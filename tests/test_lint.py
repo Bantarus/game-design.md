@@ -155,6 +155,65 @@ def test_invariant_violation_numeric(fixture_overlay):
     assert res.exit_code == 1
 
 
+def test_invariant_violation_numeric_resource_bound(make_tree):
+    """D-009: numeric_domain invariant lists {resources.energy}; if energy.max
+    becomes a float, the linter must flag it (the broadened scope).
+    """
+    mech = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "max: 1", "max: 1.5"
+    )
+    root = make_tree({"gdd/mechanics.md": mech})
+    res = _lint(root)
+    findings = [f for f in res.findings if f.rule == "invariant-violation"]
+    assert any("resources.energy.max" in f.location and "not an integer" in f.message
+               for f in findings), (
+        "expected invariant-violation on resources.energy.max=1.5; got: "
+        + ", ".join(f"{f.location}:{f.message[:40]}" for f in findings)
+    )
+    assert res.exit_code == 1
+
+
+def test_invariant_violation_numeric_entity_property(make_tree):
+    """D-009: numeric_domain invariant scope-broadened to {entities.<kind>};
+    a float in a content-entity's integer-typed field must fire.
+    """
+    # Extend the baseline invariant to also cover {entities.cards}.
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'applies_to: ["{resources.energy}"]',
+        'applies_to: ["{resources.energy}", "{entities.cards}"]',
+    )
+    # Author a content-entity with a float cost (schema declares cost: integer).
+    bad_card = """\
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: bad_card
+status: prototyped
+implemented_in: []
+name: "Bad Card"
+cost: 1.5
+"""
+    root = make_tree({
+        "gdd/architecture-invariants.md": inv,
+        "content/cards/bad_card.yaml": bad_card,
+    })
+    res = _lint(root)
+    findings = [f for f in res.findings if f.rule == "invariant-violation"]
+    assert any("cost" in f.location and "1.5" in f.message for f in findings), (
+        "expected invariant-violation on bad_card.cost=1.5; got: "
+        + ", ".join(f"{f.location}:{f.message[:40]}" for f in findings)
+    )
+    assert res.exit_code == 1
+
+
+def test_invariant_violation_numeric_resource_int_passes(make_tree):
+    """Sanity: integer min/max bounds don't trigger the broadened check."""
+    res = _lint(make_tree())  # baseline declares energy.min=0, max=1
+    findings = [f for f in res.findings if f.rule == "invariant-violation"
+                and "not an integer" in f.message]
+    assert findings == []
+
+
 # ---- balance-target-untyped (D-003) ------------------------------------------
 
 def test_balance_target_untyped_warning(make_tree):

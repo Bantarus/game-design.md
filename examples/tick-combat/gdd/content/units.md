@@ -26,7 +26,7 @@ balance_refs:
 
 A unit is a YAML object under `content/units/<id>.yaml`. Required fields: `id`, `name`, integer `hp`, integer `attack`, integer `speed` (1–10), `role`. Optional: `cost` (gold to deploy), `tags`.
 
-Integer constraints serve `{invariants.damage_is_integer}` — there's no path to fractional unit stats.
+Integer constraints serve `{invariants.gameplay_state_is_integer}` — there's no path to fractional unit stats.
 
 ## Representative Example
 

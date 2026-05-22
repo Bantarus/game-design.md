@@ -391,6 +391,13 @@ distributions:
 
 **Required keys per distribution:** `type` (one of the six above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
 
+**Output domain & rounding (D-010, optional at v0.2.0-alpha; ratchets to required for real-valued types in v0.3).** A distribution whose theoretical output is real-valued (`gaussian`, `uniform`) but whose consuming simulation state is integer-domain MUST declare its bridging contract inline:
+
+- `output_domain: integer | real` — what the consuming simulation expects. Default `real`.
+- `round_mode: half_to_even | half_up | floor | ceil | trunc` — required iff `output_domain: integer`. The canonical unbiased choice is `half_to_even` (banker's rounding); other modes are accepted with prose justification.
+
+Rounding happens **at the point of application**, not at sample time. The sampling PRNG produces the canonical real-valued sample (portable across engines that share a PRNG implementation); the consuming rule rounds. This concentrates the divergence-prone step (rounding) at a single declared boundary. See `DECISIONS.md` D-010 and `examples/tick-combat/gdd/systems/distributions.md::damage_roll` for the canonical worked example.
+
 ### 4.8 Cross-cutting: `feel`
 
 Game feel per Steve Swink's six dimensions: input, response, context, polish, metaphor, rules. Authored per verb.

@@ -68,7 +68,7 @@ The full surface lives in the subfiles linked via the `files:` map above. Agent 
 
 - **YAML is normative.** Tokens compile-against; prose explains why.
 - **Distributions are named.** `{distributions.action_order}` is `deterministic` on purpose — the rule of "highest speed first, tie-break by deployment order" *is* the distribution.
-- **Tick-time integer.** Damage and HP resolve to integers (`{invariants.damage_is_integer}`); the gaussian damage roll rounds at apply.
+- **Tick-time integer.** Damage and HP resolve to integers (`{invariants.gameplay_state_is_integer}`); the gaussian damage roll rounds at apply.
 
 ## Glossary
 

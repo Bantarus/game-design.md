@@ -535,10 +535,26 @@ def rule_invariant_violation(tree: Tree) -> list[Finding]:
     return findings
 
 
+def _is_int(value) -> bool:
+    """True iff `value` is a Python int and not a bool (bool subclasses int)."""
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[str, str, str]]:
-    """Run the statically-checkable subset of invariant.kind."""
+    """Run the statically-checkable subset of invariant.kind.
+
+    For `numeric_domain` (D-009 scope at v0.2.0-alpha), three checks:
+      1. Every `effects[].amount` in a content-entity is an integer (when the
+         effect kind is `damage` or `gain_block`).
+      2. For each `{entities.<kind>}` referenced in `applies_to:`, every content
+         entity in that collection has integer values for every field that the
+         content-schema declares `type: integer`.
+      3. For each `{resources.<id>}` referenced in `applies_to:`, the resource's
+         `min:` and `max:` bounds are integers.
+    """
     kind = inv.get("kind")
     if kind == "numeric_domain":
+        # (1) effects[].amount
         for collection, files in tree.content_entities.items():
             for pf in files:
                 effects = pf.frontmatter.get("effects") or []
@@ -549,16 +565,70 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
                         continue
                     if eff.get("kind") in ("damage", "gain_block"):
                         amt = eff.get("amount")
-                        if amt is not None and not isinstance(amt, int):
+                        if amt is not None and not _is_int(amt):
                             yield (str(pf.rel_path), f"effects[{i}].amount",
                                    f"amount={amt!r} is not an integer")
+
+        applies_to = inv.get("applies_to") or []
+
+        # (2) entity property integerness — driven by the content-schema's
+        # `type: integer` fields. If the invariant lists {entities.<kind>}, walk
+        # every content-entity in that collection.
+        entity_kinds: set[str] = set()
+        for ref in applies_to:
+            if not isinstance(ref, str):
+                continue
+            m = re.match(r"^\{entities\.([a-z_][a-z0-9_]*)\}$", ref)
+            if m:
+                entity_kinds.add(m.group(1))
+        for kind_name in entity_kinds:
+            schema_pf = tree.content_schemas.get(kind_name)
+            if not schema_pf:
+                continue
+            block_schema = schema_pf.frontmatter.get("schema") or {}
+            properties = block_schema.get("properties") or {}
+            integer_fields = sorted(
+                field for field, spec in properties.items()
+                if isinstance(spec, dict) and spec.get("type") == "integer"
+            )
+            for entity_pf in tree.content_entities.get(kind_name, []):
+                for field in integer_fields:
+                    v = entity_pf.frontmatter.get(field)
+                    if v is None:
+                        continue
+                    if not _is_int(v):
+                        yield (str(entity_pf.rel_path), field,
+                               f"{field}={v!r} is not an integer")
+
+        # (3) resource min/max integerness.
+        resource_refs: set[str] = set()
+        for ref in applies_to:
+            if not isinstance(ref, str):
+                continue
+            m = re.match(r"^\{(resources\.[a-z_][a-z0-9_]*)\}$", ref)
+            if m:
+                resource_refs.add(m.group(1))
+        for token_path in sorted(resource_refs):
+            info = tree.tokens.get("resources", {}).get(token_path)
+            if not info:
+                continue
+            pf, value = info
+            if not isinstance(value, dict):
+                continue
+            for bound in ("min", "max"):
+                v = value.get(bound)
+                if v is None:
+                    continue
+                if not _is_int(v):
+                    yield (str(pf.rel_path), f"{token_path}.{bound}",
+                           f"{bound}={v!r} is not an integer")
     elif kind == "layer_boundary":
         # Statically checkable iff implementation_pointers.presentation is
         # declared. Out of scope for v0.1.1 — no presentation pointer in any
         # example. Returning empty is correct (and silent).
         return
-    # numeric_domain / layer_boundary are the only lint-checkable kinds in
-    # v0.1.1; others (architectural_pattern, communication) are typically
+    # numeric_domain / layer_boundary are the only lint-checkable kinds at
+    # v0.2.0-alpha; others (architectural_pattern, communication) are typically
     # advisory and verify, respectively.
 
 
