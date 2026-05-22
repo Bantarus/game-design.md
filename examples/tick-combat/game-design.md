@@ -32,6 +32,7 @@ files:
   verification:            gdd/verification.md
   content_index:           gdd/content/_index.md
   units:                   gdd/content/units.md
+  encounters:              gdd/content/encounters.md   # Phase-2.5: resolves ambiguity #7
 implementation_pointers:
   engine_a_xtreme: "impl/xtreme/src/**/*.rs"
   cargo_manifest:  "impl/xtreme/Cargo.toml"

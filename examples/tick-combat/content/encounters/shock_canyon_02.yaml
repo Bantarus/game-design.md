@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: shock_canyon_02
+status: draft
+implemented_in: []
+name: "Shock Canyon (encounter 2 — drone swarm)"
+seed_offset: 1
+enemy_units:
+  - { unit_id: spark_drone, deploy_order: 0 }
+  - { unit_id: spark_drone, deploy_order: 1 }
+  - { unit_id: spark_drone, deploy_order: 2 }
+  - { unit_id: volt_marine, deploy_order: 3 }

@@ -59,10 +59,24 @@ def _collect_refs_in_block(value: Any) -> set[str]:
 
 # ---- Rules --------------------------------------------------------------------
 
+# D-012: context-local prefixes are NOT globally-resolvable namespaces. They
+# are reserved placeholders bound at rule-evaluation time (e.g. `{actor.attack}`
+# resolves to the acting unit's `attack` field when the consuming rule fires).
+# The broken-ref rule skips refs whose first segment is one of these prefixes.
+CONTEXT_LOCAL_PREFIXES: frozenset[str] = frozenset({"actor", "target"})
+
+
+def _is_context_local(ref: str) -> bool:
+    head = ref.split(".", 1)[0]
+    return head in CONTEXT_LOCAL_PREFIXES
+
+
 def rule_broken_ref(tree: Tree) -> list[Finding]:
     findings: list[Finding] = []
     for pf in tree.files:
         for ref, path in walk_refs(pf.frontmatter or {}):
+            if _is_context_local(ref):
+                continue
             if not tree.has_token(ref):
                 findings.append(Finding(
                     rule="broken-ref", severity="error", file=pf.rel_str,
@@ -71,6 +85,8 @@ def rule_broken_ref(tree: Tree) -> list[Finding]:
                 ))
         for m in TOKEN_REF_RE.finditer(pf.body or ""):
             ref = m.group(1)
+            if _is_context_local(ref):
+                continue
             if not tree.has_token(ref):
                 line = (pf.body or "")[:m.start()].count("\n") + 1
                 findings.append(Finding(
@@ -504,6 +520,73 @@ def rule_balance_target_untyped(tree: Tree) -> list[Finding]:
     return findings
 
 
+def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
+    """D-011: a `do:` step that's a bare string inside a rule reachable from a
+    deterministic loop is a *prose label*, not a computable procedure. Two
+    engines may interpret it differently, breaking the cross-engine bar.
+
+    Reachability heuristic (v0.2.0-alpha):
+      1. Collect verbs invoked from any loop with `timescale: moment`.
+      2. Collect rules whose `given.verb:` is one of those verbs.
+      3. For each such rule, flag every `do[]` item that is a string (not a dict).
+
+    Severity is `info` (advisory) at v0.2.0-alpha — visibility, not gate.
+    Ratchets to `warning` in v0.3, `error` in v0.4 (per D-011).
+    """
+    # (1) Verbs referenced from moment loops.
+    moment_verbs: set[str] = set()
+    for loop_path, (_pf, loop) in tree.tokens.get("loops", {}).items():
+        if not isinstance(loop, dict):
+            continue
+        if loop.get("timescale") != "moment":
+            continue
+        sequence = loop.get("sequence")
+        if not isinstance(sequence, list):
+            continue
+        for ref, _ in walk_refs(sequence):
+            if ref.startswith("verbs."):
+                moment_verbs.add(ref)
+
+    # (2) Rules whose given.verb is one of those verbs.
+    deterministic_rules: dict[str, tuple] = {}
+    for rule_path, (pf, rule) in tree.tokens.get("rules", {}).items():
+        if not isinstance(rule, dict):
+            continue
+        given = rule.get("given")
+        if not isinstance(given, dict):
+            continue
+        verb_ref = given.get("verb")
+        if not isinstance(verb_ref, str):
+            continue
+        m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", verb_ref)
+        if not m:
+            continue
+        if m.group(1) in moment_verbs:
+            deterministic_rules[rule_path] = (pf, rule)
+
+    # (3) Scan each deterministic rule's do[] for bare-string items.
+    findings: list[Finding] = []
+    for rule_path, (pf, rule) in deterministic_rules.items():
+        do = rule.get("do")
+        if not isinstance(do, list):
+            continue
+        rname = rule_path.split(".", 1)[1] if "." in rule_path else rule_path
+        for i, step in enumerate(do):
+            if isinstance(step, str):
+                findings.append(Finding(
+                    rule="determinism-undetermined-rule", severity="info",
+                    file=pf.rel_str,
+                    location=f"rules.{rname}.do[{i}]",
+                    message=(
+                        f"bare-string do[] step {step!r} in rule '{rname}' "
+                        f"(reachable from a deterministic loop): prose labels "
+                        f"don't constrain implementations. Restructure to a "
+                        f"typed step (e.g. {{kind: <verb>, …}}). D-011."
+                    ),
+                ))
+    return findings
+
+
 def rule_invariant_violation(tree: Tree) -> list[Finding]:
     findings: list[Finding] = []
     for pf in tree.files:
@@ -648,6 +731,7 @@ ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
     rule_broken_implementation_pointer,
     rule_stale_section,
     rule_balance_target_untyped,
+    rule_determinism_undetermined_rule,
     rule_invariant_violation,
 ]
 

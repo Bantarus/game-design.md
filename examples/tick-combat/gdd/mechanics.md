@@ -123,26 +123,47 @@ rules:
   tick_resolution:
     given:
       verb: "{verbs.advance_tick}"
+    # D-013: target is the first alive unit on the opposite side, in
+    # deployment order. Closed vocabulary, normative across engines.
+    target_selection: first_alive_opposite
     do:
-      - sample: "{distributions.action_order}"
-      - resolve_unit_action
-      - sample: "{distributions.damage_roll}"
-        round: half_to_even
-      - sample: "{distributions.critical_hit}"
-        on_hit_multiply_by: 2
-      - apply_damage_to_target: integer_only
+      # D-011: every step is a structured object (no bare prose strings).
+      # Each `kind:` value is a project-defined verb in tick-combat's local
+      # vocabulary; v0.3 ratchets a normative closed set.
+      - kind: select_actor
+        from: "{distributions.action_order}"
+        index_by: tick_number     # rotation: actor = order[tick mod len(order)]
+      - kind: sample
+        from: "{distributions.damage_roll}"
+        into: damage
+      - kind: sample
+        from: "{distributions.critical_hit}"
+        into: crit
+      - kind: apply_damage
+        target: target            # resolved via target_selection
+        amount:
+          base: damage
+          multiplier_if: { crit: 2 }
+        domain: integer           # belt-and-suspenders post-rounding clamp
     outputs: [tick_resolved_event, damage_event]
-    status: draft
-    implemented_in: []
+    status: prototyped
+    implemented_in: ["impl/xtreme/src/rules.rs"]
   combat_resolution:
     given:
       verb: "{verbs.resolve_combat}"
+    target_selection: none        # no target; awards gold globally
     do:
-      - sample: "{distributions.gold_drop}"
-      - award_gold_to_winner
+      - kind: sample
+        from: "{distributions.gold_drop}"
+        count: 6                   # D-014 / D-013-resolution of ambiguity #6
+        accumulate: value          # sum the per-drop value fields
+        into: total_gold
+      - kind: gain_resource
+        resource: "{resources.gold}"
+        amount: total_gold
     outputs: [combat_resolved_event]
-    status: draft
-    implemented_in: []
+    status: prototyped
+    implemented_in: ["impl/xtreme/src/rules.rs"]
 ---
 
 ## Tokens

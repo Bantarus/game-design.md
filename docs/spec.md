@@ -169,6 +169,13 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 **Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
 
+**Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time:
+
+- `{actor.<field>}` — the acting unit / entity in the current rule firing.
+- `{target.<field>}` — the rule's target (resolved per `target_selection:`).
+
+The linter's `broken-ref` rule skips refs starting with these prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Adding new context-local prefixes is a spec-level event (a v0.3 ratchet may close the set or extend it). Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
+
 ---
 
 ## 4. The Universal Probabilistic Surface
@@ -308,6 +315,10 @@ rules:
 
 **Required keys per rule:** `given` (object with at least `verb`), `do` (array of operations), `outputs` (array), `status`, `implemented_in`. Any `do:` step whose semantics include randomness must reference a `{distributions.<id>}` — otherwise rule `undefined-distribution` fires at severity **error** (v0.1 design decision).
 
+**Optional at v0.2.0-alpha: `target_selection:` (D-013).** When a rule applies effects to a target (e.g. damage), the rule must declare *how* the target is chosen. The field's value is drawn from a closed vocabulary: `none | first_alive_opposite | lowest_hp_opposite | highest_hp_opposite | random_alive_opposite | self | explicit`. `none` means the rule has no target (it affects global state or the actor itself implicitly). `explicit` defers selection to a `do:` step's `target:` field. Cross-engine rule: two engines that pick different targets for the same seed produce different integer trajectories — make this selection deterministic by declaring it in the spec, not in each implementation. See `DECISIONS.md` D-013 and the v0.2 Phase-2 ambiguity #5.
+
+**Computable form on deterministic loop paths (D-011, advisory at v0.2.0-alpha; ratchets to error in v0.3).** Every item in a `do:` array SHOULD be a structured object (a YAML map), not a bare string. Bare-string steps like `resolve_unit_action` or `award_gold_to_winner` are *prose labels*, not computable procedures — two engines may interpret them differently, defeating the cross-engine determinism bar. The linter emits the advisory finding `determinism-undetermined-rule` for every bare-string item in a rule's `do:` whose enclosing rule is reachable from a deterministic loop (any `{loops.<id>}` whose `timescale: moment`). The intent is to catch the failure mode where spec authors leave resolution as prose — the "Phase-2 archaeology" pattern. See `DECISIONS.md` D-011.
+
 ### 4.6 `loops`
 
 Repeating verb sequences. Every game has at least one loop; most have three (moment / session / meta).
@@ -341,7 +352,7 @@ The root `game-design.md` must reference exactly one loop as `core_loop_ref:`. I
 
 First-class randomness. **Every random outcome anywhere in a `game-design.md` tree must reference a named distribution.** Naming randomness is the difference between a game whose balance is auditable and a game whose balance is hidden in source code.
 
-Six distribution types in v0.1:
+Seven distribution types at v0.2.0-alpha (six probabilistic + one ordering-rule):
 
 ```yaml
 distributions:
@@ -387,6 +398,22 @@ distributions:
     sequence: [a, b, c, a, b, c]
     status: implemented
     implemented_in: ["src/scripted/intro.py"]
+
+  # ordering_rule (added v0.2.0-alpha) — a *deterministic ordering procedure* over
+  # a collection, distinct from `deterministic` (which is a literal sequence).
+  # Use this when the order is computable from state, not pre-baked. Required
+  # fields: `over` (the collection), `sort` (an ordered list of sort clauses).
+  # Optional: `filter` (object).
+  action_order:
+    type: ordering_rule
+    over: "{entities.units}"
+    filter: { lifecycle: alive }
+    sort:
+      - { by: speed,        direction: desc }
+      - { by: deploy_order, direction: asc }   # tie-breaker
+    seed: deterministic_per_run
+    status: implemented
+    implemented_in: ["src/ordering.py"]
 ```
 
 **Required keys per distribution:** `type` (one of the six above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
@@ -397,6 +424,47 @@ distributions:
 - `round_mode: half_to_even | half_up | floor | ceil | trunc` — required iff `output_domain: integer`. The canonical unbiased choice is `half_to_even` (banker's rounding); other modes are accepted with prose justification.
 
 Rounding happens **at the point of application**, not at sample time. The sampling PRNG produces the canonical real-valued sample (portable across engines that share a PRNG implementation); the consuming rule rounds. This concentrates the divergence-prone step (rounding) at a single declared boundary. See `DECISIONS.md` D-010 and `examples/tick-combat/gdd/systems/distributions.md::damage_roll` for the canonical worked example.
+
+**Canonical order of operations for real-valued sampling that feeds integer state (cross-engine determinism contract, locked at v0.2.0-alpha):**
+
+1. sample the continuous distribution at full float precision
+2. apply `clamp:` (if declared) to the continuous sample — i.e. clamp first, in real-valued space
+3. apply `round_mode` (half-to-even by default) to map to integer
+4. apply integer clamp post-rounding as a belt-and-suspenders sanity check (no-op when step 2 was tight)
+
+Sample → clamp → round is the canonical order, not round → clamp. The round-first ordering shifts boundary probability mass in an engine-dependent way at the tails; the clamp-first ordering preserves the gaussian's tail behavior near the boundaries. This is a binary determinism decision — two engines that disagree on the order will disagree at low-frequency boundary samples and the cross-engine integer trajectory will desync intermittently. The canonical order is normative, not advisory.
+
+**Threshold comparison direction (uniform-with-threshold idiom, locked at v0.2.0-alpha):** when a `uniform` distribution carries a `threshold:` field used to derive a boolean (the Bernoulli-via-uniform idiom — e.g. `critical_hit: { range: [0.0, 1.0], threshold: 0.10 }`), the boolean output is `sample <= threshold` (inclusive at the threshold). This is a normative choice for the same reason as the clamp/round order: two engines that interpret `<` vs `<=` differently desync at exactly the threshold sample, and the cross-engine bar requires the convention to live in the spec.
+
+**Value-bearing `weighted` options (D-014, optional at v0.2.0-alpha).** Bare-number `weighted.options` (`{ small: 0.6, medium: 0.3, large: 0.1 }`) declare *only* probability mass. When the weighted distribution's category labels need to carry an associated value (e.g. `gold_drop` returns "small" with weight 0.6 *and* "small" is worth 1 gold), the option shape may be expanded to `{ <category>: { weight: <p>, value: <any> } }`:
+
+```yaml
+gold_drop:
+  type: weighted
+  options:
+    small:  { weight: 0.6, value: 1 }
+    medium: { weight: 0.3, value: 3 }
+    large:  { weight: 0.1, value: 10 }
+  status: implemented
+```
+
+Either shape is schema-legal; mixed shapes within a single `options:` map are not (all-bare or all-objects). When values are absent and consuming code needs them, the resolution belongs in the spec, not in the implementation (see `DECISIONS.md` D-014 and the v0.2 Phase-2 ambiguity #4).
+
+**Templated distribution parameters (D-012, optional at v0.2.0-alpha).** A distribution may parameterize its sampling theory from rule-evaluation-time context via a `params_from:` map:
+
+```yaml
+damage_roll:
+  type: gaussian
+  params_from:
+    mean: "{actor.attack}"      # resolved from the acting unit's `attack` stat
+  stddev: 1
+  clamp: [1, 99]
+  output_domain: integer
+  round_mode: half_to_even
+  status: implemented
+```
+
+Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local and project-defined at v0.2.0-alpha (a closed vocabulary ratchets in v0.3). A distribution with `params_from:` overrides its inline parameter values for any key present.
 
 ### 4.8 Cross-cutting: `feel`
 
@@ -764,6 +832,7 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | `inline-content-over-threshold` | error | A content-schema file with `count_target >= 20` does not declare `data_dir:` (i.e. entries are inlined). |
 | `stale-section` | warning | A subfile's `last_verified:` is more than 30 days older than the mtime of any file in its `implemented_in:`. |
 | `balance-target-untyped` | warning (v0.2.0-alpha), error (v0.3+) | A `balance_targets.<id>` lacks the `target_kind:` discriminator (v0.1.1 legacy shape). See `DECISIONS.md` D-003. |
+| `determinism-undetermined-rule` | info (advisory) at v0.2.0-alpha; warning in v0.3; error in v0.4 | A `do:` step inside a `{rules.<id>}` reachable from a deterministic loop (`{loops.<id>}` with `timescale: moment`) is a bare string instead of a structured object. Surfaces the "Phase-2 archaeology" pattern — prose labels for resolution procedures don't constrain implementations. See `DECISIONS.md` D-011. |
 | `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
 | `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
 | `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning at v0.2.0-alpha, error in v0.3 — transition `event:` is a bare string instead of a `{events.<id>}` token). |

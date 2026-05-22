@@ -266,6 +266,18 @@
         },
         "do":             { "type": "array", "minItems": 1 },
         "outputs":        { "type": "array" },
+        "target_selection": {
+          "description": "D-013: how the rule picks its target. Closed vocabulary; 'none' means the rule has no target.",
+          "enum": [
+            "none",
+            "first_alive_opposite",
+            "lowest_hp_opposite",
+            "highest_hp_opposite",
+            "random_alive_opposite",
+            "self",
+            "explicit"
+          ]
+        },
         "status":         { "$ref": "#/$defs/Status" },
         "implemented_in": { "$ref": "#/$defs/ImplementedIn" }
       },
@@ -293,10 +305,15 @@
       "type": "object",
       "required": ["type", "status", "implemented_in"],
       "properties": {
-        "type":           { "enum": ["uniform", "weighted", "shuffle_bag", "gaussian", "pity_floor", "deterministic"] },
+        "type":           { "enum": ["uniform", "weighted", "shuffle_bag", "gaussian", "pity_floor", "deterministic", "ordering_rule"] },
         "status":         { "$ref": "#/$defs/Status" },
         "implemented_in": { "$ref": "#/$defs/ImplementedIn" },
-        "seed":           { "type": "string" }
+        "seed":           { "type": "string" },
+        "params_from":    {
+          "type": "object",
+          "description": "D-012: distribution parameters templated from a context-local ref (e.g. {actor.attack}). Keys match the distribution's parameter names (mean, stddev, threshold, …); values are TokenRef-shaped strings resolved at rule-evaluation time.",
+          "additionalProperties": { "type": "string" }
+        }
       },
       "allOf": [
         {
@@ -305,7 +322,29 @@
         },
         {
           "if":   { "properties": { "type": { "const": "weighted" } } },
-          "then": { "required": ["options"], "properties": { "options": { "type": "object", "minProperties": 2, "additionalProperties": { "type": "number", "minimum": 0 } } } }
+          "then": {
+            "required": ["options"],
+            "properties": {
+              "options": {
+                "type": "object",
+                "minProperties": 2,
+                "additionalProperties": {
+                  "oneOf": [
+                    { "type": "number", "minimum": 0 },
+                    {
+                      "type": "object",
+                      "required": ["weight"],
+                      "properties": {
+                        "weight": { "type": "number", "minimum": 0 },
+                        "value":  { }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
         },
         {
           "if":   { "properties": { "type": { "const": "shuffle_bag" } } },
@@ -322,6 +361,29 @@
         {
           "if":   { "properties": { "type": { "const": "deterministic" } } },
           "then": { "required": ["sequence"], "properties": { "sequence": { "type": "array", "minItems": 1 } } }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "ordering_rule" } } },
+          "then": {
+            "required": ["over", "sort"],
+            "properties": {
+              "over":   { "$ref": "#/$defs/TokenRef" },
+              "filter": { "type": "object", "additionalProperties": true },
+              "sort": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["by", "direction"],
+                  "properties": {
+                    "by":        { "type": "string", "minLength": 1 },
+                    "direction": { "enum": ["asc", "desc"] }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
         }
       ],
       "additionalProperties": true

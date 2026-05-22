@@ -1,0 +1,11 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: shock_canyon_01
+status: draft
+implemented_in: []
+name: "Shock Canyon (encounter 1)"
+seed_offset: 0
+enemy_units:
+  - { unit_id: volt_marine, deploy_order: 0 }
+  - { unit_id: shock_titan, deploy_order: 1 }
