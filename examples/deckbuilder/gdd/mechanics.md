@@ -3,7 +3,7 @@ spec: game-design.md
 spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
-last_verified: "2026-05-21"
+last_verified: "2026-05-22"
 implemented_in: ["src/ember_ascent/**/*.py"]
 entities:
   player:
@@ -118,11 +118,12 @@ states:
       - { id: in_discard }
       - { id: exhausted, terminal: true }
     transitions:
-      - { from: in_deck,    event: "{events.draw}",      to: in_hand }
-      - { from: in_hand,    event: "{events.play_card}", to: in_play,   side_effects: ["{resources.energy} -= cost"] }
-      - { from: in_play,    event: "{events.resolve}",   to: in_discard }
-      - { from: in_hand,    event: "{events.exhaust}",   to: exhausted }
-      - { from: in_discard, event: "{events.reshuffle}", to: in_deck }
+      - { from: in_deck,    event: "{events.draw}",                    to: in_hand }
+      - { from: in_hand,    event: "{events.play_card}",               to: in_play,   side_effects: ["{resources.energy} -= cost"] }
+      - { from: in_play,    event: "{events.resolve}",                 to: in_discard }
+      - { from: in_hand,    event: "{events.exhaust}",                 to: exhausted }
+      - { from: in_hand,    event: "{events.discard_at_end_of_turn}",  to: in_discard }
+      - { from: in_discard, event: "{events.reshuffle}",               to: in_deck }
   enemy_lifecycle:
     initial: alive
     nodes:
@@ -150,6 +151,9 @@ events:
   reshuffle:
     status: draft
     description: "When draw is requested on an empty deck, the discard reshuffles back into in_deck."
+  discard_at_end_of_turn:
+    status: draft
+    description: "Cards remaining in_hand at end of turn move to in_discard; emitted by {rules.end_of_turn}."
   catch_fire:
     status: draft
     description: "An enemy gains the burning state; usually emitted by fire-tagged card effects."

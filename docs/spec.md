@@ -176,6 +176,13 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 The linter's `broken-ref` rule skips refs starting with these prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Adding new context-local prefixes is a spec-level event (a v0.3 ratchet may close the set or extend it). Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
 
+**Binding moment (D-012, normative at v0.2.0-alpha).** Both prefixes are bound at **apply-time** — at each `do:` step that references `{actor.<field>}` or `{target.<field>}`, the value is read live from the world at that step. Two rules follow:
+
+1. **Symmetry.** `{actor.<field>}` and `{target.<field>}` resolve the same way. Neither is snapshotted at action-start or tick-start. The intuitive "target HP is live so accumulated damage kills" semantics extends to actor fields too.
+2. **Composability.** A rule's `do:` array may mutate `{actor.<field>}` in step N and read the mutated value in step N+1. There is no implicit per-firing snapshot.
+
+Engines MAY internally snapshot when they can prove no in-firing mutations affect the reads (e.g., tick-combat's xtreme reads `actor.attack` from a tick-start snapshot because tick-combat has no mid-tick attack mutations — the snapshot is provably equivalent to a live read). The normative contract is "produces the value of a live read at the step." When a future engine or future content introduces mid-firing mutations, the live-read semantics is what wins; snapshot-based engines must refactor. An explicit `snapshot:` step kind for use-the-frozen-value cases is a v0.3+ concern; at v0.2.0-alpha the only binding is apply-time. See `DECISIONS.md` D-012 and the v0.2 Phase-2 ambiguity #11.
+
 ---
 
 ## 4. The Universal Probabilistic Surface
@@ -465,6 +472,8 @@ damage_roll:
 ```
 
 Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local and project-defined at v0.2.0-alpha (a closed vocabulary ratchets in v0.3). A distribution with `params_from:` overrides its inline parameter values for any key present.
+
+**Binding moment for `params_from:` reads.** Each parameter sourced via `params_from:` is read at **apply-time** — at the `do:` step that calls `sample:` on this distribution, the context refs are resolved live against the world. This is the same rule as for context-local refs anywhere else (see §3). Two engines that read `{actor.attack}` at different moments (e.g. one at action-start, one at the sample step) produce different integer trajectories the moment any mid-firing mutation is added — the canonical timing must live in the spec, not in each engine. Tick-combat's xtreme reads `actor.attack` from a tick-start snapshot, which is provably equivalent under tick-combat's no-mid-tick-mutation invariant; this is permitted as an optimization, not a different semantics.
 
 ### 4.8 Cross-cutting: `feel`
 

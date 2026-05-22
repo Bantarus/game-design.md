@@ -3,7 +3,7 @@ spec: game-design.md
 spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
-last_verified: "2026-05-21"
+last_verified: "2026-05-22"
 implemented_in: ["src/ember_ascent/rules/**/*.py"]
 rules:
   draw_card:
@@ -33,8 +33,14 @@ rules:
     given:
       verb: "{verbs.end_turn}"
     do:
-      - tick_burning_on_each_enemy
-      - discard_remaining_hand
+      - foreach: "{entities.enemies}"
+        with_state: burning
+        do:
+          - apply_damage: 1
+          - decrement_state_duration: burning
+      - foreach: "{entities.cards}"
+        with_state: in_hand
+        emit: "{events.discard_at_end_of_turn}"
       - reset_resource: "{resources.energy}"
       - reset_resource: "{resources.block}"
       - resolve: "{rules.draw_card}"
@@ -79,4 +85,5 @@ Three of the five rules sample distributions; the other two (`end_of_turn`, `enc
 ## Open Questions
 
 - Whether `damage_resolution` should `sample {distributions.critical_hit}` *before* or *after* applying burn multipliers. Order matters for high-roll variance. Current call: crit first, burn second.
-- Whether `end_of_turn.tick_burning_on_each_enemy` should itself reference a distribution (variable burn damage). Currently deterministic at burn-stack × 1.
+- Whether `end_of_turn`'s `foreach burning` step should reference a distribution (variable burn damage). Currently deterministic at burn-stack × 1, declared inline as `apply_damage: 1`.
+- The `foreach` / `emit` / `apply_damage` / `decrement_state_duration` / `reset_resource` / `resolve` step `kind`s in `do:` arrays are a project-local vocabulary at v0.2.0-alpha; per D-011 a normative vocabulary closes in v0.3 based on what the examples actually use.

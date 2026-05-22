@@ -192,15 +192,31 @@ The rounding happens **at the point of application**, not at sample time — sam
 
 ## D-012 — Distribution parameters templated from rule-evaluation context
 
-- **Status:** decided at v0.2.0-alpha (Phase 2.5). Implemented as the optional `params_from:` field on `Distribution`.
+- **Status:** decided at v0.2.0-alpha (Phase 2.5). Implemented as the optional `params_from:` field on `Distribution`. Binding moment pinned at Phase 2.5+ (2026-05-22), see "Binding moment" below.
 - **Decided:** 2026-05-22.
-- **Source:** `docs/v0.2-phase2-spec-ambiguities.md` #8 — `{distributions.damage_roll}` is gaussian(mean=5, stddev=1) but unit stats include `attack`; the impl had to either ignore attack (making damage uniform across unit types) or invent a relationship.
-- **Spec footprint:** §4.7 (templated parameters subsection).
+- **Source:** `docs/v0.2-phase2-spec-ambiguities.md` #8 — `{distributions.damage_roll}` is gaussian(mean=5, stddev=1) but unit stats include `attack`; the impl had to either ignore attack (making damage uniform across unit types) or invent a relationship. Binding-moment sub-question raised by user at Phase 2.5 checkpoint and tracked as #11.
+- **Spec footprint:** §3 (context-local prefixes + binding-moment paragraph), §4.7 (templated parameters subsection + apply-time clause).
 - **Schema footprint:** `Distribution.params_from: { type: object, additionalProperties: { type: string } }`.
 
 `params_from:` lets a distribution declare which parameters are sourced from context (the acting unit, the target, the world tick number) rather than fixed in the YAML. Keys are parameter names of the distribution; values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the consuming rule binds. At v0.2.0-alpha the vocabulary is project-defined; v0.3 closes a normative set.
 
 **Cross-engine implication.** Without templated parameters, every implementation would need to invent the actor-stat-to-damage mapping locally. The cross-engine bar requires this mapping in the spec.
+
+### Binding moment — apply-time
+
+The original D-012 entry pinned syntax + broken-ref handling for context-local refs but was silent on *when* `{actor.<field>}` and `{target.<field>}` are read relative to other mutations in the same firing. That silence is a #5-class invisible assumption: two engines that pick different reading moments (action-start vs. apply-time) produce different integer trajectories the moment any mid-firing mutation (a buff, a debuff, a damage-over-time that scales) exists. Tick-combat's current content never triggers this — so xtreme's tick-start snapshot is silently correct and the spec gap stayed invisible through Phase 2.5. Phase 4's Unreal port (or any future tick-combat content with mid-tick mutations) would pick the other reading and the trajectory would diverge, masquerading as a spec bug.
+
+**Decision.** Both `{actor.<field>}` and `{target.<field>}` (and any future context-local prefix) are bound at **apply-time** — read live from the world at the specific `do:` step that references them. Three consequences:
+
+1. **Symmetric semantics.** `{actor.<field>}` is read the same way `{target.<field>}` is read. The "target HP is live so accumulated damage kills" intuition extends uniformly. There is no implicit per-firing snapshot for either.
+2. **Composability.** A rule's `do:` step N may mutate `{actor.<field>}` (e.g. via a future `set_resource` step kind), and step N+1 reads the post-mutation value. This is the only binding that makes intra-firing mutations composable.
+3. **Snapshot optimization permitted.** Engines MAY internally snapshot when they can prove no in-firing mutations affect the reads. Tick-combat's xtreme reads `actor.attack` from a tick-start snapshot ([`impl/xtreme/src/rules.rs`](examples/tick-combat/impl/xtreme/src/rules.rs)) because tick-combat has no mid-tick attack mutations — the snapshot is provably equivalent to a live read at the sample step. The normative contract is "produces the value of a live read"; the strategy is engine-local. When future content introduces mid-firing mutations, snapshot-based engines must refactor to live reads.
+
+**Why apply-time and not action-start.** Action-start binding has surface appeal ("a unit's whole action uses the values it began with") but breaks symmetry with `{target.<field>}` and requires an implicit snapshot data structure in every engine. Apply-time has the simplest mental model (refs always read what's true right now), composes with mutations within a firing, and matches the semantics every existing engine uses for target-field reads.
+
+**Out of scope at v0.2.0-alpha.** A normative escape hatch for "snapshot at action-start, use frozen values" — e.g. a `snapshot:` `do:` step kind plus a `{local.<name>}` ref pattern — is a v0.3+ concern, surfaced when actual content needs it.
+
+**Cross-engine implication (Phase 4).** Unreal Blueprints must read `{actor.<field>}` live at each consuming step. If the Blueprint graph caches the value at action-start, the integer trajectory will diverge from xtreme's the moment a mid-firing mutation enters tick-combat's content — this is the canonical Phase-4 risk D-012 binding-moment locks down in advance.
 
 ---
 
