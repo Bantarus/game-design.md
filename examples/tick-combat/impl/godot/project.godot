@@ -1,0 +1,15 @@
+; Engine-B reference implementation for tick-combat (Godot 4 / GDScript).
+; Per addendum §6: tests data_behavior_separation in a non-ECS, actor/
+; object-tree, GC'd engine — paradigmatic distance from xtreme/Bevy ECS.
+;
+; Substituted for Unreal Blueprints (the D-008 pick) because Unreal is not
+; installable in the current execution environment. The substitution
+; trades away the Blueprint-graph-absorbs-design test; it keeps the
+; cross-engine trajectory test + the actor/object-model data_behavior_
+; separation test.
+
+config_version=5
+
+[application]
+config/name="tick-combat (Godot reference)"
+config/features=PackedStringArray("4.6")

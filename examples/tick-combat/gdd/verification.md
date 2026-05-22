@@ -23,7 +23,8 @@ verify_targets:
   - axis: build_health
     expect: { builds: true, unresolved_refs: 0 }
 adapters:
-  default:      "./tools/verify-adapter"
+  default:      "./tools/verify-adapter"          # engine A — xtreme / Bevy ECS / Rust
+  godot:        "./tools/verify-adapter-godot"    # engine B — Godot 4 / GDScript (Phase 4 substitute for Unreal)
   presentation: null
 trajectory:
   unit: tick

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# verify-adapter-godot — engine-B verify adapter for tick-combat.
+#
+# Implements spec §9.5.6 invocation contract:
+#   verify-adapter-godot --target <token-ref> --seed <int>
+#                        [--trajectory <path>] [--max-steps <int>]
+#
+# Engine B is Godot 4 / GDScript (substituted for Unreal Blueprints — see
+# examples/tick-combat/impl/godot/project.godot for rationale).
+#
+# Requires Godot 4.x on $PATH or at ~/.local/bin/godot. The project itself
+# is at examples/tick-combat/impl/godot/.
+
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+GODOT_PROJECT="$SCRIPT_DIR/../impl/godot"
+
+# Find Godot. Prefer ~/.local/bin/godot (where Phase 4 installs the
+# downloaded 4.6.3 binary), then fall back to $PATH.
+GODOT_BIN=""
+if [[ -x "$HOME/.local/bin/godot" ]]; then
+  GODOT_BIN="$HOME/.local/bin/godot"
+elif command -v godot >/dev/null 2>&1; then
+  GODOT_BIN="$(command -v godot)"
+else
+  echo "verify-adapter-godot: godot not found. Install Godot 4 to ~/.local/bin/godot or \$PATH." >&2
+  exit 2
+fi
+
+# Godot passes everything after `--` to the script via OS.get_cmdline_user_args().
+# --quiet silences GDScript's print() too, so we don't use it. Instead, we
+# capture full stdout (banner + JSON) and extract only the single-line JSON
+# (the VerifyResult). The adapter contract requires JSON on stdout (§9.5.3);
+# Godot's banner is incidental and stripped here at the wrapper boundary.
+out="$("$GODOT_BIN" --headless --path "$GODOT_PROJECT" --script "$GODOT_PROJECT/verify_adapter.gd" --quit -- "$@" 2>&2)"
+# JSON line starts with '{"results":' — emit only that, fail if not present.
+echo "$out" | grep -E '^\{"results":' || { echo "verify-adapter-godot: no VerifyResult line in Godot output" >&2; exit 1; }
