@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "game-design-md"
+version = "0.1.0"
+description = "An LLM-first, engine-neutral, genre-agnostic specification for game design documents. Modeled on Google Labs' DESIGN.md."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "game-design.md contributors" }]
+keywords = ["game-design", "gdd", "llm", "agents", "spec"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Documentation",
+]
+dependencies = [
+    "click>=8.1",
+    "pyyaml>=6.0",
+    "python-frontmatter>=1.1",
+    "jsonschema>=4.21",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+"game-design.md" = "game_design_md.cli:main"
+gdmd = "game_design_md.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/bantarus/game-design.md"
+Specification = "https://github.com/bantarus/game-design.md/blob/main/docs/spec.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/game_design_md"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"schema" = "share/game-design-md/schema"
+"docs/spec.md" = "share/game-design-md/spec.md"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "PL"]
+ignore = ["PLR0913", "PLR2004"]

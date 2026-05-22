@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: spark_jab
+status: draft
+implemented_in: []
+name: "Spark Jab"
+cost: 1
+type: attack
+rarity: common
+tags: [attack, fire]
+effects:
+  - kind: damage
+    amount: 4
+    distribution: "{distributions.damage_roll}"

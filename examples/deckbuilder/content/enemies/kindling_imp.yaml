@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: kindling_imp
+status: draft
+implemented_in: ["src/ember_ascent/enemies/kindling_imp.py"]
+name: "Kindling Imp"
+act: 1
+max_hp: 14
+tags: [act_1, common]
+intents:
+  - { kind: attack,  damage: 5 }
+  - { kind: defend,  block: 4 }
+  - { kind: debuff, targets_burn: true }

@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: circuit_strike
+status: draft
+implemented_in: []
+name: "Circuit Strike"
+mana_cost: 2
+archetype: spark
+type: spell
+tags: [burn, fast]
+effects:
+  - { kind: deal_damage, amount: 3, target: opponent }

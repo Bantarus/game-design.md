@@ -1,0 +1,12 @@
+Cold-context card-implementation benchmark — N=5 trials
+
+Trial  Loaded Sch  Int  Lnt  Ref  Mat  PASS  Card / Notes
+--------------------------------------------------------------------------------------------------------------
+T1     ✓      ✓    ✓    ✓    ✓    ✓    PASS  spark_jab / Spark Jab
+T2     ✓      ✓    ✓    ✓    ✓    ✓    PASS  roar / Roar
+T3     ✓      ✓    ✓    ✓    ✓    ✓    PASS  cauterize / Cauterize
+T4     ✓      ✓    ✓    ✓    ✓    ✓    PASS  inferno_aura / Inferno Aura
+T5     ✓      ✓    ✓    ✓    ✓    ✓    PASS  bracer / Bracer
+
+PASS RATE: 5/5 = 100%
+BENCHMARK: MEETS the ≥80% bar from spec §11.1

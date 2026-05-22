@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: bracer
+status: draft
+implemented_in: []
+name: "Bracer"
+cost: 1
+type: skill
+rarity: common
+tags: [skill, defense]
+effects:
+  - kind: gain_block
+    amount: 6

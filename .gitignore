@@ -1,0 +1,30 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+.venv/
+venv/
+env/
+.python-version
+
+build/
+dist/
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+.DS_Store
+.env
+.env.local
+.vscode/
+.idea/
+
+# private working notes (not part of the published spec)
+docs/a blueprint for an llm-first, Engine-neutral Game design Document Standard.txt
+

@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: iron_wall
+status: draft
+implemented_in: []
+name: "Iron Wall"
+mana_cost: 3
+archetype: bulwark
+type: creature
+power: 0
+toughness: 6
+tags: [defender, big_block]
+effects:
+  - { kind: summon, amount: 1, target: self }

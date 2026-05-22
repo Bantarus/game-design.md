@@ -1,0 +1,548 @@
+"""All v0.1.1 linter rules.
+
+Each `rule_<name>(tree)` returns a list[Finding]. `run_all(tree)` runs them
+all and packages the result as a `LintResult` (whose `.to_dict()` matches
+the JSON shape documented in `docs/spec.md` §9.1).
+"""
+from __future__ import annotations
+
+import re
+from collections import defaultdict
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Callable, Iterable
+
+from .findings import Finding, LintResult
+from .refs import TOKEN_REF_RE, walk_refs
+from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+
+# ---- Canonical section orders (spec §7.1) ---------------------------------------
+
+CANONICAL_SECTIONS: dict[str, list[str]] = {
+    "core": [
+        "High Concept", "Pillars & Non-Goals", "Player Experience Goals",
+        "Core Gameplay Loop", "Universal Surface",
+        "How to Use This Document (for the Agent)", "Glossary",
+    ],
+    "subfile": ["Tokens", "Rationale", "Open Questions", "Change Log"],
+    "content-schema": ["Schema", "Representative Example", "Balance Notes",
+                       "Open Questions"],
+}
+
+STATUS_LEVELS = {
+    "draft": 0, "prototyped": 1, "implemented": 2, "balanced": 3,
+    "shipped": 4, "cut": -1,
+}
+
+
+def _extract_h2(body: str) -> list[tuple[str, int]]:
+    """Return [(heading_text, line_no), ...] for every '## ...' heading."""
+    headings = []
+    for i, line in enumerate(body.splitlines(), 1):
+        m = re.match(r"##\s+(.+?)\s*$", line)
+        if m:
+            headings.append((m.group(1).strip(), i))
+    return headings
+
+
+def _is_dist_ref(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and value.startswith("{distributions.")
+        and value.endswith("}")
+    )
+
+
+def _collect_refs_in_block(value: Any) -> set[str]:
+    return {ref for ref, _ in walk_refs(value)}
+
+
+# ---- Rules --------------------------------------------------------------------
+
+def rule_broken_ref(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        for ref, path in walk_refs(pf.frontmatter or {}):
+            if not tree.has_token(ref):
+                findings.append(Finding(
+                    rule="broken-ref", severity="error", file=pf.rel_str,
+                    location="frontmatter:" + ".".join(path),
+                    message=f"reference {{{ref}}} does not resolve",
+                ))
+        for m in TOKEN_REF_RE.finditer(pf.body or ""):
+            ref = m.group(1)
+            if not tree.has_token(ref):
+                line = (pf.body or "")[:m.start()].count("\n") + 1
+                findings.append(Finding(
+                    rule="broken-ref", severity="error", file=pf.rel_str,
+                    location=f"body:line {line}",
+                    message=f"reference {{{ref}}} does not resolve",
+                ))
+    return findings
+
+
+def rule_missing_pillars(tree: Tree) -> list[Finding]:
+    if not tree.core:
+        return []
+    pillars = tree.core.frontmatter.get("pillars") or []
+    if not isinstance(pillars, list) or len(pillars) < 3:
+        return [Finding(
+            rule="missing-pillars", severity="error", file=tree.core.rel_str,
+            location="pillars",
+            message=f"core file requires >=3 pillars; got {len(pillars) if isinstance(pillars, list) else 0}",
+        )]
+    return []
+
+
+def rule_missing_core_loop(tree: Tree) -> list[Finding]:
+    if not tree.core:
+        return []
+    ref = tree.core.frontmatter.get("core_loop_ref")
+    if not isinstance(ref, str):
+        return [Finding(
+            rule="missing-core-loop", severity="error", file=tree.core.rel_str,
+            location="core_loop_ref",
+            message="core file is missing core_loop_ref",
+        )]
+    m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", ref)
+    if not m or not tree.has_token(m.group(1)):
+        return [Finding(
+            rule="missing-core-loop", severity="error", file=tree.core.rel_str,
+            location="core_loop_ref",
+            message=f"core_loop_ref {ref!r} does not resolve",
+        )]
+    return []
+
+
+def rule_missing_balance_targets(tree: Tree) -> list[Finding]:
+    has_any = any(
+        isinstance(pf.frontmatter.get("balance_targets"), dict)
+        and pf.frontmatter["balance_targets"]
+        for pf in tree.files if pf.file_type == "subfile"
+    )
+    if has_any:
+        return []
+    return [Finding(
+        rule="missing-balance-targets", severity="error",
+        file=tree.core.rel_str if tree.core else "",
+        location="balance_targets",
+        message="no balance_targets defined anywhere in the tree",
+    )]
+
+
+def rule_undefined_distribution(tree: Tree) -> list[Finding]:
+    """Any rule.do[].sample step must point at a named {distributions.<id>}.
+
+    `sample:` is the canonical key. Other stochastic verbs (`roll`, `random`,
+    `draw`) are reserved; if they appear, they're checked too.
+    """
+    findings: list[Finding] = []
+    stochastic_keys = ("sample", "roll", "random")
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        rules = pf.frontmatter.get("rules")
+        if not isinstance(rules, dict):
+            continue
+        for rname, rule in rules.items():
+            if not isinstance(rule, dict):
+                continue
+            for i, step in enumerate(rule.get("do", []) or []):
+                if not isinstance(step, dict):
+                    continue
+                for sk in stochastic_keys:
+                    if sk in step and not _is_dist_ref(step[sk]):
+                        findings.append(Finding(
+                            rule="undefined-distribution", severity="error",
+                            file=pf.rel_str,
+                            location=f"rules.{rname}.do[{i}].{sk}",
+                            message=(f"stochastic step '{sk}:' does not reference "
+                                     f"a {{distributions.<id>}}; got {step[sk]!r}"),
+                        ))
+    return findings
+
+
+def rule_inline_content_over_threshold(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type != "content-schema":
+            continue
+        count = pf.frontmatter.get("count_target", 0) or 0
+        data_dir = pf.frontmatter.get("data_dir")
+        if count >= 20 and not data_dir:
+            findings.append(Finding(
+                rule="inline-content-over-threshold", severity="error",
+                file=pf.rel_str, location="count_target",
+                message=(f"count_target={count} >=20 requires data_dir to point "
+                         f"at content/<kind>/*.yaml"),
+            ))
+    return findings
+
+
+def rule_state_machine_coverage(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        machines = pf.frontmatter.get("states")
+        if not isinstance(machines, dict):
+            continue
+        for mname, m in machines.items():
+            if not isinstance(m, dict):
+                continue
+            initial = m.get("initial")
+            nodes = m.get("nodes") or []
+            transitions = m.get("transitions") or []
+            node_ids = {n["id"] for n in nodes
+                        if isinstance(n, dict) and "id" in n}
+            terminal_ids = {n["id"] for n in nodes
+                            if isinstance(n, dict) and n.get("terminal")}
+
+            loc_base = f"states.{mname}"
+            if not initial or initial not in node_ids:
+                findings.append(Finding(
+                    rule="state-machine-coverage", severity="error",
+                    file=pf.rel_str, location=f"{loc_base}.initial",
+                    message=f"missing-initial: 'initial' missing or not in nodes ({initial!r})",
+                ))
+                continue
+
+            for i, t in enumerate(transitions):
+                if not isinstance(t, dict):
+                    continue
+                for key in ("from", "to"):
+                    n = t.get(key)
+                    if n is not None and n not in node_ids:
+                        findings.append(Finding(
+                            rule="state-machine-coverage", severity="error",
+                            file=pf.rel_str,
+                            location=f"{loc_base}.transitions[{i}].{key}",
+                            message=f"undeclared-destination: {key}={n!r} not in nodes",
+                        ))
+
+            outgoing: dict[str, list[dict]] = defaultdict(list)
+            for t in transitions:
+                if isinstance(t, dict) and t.get("from"):
+                    outgoing[t["from"]].append(t)
+
+            for n in node_ids - terminal_ids:
+                if not outgoing.get(n):
+                    findings.append(Finding(
+                        rule="state-machine-coverage", severity="error",
+                        file=pf.rel_str, location=f"{loc_base}.nodes['{n}']",
+                        message=(f"dead-end: non-terminal node '{n}' has no "
+                                 f"outgoing transition"),
+                    ))
+
+            reachable = {initial}
+            frontier = [initial]
+            while frontier:
+                cur = frontier.pop()
+                for t in outgoing.get(cur, []):
+                    to = t.get("to")
+                    if to and to in node_ids and to not in reachable:
+                        reachable.add(to)
+                        frontier.append(to)
+            for n in node_ids - reachable:
+                findings.append(Finding(
+                    rule="state-machine-coverage", severity="warning",
+                    file=pf.rel_str, location=f"{loc_base}.nodes['{n}']",
+                    message=f"unreachable-node: '{n}' not reachable from initial '{initial}'",
+                ))
+    return findings
+
+
+def rule_section_order(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type not in CANONICAL_SECTIONS:
+            continue
+        canonical = CANONICAL_SECTIONS[pf.file_type]
+        headings = _extract_h2(pf.body or "")
+        # Duplicate detection (hard error per spec §7.2)
+        seen: dict[str, int] = {}
+        for h, line in headings:
+            if h in seen:
+                findings.append(Finding(
+                    rule="section-order", severity="error", file=pf.rel_str,
+                    location=f"body:line {line}",
+                    message=f"duplicate heading '## {h}' (first at line {seen[h]})",
+                ))
+            else:
+                seen[h] = line
+        # Canonical order: canonical headings appear in canonical order; any
+        # non-canonical heading must come after every canonical heading.
+        last_canonical_idx = -1
+        unknown_opened = False
+        for h, line in headings:
+            if h in canonical:
+                if unknown_opened:
+                    findings.append(Finding(
+                        rule="section-order", severity="error", file=pf.rel_str,
+                        location=f"body:line {line}",
+                        message=(f"canonical section '## {h}' appears after a "
+                                 f"non-canonical section"),
+                    ))
+                    continue
+                idx = canonical.index(h)
+                if idx < last_canonical_idx:
+                    findings.append(Finding(
+                        rule="section-order", severity="error", file=pf.rel_str,
+                        location=f"body:line {line}",
+                        message=f"'## {h}' is out of canonical order",
+                    ))
+                last_canonical_idx = idx
+            else:
+                unknown_opened = True
+    return findings
+
+
+def rule_orphaned_entity(tree: Tree) -> list[Finding]:
+    all_refs: set[str] = set()
+    for pf in tree.files:
+        for ref, _ in walk_refs(pf.frontmatter or {}):
+            all_refs.add(ref)
+        for m in TOKEN_REF_RE.finditer(pf.body or ""):
+            all_refs.add(m.group(1))
+
+    findings: list[Finding] = []
+    # Verbs are covered by unreferenced-verb (stricter check); invariants and
+    # pillars are not value-referenced by design. Everything else gets checked.
+    checked = ("entities", "resources", "states", "rules", "loops",
+               "distributions", "feel", "balance_targets")
+    for ns in checked:
+        for token, (pf, value) in tree.tokens.get(ns, {}).items():
+            if ns == "entities" and token.count(".") > 1:
+                continue  # per-content-entity registration; skip
+            if isinstance(value, dict) and value.get("status") == "cut":
+                continue
+            if ns == "entities" and isinstance(value, dict) \
+                    and value.get("type") == "actor":
+                continue  # the player exemption (spec §8.2)
+            referenced = any(
+                ref == token or ref.startswith(token + ".")
+                for ref in all_refs
+            )
+            if not referenced:
+                findings.append(Finding(
+                    rule="orphaned-entity", severity="warning", file=pf.rel_str,
+                    location=token,
+                    message=f"{token} is defined but not referenced anywhere",
+                ))
+    return findings
+
+
+def rule_unreferenced_verb(tree: Tree) -> list[Finding]:
+    invoking_refs: set[str] = set()
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        for ns in ("loops", "rules"):
+            block = pf.frontmatter.get(ns)
+            if isinstance(block, dict):
+                invoking_refs |= _collect_refs_in_block(block)
+
+    findings: list[Finding] = []
+    for verb_path, (pf, value) in tree.tokens.get("verbs", {}).items():
+        if isinstance(value, dict) and value.get("status") == "cut":
+            continue
+        referenced = any(
+            ref == verb_path or ref.startswith(verb_path + ".")
+            for ref in invoking_refs
+        )
+        if not referenced:
+            findings.append(Finding(
+                rule="unreferenced-verb", severity="warning", file=pf.rel_str,
+                location=verb_path,
+                message=f"{verb_path} is defined but no loop or rule invokes it",
+            ))
+    return findings
+
+
+def rule_broken_implementation_pointer(tree: Tree) -> list[Finding]:
+    """Severity is `warning` at v0.1.1 (D-002), `error` at v0.2+."""
+    findings: list[Finding] = []
+    severity = "warning"  # D-002 — promote to "error" in v0.2
+
+    def check_glob(pf: ParsedFile, pattern: str, location: str) -> None:
+        try:
+            matches = list(tree.root.glob(pattern))
+        except Exception:
+            matches = []
+        if not matches:
+            findings.append(Finding(
+                rule="broken-implementation-pointer", severity=severity,
+                file=pf.rel_str, location=location,
+                message=f"glob {pattern!r} resolves to zero files",
+            ))
+
+    for pf in tree.files:
+        status = pf.frontmatter.get("status") if pf.frontmatter else None
+        level = STATUS_LEVELS.get(status or "draft", 0)
+        impl = pf.frontmatter.get("implemented_in") if pf.frontmatter else None
+        if isinstance(impl, list) and level >= 1:
+            for i, pattern in enumerate(impl):
+                if isinstance(pattern, str):
+                    check_glob(pf, pattern, f"implemented_in[{i}]")
+        if pf.file_type == "subfile":
+            for ns in SUBFILE_NAMESPACES:
+                block = pf.frontmatter.get(ns)
+                if not isinstance(block, dict):
+                    continue
+                for k, v in block.items():
+                    if not isinstance(v, dict):
+                        continue
+                    sub_level = STATUS_LEVELS.get(v.get("status") or "draft", 0)
+                    sub_impl = v.get("implemented_in")
+                    if isinstance(sub_impl, list) and sub_level >= 1:
+                        for i, pat in enumerate(sub_impl):
+                            if isinstance(pat, str):
+                                check_glob(
+                                    pf, pat,
+                                    f"{ns}.{k}.implemented_in[{i}]",
+                                )
+    # The root-file `implementation_pointers:` map is also gated on the core
+    # file's status. A design-stage tree (status: draft) is silent here — the
+    # code isn't written yet; that's expected, not a defect.
+    if tree.core:
+        core_level = STATUS_LEVELS.get(tree.core.frontmatter.get("status") or "draft", 0)
+        ip = tree.core.frontmatter.get("implementation_pointers")
+        if isinstance(ip, dict) and core_level >= 1:
+            for key, pat in ip.items():
+                if isinstance(pat, str):
+                    check_glob(tree.core, pat, f"implementation_pointers.{key}")
+    return findings
+
+
+def rule_stale_section(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type not in ("subfile", "content-schema", "content-entity"):
+            continue
+        lv_raw = pf.frontmatter.get("last_verified")
+        if not isinstance(lv_raw, str):
+            continue
+        try:
+            lv = datetime.strptime(lv_raw, "%Y-%m-%d")
+        except ValueError:
+            continue
+        impl = pf.frontmatter.get("implemented_in")
+        if not isinstance(impl, list):
+            continue
+        for pat in impl:
+            if not isinstance(pat, str):
+                continue
+            try:
+                matches = list(tree.root.glob(pat))
+            except Exception:
+                matches = []
+            for src in matches:
+                if not src.is_file():
+                    continue
+                mtime = datetime.fromtimestamp(src.stat().st_mtime)
+                if (mtime - lv).days > 30:
+                    findings.append(Finding(
+                        rule="stale-section", severity="warning",
+                        file=pf.rel_str, location="last_verified",
+                        message=(
+                            f"source {src.relative_to(tree.root)} is "
+                            f"{(mtime - lv).days} days newer than "
+                            f"last_verified={lv_raw}"
+                        ),
+                    ))
+                    break
+    return findings
+
+
+def rule_invariant_violation(tree: Tree) -> list[Finding]:
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        invs = pf.frontmatter.get("invariants")
+        if not isinstance(invs, dict):
+            continue
+        for name, inv in invs.items():
+            if not isinstance(inv, dict):
+                continue
+            enforcement = inv.get("enforcement")
+            severity = inv.get("severity", "warning")
+            if enforcement == "advisory":
+                findings.append(Finding(
+                    rule="invariant-violation", severity="info",
+                    file=pf.rel_str, location=f"invariants.{name}",
+                    message=(f"advisory invariant '{name}' declared; review "
+                             f"in code review"),
+                ))
+            elif enforcement == "lint":
+                for v_file, v_loc, v_msg in _check_lint_invariant(tree, name, inv):
+                    findings.append(Finding(
+                        rule="invariant-violation", severity=severity,
+                        file=v_file, location=v_loc,
+                        message=f"invariant '{name}' violated: {v_msg}",
+                    ))
+            # enforcement == "verify": no-op in lint
+    return findings
+
+
+def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[str, str, str]]:
+    """Run the statically-checkable subset of invariant.kind."""
+    kind = inv.get("kind")
+    if kind == "numeric_domain":
+        for collection, files in tree.content_entities.items():
+            for pf in files:
+                effects = pf.frontmatter.get("effects") or []
+                if not isinstance(effects, list):
+                    continue
+                for i, eff in enumerate(effects):
+                    if not isinstance(eff, dict):
+                        continue
+                    if eff.get("kind") in ("damage", "gain_block"):
+                        amt = eff.get("amount")
+                        if amt is not None and not isinstance(amt, int):
+                            yield (str(pf.rel_path), f"effects[{i}].amount",
+                                   f"amount={amt!r} is not an integer")
+    elif kind == "layer_boundary":
+        # Statically checkable iff implementation_pointers.presentation is
+        # declared. Out of scope for v0.1.1 — no presentation pointer in any
+        # example. Returning empty is correct (and silent).
+        return
+    # numeric_domain / layer_boundary are the only lint-checkable kinds in
+    # v0.1.1; others (architectural_pattern, communication) are typically
+    # advisory and verify, respectively.
+
+
+# ---- Dispatch -----------------------------------------------------------------
+
+ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
+    rule_broken_ref,
+    rule_missing_pillars,
+    rule_missing_core_loop,
+    rule_missing_balance_targets,
+    rule_undefined_distribution,
+    rule_inline_content_over_threshold,
+    rule_state_machine_coverage,
+    rule_section_order,
+    rule_orphaned_entity,
+    rule_unreferenced_verb,
+    rule_broken_implementation_pointer,
+    rule_stale_section,
+    rule_invariant_violation,
+]
+
+
+def run_all(tree: Tree) -> LintResult:
+    findings: list[Finding] = []
+    for parse_err_path, msg in tree.parse_errors:
+        try:
+            rel = str(parse_err_path.relative_to(tree.root))
+        except ValueError:
+            rel = str(parse_err_path)
+        findings.append(Finding(
+            rule="parse-error", severity="error", file=rel,
+            location="", message=msg,
+        ))
+    for r in ALL_RULES:
+        findings.extend(r(tree))
+    result = LintResult(findings=findings, files_scanned=len(tree.files))
+    return result

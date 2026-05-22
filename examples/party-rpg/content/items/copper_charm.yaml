@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: copper_charm
+status: draft
+implemented_in: []
+name: "Copper Charm"
+rarity: common
+slot: trinket
+tags: [trinket, mp]
+effects:
+  - { kind: gain_mp, amount: 5, target: self }

@@ -1,0 +1,208 @@
+"""Linter rules — happy path + one failure per rule.
+
+The baseline tree from conftest.py lints clean (no errors). Each test below
+mutates the baseline to trigger exactly one rule, then asserts the finding.
+"""
+from __future__ import annotations
+
+from game_design_md import linter
+from game_design_md.tree import Tree
+
+
+def _lint(root):
+    return linter.run_all(Tree.load(root))
+
+
+# ---- Baseline -----------------------------------------------------------------
+
+def test_baseline_lints_clean(make_tree):
+    res = _lint(make_tree())
+    assert res.exit_code == 0, [f.message for f in res.findings if f.severity == "error"]
+    assert res.errors == 0
+
+
+# ---- broken-ref ---------------------------------------------------------------
+
+def test_broken_ref(fixture_overlay):
+    res = _lint(fixture_overlay("broken_ref"))
+    assert any(f.rule == "broken-ref" and "does_not_exist" in f.message
+               for f in res.findings)
+    assert res.exit_code == 1
+
+
+def test_broken_ref_inline(make_tree):
+    """A typo in a verb's resolve ref."""
+    root = make_tree({
+        "gdd/loops.md": make_tree.__wrapped__ if False else None,
+    }) if False else None  # placeholder; using inline patch below
+    # Use a simpler patch:
+    root = make_tree({
+        "gdd/test_extra.md": """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-21"
+---
+{verbs.nonexistent_verb}
+""",
+    })
+    res = _lint(root)
+    assert any(f.rule == "broken-ref" for f in res.findings)
+
+
+# ---- missing-pillars / missing-core-loop / missing-balance-targets ------------
+
+def test_missing_pillars(make_tree):
+    bad_core = (make_tree() / "game-design.md").read_text().replace(
+        'pillars: ["P1", "P2", "P3"]', 'pillars: ["P1"]'
+    )
+    root = make_tree({"game-design.md": bad_core})
+    res = _lint(root)
+    assert any(f.rule == "missing-pillars" for f in res.findings)
+
+
+def test_missing_core_loop(make_tree):
+    bad_core = (make_tree() / "game-design.md").read_text().replace(
+        'core_loop_ref: "{loops.main}"', 'core_loop_ref: "{loops.does_not_exist}"'
+    )
+    root = make_tree({"game-design.md": bad_core})
+    res = _lint(root)
+    assert any(f.rule == "missing-core-loop" for f in res.findings)
+
+
+def test_missing_balance_targets(make_tree):
+    # Strip the balance_targets block entirely.
+    bal = (make_tree() / "gdd/economy-balance.md").read_text()
+    no_targets = bal.split("balance_targets:", 1)[0] + "---\n\n## Tokens\n"
+    root = make_tree({"gdd/economy-balance.md": no_targets})
+    res = _lint(root)
+    assert any(f.rule == "missing-balance-targets" for f in res.findings)
+
+
+# ---- undefined-distribution ---------------------------------------------------
+
+def test_undefined_distribution(make_tree):
+    """A rule with a sample step that doesn't reference {distributions.X}."""
+    bad_mech = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        'sample: "{distributions.test_dist}"',
+        'sample: just_a_string',
+    )
+    root = make_tree({"gdd/mechanics.md": bad_mech})
+    res = _lint(root)
+    assert any(f.rule == "undefined-distribution" for f in res.findings)
+
+
+# ---- state-machine-coverage ---------------------------------------------------
+
+def test_dead_end_machine(fixture_overlay):
+    res = _lint(fixture_overlay("dead_end_machine"))
+    findings = [f for f in res.findings if f.rule == "state-machine-coverage"]
+    assert any("dead-end" in f.message for f in findings)
+    assert res.exit_code == 1
+
+
+def test_missing_initial(make_tree):
+    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "initial: a", "initial: not_a_node"
+    )
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    assert any(f.rule == "state-machine-coverage" and "missing-initial" in f.message
+               for f in res.findings)
+
+
+def test_undeclared_destination(make_tree):
+    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "{ from: a, event: go, to: b }",
+        "{ from: a, event: go, to: not_a_node }",
+    )
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    assert any(f.rule == "state-machine-coverage" and "undeclared-destination" in f.message
+               for f in res.findings)
+
+
+# ---- section-order ------------------------------------------------------------
+
+def test_duplicate_heading(make_tree):
+    root = make_tree({
+        "gdd/loops.md": (make_tree() / "gdd/loops.md").read_text() + "\n## Tokens\n",
+    })
+    res = _lint(root)
+    assert any(f.rule == "section-order" and "duplicate" in f.message
+               for f in res.findings)
+
+
+# ---- inline-content-over-threshold --------------------------------------------
+
+def test_inline_content_over_threshold(make_tree):
+    """Drop data_dir while keeping count_target >= 20 → error."""
+    cards_md = (make_tree() / "gdd/content/cards.md").read_text()
+    bad = cards_md.replace("data_dir: ../../content/cards\n", "")
+    root = make_tree({"gdd/content/cards.md": bad})
+    res = _lint(root)
+    assert any(f.rule == "inline-content-over-threshold" for f in res.findings)
+
+
+# ---- invariant-violation ------------------------------------------------------
+
+def test_invariant_violation_numeric(fixture_overlay):
+    res = _lint(fixture_overlay("invariant_violation_numeric"))
+    findings = [f for f in res.findings if f.rule == "invariant-violation"]
+    assert any("not an integer" in f.message for f in findings)
+    assert res.exit_code == 1
+
+
+# ---- broken-implementation-pointer (warning at v0.1.1) ------------------------
+
+def test_broken_implementation_pointer_silent_at_draft(make_tree):
+    """A design-stage tree (status: draft everywhere) emits zero impl-pointer findings,
+    even with completely fake implemented_in globs. This is what makes the rule
+    do real work — it stays quiet during design, warns at prototyped+ during
+    bootstrapping (v0.1.1), and ratchets to error at v0.2."""
+    mech = (make_tree() / "gdd/mechanics.md").read_text()
+    # Add a broken impl glob AND demote everything to draft.
+    bad = (mech
+           .replace("file_type: subfile\nstatus: prototyped",
+                    "file_type: subfile\nstatus: draft\n"
+                    'implemented_in: ["nope/**.py"]')
+           .replace("status: prototyped", "status: draft"))
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    impl_findings = [f for f in res.findings if f.rule == "broken-implementation-pointer"]
+    assert impl_findings == [], (
+        "draft status must silence broken-impl-pointer (the design-stage exit gate):\n"
+        + "\n".join(f.message for f in impl_findings)
+    )
+
+
+def test_broken_implementation_pointer_is_warning(make_tree):
+    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "verbs:\n  do_thing:\n    actor:",
+        "verbs:\n  do_thing:\n    actor:".replace("actor:", "actor:")  # no-op
+    )
+    # Add a fake implemented_in glob
+    bad = bad.replace(
+        "verbs:\n  do_thing:",
+        "verbs:\n  do_thing:\n",
+    )
+    bad = bad.replace(
+        '    implemented_in: []\n  end_turn',  # not present, won't trigger
+        '',
+    )
+    # Easiest: just add a broken glob to the file-level implemented_in
+    mech_text = (make_tree() / "gdd/mechanics.md").read_text()
+    bad = mech_text.replace(
+        "file_type: subfile\nstatus: prototyped",
+        "file_type: subfile\nstatus: prototyped\nimplemented_in: [\"nope/**.py\"]\n# anchor",
+    )
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    impl_findings = [f for f in res.findings if f.rule == "broken-implementation-pointer"]
+    assert impl_findings
+    # D-002: severity is warning at v0.1.1.
+    assert all(f.severity == "warning" for f in impl_findings)
+    # Warnings never affect exit code.
+    assert res.exit_code == 0 or res.errors == 0

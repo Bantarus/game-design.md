@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: magma_drake
+status: draft
+implemented_in: ["src/ember_ascent/enemies/magma_drake.py"]
+name: "Magma Drake"
+act: 3
+max_hp: 220
+tags: [act_3, boss]
+intents:
+  - { kind: ramp,   damage: 4 }
+  - { kind: attack, damage: 18 }
+  - { kind: defend, block: 20 }
+  - { kind: buff }

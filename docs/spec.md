@@ -1,0 +1,919 @@
+---
+spec: game-design.md
+spec_version: 0.1.1
+status: draft
+last_updated: 2026-05-21
+license: Apache-2.0
+---
+
+# The `game-design.md` Specification
+
+> **Status: draft / alpha (v0.1.1).** Expect the format to change as it matures. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+
+`game-design.md` is a plain-text, LLM-first, engine-neutral, genre-agnostic standard for describing a video game to an AI coding agent as a living source of truth. A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). The primary reader is an AI coding agent; a human is the second reader.
+
+The rest of this document is normative. Where this spec is silent, the corresponding rule in `DESIGN.md` upstream applies; where the two disagree, this document wins for `game-design.md` trees.
+
+---
+
+## 1. Philosophy & Principles
+
+These seven principles are non-negotiable. The linter exists to enforce them; the spec exists to motivate them.
+
+1. **LLM-first, human-readable.** A `game-design.md` tree contains only plain Markdown with YAML frontmatter (`---`-fenced) and sibling `*.yaml` data files. No proprietary formats, no hidden state, no binary blobs. The format must be readable cold by any frontier LLM in any IDE and any human in any text editor — no tooling required to consume it.
+
+2. **Engine-neutral.** The standard makes no assumption about Unity, Godot, Unreal, Bevy, Tauri, Flutter, or any other engine, runtime, or rendering pipeline. Platform fields are abstract (`desktop`, `handheld`, `web`, `console`, `mobile`, `mixed-reality`). Engine-specific concerns belong in `gdd/technical-constraints.md` as prose, never in the schema.
+
+3. **Genre-neutral core.** The core schema encodes a *universal probabilistic surface* (§4) that fits any genre. Deckbuilder, party RPG, tick-combat, TCG, roguelike, platformer, simulation — every game reduces to instances of the same seven primitives. **Adding a genre-specific token to the core schema is a spec bug.** Genre-specific concepts live in an example's own subfiles as prose conventions.
+
+4. **Tokens normative, prose rationale.** YAML frontmatter values are the authoritative truth — the numbers and structure an agent compiles against. Markdown prose explains *why* and serves as fallback when no token covers a case. **Tokens win on conflict.** Authoritative numbers must not appear in prose; rationale must not appear in tokens. The two layers exist for two different readers and two different purposes.
+
+5. **Modular with a short core entry file.** The root `game-design.md` stays under ~200 lines and acts as a navigation index pointing to `gdd/` subfiles via a `files:` map in frontmatter — modeled on the `llms.txt` convention (Howard, 2024). The agent reads the root file first, then opens only the subfiles the current task needs. This is *progressive disclosure*; it is what makes the standard scale to AAA-sized designs without exploding context.
+
+6. **Deterministic structure.** Section order is canonical and linter-enforced. Token namespaces are stable. Any concept is locatable by a single deterministic path: `{loops.combat_turn}` lives in `gdd/loops.md` frontmatter under `loops.combat_turn`, full stop. The agent never has to guess where a concept is.
+
+7. **Living, status-tracked, anti-drift.** Every section and content entity carries a `status:` field, an `implemented_in:` source pointer, and a `last_verified:` date. The linter detects drift (`stale-section`, `broken-ref`, `orphaned-entity`); the workflow (§8.2) re-validates on every change. The traditional GDD failure mode — write once, never update, drift from the implementation — is what this standard exists to prevent.
+
+> **Design lineage.** The standard borrows from five canonical frames in game design: **MDA** (Hunicke/LeBlanc/Zubek, 2004) supplies the mechanics → dynamics → aesthetics decomposition and the canonical aesthetic vocabulary (sensation, fantasy, narrative, challenge, fellowship, discovery, expression, submission); the **Elemental Tetrad** (Schell, *The Art of Game Design*) supplies the mechanics/story/aesthetics/technology division that motivates subfile decomposition; **Formal Elements** (Fullerton, *Game Design Workshop*) supplies the genre-agnostic enumeration that maps almost 1:1 to the seven core namespaces; **Theory of Fun** (Koster) supplies the framing of learning curve as design surface; **Game Feel** (Swink) supplies the six-dimension vocabulary for the `feel` cross-cutting namespace (§4.8). Citations belong in `gdd/glossary.md` of any example; they are not required in the root file.
+
+---
+
+## 2. File Model
+
+### 2.1 Two-layer file
+
+Every `.md` file in the standard is exactly:
+
+```
+---
+{YAML frontmatter — normative tokens}
+---
+
+{Markdown prose body — rationale}
+```
+
+**Precedence.** Where token and prose appear to disagree, the token wins; the prose is treated as stale and must be updated. The linter does not parse prose for token assertions, but the spec-author workflow (§8.2) requires it on every change.
+
+`*.yaml` files in `content/<entity>/*.yaml` are pure data: no prose body, just YAML.
+
+### 2.2 The tree
+
+Canonical layout for any conformant example:
+
+```
+<root>/
+  game-design.md            # core entry, < ~200 lines (required)
+  gdd/
+    pillars.md              # required
+    loops.md                # required
+    mechanics.md            # required (entities, verbs, resources, states)
+    architecture-invariants.md  # required (invariants — codebase contract)
+    systems/
+      _index.md             # optional
+      combat.md             # optional (genre may not need it)
+      progression.md        # optional
+      distributions.md      # required
+      ai-behavior.md        # optional
+    content/
+      _index.md             # required iff any content-schema file exists
+      cards.md              # content-schema file (genre-dependent)
+      enemies.md            # content-schema file (genre-dependent)
+      items.md              # content-schema file (genre-dependent)
+      levels.md             # content-schema file (genre-dependent)
+    narrative.md            # optional
+    economy-balance.md      # required (balance_targets)
+    ux.md                   # optional
+    art-direction.md        # optional
+    audio.md                # optional
+    feel.md                 # required iff any verb declares feel:
+    verification.md         # optional (verify_targets + adapters; experimental in v0.1)
+    technical-constraints.md # optional
+    milestones.md           # optional
+    glossary.md             # optional but strongly recommended
+  content/
+    cards/*.yaml            # one file per entity, referenced via data_source
+    enemies/*.yaml
+    items/*.yaml
+    levels/*.yaml
+```
+
+**Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The four conditionally-required files (`distributions.md`, `economy-balance.md`, `feel.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold.
+
+**The `files:` map contract.** The root `game-design.md` frontmatter declares a `files:` map whose keys are stable logical names (e.g. `loops`, `mechanics`, `cards`) and whose values are workspace-relative paths to subfiles. The linter validates that every value resolves to a real file. Any subfile not listed in `files:` is *orphaned* (rule `orphaned-entity`, severity warning). The map is the agent's navigation index — if it's not in `files:`, the agent will not find it.
+
+### 2.3 Required frontmatter keys per file type
+
+There are four file types. Every `.md` file in the tree declares its type explicitly via the `file_type:` field. (This is a v0.1 convention that makes the JSON Schema robust to validation from any IDE.)
+
+| Field | core | subfile | content-schema | content-entity (`*.yaml`) |
+| --- | --- | --- | --- | --- |
+| `spec` | required (`game-design.md`) | required | required | required |
+| `spec_version` | required (semver) | required | required | required |
+| `file_type` | required (`core`) | required (`subfile`) | required (`content-schema`) | required (`content-entity`) |
+| `name` | required | — | — | — |
+| `short_pitch` | required | — | — | — |
+| `genre_tags` | required (array) | — | — | — |
+| `status` | required | required | required | required |
+| `version` | required (semver) | — | — | — |
+| `last_updated` | required (ISO date) | — | — | — |
+| `last_verified` | — | required (ISO date) | required (ISO date) | required (ISO date) |
+| `target_platforms_neutral` | required (array) | — | — | — |
+| `pillars` | required (array of 3–5 strings) | — | — | — |
+| `non_goals` | required (array) | — | — | — |
+| `player_experience_goals` | required (object) | — | — | — |
+| `core_loop_ref` | required (`{loops.<id>}`) | — | — | — |
+| `files` | required (map) | — | — | — |
+| `implementation_pointers` | optional (map) | optional | optional | — |
+| `implemented_in` | — | optional (array of globs) | optional | required (array) |
+| `id` | — | — | — | required |
+| `entity` | — | — | required (kind name) | — |
+| `schema` | — | — | required (object) | — |
+| `data_dir` | — | — | required (path) | — |
+| `count_target` | — | — | required (integer) | — |
+| `balance_refs` | — | — | optional (array of refs) | — |
+
+Subfiles have a free per-namespace top-level key in their frontmatter (e.g. `loops.md` carries a top-level `loops:` map, `mechanics.md` carries `entities:`, `verbs:`, `resources:`). The JSON Schema (§10) enumerates the namespace-to-file mapping.
+
+---
+
+## 3. Reference Syntax
+
+Tokens are referenced inline as `{namespace.id}` with literal curly braces. Examples: `{loops.combat_turn}`, `{resources.energy}`, `{verbs.play_card}`, `{distributions.card_draw}`, `{entities.cards.ember_strike}`.
+
+**Namespace ownership.** Each namespace is owned by exactly one subfile:
+
+| Namespace | Owning subfile |
+| --- | --- |
+| `entities` | `gdd/mechanics.md` (and `content/<kind>/*.yaml` for content-heavy types) |
+| `verbs` | `gdd/mechanics.md` |
+| `resources` | `gdd/mechanics.md` |
+| `states` | `gdd/mechanics.md` |
+| `rules` | `gdd/mechanics.md` or a `gdd/systems/*.md` |
+| `loops` | `gdd/loops.md` |
+| `distributions` | `gdd/systems/distributions.md` |
+| `feel` | `gdd/feel.md` |
+| `balance_targets` | `gdd/economy-balance.md` |
+| `invariants` | `gdd/architecture-invariants.md` |
+| `verify_targets` / `adapters` | `gdd/verification.md` |
+| `pillars` | `gdd/pillars.md` (and the root `game-design.md`) |
+| `player_experience_goals` | the root `game-design.md` |
+
+**Resolution.** A reference `{ns.id}` resolves by looking up `ns` in the namespace table above, opening the owning subfile, and reading the value at `ns.id` in its frontmatter. References may chain through dot paths into nested objects (e.g. `{entities.cards.ember_strike.cost}`).
+
+**Primitive vs composite.** A reference may resolve to either a *primitive* (number, string, boolean) or a *composite* (object, array). Composite refs are legal anywhere; primitive refs are required only where the consuming field declares a scalar type (e.g. a `cost:` field must resolve to a number or to a composite that itself contains a number under a documented sub-path).
+
+**References into `content/*/*.yaml`.** A reference whose path starts with `{entities.<kind>.<id>...}` resolves through the `data_source:` of the matching content-schema file. Example: `{entities.cards.ember_strike}` first reads `gdd/content/cards.md` frontmatter, finds `data_source: ../content/cards`, and resolves the rest of the path against `../content/cards/ember_strike.yaml`. The linter computes these resolutions during `lint`.
+
+**Nesting / depth.** Maximum reference depth is 6 dot-separated segments. References inside references (`{foo.{bar.baz}}`) are not supported in v0.1.
+
+**Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
+
+---
+
+## 4. The Universal Probabilistic Surface
+
+The seven core namespaces, plus two cross-cutting namespaces, plus a tenth architecture-level namespace (`invariants`, §4.10). This is the heart of the spec. Every game, any genre, instantiates these.
+
+### 4.1 `entities`
+
+Anything addressable in game state: players, units, cards, items, enemies, tiles, projectiles, NPCs, levels, currencies-as-objects.
+
+```yaml
+entities:
+  player:
+    type: actor
+    properties:
+      hp: { from: "{resources.health}" }
+      hand_size: 5
+    status: implemented
+    implemented_in: ["src/player.py"]
+  cards:
+    type: content_collection
+    data_source: ../../content/cards
+    schema_ref: "{content_schema.cards}"
+    status: balanced
+    count_target: 220
+```
+
+**Required keys per entity (top-level):** `type` (`actor | content_collection | terrain | currency | system_object`), `status`, `implemented_in` (omit only for `content_collection` types — those carry it per-entity-file). `properties` is required for non-`content_collection` types; `data_source` is required for `content_collection` types and must point to an existing directory.
+
+### 4.2 `verbs`
+
+Actions an actor performs. Verbs are the moment-to-moment vocabulary of the game.
+
+```yaml
+verbs:
+  play_card:
+    actor: "{entities.player}"
+    cost: { resource: "{resources.energy}", amount: "varies_by_card" }
+    target_schema:
+      type: "{entities.cards}"
+      filter: "{states.cards.in_hand}"
+    effects:
+      - resolve: "{rules.card_effect_resolution}"
+    feel: "{feel.play_card}"
+    status: implemented
+    implemented_in: ["src/play_card.py"]
+```
+
+**Required keys per verb:** `actor`, `cost`, `target_schema`, `effects` (array), `status`, `implemented_in`. `feel` is optional but strongly recommended; if any verb declares `feel:`, then `gdd/feel.md` is required.
+
+A verb that is defined but never referenced from a `loop` or another `verb`/`rule` fires rule `unreferenced-verb` at severity warning.
+
+### 4.3 `resources`
+
+Quantities that flow and constrain verbs. Resources are the bookkeeping layer of the game.
+
+```yaml
+resources:
+  energy:
+    scope: per_turn
+    min: 0
+    max: 3
+    velocity_target: "{balance_targets.energy_per_turn}"
+    visibility: hud
+    status: balanced
+    implemented_in: ["src/resources.py"]
+```
+
+**Required keys per resource:** `scope` (`per_turn | per_run | permanent`), `min`, `max`, `visibility` (`hud | inferred | hidden`), `status`, `implemented_in`. `velocity_target` is optional but strongly recommended for balance-sensitive resources; if present, it must reference a `balance_targets.*`.
+
+### 4.4 `states`
+
+Named finite-state *machines* on entities or on the game. Each `states` entry is a named machine with an explicit `initial` node, an explicit set of `nodes` (each optionally `terminal`), and an explicit set of `transitions`. **Totality is checkable**: every non-terminal node must have at least one outgoing transition — see `state-machine-coverage` in §9.1.
+
+```yaml
+states:
+  card_lifecycle:
+    initial: in_deck
+    nodes:
+      - id: in_deck
+      - id: in_hand
+      - id: in_play
+      - id: in_discard
+      - id: exhausted
+        terminal: true                # absorbing; exempt from the dead-end check
+    transitions:
+      - { from: in_deck,    event: draw,        to: in_hand }
+      - { from: in_hand,    event: play_card,   to: in_play,   side_effects: ["{resources.energy} -= cost"] }
+      - { from: in_play,    event: resolve,     to: in_discard }
+      - { from: in_hand,    event: exhaust,     to: exhausted }
+      - { from: in_discard, event: reshuffle,   to: in_deck }
+```
+
+**Required keys per machine:** `initial` (id of starting node), `nodes` (array of `{ id, terminal? }` — at least one), `transitions` (array of `{ from, event, to, side_effects? }`). `side_effects` is an array of prose-readable strings that may contain `{token.path}` references but is not normatively interpreted by `lint` in v0.1.
+
+> **Why `event:` and not `on:`.** YAML 1.1 — still the default behavior in most loaders, including PyYAML's `safe_load` — implicitly coerces unquoted `on`, `off`, `yes`, `no` to booleans. An unquoted `on: draw` would parse as `True: draw` and silently break the schema's required-key check. We use `event:` so that authors who forget to quote get a clear, working key. **Do not "tidy" this back to `on:`.** Tracked as decision D-001 in `DECISIONS.md`.
+
+**Breaking change at v0.1.1.** The flat-enum form (`{ <state_name>: { transitions: [...] } }`) of v0.1.0 is removed; all `states` entries must be machines. Migration is mechanical: lift each old `<event> -> <next>` string into a `{ from: <state>, event: <event>, to: <next> }` transition, choose an `initial`, and mark any absorbing states `terminal: true`.
+
+### 4.5 `rules`
+
+Functions mapping `(state + verb) → (new state, outputs)`. Rules may invoke distributions and may compose other rules.
+
+```yaml
+rules:
+  card_draw:
+    given:
+      verb: "{verbs.draw_cards}"
+      state: "{states.cards.in_deck}"
+    do:
+      - sample: "{distributions.card_draw}"
+        count: 1
+        transition: "in_deck -> in_hand"
+      - if_pile_empty: "{rules.reshuffle_discard_into_deck}"
+    outputs: [card_drawn_event]
+    status: implemented
+    implemented_in: ["src/rules/card_draw.py"]
+```
+
+**Required keys per rule:** `given` (object with at least `verb`), `do` (array of operations), `outputs` (array), `status`, `implemented_in`. Any `do:` step whose semantics include randomness must reference a `{distributions.<id>}` — otherwise rule `undefined-distribution` fires at severity **error** (v0.1 design decision).
+
+### 4.6 `loops`
+
+Repeating verb sequences. Every game has at least one loop; most have three (moment / session / meta).
+
+```yaml
+loops:
+  combat_turn:
+    timescale: moment
+    duration: "~45s"
+    sequence:
+      - draw: "{verbs.draw_cards}"
+      - play: "{verbs.play_card}"     # repeated until energy exhausted
+      - end_turn: "{verbs.end_turn}"
+    intended_dynamics:
+      - "energy scarcity forces hand-shape decisions"
+      - "synergy between two cards rewards combos"
+    intended_aesthetics: [challenge, expression]
+    feel_priority: high
+    balance_targets:
+      - "{balance_targets.turn_decision_time}"
+      - "{balance_targets.average_combo_length}"
+    status: balanced
+    implemented_in: ["src/combat_loop.py"]
+```
+
+**Required keys per loop:** `timescale` (`moment | session | meta`), `duration` (string, prose-readable), `sequence` (array of verb refs), `intended_dynamics` (array of strings), `intended_aesthetics` (array drawn from the eight MDA aesthetics), `status`, `implemented_in`. `feel_priority` is optional (`low | medium | high`); `balance_targets` is optional but strongly recommended.
+
+The root `game-design.md` must reference exactly one loop as `core_loop_ref:`. If absent, rule `missing-core-loop` fires at severity error.
+
+### 4.7 `distributions`
+
+First-class randomness. **Every random outcome anywhere in a `game-design.md` tree must reference a named distribution.** Naming randomness is the difference between a game whose balance is auditable and a game whose balance is hidden in source code.
+
+Six distribution types in v0.1:
+
+```yaml
+distributions:
+  card_draw:
+    type: shuffle_bag
+    of: "{entities.cards}"
+    refill_when: empty
+    seed: deterministic_per_run
+    status: implemented
+    implemented_in: ["src/rng/card_draw.py"]
+
+  enemy_pack_size:
+    type: weighted
+    options: { small: 0.5, medium: 0.35, large: 0.15 }
+    status: balanced
+    implemented_in: ["src/rng/encounters.py"]
+
+  critical_hit:
+    type: uniform
+    range: [0.0, 1.0]
+    threshold: 0.15
+    status: implemented
+    implemented_in: ["src/rng/combat.py"]
+
+  loot_rarity:
+    type: pity_floor
+    table: [common, uncommon, rare, epic]
+    weights: [0.6, 0.3, 0.08, 0.02]
+    pity: { rare_within: 12, epic_within: 40 }
+    status: prototyped
+    implemented_in: ["src/rng/loot.py"]
+
+  damage_roll:
+    type: gaussian
+    mean: 10
+    stddev: 2
+    clamp: [1, 99]
+    status: implemented
+    implemented_in: ["src/rng/damage.py"]
+
+  scripted_event:
+    type: deterministic
+    sequence: [a, b, c, a, b, c]
+    status: implemented
+    implemented_in: ["src/scripted/intro.py"]
+```
+
+**Required keys per distribution:** `type` (one of the six above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
+
+### 4.8 Cross-cutting: `feel`
+
+Game feel per Steve Swink's six dimensions: input, response, context, polish, metaphor, rules. Authored per verb.
+
+```yaml
+feel:
+  play_card:
+    input:    "drag and release with momentum; snap-back on illegal target"
+    response: "card translates to play zone over 180ms cubic-ease-out"
+    context:  "energy meter pulses red when card is over the play zone"
+    polish:   "screen flash on resolve; shake amplitude scales with damage"
+    metaphor: "playing a card feels like a definitive commit; no undo"
+    rules:    "during resolve, no other verbs are accepted"
+    status: prototyped
+    implemented_in: ["src/feel/play_card.py"]
+```
+
+**Required keys per feel entry:** all six dimensions as strings, plus `status` and `implemented_in`. Empty-string is permitted for dimensions that genuinely do not apply (e.g. `metaphor: ""` for a UI verb) — but every key must be present.
+
+### 4.9 Cross-cutting: `balance_targets`
+
+Designer-intended outcomes the game must satisfy at ship. Loops and content reference these so that balance lives in one place and the `diff` regression check (§9.2) can detect when they shift.
+
+```yaml
+balance_targets:
+  energy_per_turn:
+    target: 3
+    tolerance: [3, 3]
+    measure: "average energy budget per combat turn"
+    status: balanced
+  win_rate_normal:
+    target: 0.55
+    tolerance: [0.45, 0.65]
+    measure: "win rate over 1000 monte-carlo runs at Normal difficulty"
+    status: balanced
+  average_run_length:
+    target: "32 min"
+    tolerance: ["22 min", "45 min"]
+    measure: "median end-to-end run length, Normal difficulty"
+    status: prototyped
+```
+
+**Required keys per target:** `target`, `tolerance` (`[low, high]`), `measure` (prose), `status`. A `diff` between two trees emits an entry for any target whose `target` value changed; if `target` left its previous `tolerance` band, exit code 1.
+
+If the example tree contains no `balance_targets`, rule `missing-balance-targets` fires at severity error.
+
+### 4.10 Architecture invariants
+
+A tenth namespace, `invariants`, owned by `gdd/architecture-invariants.md`. Each invariant declares a verifiable property of the *generated codebase* — a numeric domain, a structural pattern, a layer boundary, an inter-layer communication rule, or a determinism guarantee. **Invariants are how the design document tells the agent which assumptions the code must satisfy.** They are deliberately *engine-neutral*: an invariant declares a rule, never a tool.
+
+```yaml
+invariants:
+  damage_is_integer:
+    kind: numeric_domain
+    rule: "All damage, health, and resource quantities resolve to integers."
+    applies_to: ["{resources}", "{rules.damage_resolution}"]
+    enforcement: lint
+    severity: error
+  data_behavior_separation:
+    kind: architectural_pattern
+    rule: "Entities are composed of data-only structures; logic lives in stateless systems that query them. No gameplay logic inside presentation/render code."
+    applies_to: ["{entities}", "{rules}"]
+    enforcement: advisory
+    severity: warning
+  state_not_in_presentation:
+    kind: layer_boundary
+    rule: "Persistent game state is never stored on presentation/render nodes."
+    applies_to: ["{states}"]
+    enforcement: lint
+    severity: error
+  cross_layer_via_events:
+    kind: communication
+    rule: "Communication between simulation and presentation layers uses asynchronous events, not direct references."
+    enforcement: advisory
+    severity: warning
+  deterministic_given_seed:
+    kind: determinism
+    rule: "Given a fixed seed, all distribution draws are reproducible."
+    applies_to: ["{distributions}"]
+    enforcement: verify
+    severity: error
+```
+
+**Required keys per invariant:** `kind`, `rule`, `enforcement`, `severity`. `applies_to` is optional (an array of `{namespace.id}` refs the invariant governs).
+
+- `kind` enum: `numeric_domain | architectural_pattern | layer_boundary | communication | determinism`.
+- `enforcement` enum: `lint` (statically checkable now), `verify` (checked at runtime by `gdmd verify` — §9.5), `advisory` (declared, human/agent-reviewed, never auto-failed).
+- `severity` enum: `error | warning | info`.
+
+**Linter behavior.** For each invariant with `enforcement: lint`, `lint` runs an associated static check and emits an `invariant-violation` finding at the invariant's declared severity. Invariants with `enforcement: verify` are deferred to `verify` and are a no-op for `lint`. Invariants with `enforcement: advisory` produce an `info`-level reminder in the `lint` summary; they never affect exit code.
+
+The full prose rationale for each invariant lives in `gdd/architecture-invariants.md`'s Markdown body, keyed by the invariant `id`. **Invariants must never name an engine, framework, renderer, or platform** — they describe properties of the *generated codebase*, not the tools used to build it.
+
+---
+
+## 5. Core Entry File
+
+The root `game-design.md`. Under ~200 lines, llms.txt-style navigation.
+
+### 5.1 Required frontmatter
+
+```yaml
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: core
+name: "Ember Ascent"
+short_pitch: "A 30-minute deckbuilder roguelike about reshaping your hand each turn."
+genre_tags: [deckbuilder, roguelike, single-player]
+status: prototyped
+version: 0.4.2
+last_updated: 2026-05-18
+target_platforms_neutral: [desktop, handheld]
+pillars:
+  - "Every turn, a meaningful hand-shape decision"
+  - "Synergy is discoverable, not memorizable"
+  - "A run is short enough to finish on a lunch break"
+non_goals:
+  - "Multiplayer"
+  - "Real-time combat"
+  - "Persistent meta-progression unlocks"
+player_experience_goals:
+  primary: [challenge, expression]    # MDA aesthetics
+  secondary: [discovery]
+  explicit_non_goals: [submission, fellowship]
+core_loop_ref: "{loops.combat_turn}"
+files:
+  pillars: gdd/pillars.md
+  loops: gdd/loops.md
+  mechanics: gdd/mechanics.md
+  distributions: gdd/systems/distributions.md
+  combat: gdd/systems/combat.md
+  progression: gdd/systems/progression.md
+  cards: gdd/content/cards.md
+  enemies: gdd/content/enemies.md
+  feel: gdd/feel.md
+  balance: gdd/economy-balance.md
+  glossary: gdd/glossary.md
+implementation_pointers:
+  combat_loop: "src/combat/**/*.py"
+  card_system: "src/cards/**/*.py"
+  rng: "src/rng/**/*.py"
+---
+```
+
+The four fields `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are the **stability guarantee** — they are the only frontmatter values agreed to remain stable for the lifetime of the project. Everything else may drift, but must be re-validated when it does.
+
+### 5.2 Canonical prose section order
+
+```
+# {name}
+> {short_pitch}
+
+## High Concept
+## Pillars & Non-Goals
+## Player Experience Goals
+## Core Gameplay Loop
+## Universal Surface         # short, with links into gdd/*.md
+## How to Use This Document (for the Agent)
+## Glossary                  # optional but recommended; or link to gdd/glossary.md
+```
+
+Sections beyond these are accepted (preserved verbatim) but must come *after* `Glossary`. Unknown sections inside the canonical block fire rule `section-order` at severity error.
+
+The root file MUST NOT contain authoritative numbers in its prose; all numbers live in the subfiles.
+
+---
+
+## 6. Content-Heavy Data Pattern
+
+A "content-heavy type" is an `entities` kind whose `count_target` is ≥ 20. (In a deckbuilder: cards, enemies, items, relics, events. In a party RPG: classes, skills, items, encounters. In a TCG: cards, archetypes.) For these types, inlining the full set in Markdown is a context-window disaster.
+
+**Rule (v0.1, mandatory):** if `count_target >= 20`, the entries MUST be split into a sibling `content/<entity>/*.yaml` tree referenced via `data_source` on the content-schema file. The `gdd/content/<entity>.md` subfile contains only the **schema + one representative example** as prose. Violating this fires rule `inline-content-over-threshold` at severity error.
+
+For `count_target < 20`, the split is recommended but optional.
+
+### 6.1 Content-schema file frontmatter
+
+```yaml
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-schema
+status: balanced
+last_verified: 2026-05-18
+entity: cards
+schema:
+  required: [id, name, cost, type, rarity, effects]
+  properties:
+    id:      { type: string, pattern: "^[a-z][a-z0-9_]*$" }
+    name:    { type: string }
+    cost:    { type: integer, minimum: 0, maximum: 5 }
+    type:    { enum: [attack, skill, power] }
+    rarity:  { enum: [common, uncommon, rare] }
+    effects: { type: array }
+data_dir: ../../content/cards
+count_target: 220
+balance_refs:
+  - "{balance_targets.cards_per_rarity}"
+  - "{balance_targets.average_card_cost}"
+---
+```
+
+### 6.2 Per-entity file (`content/<kind>/<id>.yaml`)
+
+```yaml
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: ember_strike
+status: balanced
+implemented_in: ["src/cards/ember_strike.py"]
+name: "Ember Strike"
+cost: 1
+type: attack
+rarity: common
+effects:
+  - { kind: damage, amount: 6, distribution: "{distributions.damage_roll}" }
+  - { kind: apply_state, state: "{states.enemies.burning}", duration: 2 }
+```
+
+The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`.
+
+---
+
+## 7. Canonical Section Order & Unknown Content
+
+### 7.1 Canonical `##` order per file type
+
+**Core file (`game-design.md`):** as enumerated in §5.2.
+
+**Subfile (`gdd/*.md`):** the canonical order is
+```
+## Tokens                  # short table-of-contents into the frontmatter; optional but recommended
+## Rationale
+## Open Questions          # optional
+## Change Log              # optional
+```
+Sections beyond these are accepted but must come after `Change Log`.
+
+**Content-schema file (`gdd/content/*.md`):**
+```
+## Schema
+## Representative Example
+## Balance Notes
+## Open Questions          # optional
+```
+
+### 7.2 Unknown content handling
+
+| Situation | Behavior |
+| --- | --- |
+| Unknown `##` section *after* the canonical block | Preserved without error. |
+| Unknown `##` section *inside* the canonical block | `section-order` rule, severity error. |
+| Unknown frontmatter key | Accepted; ignored by the linter; preserved by `export`. |
+| Unknown enum value (e.g. a new MDA aesthetic) | Accepted with warning. |
+| Unknown component-style nested property | Accepted with warning. |
+| Duplicate `##` heading in the same file | **Hard error; file rejected.** Same rule as upstream `DESIGN.md`. |
+| Frontmatter parse error | Hard error; file rejected. |
+
+---
+
+## 8. Status Lifecycle & Anti-Drift
+
+### 8.1 Status values
+
+Every section and content entity declares a `status:` from this lifecycle:
+
+```
+draft → prototyped → implemented → balanced → shipped
+                                              ↘ cut
+```
+
+| Value | Meaning |
+| --- | --- |
+| `draft` | Written but no code exists. `implemented_in:` may be empty or point to planned paths that do not yet exist. |
+| `prototyped` | First-pass code exists; the section may be wrong but is wired up end-to-end. `implemented_in:` paths exist. |
+| `implemented` | Code is complete and correct against the spec, but balance is unverified. |
+| `balanced` | Code matches spec AND any referenced `balance_targets` measure within tolerance. |
+| `shipped` | Released to players. Implies `balanced`. |
+| `cut` | Removed from the design. The entity is retained in the doc for historical reference but excluded from `lint`'s normal rules; instead, `lint` errors if anything else still references it (rule: `broken-ref` against a cut target). |
+
+**Allowed transitions:** strictly left-to-right along the arrows above, plus any node may transition to `cut`. Backward transitions are permitted in the same commit (the spec is a living document and walking a status back is sometimes correct), but `gdmd diff` (§9.2) emits a `status-regression` finding for `balanced → implemented`, `shipped → balanced`, or any other backward step, so the author has a chance to confirm it is intentional. `lint` does not check status regression because it has no baseline to compare against — the check belongs to `diff`.
+
+### 8.2 Anti-drift mechanisms
+
+The standard exists because GDDs drift. These four mechanisms keep the doc and the code in sync:
+
+1. **`implemented_in` existence check.** For every entity with status ≥ `prototyped`, every path/glob in `implemented_in:` must resolve to at least one real file in the repo. If a glob resolves to zero files, the linter fires `broken-implementation-pointer`. **Entities at status `draft` are silent** — the code isn't written yet; that's not a defect, it's the expected state of a design doc. **v0.1.1 emits the finding at severity `warning`** for prototyped+ entities — relaxed for bootstrapping while the included examples lack real source. **Promoted to severity `error` in v0.2** once at least one example ships with real implementation source. Tracked as decision D-002 in `DECISIONS.md`.
+
+2. **`last_verified` staleness.** For every subfile, content-schema file, and content-entity file, the linter compares the `last_verified:` date against the most recent `mtime` of the files in its `implemented_in:`. If any source file is newer than `last_verified:` by more than 30 days, rule `stale-section` fires at severity warning.
+
+3. **`{token.path}` broken-ref and orphan detection.** Every `{ns.id}` reference resolves, or `broken-ref` fires (error). Every token defined in the tree is referenced at least once, or `orphaned-entity` fires (warning) — except for top-level `entities` of `type: actor` (the player) and any explicit `cut` entries.
+
+4. **The session-end agent ritual.** Documented in `AGENTS.md`: on every change, update affected `status:`, update `implemented_in:`, touch `last_verified:` on touched sections, bump `version:` in the root file, update `last_updated:`, re-run `lint`, fix findings, optionally re-run `diff` against the last release. This ritual is the contract between human designers and AI agents that keeps the standard living.
+
+**Stability guarantee.** Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are immutable for the life of a project. Changing any of them is a project-wide event and must be accompanied by a `version:` *major* bump in the root file and a corresponding entry in `gdd/glossary.md`'s change log if one exists.
+
+---
+
+## 9. The CLI
+
+Verbs: `lint | diff | export | spec`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
+
+### 9.1 `lint`
+
+```
+gdmd lint <path-to-example-tree>
+```
+
+Emits structured JSON to stdout:
+
+```json
+{
+  "findings": [
+    {
+      "rule": "broken-ref",
+      "severity": "error",
+      "file": "gdd/loops.md",
+      "location": "loops.combat_turn.sequence[1]",
+      "message": "Reference {verbs.play_card} does not resolve.",
+      "suggestion": "Did you mean {verbs.play_a_card}?"
+    }
+  ],
+  "summary": { "files": 14, "errors": 1, "warnings": 3 }
+}
+```
+
+Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings never affect exit code.
+
+**Linter rules in v0.1:**
+
+| Rule | Severity | Trigger |
+| --- | --- | --- |
+| `broken-ref` | error | A `{ns.id}` reference does not resolve. |
+| `broken-implementation-pointer` | warning (v0.1.1), error (v0.2+) | An `implemented_in:` path/glob resolves to zero files. See §8.2 mechanism 1 and `DECISIONS.md` D-002. |
+| `orphaned-entity` | warning | A token is defined but never referenced. |
+| `unreferenced-verb` | warning | A verb is defined but no loop or rule invokes it. |
+| `missing-pillars` | error | Root file `pillars:` is absent or has fewer than 3 entries. |
+| `missing-core-loop` | error | Root `core_loop_ref:` is absent or does not resolve. |
+| `missing-balance-targets` | error | No `balance_targets:` defined anywhere in the tree. |
+| `undefined-distribution` | **error** | A `rule.do[].sample` or any other stochastic operation does not reference a `{distributions.<id>}`. |
+| `inline-content-over-threshold` | error | A content-schema file with `count_target >= 20` does not declare `data_dir:` (i.e. entries are inlined). |
+| `stale-section` | warning | A subfile's `last_verified:` is more than 30 days older than the mtime of any file in its `implemented_in:`. |
+| `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
+| `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
+| `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning — transition `event:` references an event referenced nowhere else). |
+| `verify-result-regression` | error/warning | A prior `verify` axis result regressed. `build_health` and `behavioral_alignment` regressions are error; `presentation_usability` regressions are warning. Emitted only by `gdmd verify` (§9.5), not by `lint`. |
+
+### 9.2 `diff`
+
+```
+gdmd diff <old-tree> <new-tree>
+```
+
+Emits structured JSON describing token-level changes:
+
+```json
+{
+  "added": [...],
+  "removed": [...],
+  "changed": [
+    { "path": "balance_targets.win_rate_normal.target",
+      "from": 0.55, "to": 0.62 }
+  ],
+  "balance_regressions": [],
+  "status_regressions": []
+}
+```
+
+**Diff-only findings** (these have no `lint` analogue because `lint` has no baseline):
+
+- `balance_regressions` — `balance_targets.<id>.target` moved *outside* its previous `tolerance` band.
+- `status_regressions` — `status:` regressed from `balanced` or `shipped` to an earlier lifecycle state (per §8.1). The rule formerly listed as `status-regression` in §9.1 lives here.
+
+Exit code: `0` if both `balance_regressions` and `status_regressions` are empty; `1` otherwise.
+
+### 9.3 `export`
+
+```
+gdmd export <path> --format {schema|tokens}
+```
+
+- `--format schema` emits the JSON Schema at `schema/game-design.schema.json` to stdout.
+- `--format tokens` walks the tree and emits a single flat JSON object: every resolved `{ns.id}` keyed by its dotted path. Useful as an embedding-friendly snapshot of the design.
+
+### 9.4 `spec`
+
+```
+gdmd spec
+```
+
+Prints this document (`docs/spec.md`) to stdout, with frontmatter stripped, for injection into an agent prompt.
+
+### 9.5 `verify` (experimental in v0.1.1)
+
+```
+gdmd verify <path> [--adapter <name>] [--baseline <prior-result.json>]
+```
+
+**Status: experimental; no bundled runner.** `verify` is the dynamic-loop complement to `lint`'s static checks. It does not itself build or launch anything — instead it declares a *contract* and a *result schema* that the project's own adapter must satisfy.
+
+`verify` reads:
+
+1. The `verification` block — either `gdd/verification.md` frontmatter (`file_type: subfile`), or `verify_targets:` directly in the core file.
+2. The project-supplied **adapter** (an executable the project declares under `adapters:`) which knows how to build the project, run an automated session, and emit observations as JSON conforming to the `VerifyResult` schema (§9.5.3).
+
+The standard owns the **contract and the result schema**; the project owns the **adapter** (only the project knows its engine). This is the engine-neutral form of "headless playability" — the spec never names a runner.
+
+#### 9.5.1 Three audit axes
+
+- **`build_health`** — the project builds and starts without errors or unresolved asset/token references.
+- **`behavioral_alignment`** — declared `loops`, `rules`, and `balance_targets` produce the expected observable outcomes over an automated session (e.g., a fixed-seed run lands within the declared `win_rate` band; a state machine reaches its terminal node).
+- **`presentation_usability`** — optional, pluggable. If a `presentation` adapter is supplied (vision model, pixel diffing, layout assertions — the standard doesn't care which), it audits for overlap/clipping/contrast. Absent an adapter, this axis is *skipped*, not failed.
+
+#### 9.5.2 `verify_targets` shape
+
+```yaml
+verify_targets:
+  - axis: behavioral_alignment
+    target: "{loops.combat_turn}"
+    seed: 12345
+    expect:
+      median_turns_per_combat: { between: [4, 8] }
+  - axis: behavioral_alignment
+    target: "{balance_targets.win_rate_ascension_0}"
+    sessions: 200
+    expect: { win_rate: { near: 0.55, tolerance: 0.05 } }
+  - axis: build_health
+    expect: { builds: true, unresolved_refs: 0 }
+adapters:
+  default: "./tools/verify-adapter"        # project-supplied executable; the engine lives HERE, not in the spec
+  presentation: null                        # optional; skipped if null
+```
+
+`expect:` is a free-form object; the adapter is responsible for matching observed values against it. The standard suggests three matcher shorthands — `{ between: [low, high] }`, `{ near: v, tolerance: t }`, `{ equals: v }` — but does not normatively interpret them in v0.1.
+
+#### 9.5.3 Result schema
+
+The adapter emits, on stdout, a JSON document conforming to `$defs.VerifyResult`:
+
+```json
+{
+  "results": [
+    {
+      "axis": "behavioral_alignment",
+      "target": "{balance_targets.win_rate_ascension_0}",
+      "observed": { "win_rate": 0.572 },
+      "expected": { "win_rate": { "near": 0.55, "tolerance": 0.05 } },
+      "pass": true,
+      "notes": "200 fixed-seed sessions"
+    }
+  ],
+  "summary": { "runs": 3, "passed": 3, "failed": 0, "skipped": 0 }
+}
+```
+
+#### 9.5.4 Exit code
+
+- `0` if every non-`presentation_usability` target passed.
+- `1` if any `build_health` or `behavioral_alignment` target failed.
+- `0` (with warnings in `notes`) if only `presentation_usability` regressed.
+
+When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`).
+
+**Promotion criteria.** `verify` is promoted from experimental to stable when at least one real adapter ships in `examples/` and the result schema has been exercised against it.
+
+---
+
+## 10. JSON Schema
+
+The normative frontmatter schema lives at `schema/game-design.schema.json`. It is the machine-readable companion to §4–§6 and is what editors validate against live.
+
+The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
+
+VS Code's YAML extension picks up the schema via the YAML language server's standard mapping. Add this to a workspace `.vscode/settings.json`:
+
+```json
+{
+  "yaml.schemas": {
+    "./schema/game-design.schema.json": [
+      "game-design.md",
+      "gdd/**/*.md",
+      "content/**/*.yaml"
+    ]
+  }
+}
+```
+
+---
+
+## 11. Conformance
+
+A `game-design.md` tree is **conformant at v0.1.1** if:
+
+1. `gdmd lint <tree>` returns exit code `0` (no findings of severity `error`).
+2. The root `game-design.md` has all required frontmatter keys (§5.1) and the canonical prose section order (§5.2).
+3. Every subfile has `spec`, `spec_version`, `file_type`, `status`, `last_verified` in its frontmatter.
+4. Every `content/*/*.yaml` validates against its referencing content-schema file's `schema:`.
+5. Every random outcome resolves to a named `distributions.<id>`.
+
+### 11.1 Success benchmark
+
+The schema is working if, from a cold context, an AI coding agent can implement a correct new content entity (e.g. a new card) from `gdd/content/<kind>.md`'s schema + one representative `*.yaml` example in a single session, ≥80% of the time. The `examples/deckbuilder/` tree is designed to be testable against this benchmark. If success drops below 80%, the schema is over- or under-specified for the type — surface the gap rather than working around it.
+
+---
+
+## Appendix A — Worked Examples
+
+| Tree | Genre | Notes |
+| --- | --- | --- |
+| `examples/deckbuilder/` | Roguelike deckbuilder | The reference example — most complete; designed for the §11.1 benchmark. |
+| `examples/party-rpg/` | Party-based RPG | Multi-actor `verbs:` and richer `entities:`. |
+| `examples/tick-combat/` | Auto-battler tick combat | `loops.timescale: moment` is sub-second; distributions dominate. |
+| `examples/tcg/` | Trading card game | Two-player, asymmetric, `balance_targets` heavy on win-rate bands. |
+
+## Appendix B — Relationship to `DESIGN.md`
+
+| Aspect | Inherited verbatim | Extended / new |
+| --- | --- | --- |
+| Two-layer file (YAML + prose) | ✓ | |
+| `{namespace.id}` reference syntax | ✓ | depth ≤ 6; refs into `content/*/*.yaml` via `data_source` |
+| Canonical `##` order, linter-enforced | ✓ | per-file-type orders (§7.1) |
+| Unknown-content handling | ✓ | + `status-regression`, `inline-content-over-threshold` |
+| CLI verb set | ✓ | `diff` exit-codes balance regressions |
+| Apache-2.0 licensing | ✓ | |
+| Modular tree + `files:` map | | **new** (§2.2, §5.1) |
+| `status:` + `implemented_in:` + `last_verified:` | | **new** (§8) |
+| Seven core namespaces + `feel` + `balance_targets` | | **new** (§4) — the entire surface |
+| Named distributions for all randomness | | **new** (§4.7) — strict at v0.1 |
+| Content-heavy data pattern (`data_source:`) | | **new** (§6) |
+| Architecture invariants, state-machine totality, `verify` adapter contract | | **new** (§4.10, §4.4, §9.5) — adapted from a parallel research effort and re-grounded engine-neutral (the source assumed a web engine; we express codebase properties and a pluggable adapter contract instead). |
+
+## Appendix C — Glossary of Spec Terms
+
+- **Token** — a value in YAML frontmatter. Normative.
+- **Namespace** — a top-level key in frontmatter that owns a category of tokens (e.g. `loops`, `verbs`, `distributions`).
+- **Reference** — `{namespace.id}` syntax pointing from one token (or prose) to another.
+- **Surface** — the seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`) plus the two cross-cutting namespaces (`feel`, `balance_targets`). The universal probabilistic surface.
+- **Primitive** (in a reference) — a scalar resolution (number/string/boolean).
+- **Composite** (in a reference) — an object or array resolution.
+- **Content-heavy type** — an `entities` kind with `count_target >= 20`, which MUST live in `content/<kind>/*.yaml`.
+- **Drift** — divergence between what the doc says and what the code does. The anti-drift mechanisms (§8.2) exist to detect and prevent it.
+- **The seven primitives** — `entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`. Plus `feel` and `balance_targets` as cross-cutting concerns, the universal surface is nine total.
+- **Stability guarantee** — `pillars`, `non_goals`, `player_experience_goals`, `core_loop_ref` are the only fields agreed to remain stable for the life of a project.

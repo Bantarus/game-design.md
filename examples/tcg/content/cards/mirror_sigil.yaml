@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: mirror_sigil
+status: draft
+implemented_in: []
+name: "Mirror Sigil"
+mana_cost: 1
+archetype: neutral
+type: artifact
+tags: [utility, cantrip]
+effects:
+  - { kind: draw, amount: 1, target: self }

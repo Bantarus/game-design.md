@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.1.1
+file_type: content-entity
+id: roar
+status: draft
+implemented_in: []
+name: "Roar"
+cost: 2
+type: skill
+rarity: rare
+tags: [skill, fire, bellow]
+effects:
+  - kind: scale_burning
+    stacks: 2
