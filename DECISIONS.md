@@ -16,15 +16,21 @@ The transition trigger key in a `states.<machine>.transitions[*]` entry is `even
 
 ---
 
-## D-002 — `broken-implementation-pointer` is a warning in v0.1.1 (was: error)
+## D-002 — `broken-implementation-pointer` ratcheted to error at v0.2.0-alpha Phase 3+
 
-- **Status:** locked for v0.1.1, ratchets to **error** in v0.2.
-- **Decided:** 2026-05-21.
-- **Spec:** §8.2 mechanism 1; §9.1 rule table.
+- **Status:** ratcheted to **error** on 2026-05-23 (Phase 3+ hardening pass).
+- **Original decision:** 2026-05-21 — held at `warning` for v0.1.1.
+- **Ratchet trigger:** the planned condition ("first example ships with real source OR with a real `gdmd verify` adapter that exercises the contract") was satisfied by Phase 2 / Phase 3:
+  - `examples/tick-combat/impl/xtreme/` — Bevy ECS implementation with real source (Phase 2 — bc2250f, 319dfac).
+  - `examples/tick-combat/tools/verify-adapter` + `impl/xtreme/src/bin/verify_adapter.rs` — real adapter exercising the §9.5.6 contract (Phase 3 — 36e4ff5).
+- **Spec footprint:** §8.2 mechanism 1; §9.1 rule table.
+- **Linter footprint:** `src/game_design_md/linter.py::rule_broken_implementation_pointer` — severity flipped from `warning` to `error`.
 
-The rule's *intended* severity is `error`: an entity claiming `status: prototyped` or higher should point at real source. But the included examples (`examples/deckbuilder/`, soon `party-rpg/`, `tick-combat/`, `tcg/`) declare their `implemented_in:` paths against fictional source trees that do not ship in this repo — the examples are pedagogical, not running code. Holding them to `error` would fail `gdmd lint examples/deckbuilder` on every entity.
+The rule's intended severity has always been `error`: an entity claiming `status: prototyped` or higher should point at real source. With tick-combat shipping real source and the other three examples (`deckbuilder`, `party-rpg`, `tcg`) holding their entities at `status: draft`, the draft-status gate ensures the ratchet doesn't fail their lints. Confirmation: `gdmd lint examples/{deckbuilder,tick-combat,party-rpg,tcg}` returns 0 errors / 0 warnings after the ratchet.
 
-**Ratchet plan:** when the first example ships with real source (or with a real `gdmd verify` adapter that exercises the contract), promote the rule to `error`. Track via PR labeled `ratchet-D-002`.
+**Forward-promotion behavior.** Any future entity in any example whose `status:` advances to `prototyped` or higher and whose `implemented_in:` paths don't resolve will now block lint with an error. This is the intended discipline — the moment a designer claims a system is prototyped, the linter verifies code exists.
+
+**No further ratchet planned.** D-002 is closed.
 
 ---
 

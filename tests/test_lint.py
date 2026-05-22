@@ -293,13 +293,12 @@ def test_orphaned_event_is_warning(make_tree):
     )
 
 
-# ---- broken-implementation-pointer (warning at v0.1.1) ------------------------
+# ---- broken-implementation-pointer (D-002, error at v0.2+) --------------------
 
 def test_broken_implementation_pointer_silent_at_draft(make_tree):
     """A design-stage tree (status: draft everywhere) emits zero impl-pointer findings,
-    even with completely fake implemented_in globs. This is what makes the rule
-    do real work — it stays quiet during design, warns at prototyped+ during
-    bootstrapping (v0.1.1), and ratchets to error at v0.2."""
+    even with completely fake implemented_in globs. This is what keeps the
+    D-002 ratchet (warning → error at v0.2) from blocking design-stage trees."""
     mech = (make_tree() / "gdd/mechanics.md").read_text()
     # Add a broken impl glob AND demote everything to draft.
     bad = (mech
@@ -316,21 +315,11 @@ def test_broken_implementation_pointer_silent_at_draft(make_tree):
     )
 
 
-def test_broken_implementation_pointer_is_warning(make_tree):
-    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
-        "verbs:\n  do_thing:\n    actor:",
-        "verbs:\n  do_thing:\n    actor:".replace("actor:", "actor:")  # no-op
-    )
-    # Add a fake implemented_in glob
-    bad = bad.replace(
-        "verbs:\n  do_thing:",
-        "verbs:\n  do_thing:\n",
-    )
-    bad = bad.replace(
-        '    implemented_in: []\n  end_turn',  # not present, won't trigger
-        '',
-    )
-    # Easiest: just add a broken glob to the file-level implemented_in
+def test_broken_implementation_pointer_is_error_at_prototyped(make_tree):
+    """D-002 ratcheted at v0.2.0-alpha Phase 3+: a prototyped+ entity with a
+    broken implemented_in: glob fires at severity `error` (was `warning` in
+    v0.1.1). The ratchet trigger was tick-combat shipping real source and a
+    verify adapter."""
     mech_text = (make_tree() / "gdd/mechanics.md").read_text()
     bad = mech_text.replace(
         "file_type: subfile\nstatus: prototyped",
@@ -339,8 +328,11 @@ def test_broken_implementation_pointer_is_warning(make_tree):
     root = make_tree({"gdd/mechanics.md": bad})
     res = _lint(root)
     impl_findings = [f for f in res.findings if f.rule == "broken-implementation-pointer"]
-    assert impl_findings
-    # D-002: severity is warning at v0.1.1.
-    assert all(f.severity == "warning" for f in impl_findings)
-    # Warnings never affect exit code.
-    assert res.exit_code == 0 or res.errors == 0
+    assert impl_findings, "expected broken-implementation-pointer to fire on broken glob"
+    # D-002 ratchet: severity is error at v0.2+.
+    assert all(f.severity == "error" for f in impl_findings), (
+        "D-002 ratcheted to error at v0.2.0-alpha Phase 3+; found severities: "
+        + ", ".join(sorted({f.severity for f in impl_findings}))
+    )
+    # Errors must affect exit code.
+    assert res.exit_code == 1

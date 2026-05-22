@@ -398,9 +398,13 @@ def rule_unreferenced_verb(tree: Tree) -> list[Finding]:
 
 
 def rule_broken_implementation_pointer(tree: Tree) -> list[Finding]:
-    """Severity is `warning` at v0.1.1 (D-002), `error` at v0.2+."""
+    """Severity is `error` at v0.2 (D-002 ratchet). At v0.1.1 the rule was a
+    warning because no example shipped real source; the tick-combat / xtreme
+    Bevy ECS implementation + the verify-adapter binary close that gap, so
+    the rule now blocks on prototyped+ entities whose implemented_in: paths
+    don't resolve."""
     findings: list[Finding] = []
-    severity = "warning"  # D-002 — promote to "error" in v0.2
+    severity = "error"  # D-002 ratcheted at v0.2.0-alpha Phase 3+
 
     def check_glob(pf: ParsedFile, pattern: str, location: str) -> None:
         try:

@@ -784,7 +784,7 @@ draft → prototyped → implemented → balanced → shipped
 
 The standard exists because GDDs drift. These four mechanisms keep the doc and the code in sync:
 
-1. **`implemented_in` existence check.** For every entity with status ≥ `prototyped`, every path/glob in `implemented_in:` must resolve to at least one real file in the repo. If a glob resolves to zero files, the linter fires `broken-implementation-pointer`. **Entities at status `draft` are silent** — the code isn't written yet; that's not a defect, it's the expected state of a design doc. **v0.1.1 emits the finding at severity `warning`** for prototyped+ entities — relaxed for bootstrapping while the included examples lack real source. **Promoted to severity `error` in v0.2** once at least one example ships with real implementation source. Tracked as decision D-002 in `DECISIONS.md`.
+1. **`implemented_in` existence check.** For every entity with status ≥ `prototyped`, every path/glob in `implemented_in:` must resolve to at least one real file in the repo. If a glob resolves to zero files, the linter fires `broken-implementation-pointer`. **Entities at status `draft` are silent** — the code isn't written yet; that's not a defect, it's the expected state of a design doc. **Severity is `error` at v0.2.0-alpha** (ratcheted from `warning` at v0.1.1 once the tick-combat / xtreme reference implementation shipped real source; see `DECISIONS.md` D-002). The intended discipline: the moment a designer advances an entity's `status:` to `prototyped` or higher, the linter verifies code exists at the declared paths — drift is caught at the boundary.
 
 2. **`last_verified` staleness.** For every subfile, content-schema file, and content-entity file, the linter compares the `last_verified:` date against the most recent `mtime` of the files in its `implemented_in:`. If any source file is newer than `last_verified:` by more than 30 days, rule `stale-section` fires at severity warning.
 
@@ -831,7 +831,7 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | Rule | Severity | Trigger |
 | --- | --- | --- |
 | `broken-ref` | error | A `{ns.id}` reference does not resolve. |
-| `broken-implementation-pointer` | warning (v0.1.1), error (v0.2+) | An `implemented_in:` path/glob resolves to zero files. See §8.2 mechanism 1 and `DECISIONS.md` D-002. |
+| `broken-implementation-pointer` | error (v0.2+) | An `implemented_in:` path/glob resolves to zero files. Entities at `status: draft` are exempt. See §8.2 mechanism 1 and `DECISIONS.md` D-002. |
 | `orphaned-entity` | warning | A token is defined but never referenced. |
 | `unreferenced-verb` | warning | A verb is defined but no loop or rule invokes it. |
 | `missing-pillars` | error | Root file `pillars:` is absent or has fewer than 3 entries. |
@@ -976,8 +976,10 @@ A `behavioral_alignment` verify_target MAY declare a trajectory expectation. Whe
 
 - **One JSON object per simulation unit per line.** The simulation unit (tick, turn, frame, beat) is declared by the game in `gdd/verification.md` under `trajectory.unit:`.
 - **UTF-8 encoding, LF line endings, trailing newline on the last line.** No CRLF, no leading BOM.
-- **Canonical JSON per line:** keys sorted alphabetically (ASCII byte order); no extra whitespace inside objects or arrays; integer values for all gameplay-state fields when the game declares the `gameplay_state_is_integer` invariant (or equivalent); enum values lowercased, drawn from the closed set declared in the game's `trajectory.schema:`.
-- **Stable element ordering inside arrays:** the trajectory schema declares the canonical sort key (e.g. `units` sorted by `(side, deploy_order)`). Stable order makes byte-identity the natural cross-engine equality.
+- **Canonical JSON per line.** No extra whitespace inside objects or arrays. **JSON object keys MUST be ASCII** (`[a-zA-Z0-9_]`); they are emitted in **ASCII codepoint order** (which is byte-wise sort order for ASCII). No exceptions — non-ASCII keys are a schema-author bug.
+- **Integer values for all gameplay-state fields.** Default integer width is **int32** (range `−2,147,483,648 .. 2,147,483,647`). A game's `trajectory.schema:` MAY declare `width: int64` per field for values that genuinely need a wider range; engines MUST use a representation that round-trips the declared width without precision loss. Mixing widths within a trajectory is permitted only by per-field schema declaration; the default for every numeric field is int32. Float fields are NOT permitted in the trajectory (see the `gameplay_state_is_integer` invariant family).
+- **Enum values are ASCII lowercase**, drawn from the closed set declared in the game's `trajectory.schema:`. Lowercasing is **ASCII-only**: codepoints `U+0041..U+005A` (`A-Z`) map to `U+0061..U+007A` (`a-z`); every other codepoint passes through unchanged. **Locale-aware case conversion is forbidden** — Rust's `str::to_lowercase`, C++ `std::tolower(int)` under a non-C locale, and .NET `string.ToLower()` without `CultureInfo.InvariantCulture` will silently diverge on certain inputs (Turkish `İ → i̇`, German `ß → ss`, etc.). Engines MUST implement ASCII-only lowercasing for trajectory enum serialization.
+- **Sorted element ordering inside arrays.** Every array in the schema MUST declare a `sort_by:` key list that produces a **total order** over the array's elements — meaning the declared keys, applied lexicographically, *uniquely* order every pair of elements in any valid trajectory. (Conventional "stable" sort — insertion-order-preserving — is **NOT** the contract: two engines build their arrays in different insertion orders and would desync.) The array is sorted *before* serialization. **String sort keys compare byte-wise on the UTF-8 representation** (which equals codepoint order for valid UTF-8); locale-aware collation is forbidden. If a declared `sort_by:` does not produce a total order on some valid trajectory (any tie remains), the schema is malformed and the cross-engine desync will surface as a sort-instability bug rather than a simulation bug.
 
 **Cross-engine bar (D-009).** Byte-identical trajectory files given the same seed and the same `gdd/` tree, across all engines implementing the game. Two engines producing *structurally* equivalent but *byte* different trajectories (different enum spellings, key reordering, whitespace, sort tie-break) have diverged in the *trajectory serialization*, not the simulation — the spec rules it a failure either way. The trajectory format is itself spec; the trajectory is data.
 
@@ -985,21 +987,23 @@ A `behavioral_alignment` verify_target MAY declare a trajectory expectation. Whe
 
 ```yaml
 trajectory:
-  unit: tick                       # what one line represents
-  schema:                          # canonical JSONL shape per line
-    tick:        { type: integer, minimum: 0 }
+  unit: tick                          # what one line represents
+  schema:                             # canonical JSONL shape per line
+    tick:        { type: integer, minimum: 0 }                    # int32 default
     phase:       { enum: [setup, ticking, resolved] }
     gold:        { type: integer, minimum: 0 }
     units:
       type: array
-      sort_by: [side, deploy_order]   # canonical element order
+      sort_by: [side, deploy_order]   # total-order key — see below
       items:
         id:           { type: string }
         side:         { enum: [player, enemy] }
         deploy_order: { type: integer, minimum: 0 }
         hp:           { type: integer, minimum: 0 }
-        lifecycle:    { enum: [alive, dead] }
+        lifecycle:    { enum: [alive, stunned, dead] }
 ```
+
+**Why `sort_by: [side, deploy_order]` is a total order for tick-combat.** `side` has two values (`player`, `enemy`, comparing as ASCII strings so `enemy < player`); `deploy_order` is a 0-based integer that is unique within a side per the deploy-roster contract. The pair `(side, deploy_order)` is therefore unique across every valid trajectory — no two units can collide, so sorting is total. If a future content type allowed two units on the same side at the same `deploy_order`, this `sort_by:` would no longer be a total order and would have to be extended (e.g. tie-break by `id`).
 
 The schema is per-game, not per-engine. Both xtreme (engine A) and a future Unreal port (engine B) emit trajectories conforming to this same schema. The reference golden lives in the engine A directory under `tests/`; future engines test against the *same* golden, not a per-engine fixture. **At v0.2.0-alpha the `schema:` body is advisory** — `verify` does not validate trajectory line-by-line against it; trajectory equality is checked byte-for-byte against the golden fixture, and the schema serves as the canonical human reference. A `trajectory-schema-validation` lint rule ratchets in v0.3.
 
