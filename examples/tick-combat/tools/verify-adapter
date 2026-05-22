@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# verify-adapter — engine-neutral verify adapter for tick-combat.
+#
+# Implements spec §9.5.6 invocation contract:
+#   verify-adapter --target <token-ref> --seed <int>
+#                  [--trajectory <path>] [--max-steps <int>]
+#
+# This is the project-level adapter. The xtreme/Bevy ECS Rust binary is the
+# engine-A implementation; a future Unreal Blueprints adapter would live in
+# a sibling Phase-4 wrapper but implement the same contract.
+#
+# Adapters are project-supplied per spec; gdmd verify never assumes one
+# exists in the standard.
+
+set -euo pipefail
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+XTREME_DIR="$SCRIPT_DIR/../impl/xtreme"
+BIN="$XTREME_DIR/target/debug/verify_adapter"
+
+if [[ ! -x "$BIN" ]]; then
+  ( cd "$XTREME_DIR" && cargo build --bin verify_adapter --quiet ) >&2
+fi
+
+exec "$BIN" "$@"

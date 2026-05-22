@@ -892,20 +892,22 @@ gdmd spec
 
 Prints this document (`docs/spec.md`) to stdout, with frontmatter stripped, for injection into an agent prompt.
 
-### 9.5 `verify` (experimental in v0.1.1)
+### 9.5 `verify`
 
 ```
 gdmd verify <path> [--adapter <name>] [--baseline <prior-result.json>]
 ```
 
-**Status: experimental; no bundled runner.** `verify` is the dynamic-loop complement to `lint`'s static checks. It does not itself build or launch anything — instead it declares a *contract* and a *result schema* that the project's own adapter must satisfy.
+**Status: stable at v0.2.0-alpha.** `verify` is the dynamic-loop complement to `lint`'s static checks. It does not itself build or launch anything — instead it declares a *contract*, a *result schema*, and a *canonical trajectory format* that the project's own adapter must satisfy.
 
 `verify` reads:
 
 1. The `verification` block — either `gdd/verification.md` frontmatter (`file_type: subfile`), or `verify_targets:` directly in the core file.
-2. The project-supplied **adapter** (an executable the project declares under `adapters:`) which knows how to build the project, run an automated session, and emit observations as JSON conforming to the `VerifyResult` schema (§9.5.3).
+2. The project-supplied **adapter** (an executable the project declares under `adapters:`) which knows how to build the project, run an automated session, and emit observations as JSON conforming to the `VerifyResult` schema (§9.5.3) plus, when declared, a canonical trajectory file (§9.5.5).
 
-The standard owns the **contract and the result schema**; the project owns the **adapter** (only the project knows its engine). This is the engine-neutral form of "headless playability" — the spec never names a runner.
+The standard owns the **contract, the result schema, and the trajectory format**; the project owns the **adapter** (only the project knows its engine). This is the engine-neutral form of "headless playability" — the spec never names a runner.
+
+The reference adapter at `examples/tick-combat/tools/verify-adapter` exercises the full contract: `behavioral_alignment` via canonical JSONL trajectory comparison against a locked golden, negative-control via alt-seed divergence (§9.5.7), and `build_health` via successful adapter invocation. Phase 4's Unreal adapter will implement the *same* contract; the trajectory format and `VerifyResult` shape are normative and engine-neutral, exactly as the `gdd/` tree is engine-neutral.
 
 #### 9.5.1 Three audit axes
 
@@ -921,7 +923,10 @@ verify_targets:
     target: "{loops.combat_turn}"
     seed: 12345
     expect:
-      median_turns_per_combat: { between: [4, 8] }
+      trajectory: { matches_golden: ./tests/golden_seed_12345.jsonl }
+    negative_control:
+      seeds: [99999]
+      expect: { trajectory_diverges_from_primary: true }
   - axis: behavioral_alignment
     target: "{balance_targets.win_rate_ascension_0}"
     sessions: 200
@@ -933,7 +938,9 @@ adapters:
   presentation: null                        # optional; skipped if null
 ```
 
-`expect:` is a free-form object; the adapter is responsible for matching observed values against it. The standard suggests three matcher shorthands — `{ between: [low, high] }`, `{ near: v, tolerance: t }`, `{ equals: v }` — but does not normatively interpret them in v0.1.
+`expect:` is a free-form object; the adapter is responsible for matching observed values against it. The standard normatively interprets two expectation shapes — `{ trajectory: { matches_golden: <path> } }` (§9.5.5) and the matcher shorthands `{ between: [low, high] }`, `{ near: v, tolerance: t }`, `{ equals: v }`. Other keys are pass-through to the adapter.
+
+`negative_control:` is the spec-level mechanism for catching adapters that pass vacuously (§9.5.7). It declares one or more alternative seeds the adapter must also run, and the divergence assertion `verify` makes against the primary run.
 
 #### 9.5.3 Result schema
 
@@ -963,7 +970,85 @@ The adapter emits, on stdout, a JSON document conforming to `$defs.VerifyResult`
 
 When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`).
 
-**Promotion criteria.** `verify` is promoted from experimental to stable when at least one real adapter ships in `examples/` and the result schema has been exercised against it.
+#### 9.5.5 Trajectory format (engine-neutral, canonical JSONL)
+
+A `behavioral_alignment` verify_target MAY declare a trajectory expectation. When present, the adapter writes a *trajectory file* in canonical JSONL to the path supplied via `--trajectory` (§9.5.6). The format is normative across engines:
+
+- **One JSON object per simulation unit per line.** The simulation unit (tick, turn, frame, beat) is declared by the game in `gdd/verification.md` under `trajectory.unit:`.
+- **UTF-8 encoding, LF line endings, trailing newline on the last line.** No CRLF, no leading BOM.
+- **Canonical JSON per line:** keys sorted alphabetically (ASCII byte order); no extra whitespace inside objects or arrays; integer values for all gameplay-state fields when the game declares the `gameplay_state_is_integer` invariant (or equivalent); enum values lowercased, drawn from the closed set declared in the game's `trajectory.schema:`.
+- **Stable element ordering inside arrays:** the trajectory schema declares the canonical sort key (e.g. `units` sorted by `(side, deploy_order)`). Stable order makes byte-identity the natural cross-engine equality.
+
+**Cross-engine bar (D-009).** Byte-identical trajectory files given the same seed and the same `gdd/` tree, across all engines implementing the game. Two engines producing *structurally* equivalent but *byte* different trajectories (different enum spellings, key reordering, whitespace, sort tie-break) have diverged in the *trajectory serialization*, not the simulation — the spec rules it a failure either way. The trajectory format is itself spec; the trajectory is data.
+
+**Per-game declaration in `gdd/verification.md`:**
+
+```yaml
+trajectory:
+  unit: tick                       # what one line represents
+  schema:                          # canonical JSONL shape per line
+    tick:        { type: integer, minimum: 0 }
+    phase:       { enum: [setup, ticking, resolved] }
+    gold:        { type: integer, minimum: 0 }
+    units:
+      type: array
+      sort_by: [side, deploy_order]   # canonical element order
+      items:
+        id:           { type: string }
+        side:         { enum: [player, enemy] }
+        deploy_order: { type: integer, minimum: 0 }
+        hp:           { type: integer, minimum: 0 }
+        lifecycle:    { enum: [alive, dead] }
+```
+
+The schema is per-game, not per-engine. Both xtreme (engine A) and a future Unreal port (engine B) emit trajectories conforming to this same schema. The reference golden lives in the engine A directory under `tests/`; future engines test against the *same* golden, not a per-engine fixture. **At v0.2.0-alpha the `schema:` body is advisory** — `verify` does not validate trajectory line-by-line against it; trajectory equality is checked byte-for-byte against the golden fixture, and the schema serves as the canonical human reference. A `trajectory-schema-validation` lint rule ratchets in v0.3.
+
+**Why JSONL.** Any frontier language has a JSON parser. Each line is independent (so partial-progress trajectories from a crashed run are still consumable). The format diffs cleanly under git (one tick per line). Canonicalization (sorted keys, no whitespace) makes byte-identity the natural equality.
+
+#### 9.5.6 Adapter invocation contract
+
+`gdmd verify` invokes the project's adapter executable **once per `verify_target`** (and additionally once per negative-control seed, §9.5.7):
+
+```
+<adapter> --target <token-ref> --seed <int> [--trajectory <path>] [--max-steps <int>]
+```
+
+- `--target` — the token ref of the verify_target (e.g. `{loops.combat_turn}`, `{balance_targets.win_rate_neutral_formation}`, or the literal `build_health` axis when no `target:` ref is declared). Adapters use this to decide which simulation to run.
+- `--seed` — the seed declared on the target. For negative-control invocations, `gdmd verify` substitutes each negative-control seed in turn.
+- `--trajectory` — optional path to write the canonical JSONL trajectory to. Supplied by `gdmd verify` whenever the target's `expect:` declares `trajectory:`; absent otherwise.
+- `--max-steps` — optional cap on simulation length. Per-game default; the spec recommends a generous cap so deterministic-but-slow runs don't get prematurely truncated.
+
+The adapter writes:
+
+- **stdout** — a single `VerifyResult` JSON object (§9.5.3). The adapter MAY also include a `trajectory` key inside `results[*].observed` if it wants to convey trajectory metadata (line count, terminal phase, terminal-state hash), but the *authoritative* trajectory is the JSONL file at `--trajectory`.
+- **`<trajectory-path>` if supplied** — canonical JSONL trajectory (§9.5.5).
+- **stderr** — human-readable progress / diagnostics. `verify` does not parse it.
+
+Exit code per §9.5.4. The adapter is *stateless across invocations*: each call handles exactly one target × seed combination. `gdmd verify` aggregates the per-call results into a single `VerifyResult` and computes the overall exit code.
+
+**Why per-target invocation.** Each call is the smallest reproducible unit. A user reproducing a failure runs the same adapter command `verify` would have run, with the same args. The trajectory file is produced where the user can inspect it. There is no batch protocol the adapter has to implement.
+
+#### 9.5.7 Negative-control idiom
+
+A `behavioral_alignment` target whose expectation is "this trajectory matches the golden" is one positive test. Without a paired *negative control*, the test passes vacuously when the adapter ignores the seed entirely (it always produces the same trajectory). Negative control declares one or more alternative seeds the adapter must also run, expecting a *different* outcome.
+
+```yaml
+verify_targets:
+  - axis: behavioral_alignment
+    target: "{loops.combat_turn}"
+    seed: 12345
+    expect:
+      trajectory: { matches_golden: ./tests/golden_seed_12345.jsonl }
+    negative_control:
+      seeds: [99999]
+      expect: { trajectory_diverges_from_primary: true }
+```
+
+`gdmd verify` runs the adapter once with the primary seed (writing the trajectory to a temp path, then comparing to the golden) and once per negative-control seed (writing each to its own temp path). It then asserts that every negative-control trajectory **differs byte-for-byte** from the primary trajectory. If a negative-control trajectory equals the primary, the target fails — the adapter is provably not responding to the seed.
+
+The discipline belongs in the spec, not in each adapter: an adapter that doesn't ship a negative control passes vacuously, and the spec has no leverage to require one. Declaring `negative_control:` in the verify_target makes the discipline first-class and engine-neutral.
+
+**Why byte-identity.** Same reason as cross-engine: structural-vs-byte equivalence is exactly the failure mode the trajectory format exists to eliminate. If two seeds produce structurally-equivalent-but-byte-different trajectories, the trajectory serialization is non-canonical — fix that.
 
 ---
 

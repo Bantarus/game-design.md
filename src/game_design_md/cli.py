@@ -72,8 +72,8 @@ def spec_cmd_entry() -> None:
 
 
 @main.command("verify",
-              help="EXPERIMENTAL (v0.1.1). Invoke a project-supplied adapter "
-                   "and validate its VerifyResult JSON.")
+              help="Invoke a project-supplied adapter once per verify_target "
+                   "and compare trajectories against goldens. See spec §9.5.")
 @click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
                                         path_type=Path))
 @click.option("--adapter", "adapter_name", default="default",
@@ -81,14 +81,20 @@ def spec_cmd_entry() -> None:
 def verify_cmd_entry(path: Path, adapter_name: str) -> None:
     tree = Tree.load(path)
     targets, adapters = verify_cmd.collect_config(tree)
-    adapter = adapters.get(adapter_name)
-    if not adapter:
+    adapter_cmd = adapters.get(adapter_name)
+    if not adapter_cmd:
         raise click.ClickException(
-            f"no adapter '{adapter_name}' declared. verify is experimental in v0.1.1; "
-            f"declare an adapter in gdd/verification.md and supply the executable."
+            f"no adapter '{adapter_name}' declared under `adapters:`. "
+            f"Declare one in gdd/verification.md (or the core file) per spec §9.5.6."
+        )
+    if not targets:
+        raise click.ClickException(
+            "no verify_targets declared. Add at least one target under "
+            "`verify_targets:` in gdd/verification.md."
         )
     try:
-        result = verify_cmd.run_adapter(adapter, tree.root)
+        adapter_path = verify_cmd.resolve_adapter(adapter_cmd, tree.root)
+        result = verify_cmd.run_all(targets, adapter_path, tree.root)
     except verify_cmd.VerifyError as e:
         raise click.ClickException(str(e)) from e
     click.echo(json.dumps(result, indent=2))

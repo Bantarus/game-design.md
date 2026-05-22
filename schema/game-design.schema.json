@@ -207,13 +207,36 @@
       "type": "object",
       "required": ["axis"],
       "properties": {
-        "axis":     { "enum": ["build_health", "behavioral_alignment", "presentation_usability"] },
-        "target":   { "$ref": "#/$defs/TokenRef" },
-        "seed":     { "type": "integer" },
-        "sessions": { "type": "integer", "minimum": 1 },
-        "expect":   { "type": "object" }
+        "axis":             { "enum": ["build_health", "behavioral_alignment", "presentation_usability"] },
+        "target":           { "$ref": "#/$defs/TokenRef" },
+        "seed":             { "type": "integer" },
+        "sessions":         { "type": "integer", "minimum": 1 },
+        "expect":           { "type": "object" },
+        "negative_control": { "$ref": "#/$defs/NegativeControl" }
       },
       "additionalProperties": false
+    },
+
+    "NegativeControl": {
+      "description": "Spec §9.5.7. Declares one or more alternative seeds the adapter must also run; verify asserts each negative-control trajectory differs byte-for-byte from the primary.",
+      "type": "object",
+      "required": ["seeds", "expect"],
+      "properties": {
+        "seeds":  { "type": "array", "items": { "type": "integer" }, "minItems": 1 },
+        "expect": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+
+    "TrajectorySpec": {
+      "description": "Spec §9.5.5. Per-game canonical trajectory declaration. The schema body is advisory at v0.2.0-alpha and ratchets to JSON Schema validation in v0.3; trajectory equality is checked byte-for-byte against the golden fixture.",
+      "type": "object",
+      "required": ["unit"],
+      "properties": {
+        "unit":   { "type": "string", "minLength": 1 },
+        "schema": { "type": "object" }
+      },
+      "additionalProperties": true
     },
 
     "VerifyResult": {
@@ -532,6 +555,7 @@
           "type": "object",
           "additionalProperties": { "oneOf": [{ "type": "string" }, { "type": "null" }] }
         },
+        "trajectory":  { "$ref": "#/$defs/TrajectorySpec" },
 
         "pillars":     { "type": "array", "items": { "type": "string" } },
         "non_goals":   { "type": "array", "items": { "type": "string" } }

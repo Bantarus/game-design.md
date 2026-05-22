@@ -185,3 +185,64 @@ impl Side {
         }
     }
 }
+
+impl TickSnapshot {
+    /// Canonical JSONL serialization per spec §9.5.5.
+    ///
+    /// One JSON object per tick; keys sorted alphabetically; no extra
+    /// whitespace; integer values; lowercase enum strings drawn from the
+    /// closed set declared in `gdd/verification.md::trajectory.schema`.
+    /// `units` is already sorted by (side, deploy_order) by `snapshot()`,
+    /// so the iteration order matches the canonical sort.
+    ///
+    /// The output is a single line (no trailing newline). Callers append
+    /// `\n` to write the file. Phase 4's Unreal Blueprint adapter MUST
+    /// produce byte-identical output for the same `gdd/` tree and seed —
+    /// this is the D-009 cross-engine integer-trajectory bar.
+    pub fn to_canonical_jsonl(&self) -> String {
+        let units_json: Vec<String> = self
+            .units
+            .iter()
+            .map(|u| {
+                format!(
+                    r#"{{"deploy_order":{},"hp":{},"id":"{}","lifecycle":"{}","side":"{}"}}"#,
+                    u.deploy_order,
+                    u.hp,
+                    u.id,
+                    lifecycle_canonical(u.lifecycle),
+                    side_canonical(u.side),
+                )
+            })
+            .collect();
+        format!(
+            r#"{{"gold":{},"phase":"{}","tick":{},"units":[{}]}}"#,
+            self.gold,
+            phase_canonical(self.phase),
+            self.tick,
+            units_json.join(","),
+        )
+    }
+}
+
+fn phase_canonical(p: SnapshotPhase) -> &'static str {
+    match p {
+        SnapshotPhase::Setup => "setup",
+        SnapshotPhase::Ticking => "ticking",
+        SnapshotPhase::Resolved => "resolved",
+    }
+}
+
+fn side_canonical(s: Side) -> &'static str {
+    match s {
+        Side::Player => "player",
+        Side::Enemy => "enemy",
+    }
+}
+
+fn lifecycle_canonical(l: UnitLifecycle) -> &'static str {
+    match l {
+        UnitLifecycle::Alive => "alive",
+        UnitLifecycle::Stunned => "stunned",
+        UnitLifecycle::Dead => "dead",
+    }
+}
