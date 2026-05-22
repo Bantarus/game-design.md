@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
@@ -87,12 +87,31 @@ states:
       - { id: unconscious }
       - { id: dead, terminal: true }
     transitions:
-      - { from: alive,       event: hp_below_half, to: wounded }
-      - { from: wounded,     event: hp_zero,       to: unconscious }
-      - { from: unconscious, event: revive,        to: alive,       side_effects: ["restore hp to 1"] }
-      - { from: unconscious, event: counted_out,   to: dead }
-      - { from: alive,       event: instant_kill,  to: dead }
-      - { from: wounded,     event: heal_above_half, to: alive }
+      - { from: alive,       event: "{events.hp_below_half}",   to: wounded }
+      - { from: wounded,     event: "{events.hp_zero}",         to: unconscious }
+      - { from: unconscious, event: "{events.revive}",          to: alive,       side_effects: ["restore hp to 1"] }
+      - { from: unconscious, event: "{events.counted_out}",     to: dead }
+      - { from: alive,       event: "{events.instant_kill}",    to: dead }
+      - { from: wounded,     event: "{events.heal_above_half}", to: alive }
+events:
+  hp_below_half:
+    status: draft
+    description: "A character's hp drops to 50% or below of their max."
+  hp_zero:
+    status: draft
+    description: "A wounded character's hp reaches 0; they fall unconscious."
+  revive:
+    status: draft
+    description: "An unconscious character is healed back to consciousness with hp = 1."
+  counted_out:
+    status: draft
+    description: "An unconscious character remains down for three rounds without revival; permadeath."
+  instant_kill:
+    status: draft
+    description: "An alive character takes lethal damage that bypasses the wounded/unconscious stages."
+  heal_above_half:
+    status: draft
+    description: "A wounded character's hp is restored above 50% of max; they return to alive."
 rules:
   action_resolution:
     given:

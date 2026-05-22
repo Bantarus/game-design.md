@@ -28,51 +28,52 @@ The rule's *intended* severity is `error`: an entity claiming `status: prototype
 
 ---
 
-## D-003 — Composite `balance_targets.*` is permissive in v0.1.1
+## D-003 — Typed `target_kind:` vocabulary shipped at v0.2.0-alpha
 
-- **Status:** locked for v0.1.1, ratchets to **typed vocabulary** in v0.2.
-- **Decided:** 2026-05-21.
+- **Status:** shipped at v0.2.0-alpha. Lint rule `balance-target-untyped` is **warning** through v0.2; **ratchets to error in v0.3** once the migration window closes.
+- **Decided:** 2026-05-21; landed 2026-05-22.
 - **Spec:** §4.9; `$defs.BalanceTarget` in `schema/game-design.schema.json`.
+- **Implementation:** `src/game_design_md/linter.py::rule_balance_target_untyped`; tests at `tests/test_lint.py::test_balance_target_untyped_warning` and `test_balance_target_typed_is_silent`.
 
-The schema's `BalanceTarget.target` is permissive (`{ }` — accept any JSON value) so that composites like `cards_per_rarity: { common: 110, uncommon: 80, rare: 30 }` can be authored today. This means:
+`BalanceTarget` is now a discriminated union over `target_kind:`:
 
-- `lint` cannot statically verify that the value type is comparable against `tolerance`.
-- `gdmd diff` can detect changes in composite targets but cannot detect *regressions* (the "moved outside tolerance" check is meaningless for composites in v0.1.1).
-- `gdmd verify`'s `behavioral_alignment` axis cannot meaningfully validate composite targets — the adapter has to special-case each one in project code.
+- `scalar` — number or string + 2-array `tolerance: [low, high]` (this is the v0.1.1 shape, just newly tagged).
+- `range` — the target *is* a band; one of `{ between: [lo, hi] }` or `{ near: v, tolerance: t }`. No separate `tolerance:` field.
+- `distribution_over_categories` — composite map; `target` and `tolerance` are both `{ <category>: <value>, ... }`.
 
-**Ratchet plan in v0.2:** introduce a typed `target_kind:` discriminator on `BalanceTarget`, with three v0.2 values:
+Migration: the four examples are migrated; the deckbuilder demonstrates all three kinds (5× scalar, 1× range, 1× distribution_over_categories). A new `verify_target` at `examples/deckbuilder/gdd/verification.md` exercises the composite shape against an adapter contract.
 
-- `scalar` — single number/string + scalar tolerance. The current default.
-- `range` — explicit `{ low, high }` with a tolerance band on each.
-- `distribution_over_categories` — composite like `cards_per_rarity`; tolerance is per-category.
-
-Once the discriminator exists, `lint` enforces per-kind shape, `diff` enforces per-kind regression detection, and `verify`'s contract on `expect:` shorthands (`{ between, near, equals }`) extends naturally.
+**v0.3 ratchet:** `balance-target-untyped` becomes `error`; `target_kind` becomes structurally required by the loader (a tree without it fails to load instead of merely linting at warning). Schema is already strict — only the lint rule's severity is the soft path.
 
 ---
 
-## D-005 — Transition events stay strings (not tokens) in v0.1.1
+## D-005 — Events promoted to first-class tokens at v0.2.0-alpha
 
-- **Status:** locked for v0.1.1; revisit in v0.2 once verb/event topology is mature.
-- **Decided:** 2026-05-21.
-- **Spec:** §4.4; `state-machine-coverage` `undefined-event` sub-finding.
+- **Status:** shipped at v0.2.0-alpha. `undefined-event` sub-finding is **warning** through v0.2; **ratchets to error in v0.3**.
+- **Decided:** 2026-05-21; landed 2026-05-22.
+- **Spec:** §3 (namespace ownership table), §4.4 (`events` namespace + transition syntax), §9.1 (`state-machine-coverage` row updated).
+- **Implementation:** `src/game_design_md/tree.py::SUBFILE_NAMESPACES` (events added), `src/game_design_md/linter.py::rule_state_machine_coverage` (undefined-event sub-finding) + `rule_orphaned_entity` (events in the checked set); `$defs.Event` in `schema/game-design.schema.json`; tests at `tests/test_lint.py::test_undefined_event_on_bare_string`, `test_token_event_is_silent`, `test_broken_event_ref_is_error`, `test_orphaned_event_is_warning`.
 
-A `states.<machine>.transitions[*].event` value is a free-form string identifier — `event: draw`, not `event: "{events.draw}"`. The deeper question is whether transition events should be first-class tokens with their own namespace (`{events.draw}`), which would let `lint` cross-check that every event a state machine reacts to is *produced* somewhere (by a verb's `effects`, by a rule's `outputs`, by an external input). That cross-check is the substance of the deferred `undefined-event` sub-finding under `state-machine-coverage`.
+Transition `event:` values are now `{events.<id>}` token references. Events live in their own namespace, owned by `gdd/mechanics.md`. Three lint behaviors follow:
 
-**Why deferred at v0.1.1:** the existing verb/rule shapes don't have a normative "this event is emitted" field, so the cross-check would either fire vacuously or generate noisy false-positives. Adding the namespace prematurely locks in a vocabulary that may not match the v0.2 verb model.
+- A `{events.<id>}` reference that doesn't resolve fires `broken-ref` at **error** (the existing rule, naturally extended).
+- A bare-string `event:` (the v0.1.1 legacy shape) fires `state-machine-coverage` sub-finding `undefined-event` at **warning** — the migration backstop.
+- An event defined but referenced by no transition joins `orphaned-entity` at **warning**.
 
-**Ratchet plan in v0.2:** introduce an `events` namespace + `{events.<id>}` syntax; have verb `effects` and rule `outputs` enumerate emitted events; promote `undefined-event` to a real cross-reference check that resolves through that vocabulary. This also unifies with the `verify` adapter's behavioral-alignment observations.
+The deeper cross-check the v0.1.1 deferral worried about — "every event a state reacts to must be *emitted* somewhere by a verb's effects or rule's outputs" — remains deferred. The v0.1.1 verb/rule shapes still don't have a normative "emits" field, so adding it now would still be premature. We picked the shape that's useful immediately (typed token tracking + orphan detection) and left the verb→event production cross-check for v0.3 once a real implementation (Phase 2 onwards) exercises which fields the engines actually need.
+
+**v0.3 ratchet:** `undefined-event` becomes `error`; schema requires `event:` to match the `{events.<id>}` TokenRef pattern (currently it accepts any string for the migration window). Optionally, introduce an `emits:` field on `verbs` and `rules` and add the v0.1.1-deferred event-production cross-check then.
 
 ---
 
-## D-006 — Packaging via `importlib.resources` at v0.2
+## D-006 — Packaging via `importlib.resources` shipped at v0.2.0-alpha
 
-- **Status:** v0.1.1 ships dev-install-only; v0.2 must work from a wheel.
-- **Decided:** 2026-05-21.
-- **Implementation:** `src/game_design_md/spec_cmd.py`, `src/game_design_md/export_cmd.py`.
+- **Status:** shipped at v0.2.0-alpha. Wheel installs now read packaged data; editable dev installs fall back to the canonical source paths.
+- **Decided:** 2026-05-21; landed 2026-05-22.
+- **Implementation:** `src/game_design_md/spec_cmd.py::spec_text` and `src/game_design_md/export_cmd.py::export_schema` both try `importlib.resources.files(game_design_md).joinpath("_data/...")` first, then fall back to the dev tree at `Path(__file__).parents[2..3]`. `pyproject.toml` uses Hatchling's `[tool.hatch.build.targets.wheel.force-include]` to copy `docs/spec.md` and `schema/game-design.schema.json` into the wheel at `game_design_md/_data/`. There is no source duplication: the canonical files live exactly where they always did.
+- **Smoke test:** `tests/test_packaging.py::test_wheel_install_bundles_spec_and_schema` builds a wheel, installs it in a fresh venv, runs `gdmd spec` and `gdmd export ... --format schema` from a directory outside the source tree (so the dev-tree fallback cannot match), and asserts both produce content matching the canonical files. Skipped if `build` isn't installed.
 
-`gdmd spec` and `gdmd export --format schema` currently locate `docs/spec.md` and `schema/game-design.schema.json` via `Path(__file__).resolve().parents[2]`. This works for `pip install -e .` from the repo root (the editable install we use today) but breaks for a real wheel install where the source files live outside the package directory.
-
-**Ratchet plan in v0.2:** package both files as `game_design_md/_data/` package data, read via `importlib.resources.files(game_design_md).joinpath("_data/spec.md")`. Update `pyproject.toml` `[tool.hatch.build]` to include them. Same change applies if/when we publish to PyPI.
+**No further ratchet planned.** This is the long-term packaging story.
 
 ---
 
@@ -91,3 +92,4 @@ A `states.<machine>.transitions[*].event` value is a free-form string identifier
 This makes `event:` (D-001) belt-and-suspenders instead of load-bearing: even if a future author writes `on:`, the loader keeps it as a string. We still recommend `event:` for clarity, and the schema still rejects `on:` to keep authors honest.
 
 **No ratchet needed.** This is the long-term loader.
+

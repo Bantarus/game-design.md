@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
@@ -86,10 +86,10 @@ states:
       - { id: stunned }
       - { id: dead, terminal: true }
     transitions:
-      - { from: alive,   event: stun,    to: stunned }
-      - { from: stunned, event: recover, to: alive }
-      - { from: alive,   event: hp_zero, to: dead }
-      - { from: stunned, event: hp_zero, to: dead }
+      - { from: alive,   event: "{events.stun}",    to: stunned }
+      - { from: stunned, event: "{events.recover}", to: alive }
+      - { from: alive,   event: "{events.hp_zero}", to: dead }
+      - { from: stunned, event: "{events.hp_zero}", to: dead }
   combat_phase:
     initial: setup
     nodes:
@@ -97,8 +97,24 @@ states:
       - { id: ticking }
       - { id: resolved, terminal: true }
     transitions:
-      - { from: setup,   event: start_combat,    to: ticking }
-      - { from: ticking, event: one_side_cleared, to: resolved }
+      - { from: setup,   event: "{events.start_combat}",     to: ticking }
+      - { from: ticking, event: "{events.one_side_cleared}", to: resolved }
+events:
+  stun:
+    status: draft
+    description: "A status effect is applied that prevents the unit from acting on its tick."
+  recover:
+    status: draft
+    description: "A stunned unit's stun duration expires at the start of its tick."
+  hp_zero:
+    status: draft
+    description: "A unit's hp reaches 0 from any damage source; emitted by {rules.tick_resolution}."
+  start_combat:
+    status: draft
+    description: "The player commits the formation and combat begins; emitted by {verbs.start_combat}."
+  one_side_cleared:
+    status: draft
+    description: "All units on one side enter the {states.unit_lifecycle.dead} terminal node."
 rules:
   tick_resolution:
     given:

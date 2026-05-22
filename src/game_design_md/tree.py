@@ -14,10 +14,12 @@ from typing import Any
 
 from . import loader
 
-# The 10 value-bearing namespaces a subfile may declare in its frontmatter.
+# The value-bearing namespaces a subfile may declare in its frontmatter.
+# `events` (D-005) joined the surface at v0.2.0-alpha: every state-machine
+# transition's `event:` value resolves to a {events.<id>} token.
 SUBFILE_NAMESPACES = (
     "entities", "verbs", "resources", "states", "rules", "loops",
-    "distributions", "feel", "balance_targets", "invariants",
+    "distributions", "feel", "balance_targets", "invariants", "events",
 )
 
 

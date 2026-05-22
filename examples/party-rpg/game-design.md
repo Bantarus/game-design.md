@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: core
 name: "Hollow Hold"
 short_pitch: "A 30-minute four-party dungeon descent where loot pity floors keep every run honest."

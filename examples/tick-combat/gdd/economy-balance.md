@@ -1,27 +1,31 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
 implemented_in: []
 balance_targets:
   median_ticks_per_combat:
+    target_kind: scalar
     target: 120
     tolerance: [80, 200]
     measure: "median tick count from start_combat to resolved, over 1000 monte-carlo encounters"
     status: draft
   average_team_dps:
+    target_kind: scalar
     target: 8.0
     tolerance: [6.0, 10.0]
     measure: "average damage per tick across a balanced 5-unit roster"
     status: draft
   gold_per_encounter:
+    target_kind: scalar
     target: 14
     tolerance: [10, 20]
     measure: "expected gold reward from one encounter, weighted across difficulty"
     status: draft
   win_rate_neutral_formation:
+    target_kind: scalar
     target: 0.5
     tolerance: [0.45, 0.55]
     measure: "win rate of the canonical neutral formation against the canonical neutral opponent over 1000 runs"
@@ -30,7 +34,7 @@ balance_targets:
 
 ## Tokens
 
-Four balance targets. Each is referenced from at least one loop, resource, or verify target — otherwise `orphaned-entity` would fire.
+Four balance targets, all `target_kind: scalar`. Each is referenced from at least one loop, resource, or verify target — otherwise `orphaned-entity` would fire.
 
 ## Rationale
 

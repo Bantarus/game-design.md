@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "game-design-md"
-version = "0.1.0"
+version = "0.2.0a1"
 description = "An LLM-first, engine-neutral, genre-agnostic specification for game design documents. Modeled on Google Labs' DESIGN.md."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -46,9 +46,13 @@ Specification = "https://github.com/bantarus/game-design.md/blob/main/docs/spec.
 [tool.hatch.build.targets.wheel]
 packages = ["src/game_design_md"]
 
-[tool.hatch.build.targets.wheel.shared-data]
-"schema" = "share/game-design-md/schema"
-"docs/spec.md" = "share/game-design-md/spec.md"
+# D-006: ship spec.md and the JSON Schema as package data so a wheel install
+# can read them via importlib.resources. The canonical files live at
+# docs/spec.md and schema/game-design.schema.json; force-include copies them
+# into the wheel at game_design_md/_data/.
+[tool.hatch.build.targets.wheel.force-include]
+"docs/spec.md" = "game_design_md/_data/spec.md"
+"schema/game-design.schema.json" = "game_design_md/_data/game-design.schema.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

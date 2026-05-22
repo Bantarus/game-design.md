@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: content-schema
 status: draft
 last_verified: "2026-05-21"
@@ -42,7 +42,7 @@ The canonical enemy is `content/enemies/kindling_imp.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: content-entity
 id: kindling_imp
 status: draft

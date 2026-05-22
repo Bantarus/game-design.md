@@ -1,32 +1,37 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
 implemented_in: []
 balance_targets:
   median_battle_turns:
+    target_kind: scalar
     target: 12
     tolerance: [8, 18]
     measure: "median turns from start_battle to claim_loot, over 1000 monte-carlo descents"
     status: draft
   win_rate_neutral_party:
+    target_kind: scalar
     target: 0.65
     tolerance: [0.55, 0.75]
     measure: "win rate of the canonical four-character party over 1000 quests at Normal difficulty"
     status: draft
   gold_per_quest:
+    target_kind: scalar
     target: 800
     tolerance: [600, 1100]
     measure: "expected gold from one full descent at Normal difficulty"
     status: draft
   legendary_drops_per_quest:
+    target_kind: scalar
     target: 0.4
     tolerance: [0.2, 0.6]
     measure: "expected number of legendary-rarity items per descent, accounting for pity"
     status: draft
   average_quest_length:
+    target_kind: scalar
     target: "25 min"
     tolerance: ["18 min", "35 min"]
     measure: "median wall-clock time of one full descent, Normal difficulty"
@@ -35,7 +40,7 @@ balance_targets:
 
 ## Tokens
 
-Five balance targets. `legendary_drops_per_quest` is the pity-floor verification target.
+Five balance targets, all `target_kind: scalar`. `legendary_drops_per_quest` is the pity-floor verification target.
 
 ## Rationale
 

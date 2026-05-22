@@ -1,27 +1,31 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
 implemented_in: []
 balance_targets:
   win_rate_archetype_neutral:
+    target_kind: scalar
     target: 0.5
     tolerance: [0.45, 0.55]
     measure: "win rate of each of the four archetypes over 1000 matches against every other archetype"
     status: draft
   average_match_duration:
+    target_kind: scalar
     target: "20 min"
     tolerance: ["14 min", "28 min"]
     measure: "median wall-clock of a best-of-three match"
     status: draft
   average_game_turns:
+    target_kind: scalar
     target: 8
     tolerance: [5, 12]
     measure: "median number of turns per game"
     status: draft
   mana_per_turn:
+    target_kind: scalar
     target: 4
     tolerance: [3, 5]
     measure: "average mana available per turn after the curve ramps from 1 to 10"
@@ -30,7 +34,7 @@ balance_targets:
 
 ## Tokens
 
-Four balance targets. `win_rate_archetype_neutral` is the keystone — the matchup matrix asymmetry.
+Four balance targets, all `target_kind: scalar`. `win_rate_archetype_neutral` is the keystone — the matchup matrix asymmetry.
 
 ## Rationale
 

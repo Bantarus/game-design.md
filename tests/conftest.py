@@ -107,10 +107,10 @@ The only loop is `{loops.main}`.
     "gdd/mechanics.md": """\
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: prototyped
-last_verified: "2026-05-21"
+last_verified: "2026-05-22"
 entities:
   player:
     type: actor
@@ -147,7 +147,11 @@ states:
       - { id: a }
       - { id: b, terminal: true }
     transitions:
-      - { from: a, event: go, to: b }
+      - { from: a, event: "{events.go}", to: b }
+events:
+  go:
+    status: prototyped
+    description: "Baseline test event used by thing_state's a → b transition."
 rules:
   do_thing_rule:
     given:
@@ -203,12 +207,13 @@ distributions:
     "gdd/economy-balance.md": """\
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: prototyped
-last_verified: "2026-05-21"
+last_verified: "2026-05-22"
 balance_targets:
   energy_target:
+    target_kind: scalar
     target: 1
     tolerance: [1, 1]
     measure: "fixed"

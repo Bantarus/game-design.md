@@ -234,6 +234,28 @@ def rule_state_machine_coverage(tree: Tree) -> list[Finding]:
                                  f"outgoing transition"),
                     ))
 
+            # D-005: undefined-event — transition `event:` values must be
+            # {events.<id>} token refs. Bare strings are the v0.1.1 legacy
+            # shape; flag them as warnings during the migration window. (A
+            # {events.<id>} ref that does NOT resolve is already an error via
+            # broken-ref.)
+            for i, t in enumerate(transitions):
+                if not isinstance(t, dict):
+                    continue
+                ev = t.get("event")
+                if not isinstance(ev, str):
+                    continue
+                m = re.match(r"^\{(events\.[a-z0-9_][a-z0-9_-]*)\}$", ev)
+                if m is None:
+                    findings.append(Finding(
+                        rule="state-machine-coverage", severity="warning",
+                        file=pf.rel_str,
+                        location=f"{loc_base}.transitions[{i}].event",
+                        message=(f"undefined-event: event={ev!r} is a bare "
+                                 f"string; promote to a {{events.<id>}} token "
+                                 f"reference. Ratchets to error in v0.3."),
+                    ))
+
             reachable = {initial}
             frontier = [initial]
             while frontier:
@@ -309,7 +331,7 @@ def rule_orphaned_entity(tree: Tree) -> list[Finding]:
     # Verbs are covered by unreferenced-verb (stricter check); invariants and
     # pillars are not value-referenced by design. Everything else gets checked.
     checked = ("entities", "resources", "states", "rules", "loops",
-               "distributions", "feel", "balance_targets")
+               "distributions", "feel", "balance_targets", "events")
     for ns in checked:
         for token, (pf, value) in tree.tokens.get(ns, {}).items():
             if ns == "entities" and token.count(".") > 1:
@@ -454,6 +476,34 @@ def rule_stale_section(tree: Tree) -> list[Finding]:
     return findings
 
 
+def rule_balance_target_untyped(tree: Tree) -> list[Finding]:
+    """D-003: every `balance_targets.<id>` must declare `target_kind:`.
+
+    Legacy v0.1.1 targets without a `target_kind` field are accepted with a
+    warning. Ratchets to error in v0.3 once the deferral window closes.
+    """
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        targets = pf.frontmatter.get("balance_targets")
+        if not isinstance(targets, dict):
+            continue
+        for name, target in targets.items():
+            if not isinstance(target, dict):
+                continue
+            if "target_kind" not in target:
+                findings.append(Finding(
+                    rule="balance-target-untyped", severity="warning",
+                    file=pf.rel_str,
+                    location=f"balance_targets.{name}",
+                    message=(f"balance target '{name}' is missing target_kind: "
+                             f"(one of scalar | range | distribution_over_categories). "
+                             f"Permissive shape deprecated; ratchets to error in v0.3."),
+                ))
+    return findings
+
+
 def rule_invariant_violation(tree: Tree) -> list[Finding]:
     findings: list[Finding] = []
     for pf in tree.files:
@@ -527,6 +577,7 @@ ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
     rule_unreferenced_verb,
     rule_broken_implementation_pointer,
     rule_stale_section,
+    rule_balance_target_untyped,
     rule_invariant_violation,
 ]
 

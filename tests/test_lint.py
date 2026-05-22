@@ -115,8 +115,8 @@ def test_missing_initial(make_tree):
 
 def test_undeclared_destination(make_tree):
     bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
-        "{ from: a, event: go, to: b }",
-        "{ from: a, event: go, to: not_a_node }",
+        'event: "{events.go}", to: b',
+        'event: "{events.go}", to: not_a_node',
     )
     root = make_tree({"gdd/mechanics.md": bad})
     res = _lint(root)
@@ -153,6 +153,85 @@ def test_invariant_violation_numeric(fixture_overlay):
     findings = [f for f in res.findings if f.rule == "invariant-violation"]
     assert any("not an integer" in f.message for f in findings)
     assert res.exit_code == 1
+
+
+# ---- balance-target-untyped (D-003) ------------------------------------------
+
+def test_balance_target_untyped_warning(make_tree):
+    """A legacy v0.1.1 balance target without target_kind fires the migration warning."""
+    bal = (make_tree() / "gdd/economy-balance.md").read_text().replace(
+        "target_kind: scalar\n    target: 1",
+        "target: 1",
+    )
+    root = make_tree({"gdd/economy-balance.md": bal})
+    res = _lint(root)
+    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
+    assert findings, "expected balance-target-untyped on the legacy target"
+    assert all(f.severity == "warning" for f in findings)
+    # Warnings don't affect exit code.
+    assert res.errors == 0
+
+
+def test_balance_target_typed_is_silent(make_tree):
+    """A target with target_kind: scalar does NOT fire balance-target-untyped."""
+    res = _lint(make_tree())  # baseline already declares target_kind
+    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
+    assert findings == []
+
+
+# ---- undefined-event (D-005) -------------------------------------------------
+
+def test_undefined_event_on_bare_string(fixture_overlay):
+    """The deliberately-broken undefined_event fixture has event: go (bare).
+    state-machine-coverage should fire undefined-event at warning severity."""
+    res = _lint(fixture_overlay("undefined_event"))
+    sm_findings = [f for f in res.findings if f.rule == "state-machine-coverage"]
+    ue_findings = [f for f in sm_findings if "undefined-event" in f.message]
+    assert ue_findings, (
+        "expected undefined-event sub-finding on bare-string transition event; got: "
+        + ", ".join(f.message for f in sm_findings)
+    )
+    assert all(f.severity == "warning" for f in ue_findings)
+
+
+def test_token_event_is_silent(make_tree):
+    """The baseline uses event: \"{events.go}\" — no undefined-event finding."""
+    res = _lint(make_tree())
+    findings = [f for f in res.findings
+                if f.rule == "state-machine-coverage" and "undefined-event" in f.message]
+    assert findings == []
+
+
+def test_broken_event_ref_is_error(make_tree):
+    """{events.missing} where events.missing isn't declared → broken-ref error."""
+    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        '"{events.go}"', '"{events.missing}"'
+    )
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    assert any(f.rule == "broken-ref" and "events.missing" in f.message
+               for f in res.findings)
+    assert res.exit_code == 1
+
+
+def test_orphaned_event_is_warning(make_tree):
+    """An event declared but referenced by no transition → orphaned-entity warning."""
+    bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        'events:\n  go:\n    status: prototyped\n'
+        '    description: "Baseline test event used by thing_state\'s a → b transition."',
+        'events:\n  go:\n    status: prototyped\n'
+        '    description: "Used by the a → b transition."\n'
+        '  unused_event:\n    status: prototyped\n'
+        '    description: "Declared but never referenced."',
+    )
+    root = make_tree({"gdd/mechanics.md": bad})
+    res = _lint(root)
+    assert any(f.rule == "orphaned-entity"
+               and f.location == "events.unused_event"
+               for f in res.findings), (
+        "expected orphaned-entity at events.unused_event; got: "
+        + ", ".join(f"{f.rule}:{f.location}" for f in res.findings)
+    )
 
 
 # ---- broken-implementation-pointer (warning at v0.1.1) ------------------------

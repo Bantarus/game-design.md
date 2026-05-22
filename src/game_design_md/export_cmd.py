@@ -2,30 +2,40 @@
 from __future__ import annotations
 
 import json
+from importlib import resources as ir
 from pathlib import Path
 from typing import Any
 
 from .tree import SUBFILE_NAMESPACES, Tree
 
-# Possible locations of schema/game-design.schema.json: editable install,
-# wheel install via shared-data, or co-located dev tree.
-def _find_schema() -> Path:
+
+def _read_packaged_schema() -> str | None:
+    """Read the JSON Schema from packaged data (wheel installs)."""
+    try:
+        res = ir.files("game_design_md").joinpath("_data/game-design.schema.json")
+        if res.is_file():
+            return res.read_text(encoding="utf-8")
+    except (FileNotFoundError, ModuleNotFoundError, OSError):
+        pass
+    return None
+
+
+def _read_dev_tree_schema() -> str:
     here = Path(__file__).resolve()
-    candidates = [
-        here.parents[2] / "schema" / "game-design.schema.json",   # editable/dev
-        here.parents[3] / "schema" / "game-design.schema.json",   # parent dir
-    ]
-    for p in candidates:
-        if p.is_file():
-            return p
+    for candidate in (
+        here.parents[2] / "schema" / "game-design.schema.json",
+        here.parents[3] / "schema" / "game-design.schema.json",
+    ):
+        if candidate.is_file():
+            return candidate.read_text(encoding="utf-8")
     raise FileNotFoundError(
-        "schema/game-design.schema.json not found near "
+        "schema/game-design.schema.json not found in package data or near "
         + str(here.parents[2])
     )
 
 
 def export_schema() -> str:
-    return _find_schema().read_text(encoding="utf-8")
+    return _read_packaged_schema() or _read_dev_tree_schema()
 
 
 def export_tokens(tree: Tree) -> str:

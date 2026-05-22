@@ -1,9 +1,9 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
-last_verified: "2026-05-21"
+last_verified: "2026-05-22"
 verify_targets:
   - axis: behavioral_alignment
     target: "{balance_targets.win_rate_ascension_0}"
@@ -14,6 +14,13 @@ verify_targets:
     seed: 12345
     expect:
       median_turns_per_combat: { between: [4, 8] }
+  - axis: behavioral_alignment
+    target: "{balance_targets.cards_per_rarity}"
+    expect:
+      cards_per_rarity:
+        common:   { near: 110, tolerance: 10 }
+        uncommon: { near: 80,  tolerance: 10 }
+        rare:     { near: 30,  tolerance: 5 }
   - axis: build_health
     expect: { builds: true, unresolved_refs: 0 }
 adapters:
@@ -23,7 +30,7 @@ adapters:
 
 ## Tokens
 
-Three `verify_targets`, one for each of `build_health` and `behavioral_alignment` (twice). No `presentation_usability` target — `adapters.presentation: null` skips that axis (per spec §9.5.1, the absence is not a failure).
+Four `verify_targets`: three `behavioral_alignment` and one `build_health`. No `presentation_usability` target — `adapters.presentation: null` skips that axis (per spec §9.5.1, the absence is not a failure). The third behavioral target exercises a `target_kind: distribution_over_categories` balance target — the adapter must match observed counts per-category against per-category tolerances, not against a single scalar.
 
 ## Rationale
 

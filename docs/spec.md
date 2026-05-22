@@ -1,14 +1,14 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 status: draft
-last_updated: 2026-05-21
+last_updated: 2026-05-22
 license: Apache-2.0
 ---
 
 # The `game-design.md` Specification
 
-> **Status: draft / alpha (v0.1.1).** Expect the format to change as it matures. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **Status: draft / alpha (v0.2.0-alpha).** Expect the format to change as it matures. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is a plain-text, LLM-first, engine-neutral, genre-agnostic standard for describing a video game to an AI coding agent as a living source of truth. A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). The primary reader is an AI coding agent; a human is the second reader.
 
@@ -148,6 +148,7 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 | `verbs` | `gdd/mechanics.md` |
 | `resources` | `gdd/mechanics.md` |
 | `states` | `gdd/mechanics.md` |
+| `events` | `gdd/mechanics.md` |
 | `rules` | `gdd/mechanics.md` or a `gdd/systems/*.md` |
 | `loops` | `gdd/loops.md` |
 | `distributions` | `gdd/systems/distributions.md` |
@@ -238,7 +239,7 @@ resources:
 
 **Required keys per resource:** `scope` (`per_turn | per_run | permanent`), `min`, `max`, `visibility` (`hud | inferred | hidden`), `status`, `implemented_in`. `velocity_target` is optional but strongly recommended for balance-sensitive resources; if present, it must reference a `balance_targets.*`.
 
-### 4.4 `states`
+### 4.4 `states` and `events`
 
 Named finite-state *machines* on entities or on the game. Each `states` entry is a named machine with an explicit `initial` node, an explicit set of `nodes` (each optionally `terminal`), and an explicit set of `transitions`. **Totality is checkable**: every non-terminal node must have at least one outgoing transition — see `state-machine-coverage` in §9.1.
 
@@ -254,14 +255,32 @@ states:
       - id: exhausted
         terminal: true                # absorbing; exempt from the dead-end check
     transitions:
-      - { from: in_deck,    event: draw,        to: in_hand }
-      - { from: in_hand,    event: play_card,   to: in_play,   side_effects: ["{resources.energy} -= cost"] }
-      - { from: in_play,    event: resolve,     to: in_discard }
-      - { from: in_hand,    event: exhaust,     to: exhausted }
-      - { from: in_discard, event: reshuffle,   to: in_deck }
+      - { from: in_deck,    event: "{events.draw}",      to: in_hand }
+      - { from: in_hand,    event: "{events.play_card}", to: in_play,   side_effects: ["{resources.energy} -= cost"] }
+      - { from: in_play,    event: "{events.resolve}",   to: in_discard }
+      - { from: in_hand,    event: "{events.exhaust}",   to: exhausted }
+      - { from: in_discard, event: "{events.reshuffle}", to: in_deck }
+events:
+  draw:
+    status: draft
+    description: "A card moves from in_deck to in_hand; emitted by {verbs.draw_cards}."
+  play_card:
+    status: draft
+    description: "A card moves from in_hand to in_play; emitted by {verbs.play_card}."
+  resolve:        { status: draft, description: "A card finishes its in_play effects." }
+  exhaust:        { status: draft, description: "A one-shot card moves to the exhausted terminal node." }
+  reshuffle:      { status: draft, description: "discard pile is shuffled back into in_deck." }
 ```
 
-**Required keys per machine:** `initial` (id of starting node), `nodes` (array of `{ id, terminal? }` — at least one), `transitions` (array of `{ from, event, to, side_effects? }`). `side_effects` is an array of prose-readable strings that may contain `{token.path}` references but is not normatively interpreted by `lint` in v0.1.
+**Required keys per machine:** `initial` (id of starting node), `nodes` (array of `{ id, terminal? }` — at least one), `transitions` (array of `{ from, event, to, side_effects? }`). `side_effects` is an array of prose-readable strings that may contain `{token.path}` references but is not normatively interpreted by `lint`.
+
+**Required keys per event (v0.2.0-alpha):** `status` (from the §8.1 lifecycle). `implemented_in:` (array of globs) is required for `status >= prototyped` and is the hook for declaring where the event is *emitted* in code. `description:` (string) is recommended — explain what the event means and which verb/rule emits it.
+
+**Events as first-class tokens (D-005 ratchet at v0.2).** Every `transitions[*].event` value is a `{events.<id>}` reference — events live in their own namespace, owned by `gdd/mechanics.md`. Bare-string events (v0.1.1 legacy) fire `state-machine-coverage` sub-finding `undefined-event` at severity warning; they ratchet to error in v0.3 once the migration window closes. Three further linter behaviors follow from events being tokens:
+
+- An `{events.<id>}` reference that does not resolve fires `broken-ref` at error.
+- An event defined but referenced by no transition fires `orphaned-entity` at warning (events join the standard orphan check).
+- A `transitions[*].event` value that *is* a bare string is the `undefined-event` warning above.
 
 > **Why `event:` and not `on:`.** YAML 1.1 — still the default behavior in most loaders, including PyYAML's `safe_load` — implicitly coerces unquoted `on`, `off`, `yes`, `no` to booleans. An unquoted `on: draw` would parse as `True: draw` and silently break the schema's required-key check. We use `event:` so that authors who forget to quote get a clear, working key. **Do not "tidy" this back to `on:`.** Tracked as decision D-001 in `DECISIONS.md`.
 
@@ -395,26 +414,47 @@ feel:
 
 Designer-intended outcomes the game must satisfy at ship. Loops and content reference these so that balance lives in one place and the `diff` regression check (§9.2) can detect when they shift.
 
+**At v0.2 every target declares a `target_kind:` discriminator** (D-003 ratchet from v0.1.1's permissive `target: {}`). Three kinds, each with a fixed shape:
+
 ```yaml
 balance_targets:
+  # scalar — a single number or string with a [low, high] tolerance band.
   energy_per_turn:
+    target_kind: scalar
     target: 3
     tolerance: [3, 3]
     measure: "average energy budget per combat turn"
     status: balanced
-  win_rate_normal:
-    target: 0.55
-    tolerance: [0.45, 0.65]
-    measure: "win rate over 1000 monte-carlo runs at Normal difficulty"
+
+  # range — the target itself is a band. Two matcher shorthands:
+  #   { between: [lo, hi] }      — explicit closed interval
+  #   { near: v, tolerance: t }  — v ± t (i.e. [v-t, v+t])
+  median_turns_per_combat:
+    target_kind: range
+    target: { near: 6, tolerance: 2 }
+    measure: "median turns to clear a non-boss encounter, Ascension 0"
     status: balanced
-  average_run_length:
-    target: "32 min"
-    tolerance: ["22 min", "45 min"]
-    measure: "median end-to-end run length, Normal difficulty"
-    status: prototyped
+
+  # distribution_over_categories — a composite map; tolerance is per-category.
+  cards_per_rarity:
+    target_kind: distribution_over_categories
+    target:    { common: 110, uncommon: 80, rare: 30 }
+    tolerance: { common: 10,  uncommon: 10, rare: 5 }
+    measure: "designed card count per rarity"
+    status: balanced
 ```
 
-**Required keys per target:** `target`, `tolerance` (`[low, high]`), `measure` (prose), `status`. A `diff` between two trees emits an entry for any target whose `target` value changed; if `target` left its previous `tolerance` band, exit code 1.
+**Required keys per target:** `target_kind` (one of the three above), `target`, `measure`, `status`. `tolerance` is required for `scalar` and `distribution_over_categories`; `range` carries its band inside `target`. Shape rules per kind are enforced by the JSON Schema and reiterated below:
+
+| `target_kind` | `target` shape | `tolerance` shape |
+| --- | --- | --- |
+| `scalar` | number or string | `[low, high]` — 2-element array of comparables |
+| `range` | `{ between: [lo, hi] }` *or* `{ near: v, tolerance: t }` | *(omitted — band is in target)* |
+| `distribution_over_categories` | `{ <category>: <value>, ... }` (object, ≥1 key) | `{ <category>: <tolerance>, ... }` (object, ≥1 key) |
+
+A `diff` between two trees emits an entry for any target whose `target` value changed; if a `scalar` target's value left its previous `tolerance` band (or a `distribution_over_categories` shifted any category outside its per-category tolerance), exit code 1.
+
+**Legacy permissive targets.** A `balance_targets.<id>` missing `target_kind:` fires rule `balance-target-untyped` at severity warning. This is the v0.1.1 → v0.2 migration backstop; in v0.3 the rule ratchets to error and `target_kind` becomes structurally required by the loader.
 
 If the example tree contains no `balance_targets`, rule `missing-balance-targets` fires at severity error.
 
@@ -476,7 +516,7 @@ The root `game-design.md`. Under ~200 lines, llms.txt-style navigation.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: core
 name: "Ember Ascent"
 short_pitch: "A 30-minute deckbuilder roguelike about reshaping your hand each turn."
@@ -553,7 +593,7 @@ For `count_target < 20`, the split is recommended but optional.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: content-schema
 status: balanced
 last_verified: 2026-05-18
@@ -579,7 +619,7 @@ balance_refs:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: content-entity
 id: ember_strike
 status: balanced
@@ -716,9 +756,10 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | `undefined-distribution` | **error** | A `rule.do[].sample` or any other stochastic operation does not reference a `{distributions.<id>}`. |
 | `inline-content-over-threshold` | error | A content-schema file with `count_target >= 20` does not declare `data_dir:` (i.e. entries are inlined). |
 | `stale-section` | warning | A subfile's `last_verified:` is more than 30 days older than the mtime of any file in its `implemented_in:`. |
+| `balance-target-untyped` | warning (v0.2.0-alpha), error (v0.3+) | A `balance_targets.<id>` lacks the `target_kind:` discriminator (v0.1.1 legacy shape). See `DECISIONS.md` D-003. |
 | `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
 | `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
-| `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning — transition `event:` references an event referenced nowhere else). |
+| `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning at v0.2.0-alpha, error in v0.3 — transition `event:` is a bare string instead of a `{events.<id>}` token). |
 | `verify-result-regression` | error/warning | A prior `verify` axis result regressed. `build_health` and `behavioral_alignment` regressions are error; `presentation_usability` regressions are warning. Emitted only by `gdmd verify` (§9.5), not by `lint`. |
 
 ### 9.2 `diff`
@@ -865,7 +906,7 @@ VS Code's YAML extension picks up the schema via the YAML language server's stan
 
 ## 11. Conformance
 
-A `game-design.md` tree is **conformant at v0.1.1** if:
+A `game-design.md` tree is **conformant at v0.2.0-alpha** if:
 
 1. `gdmd lint <tree>` returns exit code `0` (no findings of severity `error`).
 2. The root `game-design.md` has all required frontmatter keys (§5.1) and the canonical prose section order (§5.2).

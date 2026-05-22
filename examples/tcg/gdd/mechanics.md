@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-22"
@@ -106,13 +106,13 @@ states:
       - { id: graveyard }
       - { id: exiled, terminal: true }
     transitions:
-      - { from: in_deck,    event: draw,        to: in_hand }
-      - { from: in_hand,    event: cast,        to: on_board }
-      - { from: on_board,   event: destroyed,   to: graveyard }
-      - { from: graveyard,  event: reanimate,   to: on_board }
-      - { from: in_hand,    event: discard,     to: graveyard }
-      - { from: graveyard,  event: exile,       to: exiled }
-      - { from: on_board,   event: exile_direct, to: exiled }
+      - { from: in_deck,    event: "{events.draw}",         to: in_hand }
+      - { from: in_hand,    event: "{events.cast}",         to: on_board }
+      - { from: on_board,   event: "{events.destroyed}",    to: graveyard }
+      - { from: graveyard,  event: "{events.reanimate}",    to: on_board }
+      - { from: in_hand,    event: "{events.discard}",      to: graveyard }
+      - { from: graveyard,  event: "{events.exile}",        to: exiled }
+      - { from: on_board,   event: "{events.exile_direct}", to: exiled }
   phase_state:
     initial: untap
     nodes:
@@ -122,11 +122,40 @@ states:
       - { id: combat }
       - { id: endphase }
     transitions:
-      - { from: untap,    event: proceed, to: upkeep }
-      - { from: upkeep,   event: proceed, to: main }
-      - { from: main,     event: proceed, to: combat }
-      - { from: combat,   event: proceed, to: endphase }
-      - { from: endphase, event: pass,    to: untap }
+      - { from: untap,    event: "{events.proceed}", to: upkeep }
+      - { from: upkeep,   event: "{events.proceed}", to: main }
+      - { from: main,     event: "{events.proceed}", to: combat }
+      - { from: combat,   event: "{events.proceed}", to: endphase }
+      - { from: endphase, event: "{events.pass_turn}", to: untap }
+events:
+  draw:
+    status: draft
+    description: "A card moves from in_deck to in_hand; usually emitted in {states.phase_state.untap}."
+  cast:
+    status: draft
+    description: "A card moves from in_hand to on_board; emitted by {verbs.play_card} after mana is paid."
+  destroyed:
+    status: draft
+    description: "An on_board card is destroyed and moves to graveyard."
+  reanimate:
+    status: draft
+    description: "A graveyard card returns to on_board via a reanimation effect."
+  discard:
+    status: draft
+    description: "An in_hand card moves directly to graveyard (forced or voluntary discard)."
+  exile:
+    status: draft
+    description: "A graveyard card moves to the exiled terminal node."
+  exile_direct:
+    status: draft
+    description: "An on_board card moves straight to exiled, bypassing graveyard."
+  proceed:
+    status: draft
+    description: "Phase advances within a turn (untap → upkeep → main → combat → endphase)."
+  pass_turn:
+    status: draft
+    description: "End of one player's turn; phase_state returns to untap for the next player."
+
 rules:
   card_play_resolution:
     given:

@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.1.1
+spec_version: 0.2.0-alpha
 file_type: subfile
 status: draft
 last_verified: "2026-05-21"
@@ -118,11 +118,11 @@ states:
       - { id: in_discard }
       - { id: exhausted, terminal: true }
     transitions:
-      - { from: in_deck,    event: draw,      to: in_hand }
-      - { from: in_hand,    event: play_card, to: in_play,   side_effects: ["{resources.energy} -= cost"] }
-      - { from: in_play,    event: resolve,   to: in_discard }
-      - { from: in_hand,    event: exhaust,   to: exhausted }
-      - { from: in_discard, event: reshuffle, to: in_deck }
+      - { from: in_deck,    event: "{events.draw}",      to: in_hand }
+      - { from: in_hand,    event: "{events.play_card}", to: in_play,   side_effects: ["{resources.energy} -= cost"] }
+      - { from: in_play,    event: "{events.resolve}",   to: in_discard }
+      - { from: in_hand,    event: "{events.exhaust}",   to: exhausted }
+      - { from: in_discard, event: "{events.reshuffle}", to: in_deck }
   enemy_lifecycle:
     initial: alive
     nodes:
@@ -130,10 +130,35 @@ states:
       - { id: burning }
       - { id: dead, terminal: true }
     transitions:
-      - { from: alive,   event: catch_fire,   to: burning, side_effects: ["apply burn stacks"] }
-      - { from: burning, event: burn_expires, to: alive }
-      - { from: alive,   event: hp_zero,      to: dead }
-      - { from: burning, event: hp_zero,      to: dead }
+      - { from: alive,   event: "{events.catch_fire}",   to: burning, side_effects: ["apply burn stacks"] }
+      - { from: burning, event: "{events.burn_expires}", to: alive }
+      - { from: alive,   event: "{events.hp_zero}",      to: dead }
+      - { from: burning, event: "{events.hp_zero}",      to: dead }
+events:
+  draw:
+    status: draft
+    description: "A card moves from in_deck to in_hand; emitted by {verbs.draw_cards}."
+  play_card:
+    status: draft
+    description: "A card moves from in_hand to in_play; emitted by {verbs.play_card}."
+  resolve:
+    status: draft
+    description: "A card finishes its in_play effects and moves to in_discard."
+  exhaust:
+    status: draft
+    description: "A one-shot card moves from in_hand directly to the exhausted terminal node."
+  reshuffle:
+    status: draft
+    description: "When draw is requested on an empty deck, the discard reshuffles back into in_deck."
+  catch_fire:
+    status: draft
+    description: "An enemy gains the burning state; usually emitted by fire-tagged card effects."
+  burn_expires:
+    status: draft
+    description: "The burning state's duration counter reaches 0; the enemy returns to alive."
+  hp_zero:
+    status: draft
+    description: "An enemy's hp reaches 0 from any damage source; the enemy enters dead."
 ---
 
 ## Tokens
