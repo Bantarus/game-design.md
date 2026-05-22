@@ -8,10 +8,10 @@
 //! are directly comparable.
 
 use bevy_ecs::prelude::*;
-use rand::SeedableRng;
 
 use crate::components::{Side, Unit, UnitRole};
 use crate::loops::{run_encounter, tick as tick_loop};
+use crate::prng::Xoshiro256StarStar;
 use crate::resources::{Gold, Rng, TickCounter};
 use crate::state::{CombatPhase, Event, UnitLifecycle};
 
@@ -47,8 +47,12 @@ pub struct UnitSnapshot {
 
 impl Simulation {
     pub fn new(seed: u64) -> Self {
+        // Self-validate PRNG against the spec's reference vector before any
+        // simulation work — catch misimplementation before it produces
+        // wrong-but-consistent trajectories.
+        crate::prng::reference_vector_self_check();
         let mut world = World::new();
-        world.insert_resource(Rng(rand_chacha::ChaCha20Rng::seed_from_u64(seed)));
+        world.insert_resource(Rng(Xoshiro256StarStar::from_seed(seed)));
         world.insert_resource(Gold(0));
         world.insert_resource(TickCounter::default());
         world.insert_resource(CombatPhase::Setup);

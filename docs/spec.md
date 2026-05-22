@@ -359,7 +359,40 @@ The root `game-design.md` must reference exactly one loop as `core_loop_ref:`. I
 
 First-class randomness. **Every random outcome anywhere in a `game-design.md` tree must reference a named distribution.** Naming randomness is the difference between a game whose balance is auditable and a game whose balance is hidden in source code.
 
-Seven distribution types at v0.2.0-alpha (six probabilistic + one ordering-rule):
+**PRNG pin (D-015, normative at v0.2.0-alpha).** Cross-engine determinism (D-009) requires that every engine implementing a `game-design.md` tree produces *the same* sequence of raw PRNG outputs for the same seed. Distribution type alone (`gaussian`, `uniform`, …) does not constrain the underlying random source — two engines using different PRNGs (e.g. ChaCha20 vs PCG vs xoshiro) draw different sample streams from the same seed and the cross-engine integer trajectory desyncs at the very first sample. Phase 4 demonstrated this failure mode in tick-combat against Godot's PCG-family vs xtreme's ChaCha20.
+
+Every tree (or per-distribution override) MUST declare:
+
+```yaml
+prng:
+  algorithm: xoshiro256_starstar    # the default at v0.2.0-alpha
+  seeding:   splitmix64              # how an integer seed initializes the state
+  reference_vector:                  # MUST be shipped — first N raw u64 outputs at canonical_seed
+    canonical_seed: 0
+    outputs: [
+      "0x860bfe4fec669882",
+      "0x829cde4321bdff18",
+      "0xd57ceaee872782c9",
+      "0xc47fc8ff58359611",
+      "0x71718b5da1661407"
+    ]
+```
+
+Closed vocabulary at v0.2.0-alpha:
+
+- **`xoshiro256_starstar`** (default) — Blackman & Vigna, 2018. 4×u64 state, output `rotl(s1 * 5, 7) * 9`. Trivially identical across Rust / GDScript / a Blueprint visual graph: a handful of shifts/rotates/xors on u64s, zero math-library dependency. The recommended default for any tree whose cross-engine trajectory contract matters.
+- **`chacha20`** — D. J. Bernstein, 2008. Cryptographic-quality, reversible-resistant, broadly implemented. Use this *override* when a game needs the PRNG to be unpredictable to a player (e.g. two-player TCG where seed prediction could become an exploit). Tradeoff: implementing ChaCha20's quarter-rounds correctly in a Blueprint visual graph is materially harder than xoshiro's shift/xor ladder.
+- **`pcg32` / `pcg64`** — O'Neill, 2014. Reserved for future per-game opt-in; not the default because "PCG" is a family with multiple variants and constants vary across libraries.
+
+The default is **`xoshiro256_starstar` + `splitmix64` seeding**. A per-distribution `prng:` override is legal at v0.2.0-alpha for distributions that need a different generator (e.g. a card-shuffle distribution that wants cryptographic unpredictability while damage rolls stay on the cheap pinned PRNG); the override declares the same three fields.
+
+**Reference vector requirement.** Every PRNG declaration MUST ship a `reference_vector:` of the first 5 raw u64 outputs at a `canonical_seed:`. Engines self-validate against the vector at adapter startup (or in a unit test) — divergence in the vector means the engine has misimplemented the PRNG or seeding, surfacing the bug before any trajectory comparison runs. The vector lives in the spec, not in each adapter; an adapter that disagrees with the vector is incorrect *regardless* of whether its trajectory happens to match.
+
+**Seeding (`splitmix64`).** Given a single u64 seed `S`, `splitmix64` produces the four u64s used to initialize xoshiro256**'s state. The algorithm (Blackman & Vigna's reference): `z = (S += 0x9E3779B97F4A7C15); z = (z ^ (z >> 30)) * 0xBF58476D1CE4E1B5; z = (z ^ (z >> 27)) * 0x94D049BB133111EB; z = z ^ (z >> 31); return z`. Call four times to fill `(s0, s1, s2, s3)`. All arithmetic is wrapping u64. The canonical `seed: deterministic_per_run` field on a distribution is the input S to this procedure.
+
+---
+
+**Distribution types at v0.2.0-alpha** (eight total: seven probabilistic + one ordering-rule):
 
 ```yaml
 distributions:
@@ -379,26 +412,50 @@ distributions:
 
   critical_hit:
     type: uniform
-    range: [0.0, 1.0]
-    threshold: 0.15
+    range: [0, 9]                # integer-native (D-016) — 0..9 inclusive
+    threshold: 1                 # crit when sample < threshold (1-in-10 = 10% crit)
+    output_domain: integer
+    selection_rule: less_than    # see "Threshold comparison" below
     status: implemented
     implemented_in: ["src/rng/combat.py"]
 
   loot_rarity:
     type: pity_floor
     table: [common, uncommon, rare, epic]
-    weights: [0.6, 0.3, 0.08, 0.02]
+    weights: [60, 30, 8, 2]      # integer weights (D-016); total_weight = 100
     pity: { rare_within: 12, epic_within: 40 }
     status: prototyped
     implemented_in: ["src/rng/loot.py"]
 
   damage_roll:
-    type: gaussian
-    mean: 10
-    stddev: 2
+    # Integer-native gaussian-like (D-016). sum 3 PRNG draws each uniform
+    # int in [-1, +1], then add params_from.mean. Result in [mean-3, mean+3]
+    # with stddev ≈ √2 (close to gaussian(stddev=1)) — zero transcendentals,
+    # bit-identical across engines that share the pinned PRNG.
+    type: discrete_sum
+    samples: 3
+    range: [-1, 1]               # integer uniform per draw, inclusive
+    params_from:
+      mean: "{actor.attack}"
     clamp: [1, 99]
+    output_domain: integer
     status: implemented
     implemented_in: ["src/rng/damage.py"]
+
+  # `gaussian` is RESERVED for non-cross-engine, non-state-affecting uses
+  # (cosmetic jitter, presentation noise). Its real-valued output depends on
+  # libm transcendentals (`log`, `sin`/`cos`) which are NOT IEEE-754
+  # correctly-rounded — even with the same PRNG and the same method, two
+  # engines drift in the last ULP and `round_mode: half_to_even` will
+  # eventually flip near `.5` boundaries. For determinism-critical
+  # integer-state randomness, use `discrete_sum` instead. See D-016.
+  cosmetic_jitter:
+    type: gaussian
+    mean: 0
+    stddev: 1
+    output_domain: real          # cosmetic-only; cross-engine non-binding
+    status: prototyped
+    implemented_in: ["src/fx/jitter.py"]
 
   scripted_event:
     type: deterministic
@@ -423,39 +480,49 @@ distributions:
     implemented_in: ["src/ordering.py"]
 ```
 
-**Required keys per distribution:** `type` (one of the six above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
+**Required keys per distribution:** `type` (one of the eight above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
 
-**Output domain & rounding (D-010, optional at v0.2.0-alpha; ratchets to required for real-valued types in v0.3).** A distribution whose theoretical output is real-valued (`gaussian`, `uniform`) but whose consuming simulation state is integer-domain MUST declare its bridging contract inline:
+**`discrete_sum` (D-016).** The integer-native alternative to `gaussian` for cross-engine state-affecting randomness. Result = `(params_from.mean or 0) + sum(uniform_int(range[0], range[1]) for _ in 0..samples)`, then `clamp`. Required: `samples` (positive integer), `range` (`[lo, hi]` integer pair, inclusive on both ends), and either `params_from.mean` or a fixed `mean:` field. Optional: `clamp: [min, max]`. Pure integer arithmetic; no `log`, `exp`, `sin`, `cos`, `sqrt`, or `pow` involved — bit-identical by construction on any engine that agrees on the pinned PRNG (§4.7 PRNG pin). The variance of the resulting distribution is `samples × (range[1] − range[0] + 1)² − 1) / 12` for integer uniforms; pick `samples` and `range` to land in the gameplay-feel band you want. (For tick-combat: `samples: 3, range: [-1, 1]` → stddev ≈ √2 ≈ 1.41, a close-enough discretization of the previous continuous `gaussian(stddev=1)`.)
 
-- `output_domain: integer | real` — what the consuming simulation expects. Default `real`.
-- `round_mode: half_to_even | half_up | floor | ceil | trunc` — required iff `output_domain: integer`. The canonical unbiased choice is `half_to_even` (banker's rounding); other modes are accepted with prose justification.
+**Output domain & rounding (D-010, deprecated for state-affecting use at v0.2.0-alpha Phase 4+; superseded by D-016).** The original D-010 contract — sample a continuous distribution at full float precision, clamp in real space, round to integer with `round_mode: half_to_even` — was correct in its ordering but incomplete in its determinism contract. Every continuous-then-rounded path depends on `log` / `exp` / `sin` / `cos` somewhere in the sampling code, and IEEE-754 does NOT mandate correctly-rounded transcendentals — real libm implementations (Rust's, Godot's, MSVC's under Unreal) differ in the last ULP. The integer rounding occasionally flips when a sample lands within ULP-distance of an x.5 boundary. Rare, unpredictable, and exactly the "almost always deterministic" posture this project refuses.
 
-Rounding happens **at the point of application**, not at sample time. The sampling PRNG produces the canonical real-valued sample (portable across engines that share a PRNG implementation); the consuming rule rounds. This concentrates the divergence-prone step (rounding) at a single declared boundary. See `DECISIONS.md` D-010 and `examples/tick-combat/gdd/systems/distributions.md::damage_roll` for the canonical worked example.
+**For state-affecting, cross-engine-deterministic randomness, use `discrete_sum` (D-016) — not `gaussian` + `round_mode`.** The `output_domain` and `round_mode` fields remain in the schema for backward compatibility and for legitimate cosmetic/non-cross-engine uses, but they MUST NOT be the path by which integer simulation state is produced in any tree that declares cross-engine `verify_targets`. The legacy worked example at `examples/tick-combat/gdd/systems/distributions.md::damage_roll` was migrated to `discrete_sum` in Phase 4+ (see D-016).
 
-**Canonical order of operations for real-valued sampling that feeds integer state (cross-engine determinism contract, locked at v0.2.0-alpha):**
+**Canonical order of operations for `discrete_sum` (Phase 4+, normative):**
 
-1. sample the continuous distribution at full float precision
-2. apply `clamp:` (if declared) to the continuous sample — i.e. clamp first, in real-valued space
-3. apply `round_mode` (half-to-even by default) to map to integer
-4. apply integer clamp post-rounding as a belt-and-suspenders sanity check (no-op when step 2 was tight)
+1. Draw `samples` uniform integers from the pinned PRNG in `range[0]..range[1]` (inclusive both ends). Each draw is `(rng.next_u64() mod (range[1] - range[0] + 1)) + range[0]` — pure integer arithmetic.
+2. Sum the draws and add `params_from.mean` (or the fixed `mean`) if present.
+3. Apply integer `clamp` to the result.
 
-Sample → clamp → round is the canonical order, not round → clamp. The round-first ordering shifts boundary probability mass in an engine-dependent way at the tails; the clamp-first ordering preserves the gaussian's tail behavior near the boundaries. This is a binary determinism decision — two engines that disagree on the order will disagree at low-frequency boundary samples and the cross-engine integer trajectory will desync intermittently. The canonical order is normative, not advisory.
+No floating-point arithmetic at any step. No transcendentals. Bit-identical across every engine that agrees on the PRNG (§4.7 PRNG pin) and applies these three steps. The "clamp first then round" question of D-010 no longer applies because there is nothing to round.
 
-**Threshold comparison direction (uniform-with-threshold idiom, locked at v0.2.0-alpha):** when a `uniform` distribution carries a `threshold:` field used to derive a boolean (the Bernoulli-via-uniform idiom — e.g. `critical_hit: { range: [0.0, 1.0], threshold: 0.10 }`), the boolean output is `sample <= threshold` (inclusive at the threshold). This is a normative choice for the same reason as the clamp/round order: two engines that interpret `<` vs `<=` differently desync at exactly the threshold sample, and the cross-engine bar requires the convention to live in the spec.
+**Threshold comparison direction (uniform-with-threshold idiom, Phase 4+).** When a `uniform` distribution carries a `threshold:` field used to derive a boolean (the Bernoulli-via-uniform idiom — e.g. `critical_hit: { range: [0, 9], threshold: 1, selection_rule: less_than }`), the boolean output is the result of comparing the integer sample to the integer threshold via `selection_rule:` — `less_than` (`sample < threshold`) is the recommended default. Per-distribution `selection_rule:` MAY also take `less_than_or_equal`, `greater_than`, `greater_than_or_equal`, `equal`. The legacy float form (`range: [0.0, 1.0], threshold: 0.10`) is reserved for non-cross-engine use; for the cross-engine bar, integer uniforms with explicit `selection_rule:` are normative. Two engines that interpret `<` vs `<=` differently desync at exactly the threshold sample — the convention is now structurally declared, not implicit.
 
-**Value-bearing `weighted` options (D-014, optional at v0.2.0-alpha).** Bare-number `weighted.options` (`{ small: 0.6, medium: 0.3, large: 0.1 }`) declare *only* probability mass. When the weighted distribution's category labels need to carry an associated value (e.g. `gold_drop` returns "small" with weight 0.6 *and* "small" is worth 1 gold), the option shape may be expanded to `{ <category>: { weight: <p>, value: <any> } }`:
+**Value-bearing `weighted` options (D-014, optional at v0.2.0-alpha).** Bare-number `weighted.options` (`{ small: 60, medium: 30, large: 10 }`) declare *only* probability mass. When the weighted distribution's category labels need to carry an associated value (e.g. `gold_drop` returns "small" with weight 60 *and* "small" is worth 1 gold), the option shape may be expanded to `{ <category>: { weight: <int>, value: <any> } }`:
 
 ```yaml
 gold_drop:
   type: weighted
   options:
-    small:  { weight: 0.6, value: 1 }
-    medium: { weight: 0.3, value: 3 }
-    large:  { weight: 0.1, value: 10 }
+    small:  { weight: 60, value: 1 }     # integer weights (D-016)
+    medium: { weight: 30, value: 3 }
+    large:  { weight: 10, value: 10 }
+  selection_rule: declaration_order_first_above   # D-017
   status: implemented
 ```
 
 Either shape is schema-legal; mixed shapes within a single `options:` map are not (all-bare or all-objects). When values are absent and consuming code needs them, the resolution belongs in the spec, not in the implementation (see `DECISIONS.md` D-014 and the v0.2 Phase-2 ambiguity #4).
+
+**Weighted selection rule (D-017, Phase 4+, normative).** `weighted.options` MUST declare `selection_rule:`. The single normative value at v0.2.0-alpha Phase 4+ is `declaration_order_first_above`:
+
+1. Compute the integer total weight `W = sum(options[k].weight for k in declaration order)`. Integer weights are normative for cross-engine determinism; float weights are forbidden in any tree with cross-engine `verify_targets`.
+2. Draw `d = rng.next_u64() mod W`.
+3. Walk options in YAML declaration order, maintaining a running cumulative sum `c`.
+4. Select the **first** option whose `c > d` (strict greater-than).
+
+The "strict greater-than" is the same class of decision as the `<` vs `<=` boundary on the threshold idiom — `c >= d` would shift mass at the cumulative boundary by one slot, divergent across engines that pick the other comparison. The selection rule lives in the spec because it MUST be identical across engines; per-option behavior is fully determined by `(W, declaration order, running cumulative sum, strict >)`.
+
+**On YAML declaration order.** The standard's loader (`GdmdLoader` in `src/game_design_md/loader.py`) preserves YAML map insertion order via Python 3.7+ dict semantics. Engines reading `weighted.options` MUST honor that order — never re-sort by key, never iterate via a hash-map. Phase 4 found that both xtreme and Godot happened to honor declaration order accidentally; the rule now requires it.
 
 **Templated distribution parameters (D-012, optional at v0.2.0-alpha).** A distribution may parameterize its sampling theory from rule-evaluation-time context via a `params_from:` map:
 

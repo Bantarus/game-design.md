@@ -1,43 +1,39 @@
 //! Realizes `{distributions.*}` from `../../gdd/systems/distributions.md`.
 //!
-//! Phase-2.5 re-alignment: each function now implements the *resolved* spec
-//! (not Phase-2's interpretations). Specifically:
+//! Phase-4+ rewrite (D-015 + D-016 + D-017):
 //!
-//!   - `action_order` is an `ordering_rule` (D-011/#1), not a `deterministic`
-//!     literal sequence. Sort by speed desc, tie-break deploy_order asc,
-//!     filter to alive. The rotation index (one unit per tick) is applied by
-//!     `rules::tick_resolution`, not here.
-//!   - `damage_roll` uses templated `mean = actor.attack` per D-012 / #8.
-//!     The acting unit's `attack` stat is now load-bearing.
-//!   - `critical_hit` uses normative `sample <= threshold` per spec §4.7.
-//!   - `gold_drop` returns a `GoldDrop` *with its declared per-category value*
-//!     drawn from the weighted options' `{ weight, value }` shape (D-014 / #4).
-//!     `combat_resolution` requests `count: 6` drops (resolves #6) and
-//!     accumulates the values.
+//!   - PRNG is `xoshiro256_starstar + splitmix64` per D-015. Hand-rolled in
+//!     `crate::prng`; no external rand crate. The reference vector at
+//!     canonical_seed=0 is the cross-engine self-validation hook.
+//!   - `damage_roll` is integer-native `discrete_sum` per D-016. Sum 3 PRNG
+//!     draws each uniform int in [-1, +1], add `params_from.mean` (the
+//!     actor's attack stat), clamp [1, 99]. No transcendentals → no IEEE-754
+//!     ULP drift → no #15-class boundary flips.
+//!   - `critical_hit` is integer uniform on [0, 9] with `selection_rule:
+//!     less_than` threshold 1 (10% crit; semantically identical to the prior
+//!     [0.0, 1.0] threshold 0.10 but no floats).
+//!   - `gold_drop` uses integer weights (60/30/10 summing to 100) and the
+//!     normative `declaration_order_first_above` selection rule (D-017):
+//!     walk options in declaration order, first option whose cumulative
+//!     running sum strictly exceeds the draw wins.
+//!   - `action_order` (ordering_rule) unchanged — no PRNG involvement.
 //!
-//! All sampling pulls from a single `ChaCha20Rng` keyed by the encounter
-//! seed. Identical seed → identical bit-stream across machines.
-
-use rand::Rng;
-use rand_chacha::ChaCha20Rng;
-use rand_distr::{Distribution as _, Normal};
+//! All sampling pulls from a single `Xoshiro256StarStar` keyed by the
+//! encounter seed via `splitmix64`. Identical seed → identical bit-stream
+//! across every engine that implements the same algorithm.
 
 use crate::components::{Side, Unit};
+use crate::prng::Xoshiro256StarStar;
 use bevy_ecs::entity::Entity;
 
 // ---- `{distributions.action_order}` (ordering_rule) -------------------------
 //
-// D-011 / #1 resolution: this is now an *ordering procedure*, not a prose
-// label. The spec declares:
-//
+// Pure deterministic sort — no PRNG involvement. Spec declares:
 //   over:   "{entities.units}"
 //   filter: { lifecycle: alive }
 //   sort:   [{by: speed, direction: desc}, {by: deploy_order, direction: asc}]
-//
-// Below is the executable realization.
 
-/// Compute the deterministic action order. Returns alive Entities in the
-/// canonical order. Empty if no alive units.
+/// Returns alive entities in canonical order. Empty if no alive units.
 pub fn action_order<'a>(units: impl IntoIterator<Item = (Entity, &'a Unit)>) -> Vec<Entity> {
     let mut alive: Vec<(Entity, &Unit)> = units
         .into_iter()
@@ -47,46 +43,45 @@ pub fn action_order<'a>(units: impl IntoIterator<Item = (Entity, &'a Unit)>) -> 
         ub.speed
             .cmp(&ua.speed)
             .then_with(|| ua.deploy_order.cmp(&ub.deploy_order))
-            // Side is a stable secondary tie-break so player and enemy units
-            // with identical (speed, deploy_order) get a fixed order.
-            // (Spec is silent on cross-side tie-break; this is the canonical
-            // choice — Player < Enemy.)
+            // Cross-side tie-break (spec is silent; we pick Player < Enemy
+            // as the canonical extension consistent with §9.5.5's
+            // (side, deploy_order) trajectory sort).
             .then_with(|| (ua.side as u8).cmp(&(ub.side as u8)))
     });
     alive.into_iter().map(|(e, _)| e).collect()
 }
 
-// ---- `{distributions.damage_roll}` ------------------------------------------
+// ---- `{distributions.damage_roll}` (discrete_sum) ---------------------------
 //
-// `params_from: { mean: "{actor.attack}" }` per D-012. The `mean` argument
-// below is the resolved actor-stat value at call site. stddev fixed at 1.
-//
-// Canonical order of operations (spec §4.7): sample → clamp continuous →
-// round half-to-even → integer clamp.
-pub fn damage_roll(rng: &mut ChaCha20Rng, mean: i32) -> i32 {
-    let normal = Normal::new(mean as f64, 1.0_f64).expect("stddev > 0");
-    let sample: f64 = normal.sample(rng);
-    let clamped: f64 = sample.clamp(1.0, 99.0);
-    let rounded: f64 = clamped.round_ties_even();
-    (rounded as i32).clamp(1, 99)
+// D-016 integer-native. Sum 3 PRNG draws each uniform int in [-1, +1], add
+// `mean` (the actor's attack stat per D-012), clamp [1, 99]. Pure integer
+// arithmetic — bit-identical across engines sharing xoshiro256**+splitmix64.
+
+pub fn damage_roll(rng: &mut Xoshiro256StarStar, mean: i32) -> i32 {
+    let mut sum: i32 = 0;
+    for _ in 0..3 {
+        sum += rng.uniform_int_inclusive(-1, 1);
+    }
+    (mean + sum).clamp(1, 99)
 }
 
-// ---- `{distributions.critical_hit}` -----------------------------------------
+// ---- `{distributions.critical_hit}` (uniform + selection_rule) -------------
 //
-// `range: [0.0, 1.0], threshold: 0.10`. Normative `sample <= threshold`
-// per spec §4.7 (resolves #3).
-pub fn critical_hit(rng: &mut ChaCha20Rng) -> bool {
-    let sample: f64 = rng.random_range(0.0_f64..1.0_f64);
-    sample <= 0.10
+// D-016 + D-017 integer reformulation: integer uniform on [0, 9] inclusive,
+// crit when `sample < threshold(1)`. 1-in-10 = 10% crit, semantically
+// identical to the prior float [0.0, 1.0] threshold 0.10.
+
+pub fn critical_hit(rng: &mut Xoshiro256StarStar) -> bool {
+    let sample = rng.uniform_int_inclusive(0, 9);
+    sample < 1
 }
 
-// ---- `{distributions.gold_drop}` --------------------------------------------
+// ---- `{distributions.gold_drop}` (weighted, integer weights + D-017) -------
 //
-// Weighted with `{ weight, value }` options per D-014 (resolves #4):
-//   small:  { weight: 0.6, value: 1 }
-//   medium: { weight: 0.3, value: 3 }
-//   large:  { weight: 0.1, value: 10 }
-// Per-encounter count: 6 (declared on combat_resolution.do[].count).
+// Integer weights summing to 100; `selection_rule: declaration_order_first_above`.
+// Declaration order: small (60), medium (30), large (10).
+// Cumulative running sum: 60, 90, 100. Draw d = rng.next_u64() mod 100.
+// First option whose c > d wins (strict greater-than).
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum GoldDrop {
@@ -96,7 +91,7 @@ pub enum GoldDrop {
 }
 
 impl GoldDrop {
-    /// Per-category value, normatively declared in the spec (D-014).
+    /// Per-category value per D-014.
     pub fn value(self) -> i32 {
         match self {
             GoldDrop::Small => 1,
@@ -106,18 +101,21 @@ impl GoldDrop {
     }
 }
 
-pub fn gold_drop(rng: &mut ChaCha20Rng) -> GoldDrop {
-    let r: f64 = rng.random_range(0.0_f64..1.0_f64);
-    if r < 0.6 {
-        GoldDrop::Small
-    } else if r < 0.9 {
-        GoldDrop::Medium
-    } else {
-        GoldDrop::Large
+pub fn gold_drop(rng: &mut Xoshiro256StarStar) -> GoldDrop {
+    // Integer weights in declaration order: small=60, medium=30, large=10.
+    // total_weight = 100; draw in [0, 99].
+    let draw: u64 = rng.next_u64() % 100;
+    // Cumulative sums in declaration order.
+    if 60u64 > draw {
+        return GoldDrop::Small;
     }
+    if 90u64 > draw {
+        return GoldDrop::Medium;
+    }
+    GoldDrop::Large
 }
 
-// ---- Combat outcome helpers (not a spec token) ------------------------------
+// ---- Combat outcome helper (not a spec token) -------------------------------
 
 /// `{invariants.units_act_only_when_alive}` — used by the tick loop to detect
 /// `{events.one_side_cleared}`. Pure helper; advisory-status invariant.

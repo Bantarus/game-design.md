@@ -16,6 +16,7 @@
 pub mod components;
 pub mod distributions;
 pub mod loops;
+pub mod prng;
 pub mod resources;
 pub mod rules;
 pub mod sim;

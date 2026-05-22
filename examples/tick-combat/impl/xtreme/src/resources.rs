@@ -26,9 +26,12 @@ impl Gold {
 #[derive(Resource, Debug, Clone, Copy, Default)]
 pub struct TickCounter(pub u64);
 
-/// The shared deterministic PRNG state. Wraps a single `ChaCha20Rng` seeded
-/// once per encounter. Every distribution sample pulls from this — there is
-/// only one stream of random bits per encounter, which is what makes the
-/// Phase-3 byte-identical replay bar reachable.
+/// The shared deterministic PRNG state. Wraps a single `Xoshiro256StarStar`
+/// seeded via `splitmix64` from the encounter seed per spec §4.7 / D-015.
+/// Every distribution sample pulls from this — there is only one stream of
+/// random bits per encounter, which is what makes the Phase-3 byte-identical
+/// replay bar reachable. Phase 4+ rewrite: the PRNG is hand-rolled in
+/// `crate::prng`, not pulled from the `rand` crate; the spec's reference
+/// vector at canonical_seed=0 is the cross-engine self-validation hook.
 #[derive(Resource)]
-pub struct Rng(pub rand_chacha::ChaCha20Rng);
+pub struct Rng(pub crate::prng::Xoshiro256StarStar);
