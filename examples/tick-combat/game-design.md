@@ -5,8 +5,8 @@ file_type: core
 name: "Lockstep"
 short_pitch: "A fixed-seed auto-battler: assemble a 5-unit squad, lock the formation, watch the tick."
 genre_tags: [auto-battler, tactics, single-player]
-status: draft
-version: 0.1.0
+status: prototyped
+version: 0.2.0-alpha
 last_updated: "2026-05-22"
 target_platforms_neutral: [desktop, web]
 pillars:
@@ -32,6 +32,9 @@ files:
   verification:            gdd/verification.md
   content_index:           gdd/content/_index.md
   units:                   gdd/content/units.md
+implementation_pointers:
+  engine_a_xtreme: "impl/xtreme/src/**/*.rs"
+  cargo_manifest:  "impl/xtreme/Cargo.toml"
 ---
 
 # Lockstep

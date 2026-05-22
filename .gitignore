@@ -28,3 +28,7 @@ htmlcov/
 # private working notes (not part of the published spec)
 docs/a blueprint for an llm-first, Engine-neutral Game design Document Standard.txt
 
+# Rust build artifacts (impl/<engine>/target/ — never commit)
+target/
+**/target/
+

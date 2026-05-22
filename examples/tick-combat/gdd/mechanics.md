@@ -2,9 +2,13 @@
 spec: game-design.md
 spec_version: 0.2.0-alpha
 file_type: subfile
-status: draft
+status: prototyped
 last_verified: "2026-05-22"
-implemented_in: []
+implemented_in:
+  - "impl/xtreme/src/components.rs"
+  - "impl/xtreme/src/resources.rs"
+  - "impl/xtreme/src/state.rs"
+  - "impl/xtreme/src/rules.rs"
 entities:
   player:
     type: actor

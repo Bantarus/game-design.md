@@ -1,0 +1,36 @@
+[package]
+name = "tick-combat-xtreme"
+version = "0.1.0"
+edition = "2021"
+description = "Engine-A (xtreme/Bevy ECS) implementation of examples/tick-combat/ — the v0.2 reference. Drives every gameplay decision from the sibling gdd/ tree; this crate contains no design value, only logic that realizes the spec."
+license = "Apache-2.0"
+publish = false
+
+[lib]
+name = "tick_combat_xtreme"
+path = "src/lib.rs"
+
+[[bin]]
+name = "tick-combat"
+path = "src/main.rs"
+
+[dependencies]
+# ECS only — no rendering. xtreme's headless-deterministic stance starts here.
+bevy_ecs = "0.18"
+# Deterministic PRNG. ChaCha20 produces identical bit-streams across platforms
+# given the same seed; this is the load-bearing piece for {distributions.*}.
+rand = { version = "0.9", default-features = false, features = ["std_rng"] }
+rand_chacha = "0.9"
+rand_distr = "0.5"
+# CLI for the headless harness (seed, encounter id, etc.).
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+# In-crate determinism tests; the verify adapter (Phase 3) sits above this.
+
+[profile.release]
+# Deterministic codegen: avoid the optimizer reordering FP math (we forbid FP
+# in the simulation hot path anyway per {invariants.gameplay_state_is_integer},
+# but belt-and-suspenders).
+overflow-checks = true
+debug-assertions = true
