@@ -1,0 +1,23 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: caverns_01_first_breath
+status: draft
+implemented_in: ["src/embergrave/levels/caverns_01_first_breath.py"]
+name: "First Breath"
+region: caverns
+difficulty_tier: 1
+time_target_ms: 90000
+entry:  { x: 1000,  y: 1000  }
+exit:   { x: 12000, y: 1000  }
+checkpoints:
+  - { x: 4000,  y: 1000 }
+  - { x: 8000,  y: 1000 }
+ember_pickups:
+  - { x: 3000,  y: 1500, ember_value: 1 }
+  - { x: 5500,  y: 2200, ember_value: 1 }
+  - { x: 9000,  y: 1800, ember_value: 2 }
+lethal_regions:
+  - { x: 0, y: 0, width: 13000, height: 200, tag: void }
+layout_ref: "layouts/caverns_01.tmx"
+notes: "Tutorial level. Single horizontal traversal with two checkpoints; three ember pickups demonstrate refuel without making ember scarce. The void floor is the only lethal region — every fall is fatal, every other surface is safe. Tier 1: 0–4 deaths is the acceptable band."

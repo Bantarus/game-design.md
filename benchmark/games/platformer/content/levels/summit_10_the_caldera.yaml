@@ -1,0 +1,37 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: summit_10_the_caldera
+status: draft
+implemented_in: ["src/embergrave/levels/summit_10_the_caldera.py"]
+name: "The Caldera"
+region: summit
+difficulty_tier: 5
+time_target_ms: 360000
+entry:  { x: 1000,  y: 1000  }
+exit:   { x: 25000, y: 18000 }
+checkpoints:
+  - { x: 6000,  y: 3000  }
+  - { x: 12000, y: 7000  }
+  - { x: 18000, y: 12000 }
+  - { x: 22000, y: 16000 }
+ember_pickups:
+  - { x: 3500,  y: 1800,  ember_value: 1 }
+  - { x: 7500,  y: 4200,  ember_value: 2 }
+  - { x: 9000,  y: 5500,  ember_value: 1 }
+  - { x: 13500, y: 8200,  ember_value: 3 }
+  - { x: 16500, y: 10000, ember_value: 1 }
+  - { x: 20000, y: 13500, ember_value: 2 }
+  - { x: 23500, y: 17000, ember_value: 4 }
+lethal_regions:
+  - { x: 0,     y: 0,    width: 26000, height: 300, tag: void  }
+  - { x: 8000,  y: 0,    width: 1500,  height: 800, tag: lava  }
+  - { x: 14000, y: 0,    width: 2000,  height: 1200, tag: lava }
+  - { x: 5000,  y: 2500, width: 600,   height: 300, tag: spike }
+  - { x: 11000, y: 6500, width: 800,   height: 300, tag: spike }
+  - { x: 17000, y: 11500, width: 1000, height: 300, tag: spike }
+  - { x: 9000,  y: 4500, width: 1200,  height: 800, tag: crusher }
+  - { x: 15000, y: 9000, width: 1200,  height: 1000, tag: crusher }
+  - { x: 21000, y: 14000, width: 800,  height: 800, tag: crusher }
+layout_ref: "layouts/summit_10.tmx"
+notes: "Final level. Diagonal climb from entry (bottom-left) to exit (top-right) across 25000 horizontal × 18000 vertical micro_units. Four checkpoints break the ~32000-unit traversal into five sections. Three crusher obstacles introduce timing-cycle mechanics not seen in earlier regions; lethal lava strips at the base force the climb forward (no falling back). Seven ember pickups including a 4-value reward at the final approach. Tier 5: 18–42 deaths is the acceptable band; expected first-clear time ~6 minutes for a skilled player. This is the summit — clearing it is the run's end."
