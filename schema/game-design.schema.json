@@ -458,6 +458,30 @@
             }
           },
           "additionalProperties": false
+        },
+        "uniform_int_reference_vector": {
+          "description": "D-018 / Phase 4++. Reduction-layer self-validation: each entry asserts that `uniform_int_inclusive(range[0], range[1])` at `canonical_seed` produces `outputs`. At least one entry SHOULD use a non-power-of-two `range` width to catch the signed-int64 host's naive-corrected modulo (which silently equals the correct u64 modulo only when 2^64 mod w = 0).",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["canonical_seed", "range", "outputs"],
+            "properties": {
+              "canonical_seed": { "type": "integer" },
+              "range": {
+                "type": "array",
+                "items": { "type": "integer" },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "outputs": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "type": "integer" }
+              }
+            },
+            "additionalProperties": false
+          }
         }
       },
       "additionalProperties": false

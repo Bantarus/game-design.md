@@ -328,3 +328,38 @@ Two shapes coexist: bare numbers (probability only, the v0.1 form) and `{ weight
 **Per-uniform selection_rule.** The same `selection_rule:` field on `uniform` distributions carries the boolean-comparison vocabulary: `less_than`, `less_than_or_equal`, `greater_than`, `greater_than_or_equal`, `equal`. The Phase-2.5 normative `sample <= threshold` for crit (#3) is now structurally declared as `selection_rule: less_than_or_equal`; the migrated integer form in tick-combat uses `less_than` with threshold=1 (1-in-10 = 10% crit; semantically identical to the old `sample <= 0.10` on `[0.0, 1.0]`).
 
 **No further ratchet planned.** D-017 is closed.
+
+---
+
+## D-018 — Reduction-layer reference vector normative (closes F-007 → spec contract; resolves spec-ambiguity #16)
+
+- **Status:** decided at v0.2.0-alpha Phase 4++ (2026-05-23). Resolves spec-ambiguity #16 (the F-007 reduction bug as a spec gap, not a comment in `prng.gd`).
+- **Decided:** 2026-05-23.
+- **Spec footprint:** §4.7 — new "Uniform-int reduction is normative" paragraph + extended `uniform_int_reference_vector:` requirement on every `prng:` declaration.
+- **Schema footprint:** `PrngSpec.uniform_int_reference_vector` array (multi-w entries, each with `canonical_seed`, `range`, integer `outputs`).
+
+**Problem (the F-007 gap that the raw vector couldn't catch).** D-015 pinned the raw `u64` stream and shipped a `reference_vector:` so engines could self-validate at startup. Phase 4+'s cross-engine integer-trajectory work then surfaced a bug *one layer deeper*: GDScript's signed `int % w` on a high-bit-set raw silently gives the wrong reduction, but the engine had already passed the raw vector cleanly because the raw `u64`s were bit-identical. The divergence appeared only at trajectory tick 2 (tick 1 matched by luck — the first raw's low bits happened to be modulo-bias-friendly for the specific seed and `w` used in that sample). Without a reduction-layer contract, any future engine on a signed-int64 host (Lua, untyped JS, Blueprint visual graph, .NET under default int) would re-discover the bug at *its* tick N — exactly the "almost always deterministic" failure mode the project refuses.
+
+**Decision.** Make the reduction layer a spec contract with three pieces:
+
+1. **Normative reduction algorithm.** `uniform_int_inclusive(0, w-1) ≡ (rng.next_u64() as u64) mod (w as u64)`. The 32-bit-halves split is the prescribed *equivalent* form for signed-int64 hosts; naive `raw % w` and naive `((raw % w) + w) % w` are FORBIDDEN for cross-engine trees (the former gives negative results, the latter is correct only for pow-of-two `w`).
+2. **Extended reference vector.** Every `prng:` declaration now ships a `uniform_int_reference_vector:` with at least **two entries**: one power-of-two `w` (validates the reduction itself, bias-free) and one non-power-of-two `w` (validates the engine handles `(2^64 mod w) ≠ 0` correctly — the bit that catches the naive-corrected form). At least one entry's draw #1 MUST be adversarial — chosen so a wrong reduction fails at startup, not at tick N.
+3. **Engine self-validation contract.** Both the raw and reduction vectors are checked at adapter startup before any simulation work. An engine that disagrees with either vector is incorrect *regardless* of whether its trajectory happens to match.
+
+**Why two w's and not one.** A single `w` can match by coincidence — exactly what happened in Phase 4+'s pre-fix Godot at tick 1. The pair `(pow-of-two w, non-pow-of-two w)` narrows the diagnosis:
+
+- A no-correction-at-all impl fails on both.
+- A naive-corrected impl (the `((raw % w) + w) % w` form that many programmers reach for) passes pow-of-two but **fails non-pow-of-two**, because `2^64 mod w = 0` only when `w` divides `2^64`.
+- A correct 32-half-split impl passes both.
+
+The non-pow-of-two entry is what makes the vector load-bearing.
+
+**Why adversarial draw #1.** Phase 4+'s bug survived to tick 2 because draw #1 matched by luck. The reference vector's job is to remove that luck — if the first PRNG output has the high bit set AND the reduction would differ between the correct and naive forms for that specific `(raw, w)`, then any wrong implementation fails at adapter startup. The chosen `canonical_seed: 0` for tick-combat satisfies this: first raw is `0x860bfe4fec669882` (high bit set); `u64 % 7 = 1` vs naive-corrected = 6 vs no-correction = -1. Three distinguishable answers on draw #1.
+
+**Modulo bias accepted at v0.2.0-alpha.** `next_u64() mod w` is slightly biased for non-pow-of-two `w` (the bias is `2^64 mod w` extra mass on the first `2^64 mod w` integers). For small `w` (the tick-combat ranges: `w ≤ 100`, plus the values declared in `weighted.options` summing to 100) the bias is negligible — `2^64 / 100 ≈ 1.84e17`, so the bias per option is `< 6e-18`. Unbiased reduction (Lemire 2019 multiply-shift; rejection sampling) becomes spec-relevant only when a distribution declares a `w` large enough for the bias to matter; at that point reduction algorithm becomes a per-distribution field. Not yet.
+
+**Same-author-twice caveat (recorded in F-007 alongside this decision).** D-018 closes the spec-contract gap that F-007 named. It does NOT close the parallel rigor caveat — both engine A (xtreme) and engine B (Godot) were implemented by the same agent reading the same spec; shared interpretive blind spots survive both. A third-party implementation from spec alone remains the next rigor tier. The benefit of D-018: a future third-party implementer hits the reduction-layer self-check at adapter startup and fails fast on exactly the class of bug that took two engines to surface here.
+
+**Migration (tick-combat).** `examples/tick-combat/gdd/systems/distributions.md::prng` gains a `uniform_int_reference_vector:` block with two entries at `canonical_seed: 0`: `range: [0, 7]` (pow-of-two, outputs `[2, 0, 1, 1, 7, 2, 5, 6]`) and `range: [0, 6]` (non-pow-of-two, outputs `[1, 1, 5, 6, 1, 5, 0, 3]`). Both engines compile the table into a static const + a self-check function called from `Simulation::new()` immediately after `reference_vector_self_check()`. The golden trajectory does NOT change (both engines were already producing correct reductions — D-018 codifies what was correct, not what was broken).
+
+**No further ratchet planned.** D-018 is closed. The reduction-layer field is structurally required on every `prng:` declaration at v0.2.0-alpha; a future `Distribution.reduction:` opt-out for unbiased reductions would be a new D-NNN, not a backwards step here.

@@ -26,10 +26,14 @@ var gold: int = 0
 var rng: DistributionsModule
 
 func _init(seed: int) -> void:
-	# Self-validate PRNG against the spec's reference vector before any
+	# Self-validate PRNG against the spec's reference vectors before any
 	# simulation work — catch misimplementation before it produces
 	# wrong-but-consistent trajectories. Matches xtreme's `Simulation::new`.
+	# Raw vector first (catches PRNG / seeding bugs); then reduction-layer
+	# vector (D-018, catches GDScript signed-int64 % w divergence — the
+	# F-007 failure mode, now a startup tripwire).
 	PRNGModule.reference_vector_self_check()
+	PRNGModule.uniform_int_reference_vector_self_check()
 	rng = DistributionsModule.new(seed)
 
 # Phase-2 demo roster — same content as xtreme's deploy_demo_roster() to

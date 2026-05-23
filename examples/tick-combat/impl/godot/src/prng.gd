@@ -108,3 +108,45 @@ static func reference_vector_self_check() -> void:
 				]
 			)
 			assert(false, "PRNG reference vector mismatch — see push_error above")
+
+# D-018 / Phase 4++. Reduction-layer reference vectors at canonical_seed=0.
+# This is the self-check that catches the F-007 GDScript-modulo bug at
+# adapter startup — exactly the failure mode that previously survived to
+# trajectory tick 2. Two entries: power-of-two w=8 (range [0,7]) and
+# non-power-of-two w=7 (range [0,6]). Draw #1 at seed 0 is adversarial
+# under both w's because the first raw u64 (0x860bfe4fec669882) has the
+# high bit set, so the GDScript signed-int64 reinterpretation matters.
+const REDUCTION_VECTOR_W8_SEED_0: Array = [2, 0, 1, 1, 7, 2, 5, 6]
+const REDUCTION_VECTOR_W7_SEED_0: Array = [1, 1, 5, 6, 1, 5, 0, 3]
+
+# Self-check uniform_int_inclusive against the spec's reduction-layer vector.
+# Called at adapter startup immediately after reference_vector_self_check.
+static func uniform_int_reference_vector_self_check() -> void:
+	var script := load("res://src/prng.gd")
+	# Power-of-two w (range [0, 7]).
+	var rng_w8 = script.new(0)
+	for i in range(REDUCTION_VECTOR_W8_SEED_0.size()):
+		var expected: int = REDUCTION_VECTOR_W8_SEED_0[i]
+		var actual: int = rng_w8.uniform_int_inclusive(0, 7)
+		if actual != expected:
+			push_error(
+				"uniform_int reduction vector mismatch at (seed=0, range=[0,7]), index %d: spec wants %d, this engine produced %d" % [
+					i, expected, actual
+				]
+			)
+			assert(false, "uniform_int reduction vector mismatch (w=8) — see push_error above")
+	# Non-power-of-two w (range [0, 6]). The entry that catches the
+	# naive-corrected `((raw % w) + w) % w` form (which silently equals
+	# the correct u64 modulo only when 2^64 mod w = 0 — i.e. only for
+	# power-of-two w).
+	var rng_w7 = script.new(0)
+	for i in range(REDUCTION_VECTOR_W7_SEED_0.size()):
+		var expected: int = REDUCTION_VECTOR_W7_SEED_0[i]
+		var actual: int = rng_w7.uniform_int_inclusive(0, 6)
+		if actual != expected:
+			push_error(
+				"uniform_int reduction vector mismatch at (seed=0, range=[0,6]), index %d: spec wants %d, this engine produced %d" % [
+					i, expected, actual
+				]
+			)
+			assert(false, "uniform_int reduction vector mismatch (w=7) — see push_error above")

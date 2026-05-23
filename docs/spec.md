@@ -388,6 +388,50 @@ The default is **`xoshiro256_starstar` + `splitmix64` seeding**. A per-distribut
 
 **Reference vector requirement.** Every PRNG declaration MUST ship a `reference_vector:` of the first 5 raw u64 outputs at a `canonical_seed:`. Engines self-validate against the vector at adapter startup (or in a unit test) — divergence in the vector means the engine has misimplemented the PRNG or seeding, surfacing the bug before any trajectory comparison runs. The vector lives in the spec, not in each adapter; an adapter that disagrees with the vector is incorrect *regardless* of whether its trajectory happens to match.
 
+**Uniform-int reduction is normative, and the reference vector extends to it (D-018, Phase 4++ at v0.2.0-alpha).** The raw `reference_vector:` above guarantees both engines agree on the underlying `u64` stream, but it stops one layer too early: every consuming distribution (`uniform`, `discrete_sum`, `weighted`, `shuffle_bag`) reaches into the stream via a *reduction* step — typically `next_u64() mod w` to produce a uniform integer in `[0, w-1]` — and that reduction is where Phase 4+ caught a subtle cross-engine bug (F-007). The bug only manifested at trajectory tick 2, *after* both engines had passed the raw vector cleanly. The fix is to make the reduction itself a spec contract.
+
+The normative reduction for "uniform integer in `[0, w-1]` from one PRNG draw" is the u64-typed modulo:
+
+```
+uniform_int_inclusive(0, w-1)  ≡  (rng.next_u64() as u64) mod (w as u64)
+```
+
+Engines whose host language has a native `u64` (Rust, C, Go) implement this directly. Engines whose host language is *signed-int64* by default (GDScript, Lua, untyped JS, Python under hardware-int simulation, a Blueprint visual graph) MUST implement the equivalent **32-bit-halves split**, because a signed-truncated `raw % w` does *not* equal `(raw as u64) % w` when the high bit is set:
+
+```
+let hi32  = (raw >> 32) AND 0xFFFFFFFF        # logical-shifted high u32
+let lo32  =  raw        AND 0xFFFFFFFF        # low u32
+let t32   = (2^32) mod w                       # precomputable
+return ((hi32 mod w) * t32 + (lo32 mod w)) mod w
+```
+
+Naive forms FORBIDDEN for cross-engine trees:
+
+- `raw % w` on a signed-int64 host — returns a *negative* result for high-bit-set raws.
+- `((raw % w) + w) mod w` on a signed-int64 host — happens to be correct when `w` divides `2^64` (power-of-two `w`); WRONG for any other `w`, because the signed-to-unsigned reinterpretation requires adding back `(2^64 mod w)` and that term is zero only for pow-of-two `w`.
+
+Modulo bias (the slight non-uniformity that `% w` introduces when `w` does not divide `2^64`) is *accepted* at v0.2.0-alpha for small `w`. Unbiased reductions (Lemire 2019, rejection sampling) are out of scope until a distribution surfaces a `w` large enough for the bias to matter — at which point the reduction algorithm becomes a per-distribution declaration alongside `prng:`.
+
+**Uniform-int reference vector (extends the raw vector to the reduction layer).** Every `prng:` declaration MUST also ship a `uniform_int_reference_vector:` containing at least two `(canonical_seed, range, outputs)` entries: **one with a power-of-two `w`** (validates the `u64` reduction itself) and **one with a non-power-of-two `w`** (validates that the engine handles `(2^64 mod w) ≠ 0` correctly — the bit that catches the naive-corrected form). The first draw of at least one entry MUST be *adversarial* — i.e., chosen such that a wrong reduction produces a different output on draw #1 — so a misimplementation fails at adapter startup, not on trajectory line N. The chosen `canonical_seed:` may coincide with the raw vector's; the entry's `outputs:` are the first N integer results of `uniform_int_inclusive(0, w-1)`.
+
+```yaml
+prng:
+  algorithm: xoshiro256_starstar
+  seeding:   splitmix64
+  reference_vector:                  # raw u64 stream — see above
+    canonical_seed: 0
+    outputs: ["0x860bfe4fec669882", "0x829cde4321bdff18", ...]
+  uniform_int_reference_vector:      # reduction layer — D-018
+    - canonical_seed: 0
+      range: [0, 7]                  # power-of-two w=8 (bias-free)
+      outputs: [2, 0, 1, 1, 7, 2, 5, 6]
+    - canonical_seed: 0
+      range: [0, 6]                  # non-power-of-two w=7 (bites naive-corrected form)
+      outputs: [1, 1, 5, 6, 1, 5, 0, 3]
+```
+
+Engines validate both vectors at adapter startup, before any simulation work runs. The reduction-layer vector is what converts the F-007 bug from "documented in a comment" to "spec contract any future engine must satisfy before it gets to write its first trajectory line."
+
 **Seeding (`splitmix64`).** Given a single u64 seed `S`, `splitmix64` produces the four u64s used to initialize xoshiro256**'s state. The algorithm (Blackman & Vigna's reference): `z = (S += 0x9E3779B97F4A7C15); z = (z ^ (z >> 30)) * 0xBF58476D1CE4E1B5; z = (z ^ (z >> 27)) * 0x94D049BB133111EB; z = z ^ (z >> 31); return z`. Call four times to fill `(s0, s1, s2, s3)`. All arithmetic is wrapping u64. The canonical `seed: deterministic_per_run` field on a distribution is the input S to this procedure.
 
 ---

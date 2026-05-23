@@ -95,6 +95,47 @@ pub fn reference_vector_self_check() {
     }
 }
 
+/// D-018: reduction-layer reference vectors at `canonical_seed: 0`. Two
+/// entries — one power-of-two `w` (validates the reduction itself, bias-free)
+/// and one non-power-of-two `w` (catches the naive-corrected form on a
+/// signed-int64 host, which silently equals u64 modulo only when 2^64 mod w
+/// = 0). Draw #1 is adversarial under both `w`s: first raw at seed 0 has
+/// the high bit set, so a wrong reduction fails at adapter startup rather
+/// than at trajectory tick N (the failure mode F-007 caught at tick 2).
+pub const REDUCTION_REFERENCE_VECTOR_W8_SEED_0: [i32; 8] = [2, 0, 1, 1, 7, 2, 5, 6];
+pub const REDUCTION_REFERENCE_VECTOR_W7_SEED_0: [i32; 8] = [1, 1, 5, 6, 1, 5, 0, 3];
+
+/// Self-check `uniform_int_inclusive` against the spec's reduction-layer
+/// reference vectors. Called at adapter startup immediately after
+/// `reference_vector_self_check`. Panics on mismatch with diagnostic output.
+pub fn uniform_int_reference_vector_self_check() {
+    // Power-of-two w (range [0, 7]; w = 8).
+    {
+        let mut rng = Xoshiro256StarStar::from_seed(0);
+        for (i, expected) in REDUCTION_REFERENCE_VECTOR_W8_SEED_0.iter().enumerate() {
+            let actual = rng.uniform_int_inclusive(0, 7);
+            assert_eq!(
+                actual, *expected,
+                "uniform_int reduction vector mismatch at (seed=0, range=[0,7]), index {}: spec wants {}, this engine produced {}",
+                i, expected, actual
+            );
+        }
+    }
+    // Non-power-of-two w (range [0, 6]; w = 7). This is the entry that catches
+    // the naive-corrected `((raw % w) + w) % w` form on signed-int64 hosts.
+    {
+        let mut rng = Xoshiro256StarStar::from_seed(0);
+        for (i, expected) in REDUCTION_REFERENCE_VECTOR_W7_SEED_0.iter().enumerate() {
+            let actual = rng.uniform_int_inclusive(0, 6);
+            assert_eq!(
+                actual, *expected,
+                "uniform_int reduction vector mismatch at (seed=0, range=[0,6]), index {}: spec wants {}, this engine produced {}",
+                i, expected, actual
+            );
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,6 +143,11 @@ mod tests {
     #[test]
     fn reference_vector_matches() {
         reference_vector_self_check();
+    }
+
+    #[test]
+    fn uniform_int_reference_vector_matches() {
+        uniform_int_reference_vector_self_check();
     }
 
     #[test]

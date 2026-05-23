@@ -47,10 +47,14 @@ pub struct UnitSnapshot {
 
 impl Simulation {
     pub fn new(seed: u64) -> Self {
-        // Self-validate PRNG against the spec's reference vector before any
+        // Self-validate PRNG against the spec's reference vectors before any
         // simulation work — catch misimplementation before it produces
-        // wrong-but-consistent trajectories.
+        // wrong-but-consistent trajectories. Raw vector first (catches PRNG
+        // / seeding bugs); then reduction-layer vector (D-018, catches host-
+        // language signedness bugs in `uniform_int_inclusive` — the F-007
+        // failure mode, now a spec contract instead of a comment).
         crate::prng::reference_vector_self_check();
+        crate::prng::uniform_int_reference_vector_self_check();
         let mut world = World::new();
         world.insert_resource(Rng(Xoshiro256StarStar::from_seed(seed)));
         world.insert_resource(Gold(0));
