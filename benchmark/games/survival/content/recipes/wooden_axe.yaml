@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: wooden_axe
+status: draft
+implemented_in: ["src/driftwood/content/recipes/wooden_axe.py"]
+name: "Wooden Axe"
+tier: 1
+inputs:
+  - { item: wood,        quantity: 3 }
+  - { item: fiber_rope,  quantity: 1 }
+output:
+  item: wooden_axe
+  quantity: 1
+  tag: tool
+  starting_durability: 12
+tool_required: belt_knife
+in_game_minutes_to_craft: 60

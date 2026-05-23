@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: fiber_rope
+status: draft
+implemented_in: ["src/driftwood/content/recipes/fiber_rope.py"]
+name: "Fiber Rope"
+tier: 1
+inputs:
+  - { item: fiber, quantity: 3 }
+output:
+  item: fiber_rope
+  quantity: 1
+  tag: material
+tool_required: belt_knife
+in_game_minutes_to_craft: 30
