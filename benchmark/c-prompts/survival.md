@@ -1,0 +1,11 @@
+# Driftwood — C-condition prompt
+
+> Pre-registered under `27a4381` (Phase 5 pre-reg v6). Frozen before trial zero; this file's SHA at trial-harness commit is the locked C-prompt.
+
+You're building a short survival-and-crafting game called Driftwood. The player is a sailor shipwrecked on a small hand-authored island. A rescue ship's route passes the island's signal point every five days, so the whole game is the next five in-game days — about thirty minutes of wall-clock time per run. The player has to gather raw materials, craft tools and crafting stations along a fixed recipe tree, and build and light the signal pyre at the island's high point by sunset on Day 5 to be rescued.
+
+The player has four actions: *gather* (harvest a resource node — tree, stone outcrop, fiber plant, berry bush, tidepool, spring, flint outcrop — with yields depending on which tool they're carrying), *craft* (combine materials into items at the player's camp, sometimes requiring a crafting station like a campfire or sawhorse), *eat / drink / sleep* (manage hunger, thirst, and night exposure), and *build the signal pyre* (the win condition — the most expensive recipe chain in the game, ending in lighting a flint shard at the high point). No combat, no enemies, no procedural generation, no metagame progression: same island every run, same nodes in the same places, the only thing that carries over is the player's knowledge of the island.
+
+An in-game day is divided into morning, afternoon, evening, and night — about six minutes of wall-clock time per day. Hunger and thirst decay over the in-game day; you die if either reaches zero, and sleeping in the open at night costs health. The recipe tree has about a dozen craftables across four tiers (tier 0 needs no tool, tier 1 needs the starting belt knife, tier 2 needs a wooden axe, tier 3 needs a pickaxe, and the signal pyre is the win-tier recipe). The pillars are *the graph is the game* (route-planning across the recipe tree is the gameplay), *time pressure, not difficulty pressure* (no enemies or skill tests — only the deadline), and *a real island, not a procedurally-generated one* (cross-run learning is the replayability surface).
+
+A skilled player reliably reaches Day 5 with the pyre lit; first-timers usually miss the rescue by under-gathering on Day 3 or running out of food on Day 4.

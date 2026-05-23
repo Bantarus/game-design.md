@@ -1,0 +1,76 @@
+task_type: hard
+game: platformer
+n_per_cell: 20
+headline: true
+brief: |
+  Add a weather system to Embergrave.
+
+  Each level has a weather attribute with one of two values: `clear` or
+  `rain`. The level's weather is fixed in the level data (not randomized
+  at runtime). Existing levels default to `clear` when the field is
+  absent.
+
+  When a level's weather is `rain`:
+
+  1. **Wet ember pickups.** Every ember pickup in the level yields half
+     its normal value when collected (a 4-ember pickup gives 2; a 3-ember
+     gives 1, rounded down; a 1-ember gives 0 with a small "fizzle"
+     observable signal).
+
+  2. **Wet wings.** While the moth is gliding in a `rain` level, ember
+     drains at 1.5x the normal rate (because the moth's wings are wet).
+
+  3. **No effect on jump or dash.** Jump arcs are unchanged; dash cost
+     is unchanged; physics constants are unchanged.
+
+  The system also requires you to add a balance-tracking number: how
+  many levels per region carry the `rain` attribute. The design intent
+  is that the hot springs region has the most rain levels (it's the
+  geyser region — atmospheric coherence), and the caverns region has
+  none (introductory region; weather noise would interfere with
+  learning).
+
+  The system must preserve Embergrave's existing deterministic-replay
+  guarantee: a recorded replay of a `rain` level must reproduce the
+  same per-tick simulation state on playback as it did when recorded
+  (the rain attribute is part of level data, not a runtime random
+  decision).
+intent_checklist:
+  - id: weather_attribute_added
+    description: "The implementation adds a `weather` attribute (or equivalent) to the level data, taking values `clear` or `rain`."
+  - id: existing_levels_default_clear
+    description: "Levels that lack the weather field continue to behave as `clear` (backwards-compatibility default; existing levels are not broken by the change)."
+  - id: rain_halves_ember_pickup
+    description: "In `rain` levels, ember pickup values are halved (rounded down): a 4-ember pickup gives 2; a 3-ember gives 1; a 1-ember gives 0."
+  - id: rain_increases_glide_drain
+    description: "In `rain` levels, the glide action drains ember at 1.5x the normal rate."
+  - id: jump_and_dash_unchanged
+    description: "Jump arc and dash cost / behavior are unchanged in `rain` levels."
+  - id: balance_number_rain_levels_per_region
+    description: "The implementation includes a balance-tracking number for how many `rain` levels each of the four regions contains, with the hot springs region holding the highest count and the caverns region holding zero."
+  - id: deterministic_replay_preserved
+    description: "The implementation preserves deterministic replay: a recorded input sequence on a `rain` level produces the same per-tick simulation state on playback (the weather state is part of level data, not a runtime random decision)."
+notes: |
+  This is a headline task touching mechanics (new attribute on level
+  entity), loops (flight loop's ember-drain calculation under rain),
+  balance (the rain-levels-per-region tracking), at least one state
+  machine (the moth_movement state's glide transition's ember-drain
+  rate must respond to weather), and the load-bearing
+  `deterministic_given_input` invariant.
+
+  Per the user's harness-caution, criteria are about BEHAVIOR
+  ("rain halves ember pickup," "glide drains at 1.5x") not about
+  spec-structure ("declares a new entry in the invariants namespace").
+  The `balance_number_rain_levels_per_region` criterion phrases the
+  balance check in behavioral language ("includes a balance-tracking
+  number") rather than structural language ("declares
+  balance_targets.rain_level_count_per_region"). An A-condition output
+  that uses the spec's namespacing passes; a B-condition output that
+  expresses the same fact in prose passes; a C-condition output that
+  hardcodes the per-region counts in a comment also passes.
+
+  The `deterministic_replay_preserved` criterion probes invariant honor
+  in BEHAVIORAL form: the test is "does same input on same level produce
+  same state," not "does the implementation declare
+  invariants.deterministic_given_input." The latter would silently reward
+  the A-condition spec-shaped output.

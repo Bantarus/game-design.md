@@ -1,0 +1,70 @@
+task_type: ambiguity
+game: platformer
+n_per_cell: 20
+headline: true
+brief: |
+  Add a new collectible to Embergrave.
+
+  The collectible should reward exploration without rewarding repetitive
+  grinding. Choose a name for it. Choose what collecting it does (its
+  effect on the player or the game state). Choose how it appears in
+  levels — where it can be placed, how the level designer would author
+  it, and any constraints on its placement.
+
+  Defend every design choice you make against Embergrave's pillars
+  (the brief mentions: *commitment* / *vision through motion* / *cheap
+  death, sticky progress*) and the prose rationale that the game's
+  documentation provides. If you choose a number — a quantity, a cost,
+  a duration, a count per level — defend the chosen number against the
+  game's existing balance language (you may consult numbers the game
+  already declares; you should not introduce numbers that contradict
+  the design's established ranges).
+
+  Do not add features the brief explicitly forbids (combat, story-driven
+  moments, procedural generation, persistent meta-progression).
+intent_checklist:
+  - id: collectible_named
+    description: "The output proposes a specific named collectible (not a placeholder like `new_collectible`)."
+  - id: effect_defined
+    description: "The output specifies what collecting it DOES (an observable effect on player or game state)."
+  - id: placement_constraints_articulated
+    description: "The output specifies where in levels the collectible can be placed, and any constraints (e.g., at most N per level, only in certain regions, etc.)."
+  - id: rewards_exploration_not_grinding
+    description: "The chosen design actually rewards exploration (encourages finding hidden / hard-to-reach instances) without rewarding grinding (does not incentivize repeated revisits of the same level for incremental gain). Score: does the design hold under a 30-second adversarial reading?"
+  - id: pillar_alignment_committed
+    description: "The design choices are consistent with the *commitment* pillar (no take-backs; no design that lets the player undo a bad decision)."
+  - id: pillar_alignment_vision
+    description: "The design choices are consistent with the *vision through motion* pillar (does not contradict ember-as-light-and-resource; does not introduce a parallel HUD that distracts from the ember)."
+  - id: pillar_alignment_cheap_death
+    description: "The design choices are consistent with the *cheap death, sticky progress* pillar (does not penalize the player for dying; does not introduce a counter that grows back after death)."
+  - id: forbids_combat_etc
+    description: "The design does NOT introduce any of the brief's forbidden features (combat, story-driven moments, procedural generation, persistent meta-progression)."
+  - id: numbers_defended
+    description: "If the design includes numbers (quantities, durations, counts), those numbers are defended against the game's existing balance ranges (the agent cites a comparable existing number or argues the number is in the right neighborhood)."
+notes: |
+  This is the ambiguity probe — the deliberately under-specified task
+  with no numbers in the brief. The criteria probe DEFENSIBILITY against
+  the prose rationale, which is the prose-fallback claim under direct
+  test (per spec §1.4: "prose is fallback when no token covers a case").
+
+  Pillar-alignment criteria (`pillar_alignment_committed`,
+  `_vision`, `_cheap_death`) are subjective judgments — they ask whether
+  the design holds against the pillar's spirit, not whether the
+  implementation declares pillar text in a particular namespace. The
+  auxiliary LLM judge + user consensus scores these per the §"Judge"
+  section of the pre-reg.
+
+  `numbers_defended` is the strongest test of the prose-rationale claim:
+  if A condition outputs cite specific existing numbers (e.g., "this
+  collectible refills 2 ember, matching the lowest existing ember
+  pickup value") at higher rates than B and C, that's evidence for the
+  spec's structured prose-numbers correspondence helping the agent
+  defend choices. If A doesn't outperform on this criterion, the prose-
+  rationale claim is weaker than the standard claims.
+
+  The task is genuinely ambiguous — there are many defensible answers
+  (a wind-shard that briefly extends the ember meter's max; a glyph
+  that unlocks a shortcut on subsequent runs of the same level; a
+  hidden checkpoint that doesn't auto-touch). The criteria score the
+  defensibility of WHATEVER the agent chose, not whether the agent
+  chose the "right" answer.

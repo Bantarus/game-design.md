@@ -1,0 +1,58 @@
+task_type: ambiguity
+game: survival
+n_per_cell: 20
+headline: true
+brief: |
+  Add a new world feature to Driftwood that addresses the *time pressure,
+  not difficulty pressure* pillar in a way the existing mechanics don't.
+
+  The feature can be anything in the game's surface — a new resource, a
+  new craftable, a new environmental beat, a new constraint on the
+  player's actions, a change in how the day rhythm interacts with
+  something. Choose what the feature is. Choose where it lives. Choose
+  how it affects the player's planning.
+
+  Defend every design choice against Driftwood's pillars (*the graph is
+  the game* / *time pressure, not difficulty pressure* / *a real island,
+  not a procedurally-generated one*) and the prose rationale that the
+  game's documentation provides. If you choose a number — a duration, a
+  cost, a count, a chance — defend the chosen number against the game's
+  existing balance language.
+
+  Do not add features the brief explicitly forbids (combat, procedural
+  generation, metagame progression across runs, multiplayer).
+intent_checklist:
+  - id: feature_named
+    description: "The output proposes a specific named feature (not a placeholder like `new_thing`)."
+  - id: surface_placement_articulated
+    description: "The output specifies where in the game's surface the feature lives (a new resource? a new craftable? a new environmental beat? etc.)."
+  - id: planning_effect_articulated
+    description: "The output specifies how the feature affects the player's PLANNING (the brief says planning is the gameplay; the feature should change what the player has to plan around)."
+  - id: addresses_time_pressure_pillar
+    description: "The feature addresses the *time pressure, not difficulty pressure* pillar in a way the existing mechanics don't — i.e., the feature genuinely creates time pressure without adding a skill challenge or a combat element. Score: does the design hold under a 30-second adversarial reading?"
+  - id: pillar_alignment_graph
+    description: "The design choices are consistent with the *the graph is the game* pillar — the feature integrates with the recipe / resource graph, doesn't bypass it, doesn't introduce a parallel system that competes with graph reasoning."
+  - id: pillar_alignment_real_island
+    description: "The design choices are consistent with the *a real island* pillar — the feature is consistent with the island being hand-authored and learned across runs (not randomized in a way that defeats cross-run learning)."
+  - id: forbids_combat_etc
+    description: "The design does NOT introduce any of the brief's forbidden features (combat, procedural generation, metagame progression across runs, multiplayer)."
+  - id: numbers_defended
+    description: "If the design includes numbers, those numbers are defended against the game's existing balance ranges (the agent cites a comparable existing number or argues the number is in the right neighborhood)."
+notes: |
+  Mirror of the platformer ambiguity probe. The prose-rationale-as-
+  fallback claim (spec §1.4) is under direct test here: under condition
+  A the agent has the spec's full prose-numbers correspondence; under
+  B the agent has the same prose without the structural anchors; under
+  C the agent has only the C-prompt.
+
+  As with the platformer ambiguity task, criteria score the
+  DEFENSIBILITY of whatever the agent chose, not whether the agent
+  chose the "right" answer. Many defensible features exist (a tide
+  system that opens/closes coastal nodes on a fixed schedule; a
+  morale meter that gates the player's gather efficiency; a
+  perishable-food mechanic where uncooked fish spoils after N hours).
+
+  The `numbers_defended` criterion is the strongest direct probe of the
+  prose-rationale claim — if structured A outperforms flat-prose B on
+  this criterion specifically, that's evidence the spec's structure
+  helps the agent ground design choices in existing balance language.

@@ -1,0 +1,44 @@
+task_type: easy
+game: platformer
+n_per_cell: 5
+headline: false
+brief: |
+  Author a new Embergrave level. The level is a tier-3 fault-lines descent
+  called `fault_lines_07_the_chasm`. Design intent: the player enters at
+  the top of a vertical shaft, descends through six platforms across the
+  shaft (some axis-aligned, some narrow ledges), passes two checkpoints
+  along the natural descent path, collects four ember pickups (worth a
+  total of about 8 ember), and exits at the bottom. A void / lava region
+  occupies the bottom of the shaft below the exit; falling past the exit
+  is lethal.
+
+  Author the level YAML conforming to the `gdd/content/levels.md` schema.
+  The level should be implementable as one new file in the
+  `content/levels/` directory; no other files need to change.
+intent_checklist:
+  - id: file_authored
+    description: "Output is a level definition file for the fault_lines region with id `fault_lines_07_the_chasm`."
+  - id: tier_three
+    description: "The level's tier is 3 (matches the brief's `tier-3` requirement)."
+  - id: six_platforms
+    description: "The level contains exactly 6 platforms (the brief said six)."
+  - id: two_checkpoints
+    description: "The level contains exactly 2 checkpoints (the brief said two)."
+  - id: four_ember_pickups_sum_eight
+    description: "The level contains exactly 4 ember pickups; their value sum is approximately 8 (within ±2)."
+  - id: entry_above_exit
+    description: "The entry point is at a higher world-coordinate Y than the exit point (it's a descent)."
+  - id: lethal_below_exit
+    description: "There is a lethal region (lava / void / similar) at the bottom of the shaft, below the exit point."
+notes: |
+  This is a sanity-check task (non-headline, N=5). Under condition A, the
+  schema is available in `gdd/content/levels.md`; under B, the schema is
+  flattened into prose; under C, the agent must infer reasonable level
+  structure from the C-prompt alone. The checklist scores game-content
+  questions (does the level have the right shape per the brief), not
+  spec-structure questions (does it use the schema's exact namespacing).
+  A condition-C output that gets the platforms/checkpoints/ember counts
+  right but doesn't conform to the schema still passes most criteria —
+  schema-conformance is implicit via `file_authored`'s permissive
+  reading: any level definition file with the right id and the right
+  game-content shape counts.

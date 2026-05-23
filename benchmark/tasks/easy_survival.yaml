@@ -1,0 +1,38 @@
+task_type: easy
+game: survival
+n_per_cell: 5
+headline: false
+brief: |
+  Author a new Driftwood recipe. The recipe is `cooked_fish`: at a
+  campfire, the player turns 1 raw_fish into 1 cooked_fish. The
+  cooked_fish is a food item that refills 6 hunger when eaten. The recipe
+  is tier-2 (requires the wooden axe as the gating tool tier) and takes
+  about 30 in-game minutes to craft.
+
+  Author the recipe YAML conforming to the `gdd/content/recipes.md`
+  schema. The recipe should be implementable as one new file in the
+  `content/recipes/` directory; no other files need to change.
+intent_checklist:
+  - id: file_authored
+    description: "Output is a recipe definition file with id `cooked_fish`."
+  - id: tier_two
+    description: "The recipe's tier is 2 (matches the brief's `tier-2`)."
+  - id: input_one_raw_fish
+    description: "The recipe consumes 1 raw_fish as its only input (or as its primary input)."
+  - id: output_one_cooked_fish
+    description: "The recipe produces 1 cooked_fish."
+  - id: hunger_restore_six
+    description: "The output declares hunger-restore-value 6 (the brief specified 6 hunger restored when eaten)."
+  - id: station_campfire
+    description: "The recipe requires a campfire as its crafting station."
+  - id: craft_time_thirty_minutes
+    description: "The recipe's craft time is approximately 30 in-game minutes (within ±15)."
+  - id: tagged_food
+    description: "The recipe's output is tagged as `food` (or otherwise declared as edible)."
+notes: |
+  Same scoring philosophy as easy_platformer: questions probe what the
+  recipe DOES (consumes what, produces what, at which station, with what
+  effect), not whether the implementation uses the exact spec namespacing.
+  An honest C-condition output that gets the food-conversion right at
+  approximately the right craft time passes most criteria even without
+  conforming to the YAML schema's structure.

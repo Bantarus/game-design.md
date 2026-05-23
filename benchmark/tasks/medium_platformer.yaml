@@ -1,0 +1,61 @@
+task_type: medium
+game: platformer
+n_per_cell: 20
+headline: true
+brief: |
+  Implement a new Embergrave action called `wall_kick`. The behavior:
+
+  When the moth is airborne (state: jumping or falling, not gliding) and
+  its position is adjacent to a wall (within 100 micro_units of a solid
+  vertical surface), pressing jump within 4 frames of the wall-touch
+  performs a wall-kick:
+
+  - the moth's horizontal velocity is set to 350 micro_units/tick in the
+    direction *away* from the wall (the moth pushes off);
+  - the moth's vertical velocity is set to the standard jump's vertical
+    velocity (the same as a regular jump from the ground);
+  - the wall_kick costs 1 ember.
+
+  If the player attempts a wall_kick with less than 1 ember, the kick is
+  rejected: the moth's velocity is unchanged, no ember is consumed, and
+  the ember meter flashes dim for 200ms (the same dim-flash a rejected
+  dash uses).
+
+  Wire the new action through Embergrave's existing structures so that
+  (a) the action appears in the airborne moment loop's vocabulary,
+  (b) the moth's movement state machine handles the transition
+  correctly (a wall_kick from `jumping` or `falling` returns the moth
+  to `jumping`), and (c) the rejected-without-ember case is honored.
+intent_checklist:
+  - id: action_named_wall_kick
+    description: "The implementation includes a new action / verb named `wall_kick` (or a clearly equivalent name like `kick_off_wall`)."
+  - id: trigger_airborne_wall_adjacent
+    description: "The wall_kick triggers only when the moth is airborne (not on a platform) AND within ~100 micro_units of a wall."
+  - id: input_window_four_frames
+    description: "The input window for triggering the wall_kick after touching a wall is approximately 4 frames (within ±2)."
+  - id: horizontal_velocity_away
+    description: "On successful wall_kick, the moth's horizontal velocity becomes ~350 micro_units/tick (within ±50) in the direction away from the wall."
+  - id: vertical_matches_standard_jump
+    description: "On successful wall_kick, the moth's vertical velocity becomes the same as the standard jump's vertical velocity (uses the existing jump constant, not a new one)."
+  - id: ember_cost_one
+    description: "A successful wall_kick consumes exactly 1 ember."
+  - id: rejected_without_ember
+    description: "When the player has 0 ember and attempts a wall_kick, the kick is rejected: no velocity change, no ember consumed, and the ember meter dim-flashes (or the rejection is otherwise observable in the same way the existing dash-rejection is)."
+  - id: state_machine_transition_documented
+    description: "The implementation states (in code or comment or design note) what state the moth is in after a successful wall_kick (the brief said: returns to `jumping`)."
+notes: |
+  This is a headline task. The criteria probe game behavior — what the
+  action DOES, under what conditions it triggers, what numerical effects
+  it has — not how the implementation is shaped. A criterion like "the
+  implementation declares a new verb in the verbs namespace" would silently
+  reward A for being spec-shaped; instead the criteria ask "does a
+  wall_kick action exist that meets the behavioral spec." Either a
+  structured `verbs:` declaration (A-style) or a prose description with
+  the same content (B-style) or an inline code function (C-style) can
+  pass.
+
+  The "rejected_without_ember" criterion specifically anchors to the
+  EXISTING dash-rejection pattern (already in the moth's design) — the
+  brief asks the implementation to mirror that pattern. This is a fair
+  test of whether the agent absorbed the brief's design intent, not
+  whether the agent rediscovered the spec's `cost:` field.

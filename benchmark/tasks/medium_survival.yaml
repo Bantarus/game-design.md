@@ -1,0 +1,57 @@
+task_type: medium
+game: survival
+n_per_cell: 20
+headline: true
+brief: |
+  Implement a new Driftwood action called `inspect_tool`. The behavior:
+
+  When the player issues `inspect_tool` targeting an inventory item with
+  tag `tool`, the action reveals that specific tool instance's current
+  remaining-durability as a heads-up notification (e.g., "Wooden Axe: 7
+  uses remaining"). It is a peek action — no in-game time is consumed,
+  no resources are consumed, and no game state is changed by the peek
+  itself.
+
+  The action is only valid against an item that is currently in the
+  player's inventory and whose tag is `tool` (so the player cannot
+  inspect raw_fish, but can inspect wooden_axe, pickaxe, stone_axe,
+  fishing_rod, etc.). Attempting to inspect a non-tool item is rejected
+  (no notification, the action does nothing).
+
+  Wire the new action through Driftwood's existing structures so that
+  (a) the action is part of the player's action loop vocabulary,
+  (b) it does not advance the world clock (zero in-game minutes), and
+  (c) it reads the per-instance durability of the SPECIFIC tool the
+  player targeted (not a class-level default — two wooden axes with
+  different remaining-uses report their own counts).
+intent_checklist:
+  - id: action_named_inspect_tool
+    description: "The implementation includes a new action / verb named `inspect_tool` (or a clearly equivalent name like `check_tool`)."
+  - id: targets_tool_tagged_inventory_items
+    description: "The action targets inventory items whose tag is `tool` (filters out non-tool items like raw_fish or wood)."
+  - id: peek_zero_time_cost
+    description: "The action does NOT advance the world clock (zero in-game minutes consumed)."
+  - id: no_resource_consumption
+    description: "The action does NOT consume any inventory items or any meter (hp/hunger/thirst)."
+  - id: reveals_remaining_durability
+    description: "The action's effect is to reveal the targeted tool's remaining-durability (as a notification, log message, console output, or equivalent observable signal)."
+  - id: per_instance_not_class
+    description: "When the player has two tools of the same kind with different remaining-durability values, inspecting each reports its own count (the action reads the specific targeted instance's value, not a class-level default)."
+  - id: non_tool_rejected
+    description: "Attempting to inspect a non-tool item (e.g., raw_fish, wood, fiber_rope) is rejected: no notification, no state change."
+notes: |
+  This is a headline task. Note the `per_instance_not_class` criterion —
+  it directly probes the per-instance-state expressiveness gap (F-008).
+  A condition-A implementation that reads from a `content_collection`
+  template would fail this criterion (the template has no remaining-uses
+  field per instance); a correct implementation has to model inventory
+  as a runtime data structure with per-item state, which the spec doesn't
+  directly support. The task is fair across A/B/C because the gap is a
+  property of the GAME (per-instance state is unavoidable for tools-with-
+  durability), not a property of any condition's information payload.
+
+  This is also a useful per-instance-state-aware probe of the help
+  differential: if A condition outputs over-rely on the spec's
+  `entities` (templates), they'll fail per_instance_not_class more often
+  than B outputs that have read the brief's prose without the
+  structural bias. That would be a small per-task data point on F-008.

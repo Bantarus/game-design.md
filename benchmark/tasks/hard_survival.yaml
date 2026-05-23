@@ -1,0 +1,78 @@
+task_type: hard
+game: survival
+n_per_cell: 20
+headline: true
+brief: |
+  Add a weather system to Driftwood.
+
+  Each in-game day has a weather attribute, one of three values:
+  `clear`, `drizzle`, or `storm`. The weather for each of the five days
+  of a run is drawn at sunrise of Day 1 from a single pre-registered
+  distribution (so the player sees the full forecast at the start of the
+  run, and the weather sequence is deterministic given the run's seed).
+  Suggested distribution: roughly 60% clear / 25% drizzle / 15% storm
+  per day, sampled independently for each of the five days.
+
+  Effects:
+
+  1. **Drizzle** — fire-cooked recipes (recipes whose `station_required`
+     is `campfire`) take 50% longer to craft. A recipe normally
+     requiring 30 in-game minutes takes 45 on a drizzle day; a 60-minute
+     recipe takes 90.
+
+  2. **Storm** — tidepool nodes are closed for the day. Attempting to
+     gather from a tidepool returns 0 yield with a "tidepool too rough
+     today" message (or equivalent observable signal). The action still
+     consumes its in-game time cost (the player's time is wasted —
+     punishment for not planning around the forecast).
+
+  3. **Clear** — no effect.
+
+  The system requires a balance-tracking number: the expected
+  distribution of storm-day counts across a five-day run (e.g., the
+  probability that a run has 0 storm days, 1 storm day, 2 storm days,
+  etc., given the per-day storm probability). The design intent is that
+  the player should expect roughly 1 storm day per run on average.
+
+  The system must preserve Driftwood's existing wall-clock-decoupled
+  guarantee: the weather sequence is determined at sunrise of Day 1 and
+  does not change based on how long the player takes (in wall-clock
+  time) to play through the run.
+intent_checklist:
+  - id: weather_attribute_added
+    description: "The implementation adds a per-day weather attribute taking values `clear`, `drizzle`, or `storm`."
+  - id: weather_sampled_at_day1_sunrise
+    description: "All five days' weather is sampled at sunrise of Day 1 (not re-rolled each subsequent day), so the player sees the full forecast at run start."
+  - id: weather_sequence_seed_deterministic
+    description: "The weather sequence for a given run-seed is reproducible: replaying the run with the same seed produces the same five-day weather sequence."
+  - id: drizzle_halves_fire_speed
+    description: "On drizzle days, fire-cooked recipes (whose station is the campfire) take 50% longer (a 30-minute recipe takes 45)."
+  - id: storm_closes_tidepools
+    description: "On storm days, gathering from a tidepool returns 0 yield AND still consumes the action's in-game time cost (the player's time is wasted)."
+  - id: clear_no_effect
+    description: "On clear days, recipes craft at their normal time and tidepools yield their normal amount."
+  - id: balance_number_storm_distribution
+    description: "The implementation includes a balance-tracking number for the expected distribution of storm-day counts per run (e.g., expected storms-per-run ≈ 1 given the per-day storm probability)."
+  - id: wall_clock_decoupled_preserved
+    description: "The weather sequence does not change based on wall-clock time: pausing the game, deliberating for a long time, etc., do not alter which days are storms."
+notes: |
+  This is a headline task touching mechanics (per-day weather attribute
+  on the world state), loops (the day loop's weather lookup), balance
+  (the storm-distribution tracking number), at least one state machine
+  (the world_clock state machine's sunrise transition triggers the
+  weather sample at Day 1, then reads the pre-sampled weather on each
+  subsequent sunrise), and the `world_time_decoupled_from_wall_clock`
+  invariant.
+
+  Note the seed_deterministic criterion — this is a behavioral test that
+  the weather system honors Driftwood's overall determinism posture. A
+  C-condition output that uses `random.random()` without seeding would
+  fail this criterion. An A-condition output using
+  `{distributions.weather_per_day}` passes; a B-condition output that
+  reads the spec's "named distributions, seeded per run" prose and uses
+  a seeded RNG also passes. The criterion is behavioral, not structural.
+
+  The `balance_number_storm_distribution` criterion is phrased
+  permissively: a structured `balance_targets.<id>` (A-style), a prose
+  sentence (B-style), or a comment in the implementation noting the
+  expected distribution (C-style) all pass.
