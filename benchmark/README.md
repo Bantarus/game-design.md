@@ -66,19 +66,29 @@ benchmark/
 
 The harness is complete *to the extent code-only work can complete it*. The remaining work requires either an external API key or a local model deployment — each is listed below with what specifically the pre-reg requires.
 
-### 1. Pin the auxiliary LLM judge (pre-reg §"Judge")
+### 1. Wire up the auxiliary LLM judge (pinned at v7: Gemma 4 26B A4B)
 
-The auxiliary judge must be a non-Qwen, non-Claude-family model. The pre-reg suggests Gemini, GPT-4o, or a local Llama variant. To wire it up:
+**The auxiliary judge bundle is pinned at pre-reg v7 (commit landing alongside this README) to Gemma 4 26B A4B (Google), local-inference via llama.cpp.** Non-Qwen, non-Claude family — satisfies the pre-reg's hard family rule (the rule exists to eliminate spec-author interpretive bias and subject overlap; Claude as judge is hard-disqualified by both vectors). Apache-2.0 licensed. No API key required. Runs sequentially alongside the Qwen instrument in the same llama.cpp infrastructure (judge has the full GPU during scoring; generation and judging never compete for VRAM).
 
-1. Choose the specific model + version + sampling params.
-2. Set the API key (`GEMINI_API_KEY` or `OPENAI_API_KEY`) in the environment.
-3. Implement the corresponding judge class in `harness/judge.py` (the `GeminiJudge` / `OpenAIJudge` stubs are placeholders — replace `raise NotImplementedError` with actual SDK calls).
-4. Commit the bundle declaration: this freezes the judge identity.
+The model family + base identity (`gemma-4-26b-a4b`) is normative at v7 pre-reg. The quant + GGUF SHA + llama.cpp version + sampling parameters + chat template are pinned at the harness-build commit per the same bundle-pinning discipline as the instruments. To finalize:
 
-The judge is used for THREE purposes (each requires a separate prompt template):
-- **Matches-intent scoring** (the 0-5 rubric in `judge.py::IntentScore`). Prompt template: builds at trial time from `task.brief` + `subject_output` + `game_brief` (the design-brief.md).
-- **Fairness audit** (Layer 3 of B-construction). Prompt template at `tools/fairness_audit_prompt.md` (frozen).
-- **Blinding-leak calibration** (predict A/B/C from blinded output). Prompt template: needs to be authored as part of judge wiring; the prompt should not leak the rubric or scoring criteria.
+1. Build llama.cpp at a chosen release tag (record git SHA in the bundle).
+2. Download the chosen Gemma 4 26B A4B GGUF (record SHA-256 in the bundle).
+3. Set env vars `DRIFTWOOD_GEMMA_GGUF_PATH` and `DRIFTWOOD_LLAMA_CPP_BIN` (same llama.cpp binary as the Qwen instrument).
+4. Implement `GemmaJudge.{score_matches_intent, audit_fairness, predict_conditions}` in `harness/judge.py` — the class + bundle declaration are pinned; the three methods need their subprocess-call bodies wired up.
+5. Commit the finalized bundle declaration (the harness-build commit's SHA becomes the bundle lock).
+
+The judge is used for THREE purposes (each with a frozen prompt template committed in `benchmark/tools/`):
+
+- **Matches-intent scoring** (the 0-5 rubric, pre-reg §"Judge" Layer 2). Template: [`tools/matches_intent_prompt.md`](tools/matches_intent_prompt.md). Frozen.
+- **Fairness audit** (Layer 3 of B-construction). Template: [`tools/fairness_audit_prompt.md`](tools/fairness_audit_prompt.md). Frozen.
+- **Blinding-leak prediction** (Phase 1 + Phase 2 of the two-phase blinding-leak calibration, pre-reg §"Judge" Layer 3 v7). Template: [`tools/blinding_leak_prompt.md`](tools/blinding_leak_prompt.md). Frozen; identical prompt across both phases.
+
+All three templates are loaded as text and substituted at runtime — no template-generation logic in the judge wire-up.
+
+**Alternative judges (`GeminiJudge`, `OpenAIJudge`) remain in `harness/judge.py` as future-options** if a v8+ extension changes the pin away from Gemma; both require API keys and both satisfy the family rule. Neither is the v7 pin and neither should be used as a substitute for the Gemma pin without a pre-reg supersession.
+
+**Forbidden judge candidates:** Qwen (headline subject), Claude (spec-author + transfer-probe subject). The latter is most acute at the blinding-leak step where the judge's job is adversarial — the family that wrote the spec is the family most likely to recognize spec-vocabulary leaking through A-condition outputs. See pre-reg v6 → v7 audit-trail row #12 for the full rationale and project memory `judge-family-independence` for the standing rule.
 
 ### 2. Pin the Qwen headline instrument bundle (pre-reg §"Test subjects")
 
@@ -126,7 +136,7 @@ python -m benchmark.harness.run_calibration --instrument claude
 
 Both bundles must pass all three gates (structural / seed-sensitivity / rubric-reachability). The same-seed audit is recorded but not gated.
 
-### 6. Run blinding-leak calibration on the pinned judge (pre-reg §"Judge" Layer 3)
+### 6. Run blinding-leak calibration on the pinned judge — TWO PHASES (pre-reg v7 §"Judge" Layer 3)
 
 ```
 python -m benchmark.harness.run_blinding_leak_calibration \
@@ -135,9 +145,19 @@ python -m benchmark.harness.run_blinding_leak_calibration \
 
 (Stub entrypoint.)
 
-N=30 outputs (10 per A/B/C) on the easy_platformer task; the judge predicts each output's condition; pass criterion is no-better-than-chance accuracy (95% CI on accuracy includes 33%).
+N=30 outputs (10 per A/B/C) on the easy_platformer task. **Two-phase gate per pre-reg v7:**
 
-If calibration FAILS — the judge predicts above chance — the blinding leaks. Strip spec-vocabulary from A outputs / prose-style markers from B outputs as needed; re-run calibration; trials don't count until calibration passes.
+- **Phase 1 — Positive control / judge fitness.** Judge predicts each output's condition on the RAW outputs (no sanitization applied; spec-vocabulary in A intact, prose-style markers in B intact). **PASS iff** judge's accuracy is *above chance* with statistical significance — lower bound of 95% Wilson CI > 1/3. Proves the judge is a fair adversary that CAN detect tells.
+- **Sanitize.** Apply [`harness/sanitization.py::sanitize_output`](harness/sanitization.py) to every output. (Pre-reg-locked; sanitizer changes require pre-reg supersession.)
+- **Phase 2 — Blinding-leak gate.** Judge predicts each output's condition on the SANITIZED outputs. **PASS iff** judge's accuracy is at chance — 95% Wilson CI on accuracy includes 1/3. Proves the sanitization REMOVED the tells.
+
+**Overall pass requires BOTH phases.** Fail modes:
+- **Phase 1 fails** → the judge is too weak to detect even un-sanitized tells. Re-pin the judge (family rule must still hold). Phase-1 failure invalidates the judge, not the blinding.
+- **Phase 2 fails** → the blinding leaks even after sanitization. Strengthen `sanitization.py` (add more patterns), re-run from Phase 2 only — Phase 1 holds because the judge already passed fitness.
+
+Why two phases (v7 hardening): a one-phase "at-chance" gate is ambiguous between "blinding works" and "judge too weak to detect anything." A weak judge gets ~chance regardless, which is a false pass. The positive control closes the hole — see pre-reg v6 → v7 audit-trail row #13 and project memory `calibration-positive-control` for the general rule.
+
+The harness's MockJudge demonstrates the gate working as designed: it predicts uniformly at random, so its accuracy lands at ~chance in both phases, and the positive control correctly FAILS (a uniform-random judge isn't a fair adversary). Real Gemma should pass Phase 1 with accuracy clearly above chance (cites visible `{namespace.id}` syntax / canonical headers / "per the spec" phrasing as A-tells) and then Phase 2 should fall to chance after sanitization strips those tells.
 
 ### 7. (Then) Trial zero
 

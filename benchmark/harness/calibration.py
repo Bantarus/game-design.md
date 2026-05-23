@@ -20,10 +20,26 @@ recorded for audit purposes; strict byte-identity is NOT required (GPU
 non-determinism is expected; the audit records the divergence rate for
 the F-009 report).
 
-Per pre-reg §"Judge" Layer 3, the blinding-leak calibration runs N=30
-outputs across A/B/C on one calibration task. The aux judge predicts each
-output's condition with labels stripped. Pass if predictions are
-no-better-than-chance (95% CI on accuracy includes 33%).
+Per pre-reg §"Judge" Layer 3 (v7), the blinding-leak calibration runs
+N=30 outputs across A/B/C on one calibration task, then evaluates the
+judge in TWO PHASES:
+
+  Phase 1 (positive control / judge fitness): judge predicts conditions
+  on RAW outputs (no sanitization). PASS iff above chance with
+  statistical significance — lower bound of 95% Wilson CI exceeds 1/3.
+  This proves the judge is a fair adversary that CAN detect tells.
+
+  Phase 2 (blinding-leak gate proper): same judge predicts conditions
+  on SANITIZED outputs (sanitization function pinned in
+  `benchmark/harness/sanitization.py`). PASS iff at chance —
+  95% Wilson CI on accuracy INCLUDES 1/3. This proves sanitization
+  REMOVED the tells.
+
+Overall pass requires BOTH phases. A Phase-1 fail invalidates the JUDGE
+(too weak — re-pin); a Phase-2 fail invalidates the SANITIZATION
+(strengthen sanitizer + re-run Phase 2 only). Pre-reg v7 added the
+positive control to close a false-pass-from-weak-judge hole in the v6
+gate. See memory `calibration-positive-control` for the general rule.
 """
 from __future__ import annotations
 
@@ -255,14 +271,30 @@ def _min_pairwise_edit_distance(texts: list[str]) -> int:
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
-class BlindingLeakResult:
-    judge_bundle_id: str
+class BlindingPhaseResult:
+    """Result of one phase of the blinding-leak calibration (raw or sanitized)."""
+    phase: str                     # "positive_control" | "blinding_gate"
     n_outputs: int
     accuracy: float                # fraction of correct predictions
     accuracy_95_ci_low: float
     accuracy_95_ci_high: float
     chance_accuracy: float = 1.0 / 3.0
-    passed: bool = False           # True iff CI includes chance_accuracy
+    passed: bool = False           # phase-specific pass criterion
+
+
+@dataclass(frozen=True)
+class BlindingLeakResult:
+    """Combined two-phase result (v7).
+
+    overall_passed iff BOTH:
+      - positive_control.passed (judge above chance on raw outputs)
+      - blinding_gate.passed     (judge at chance on sanitized outputs)
+    """
+    judge_bundle_id: str
+    sanitization_sha256: str       # SHA of harness/sanitization.py
+    positive_control: BlindingPhaseResult
+    blinding_gate: BlindingPhaseResult
+    overall_passed: bool
 
 
 def calibrate_blinding(
@@ -271,14 +303,31 @@ def calibrate_blinding(
     calibration_task: Task,
     n_per_condition: int = 10,
 ) -> BlindingLeakResult:
-    """Run N=30 outputs across A/B/C, ask judge to predict conditions, check
-    if accuracy is no-better-than-chance."""
+    """Two-phase blinding-leak calibration (pre-reg v7).
+
+    Phase 1 (positive control / judge fitness):
+      Predict on RAW outputs. PASS iff accuracy_95_ci_low > 1/3
+      (judge can provably detect tells when present).
+
+    [Sanitize.]
+
+    Phase 2 (blinding-leak gate proper):
+      Same judge predicts on SANITIZED outputs. PASS iff
+      accuracy_95_ci_low <= 1/3 <= accuracy_95_ci_high
+      (predictions statistically indistinguishable from chance).
+
+    Overall pass iff both phases pass.
+    """
+    from .sanitization import sanitize_output, sanitization_sha256
+
+    chance = 1.0 / 3.0
+
     # Build A/B/C payloads
     payload_a = build_a(calibration_task.game)
     payload_b = build_b(calibration_task.game)
     payload_c = build_c(calibration_task.game)
 
-    outputs: list[tuple[int, str, str]] = []  # (output_id, true_condition, text)
+    outputs: list[tuple[int, str, str]] = []  # (output_id, true_condition, raw_text)
     oid = 0
     for cond_name, payload in [("A", payload_a), ("B", payload_b), ("C", payload_c)]:
         for i in range(n_per_condition):
@@ -291,30 +340,60 @@ def calibrate_blinding(
             outputs.append((oid, cond_name, r.text))
             oid += 1
 
-    # Strip labels (the judge sees only the output text; in random order)
+    # --- Phase 1: positive control on RAW outputs ----------------------------
     import random
     rng = random.Random(42)
-    shuffled = outputs.copy()
-    rng.shuffle(shuffled)
+    shuffled_raw = outputs.copy()
+    rng.shuffle(shuffled_raw)
+    raw_inputs = [(o[0], o[2]) for o in shuffled_raw]
+    raw_predictions = judge.predict_conditions(raw_inputs)
 
-    judge_inputs = [(o[0], o[2]) for o in shuffled]
-    predictions = judge.predict_conditions(judge_inputs)
-
-    # Score predictions
     true_by_oid = {o[0]: o[1] for o in outputs}
-    correct = sum(1 for p in predictions if p.predicted_condition == true_by_oid[p.output_id])
-    n = len(predictions)
-    accuracy = correct / n if n else 0.0
-    # Wilson 95% CI
-    lo, hi = _wilson_95_ci(correct, n)
-    passed = lo <= (1.0 / 3.0) <= hi
+    correct_raw = sum(1 for p in raw_predictions if p.predicted_condition == true_by_oid[p.output_id])
+    n = len(raw_predictions)
+    acc_raw = correct_raw / n if n else 0.0
+    lo_raw, hi_raw = _wilson_95_ci(correct_raw, n)
+    # PASS iff lower bound > chance (strict above-chance)
+    pc_passed = lo_raw > chance
+    positive_control = BlindingPhaseResult(
+        phase="positive_control",
+        n_outputs=n,
+        accuracy=acc_raw,
+        accuracy_95_ci_low=lo_raw,
+        accuracy_95_ci_high=hi_raw,
+        passed=pc_passed,
+    )
+
+    # --- Phase 2: blinding gate on SANITIZED outputs -------------------------
+    # Same RNG seed so the shuffle order is identical (controls for ordering
+    # confounds between the two phases).
+    rng2 = random.Random(42)
+    sanitized_outputs = [(oid, cond, sanitize_output(text)) for (oid, cond, text) in outputs]
+    shuffled_san = sanitized_outputs.copy()
+    rng2.shuffle(shuffled_san)
+    san_inputs = [(o[0], o[2]) for o in shuffled_san]
+    san_predictions = judge.predict_conditions(san_inputs)
+
+    correct_san = sum(1 for p in san_predictions if p.predicted_condition == true_by_oid[p.output_id])
+    acc_san = correct_san / n if n else 0.0
+    lo_san, hi_san = _wilson_95_ci(correct_san, n)
+    # PASS iff CI includes chance (at-chance)
+    bg_passed = lo_san <= chance <= hi_san
+    blinding_gate = BlindingPhaseResult(
+        phase="blinding_gate",
+        n_outputs=n,
+        accuracy=acc_san,
+        accuracy_95_ci_low=lo_san,
+        accuracy_95_ci_high=hi_san,
+        passed=bg_passed,
+    )
+
     return BlindingLeakResult(
         judge_bundle_id=judge.bundle.bundle_id(),
-        n_outputs=n,
-        accuracy=accuracy,
-        accuracy_95_ci_low=lo,
-        accuracy_95_ci_high=hi,
-        passed=passed,
+        sanitization_sha256=sanitization_sha256(),
+        positive_control=positive_control,
+        blinding_gate=blinding_gate,
+        overall_passed=(positive_control.passed and blinding_gate.passed),
     )
 
 
