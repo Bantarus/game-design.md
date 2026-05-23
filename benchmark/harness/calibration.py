@@ -30,6 +30,17 @@ to ~0.10, catching ~10pp-or-larger leaks. Blinding-leak calibration is
 just the judge predicting condition on stored outputs (no instrument
 generation per evaluation phase), so the larger N is nearly free.
 
+Per pre-reg §"Judge" Layer 3c (v9), an additional **sanitizer-generalization
+check** is run on REAL trial outputs (not calibration anchors). The
+blinding-leak gate above validates the sanitizer on the 90-output
+calibration sample; the sanitizer is applied to the ~660-trial population,
+which the calibration never saw. A pre-sweep small-batch check (after
+instrument calibration but before the full sweep) catches sanitizer leaks
+on the trial population early; a post-hoc full-sweep sample check is
+recorded alongside F-009. See `check_blinding_generalization` below and
+project memory `train-test-distribution-shift-sanitizer` for the standing
+rule.
+
   Phase 1 (positive control / judge fitness): judge predicts conditions
   on RAW outputs (no sanitization). PASS iff above chance with
   statistical significance — lower bound of 95% Wilson CI exceeds 1/3.
@@ -412,6 +423,176 @@ def _wilson_95_ci(successes: int, n: int, z: float = 1.96) -> tuple[float, float
     center = (p_hat + (z * z) / (2 * n)) / denom
     half = (z * ((p_hat * (1 - p_hat) / n) + (z * z) / (4 * n * n)) ** 0.5) / denom
     return (max(0.0, center - half), min(1.0, center + half))
+
+
+# ---------------------------------------------------------------------------
+# Sanitizer-generalization check (v9) — Phase-2-equivalent on REAL trial outputs
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class GeneralizationCheckResult:
+    """Result of running the Phase-2 at-chance check on REAL trial outputs.
+
+    Distinct from BlindingPhaseResult because the input is real trial outputs
+    (not calibration anchors), and the result is recorded as evidence that
+    the sanitizer generalized from calibration sample to trial population
+    (or failed to generalize). Pass criterion identical to Phase 2.
+    """
+    label: str                         # "pre_sweep" | "post_hoc" | freeform
+    judge_bundle_id: str
+    sanitization_sha256: str
+    n_outputs: int
+    accuracy: float                    # fraction of correct predictions
+    accuracy_95_ci_low: float
+    accuracy_95_ci_high: float
+    chance_accuracy: float = 1.0 / 3.0
+    passed: bool = False               # CI includes 1/3
+    notes: str = ""
+
+
+def check_blinding_generalization(
+    judge: Judge,
+    trial_outputs: list[tuple[int, str, str]],
+    label: str = "pre_sweep",
+    rng_seed: int = 42,
+) -> GeneralizationCheckResult:
+    """Run the Phase-2 at-chance check on REAL trial outputs (post-sanitization).
+
+    Per pre-reg v9 §"Judge" Layer 3c. Use this in two places:
+
+      (a) Pre-sweep (label="pre_sweep"). After instrument calibration
+          (§"Protocol" step 11) and before the full trial sweep
+          (§"Protocol" step 12), generate a small batch of real trials
+          (a handful per condition per game; typically N=12-30 total) and
+          run this check on them. Catches sanitizer leaks on the trial
+          population that the calibration sample never saw. Failure at
+          pre-sweep means the sanitizer needs strengthening BEFORE
+          committing to the ~9-hour full sweep. The Wilson CI is wide
+          at small N (it's an early-warning flag, not a statistical
+          guarantee), but a clearly above-chance accuracy here is a
+          strong signal of generalization failure.
+
+      (b) Post-hoc (label="post_hoc"). On a sample of the full sweep
+          (typically N=60-120, drawn uniformly across conditions × games
+          × tasks), recorded alongside F-009. The CI tightens; provides
+          real statistical power on the question "did the sanitizer
+          generalize to the trial population we actually ran?"
+
+    Input contract (trial_outputs): list of `(trial_id, true_condition, raw_text)`
+    tuples. `true_condition` is one of "A" | "B" | "C". `raw_text` is the
+    instrument's raw response.text — this function applies sanitization
+    internally so the same SHA-locked transform Phase 2 validated is what
+    gets evaluated.
+
+    Pass criterion: 95% Wilson CI on judge accuracy INCLUDES 1/3. Identical
+    to Phase 2 of calibrate_blinding. The sanitization SHA is recorded so a
+    Phase-2 fail (calibration) and a generalization-check fail can be
+    cross-attributed to the same or different sanitizer versions.
+
+    Failure modes:
+      - Pre-sweep fail → sanitizer leaks on the trial population. Strengthen
+        sanitizer in a pre-reg cycle (re-runs Phase 2 of calibrate_blinding
+        + Phase B of calibrate_content_preservation + this check at
+        pre-sweep). Do NOT proceed to the full trial sweep.
+      - Post-hoc fail (small leak detected only at the larger-N post-hoc) →
+        recorded with F-009 as a stated limitation: "blinding-leak
+        generalization passed at pre-sweep N=X with CI [...,...] but
+        failed at post-hoc N=Y with CI [...,...]." F-009 reports the
+        observed leak magnitude alongside the headline.
+    """
+    import random
+    from .sanitization import sanitize_output, sanitization_sha256
+
+    chance = 1.0 / 3.0
+
+    # Shuffle so the prediction order doesn't reveal the source order.
+    rng = random.Random(rng_seed)
+    shuffled = list(trial_outputs)
+    rng.shuffle(shuffled)
+
+    # Sanitize and pass to the judge.
+    sanitized_inputs = [
+        (oid, sanitize_output(text))
+        for (oid, _true_cond, text) in shuffled
+    ]
+    predictions = judge.predict_conditions(sanitized_inputs)
+
+    true_by_oid = {oid: cond for (oid, cond, _text) in shuffled}
+    correct = sum(
+        1 for p in predictions
+        if p.predicted_condition == true_by_oid[p.output_id]
+    )
+    n = len(predictions)
+    acc = correct / n if n else 0.0
+    lo, hi = _wilson_95_ci(correct, n)
+    passed = lo <= chance <= hi
+
+    notes_parts = []
+    if not passed:
+        if lo > chance:
+            notes_parts.append(
+                f"sanitizer LEAKS on trial population: judge accuracy "
+                f"{acc:.3f} above chance with 95% CI lower bound {lo:.3f} > 1/3"
+            )
+        elif hi < chance:
+            notes_parts.append(
+                f"judge predicts BELOW chance (CI upper {hi:.3f} < 1/3); "
+                "anti-correlation suggests judge is inverted or sanitizer "
+                "introduced anti-tells"
+            )
+
+    return GeneralizationCheckResult(
+        label=label,
+        judge_bundle_id=judge.bundle.bundle_id(),
+        sanitization_sha256=sanitization_sha256(),
+        n_outputs=n,
+        accuracy=acc,
+        accuracy_95_ci_low=lo,
+        accuracy_95_ci_high=hi,
+        passed=passed,
+        notes="; ".join(notes_parts),
+    )
+
+
+def load_trial_records_for_generalization_check(
+    trials_dir: Path,
+) -> list[tuple[int, str, str]]:
+    """Load trial records and convert to the (oid, condition, raw_text) tuples
+    that `check_blinding_generalization` expects.
+
+    Reads every `*.json` file in `trials_dir`; each is a serialized
+    `TrialRecord` (see `run_trial.py`). Uses the file's `subject_output`
+    (the RAW form — generalization check sanitizes internally) and the
+    record's `condition` field. The `oid` is the integer index into the
+    sorted file list (deterministic across calls).
+
+    The caller is responsible for selecting which records to include
+    (a small pre-sweep batch — typically the first ~20 trials run; or a
+    uniform-sample from the full sweep for post-hoc).
+    """
+    paths = sorted(trials_dir.glob("*.json"))
+    out: list[tuple[int, str, str]] = []
+    for i, p in enumerate(paths):
+        rec = json.loads(p.read_text())
+        cond = rec.get("condition")
+        raw = rec.get("subject_output")
+        if cond and raw:
+            out.append((i, cond, raw))
+    return out
+
+
+def write_generalization_check_result(
+    result: GeneralizationCheckResult,
+    out_dir: Path,
+) -> Path:
+    import time
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y-%m-%dT%H%M%SZ", time.gmtime())
+    safe_bundle = result.judge_bundle_id.replace("/", "_")
+    fname = f"generalization_check_{result.label}_{safe_bundle}_{ts}.json"
+    path = out_dir / fname
+    path.write_text(json.dumps(_to_jsonable(result), indent=2, default=str))
+    return path
 
 
 # ---------------------------------------------------------------------------

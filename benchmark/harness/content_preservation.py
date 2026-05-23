@@ -88,7 +88,7 @@ CONTENT_PRESERVATION_GAP_FLOOR = 2.0      # sanitized gap              >= 2 / 5
 # hand-waving / wrong-on-specifics) on the incorrect side.
 # ---------------------------------------------------------------------------
 
-PLATFORMER_EASY_CORRECT_A_STYLE = """Here is the level file conforming to `{content.levels}` schema.
+PLATFORMER_EASY_CORRECT_A_STYLE = """Here is the level file conforming to `{entities.levels}` schema.
 
 <<< FILE: content/levels/fault_lines_07_the_chasm.yaml >>>
 spec: game-design.md
@@ -242,7 +242,7 @@ hazard: none
 """
 
 
-SURVIVAL_EASY_CORRECT_A_STYLE = """Per `{content.recipes}` schema, here is the new recipe entity:
+SURVIVAL_EASY_CORRECT_A_STYLE = """Per `{entities.recipes}` schema, here is the new recipe entity:
 
 <<< FILE: content/recipes/cooked_fish.yaml >>>
 spec: game-design.md

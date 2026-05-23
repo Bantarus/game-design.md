@@ -1,6 +1,6 @@
 # `benchmark/` — Phase 5 help-benchmark scaffolding
 
-> The harness for the Phase 5 help-benchmark whose pre-registration is locked at the v8 commit (chain: `f76f4c2 → a9425e8 → 77ae3a5 → 78f150c → 766e07b → 27a4381 → 4d322bf → f996187 → <v8 commit>`). See [`docs/v0.2-phase5-pre-registration.md`](../docs/v0.2-phase5-pre-registration.md) for the locked gate, [`docs/v0.2-phase5-help-benchmark-scope.md`](../docs/v0.2-phase5-help-benchmark-scope.md) for the framing.
+> The harness for the Phase 5 help-benchmark whose pre-registration is locked at the v9 commit (chain: `f76f4c2 → a9425e8 → 77ae3a5 → 78f150c → 766e07b → 27a4381 → 4d322bf → f996187 → 94938ed → <v9 commit>`). See [`docs/v0.2-phase5-pre-registration.md`](../docs/v0.2-phase5-pre-registration.md) for the locked gate, [`docs/v0.2-phase5-help-benchmark-scope.md`](../docs/v0.2-phase5-help-benchmark-scope.md) for the framing.
 
 ## Layout
 
@@ -63,6 +63,8 @@ benchmark/
 | Calibration smoke runs | **Mock-only** | Calibration code path works; the seed-sensitivity gate correctly *fails* MockInstrument (as designed — mock outputs only vary by seed integer). Real-instrument calibration is blocked on instrument wiring. |
 | Blinding-leak calibration | **Mock-only** | Two-phase code path works with MockJudge (correctly fails Phase 1 as designed; v8 bumped N to 90). Real calibration is blocked on judge wiring. |
 | Content-preservation calibration (v8) | **Mock-only** | Sanitizer's positive control. Anchor library at `harness/content_preservation.py` (3 correct + 3 incorrect per game on the easy task). MockJudge correctly fails Phase A (length heuristic can't read correctness). Real calibration is blocked on judge wiring. |
+| Sanitizer (v9) | **Done** (content-general) | Every rule labeled (S) structural or (E) closed-enumeration drawn from the spec's declared vocabulary — NOT from observed calibration samples. Closes the train/test distribution-shift hole: a closed enumeration of the spec's namespaces, headers, and reference-phrases generalizes to any A-tell the spec offers, not just those observed in calibration. See [`harness/sanitization.py`](harness/sanitization.py) docstring. |
+| Sanitizer-generalization check (v9) | **Mock-ready** | `check_blinding_generalization()` in `harness/calibration.py` runs the Phase-2 at-chance check on REAL trial outputs (not calibration anchors). Two timepoints: pre-sweep small-batch (N=12–30, before full sweep — catches generalization failure after ~20 trials instead of ~660) and post-hoc full-sweep sample (N=60–120, recorded alongside F-009). Real run blocked on instrument + judge wiring. |
 | Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. At v8, every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Real trials are blocked on instrument + judge wiring. |
 
 ## What's needed before trial zero can fire
@@ -186,11 +188,35 @@ The harness's MockJudge demonstrates the gate working as designed: it scores by 
 
 See pre-reg v7 → v8 audit-trail row #15 for the rationale and project memory `sanitizer-content-preservation` for the general "every sanitization-style gate needs a content-preservation counterweight" rule.
 
-### 7. (Then) Trial zero
+### 6c. Run sanitizer-generalization check on a pre-sweep small batch (pre-reg v9 §"Judge" Layer 3c)
 
-After steps 1-6 land, trial zero is the first run of `python -m benchmark.harness.run_trial` with a real subject. Once that fires, **the pre-registration is frozen and any redirect of gates / B-construction / task set / judge / etc. is no longer possible**.
+```
+python -m benchmark.harness.run_generalization_check --label pre_sweep
+```
+
+(Stub entrypoint.)
+
+**Steps 6 and 6b validate the sanitizer on the calibration sample (90 outputs) + the anchor library (12 anchors). They do NOT validate that the sanitizer generalizes to the ~660-trial production population, which neither calibration ever saw.** v9 closes that gap two ways: (a) the sanitizer is content-general by construction (every rule structural or closed-enumeration drawn from spec vocabulary — see [`harness/sanitization.py`](harness/sanitization.py) docstring); (b) a positive verification on real trial outputs runs at two timepoints. This step is the first timepoint.
+
+After step 11 (instrument calibration) has passed but BEFORE the full trial sweep (step 7 below), generate a **small batch of real trials** — a handful per condition per game, total **N=12–30**. Apply the SHA-locked sanitization. Run the condition-prediction judge (same Layer 3 judge) on the sanitized outputs. **Pass criterion identical to step 6 Phase 2:** 95% Wilson CI on judge accuracy includes 1/3 (predictions at chance).
+
+Wilson CI is wide at small N — this is an early-warning flag, not a statistical guarantee. An above-chance accuracy here is a strong signal of generalization failure. **Pre-sweep fail → do NOT proceed to the full sweep.** Strengthen the sanitizer in a pre-reg supersession (re-runs step 6 Phase 2 + step 6b Phase B + this check); re-evaluate.
+
+The whole apparatus is "judge predictions on stored text" — nearly free relative to the full ~9-hour trial sweep. Catches sanitizer leaks on the trial population after ~20 trials instead of after ~660.
+
+See pre-reg v8 → v9 audit-trail row #17 and project memory `train-test-distribution-shift-sanitizer` for the standing rule.
+
+### 7. (Then) Trial zero, with post-hoc generalization check (pre-reg v9)
+
+After steps 1-6c land, trial zero is the first run of `python -m benchmark.harness.run_trial` with a real subject. Once that fires, **the pre-registration is frozen and any redirect of gates / B-construction / task set / judge / etc. is no longer possible**.
 
 The trial sweep itself: 660 outputs per the pre-reg's design (3 headline task types × 2 games × 20 N × 2 conditions = 240 paired per subject; plus C unpaired 60 × 2 subjects; plus 5 × 2 × 3 easy = 30 per subject; × 2 subjects = 660). At real instrument speeds (~30s per Qwen invocation, ~10s per Claude invocation, average), a serial sweep takes ~9 hours; parallelization across cells trivially possible.
+
+**After the sweep, run the post-hoc sanitizer-generalization check (pre-reg v9 step 14).** Draw a uniform sample from the full ~660 trial records (N=60–120, distributed across conditions × games × tasks), apply the SHA-locked sanitization, run the condition-prediction judge, report the 95% Wilson CI on accuracy alongside F-009. A CI that includes 1/3 confirms generalization; a CI strictly above 1/3 is recorded as a stated F-009 limitation with the observed leak magnitude — F-009 reports the residual leak as a measured fact and does NOT retroactively re-run.
+
+```
+python -m benchmark.harness.run_generalization_check --label post_hoc --sample-n 100
+```
 
 ## Discipline reminders
 
@@ -202,6 +228,8 @@ Three specific cautions, in chronological order of when the user surfaced them:
 
 **Trial-time scoring is on SANITIZED outputs only.** (v8.) Every trial sanitizes its subject output via `harness/sanitization.py::sanitize_output` once at scoring time, and BOTH judge calls — matches-intent (Layer 2) and the per-criterion checklist grader (Layer 1 when LLM-graded) — score the sanitized form. Raw subject outputs MUST NEVER reach the scoring judge. The constraint exists because the v7 two-phase blinding-leak calibration validated the judge's behavior on sanitized outputs (Phase 2: judge at chance); Phase 1 was the proof that the judge *can* read condition off raw outputs. If trials scored raw, the judge would be operating in its un-blinded mode against exactly the channel the calibration was designed to close. See pre-reg v7 → v8 audit-trail row #14 and project memory `sanitized-scoring-consistency` for the standing rule.
 
+**Every sanitizer rule is structural or closed-enumeration from spec vocabulary — NOT from calibration samples.** (v9.) The sanitizer at [`harness/sanitization.py`](harness/sanitization.py) labels each of its nine rules as either (S) a structural pattern (regex on shape, content-agnostic) or (E) a closed enumeration drawn from `docs/spec.md` (§3 namespace ownership table; §5.2 + §7.1 canonical section headers; spec-terminology synonyms). The discipline exists because the calibration sample is N=90 but the trial population is N=660; a denylist drawn from calibration would be train-set-shaped and would leak tells appearing in trials but not in calibration. Adding rules: either generalize (structural) or enumerate from spec vocabulary, not from observed sample outputs. See pre-reg v8 → v9 audit-trail row #17 and project memory `train-test-distribution-shift-sanitizer` for the standing rule.
+
 ## Where the next checkpoint lives
 
 Per the user's standing direction, the next checkpoint is *"calibration has passed for both instruments and trial zero is genuinely ready to fire, with the pre-registration commit standing behind it untouched."* That means:
@@ -211,6 +239,7 @@ Per the user's standing direction, the next checkpoint is *"calibration has pass
 - Step 5 (instrument calibration) run and passed for both bundles.
 - Step 6 (blinding-leak calibration, two-phase at N=90) run and passed.
 - Step 6b (content-preservation calibration, two-phase across both games' anchor sets) run and passed.
-- No edits to the v8 pre-reg — the gate stands.
+- Step 6c (sanitizer-generalization check on a pre-sweep small batch of real trial outputs) run and passed.
+- No edits to the v9 pre-reg — the gate stands.
 
-At that point the harness is loaded, both calibrations have landed in the joint pass region (sanitization strips enough to blind the condition-prediction judge AND preserves enough for the matches-intent judge to discriminate good from bad content), and the only thing left is the `run_trial` invocation that fires trial zero.
+At that point the harness is loaded, all three calibration apparatuses have landed in their respective pass regions (sanitization strips enough to blind the condition-prediction judge AND preserves enough for the matches-intent judge to discriminate good from bad content AND generalizes to a small batch of real trial outputs), and the only thing left is the `run_trial` invocation that fires trial zero — followed by the post-hoc generalization check on the full sweep, recorded alongside F-009.
