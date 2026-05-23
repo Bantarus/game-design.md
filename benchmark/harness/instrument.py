@@ -4,7 +4,9 @@ Two instrument bundles are pinned at the harness-build commit per pre-reg
 §"Test subjects":
   - Headline: a specific Qwen variant (model + quant + GGUF SHA +
     llama.cpp build + sampling params + chat template) running locally.
-  - Transfer probe: a specific Claude version.
+  - Transfer probe: a specific Claude version, invoked via the Claude
+    Code CLI in headless mode (NOT the Anthropic API — uses the user's
+    existing Claude Code installation and authentication; no API key).
 
 Both instruments speak through the same `Instrument` interface so the
 harness can parametrize subject without conditionals throughout the trial
@@ -12,14 +14,18 @@ loop.
 
 Concrete implementations are stubbed pending external infra:
   - `QwenInstrument`     — requires local llama.cpp build + GGUF model + flags.
-  - `ClaudeInstrument`   — requires Anthropic API key + a pinned Claude
-                            version.
+  - `ClaudeInstrument`   — requires the `claude` CLI binary on PATH
+                            (Claude Code, headless / `--print` mode) and
+                            an active Claude Code session/login. No
+                            Anthropic API key needed.
   - `MockInstrument`     — returns canned responses, lets the harness be
                             exercised end-to-end without external infra.
 """
 from __future__ import annotations
 
+import json
 import os
+import subprocess
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -168,21 +174,57 @@ class QwenInstrument(Instrument):
 
 
 class ClaudeInstrument(Instrument):
-    """Transfer-probe instrument: Claude via the Anthropic API.
+    """Transfer-probe instrument: Claude via the Claude Code CLI (headless).
+
+    Wired through the user's existing Claude Code installation rather than
+    the Anthropic API. Benefits over the API path: no API key needed (uses
+    the user's Claude Code login session); same model behavior as the
+    user's interactive Claude Code sessions; no SDK dependency.
 
     Requires:
-      - ANTHROPIC_API_KEY env var
-      - the pinned Claude model name in the bundle
-      - the pinned sampling params
+      - The `claude` CLI on PATH (or set DRIFTWOOD_CLAUDE_CODE_BIN).
+      - An active Claude Code login (run `claude` once interactively to
+        authenticate; the CLI caches the session).
+      - The pinned Claude model name in the bundle (passed via --model).
+      - The pinned sampling params recorded in the bundle for audit;
+        Claude Code CLI does not expose a `--temperature` flag, so the
+        bundle's `sampling_temperature` is documentation of Claude's
+        in-effect default, not a per-call override. The seed-sensitivity
+        gate (Protocol step 11) still passes because Claude's default
+        temperature is > 0 and same-prompt repeated invocations produce
+        varied outputs naturally.
+
+    Invocation contract (matches Qwen one-shot text generation so the
+    A-vs-B-vs-C comparison is comparable across instruments):
+      - `--max-turns 1`            : single-turn (no tool-use loop)
+      - `--disallowed-tools "*"`   : no tool invocations
+      - `--output-format json`     : structured response with token
+                                      counts and duration
+      - prompt passed via stdin    : avoids shell-quoting issues for
+                                      long design contexts
+
+    Seed handling: Claude Code does not accept a seed parameter. The
+    `seed` arg is recorded on every InstrumentResponse for audit-trail
+    purposes (per pre-reg §11 "auditability is recorded, not gated") but
+    does NOT deterministically reproduce. Same-seed re-runs will diverge;
+    that is expected and accepted per the v4 layer-confusion correction.
 
     The transfer-probe role is documented in pre-reg §"Test subjects" —
     NOT framed as an "optimistic ceiling," but as a capability-tier
     transfer test.
     """
 
+    DEFAULT_DISALLOWED_TOOLS = (
+        "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,Task,TodoWrite,"
+        "NotebookEdit,SlashCommand,KillShell"
+    )
+
     def __init__(self, bundle: InstrumentBundle):
         super().__init__(bundle)
-        self._api_key = os.environ.get("ANTHROPIC_API_KEY")
+        self._claude_bin = os.environ.get("DRIFTWOOD_CLAUDE_CODE_BIN", "claude")
+        self._timeout_seconds = int(os.environ.get(
+            "DRIFTWOOD_CLAUDE_CODE_TIMEOUT_SECONDS", "300"
+        ))
 
     def complete(
         self,
@@ -190,20 +232,73 @@ class ClaudeInstrument(Instrument):
         user_prompt: str,
         seed: int,
     ) -> InstrumentResponse:
-        if not self._api_key:
-            raise NotImplementedError(
-                "ClaudeInstrument requires ANTHROPIC_API_KEY env var + the "
-                "Anthropic SDK. Stub pending external infra; see benchmark/README.md."
+        cmd = [
+            self._claude_bin,
+            "--print",
+            "--max-turns", "1",
+            "--output-format", "json",
+            "--model", self.bundle.model_name,
+            "--append-system-prompt", system_prompt,
+            "--disallowed-tools", self.DEFAULT_DISALLOWED_TOOLS,
+        ]
+        t0 = time.monotonic()
+        try:
+            proc = subprocess.run(
+                cmd,
+                input=user_prompt,
+                capture_output=True,
+                text=True,
+                timeout=self._timeout_seconds,
+                check=False,
             )
-        # TODO: import anthropic; client = anthropic.Anthropic(api_key=self._api_key)
-        # response = client.messages.create(model=self.bundle.model_name,
-        #                                    system=system_prompt,
-        #                                    messages=[{"role": "user", "content": user_prompt}],
-        #                                    max_tokens=self.bundle.sampling_max_tokens,
-        #                                    temperature=self.bundle.sampling_temperature,
-        #                                    metadata={"user_id": str(seed)})
-        # Note: Claude's API doesn't take a seed parameter directly; the
-        # `metadata.user_id` field is the closest proxy. The bundle's
-        # `sampling_temperature` must be > 0 for the seed-sensitivity check
-        # to produce distinct outputs.
-        raise NotImplementedError("ClaudeInstrument.complete() stub; wire up Anthropic SDK.")
+        except FileNotFoundError as e:
+            raise NotImplementedError(
+                f"ClaudeInstrument requires the `claude` CLI on PATH (or set "
+                f"DRIFTWOOD_CLAUDE_CODE_BIN). Tried: {self._claude_bin!r}. "
+                f"See benchmark/README.md."
+            ) from e
+        wall_clock = time.monotonic() - t0
+
+        if proc.returncode != 0:
+            raise RuntimeError(
+                f"Claude Code CLI returned exit code {proc.returncode}.\n"
+                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
+            )
+
+        # Claude Code's --output-format json returns a single object with
+        # `result` (the text), `usage` (token counts), `duration_ms`,
+        # `num_turns`, `total_cost_usd`, etc.
+        try:
+            data = json.loads(proc.stdout)
+        except json.JSONDecodeError as e:
+            raise RuntimeError(
+                f"Claude Code CLI returned non-JSON on stdout despite "
+                f"--output-format json. First 2 KB of stdout: "
+                f"{proc.stdout[:2048]!r}"
+            ) from e
+
+        text = data.get("result", "")
+        usage = data.get("usage", {}) or {}
+        tokens_input = int(usage.get("input_tokens", 0))
+        tokens_output = int(usage.get("output_tokens", 0))
+        num_turns = int(data.get("num_turns", 0))
+
+        return InstrumentResponse(
+            text=text,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            # tool_steps = num_turns - 1 (the first turn is the response
+            # itself; any additional turn is a tool round-trip). With
+            # --max-turns 1 + --disallowed-tools, this should always be 0.
+            tool_steps=max(0, num_turns - 1),
+            wall_clock_seconds=wall_clock,
+            bundle_id=self.bundle.bundle_id(),
+            invocation_seed=seed,
+            extra={
+                "claude_code_duration_ms": data.get("duration_ms"),
+                "claude_code_total_cost_usd": data.get("total_cost_usd"),
+                "claude_code_num_turns": num_turns,
+                # Note: seed is recorded above but Claude Code does NOT use it.
+                # Same-seed re-runs will diverge; recorded for audit, not gated.
+            },
+        )

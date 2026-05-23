@@ -65,7 +65,8 @@ benchmark/
 | Content-preservation calibration (v8) | **Mock-only** | Sanitizer's positive control. Anchor library at `harness/content_preservation.py` (3 correct + 3 incorrect per game on the easy task). MockJudge correctly fails Phase A (length heuristic can't read correctness). Real calibration is blocked on judge wiring. |
 | Sanitizer (v9) | **Done** (content-general) | Every rule labeled (S) structural or (E) closed-enumeration drawn from the spec's declared vocabulary — NOT from observed calibration samples. Closes the train/test distribution-shift hole: a closed enumeration of the spec's namespaces, headers, and reference-phrases generalizes to any A-tell the spec offers, not just those observed in calibration. See [`harness/sanitization.py`](harness/sanitization.py) docstring. |
 | Sanitizer-generalization check (v9) | **Mock-ready** | `check_blinding_generalization()` in `harness/calibration.py` runs the Phase-2 at-chance check on REAL trial outputs (not calibration anchors). Two timepoints: pre-sweep small-batch (N=12–30, before full sweep — catches generalization failure after ~20 trials instead of ~660) and post-hoc full-sweep sample (N=60–120, recorded alongside F-009). Real run blocked on instrument + judge wiring. |
-| Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. At v8, every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Real trials are blocked on instrument + judge wiring. |
+| ClaudeInstrument wiring | **Done** (Claude Code CLI) | `ClaudeInstrument.complete()` invokes `claude --print --max-turns 1 --output-format json --model <pinned> --disallowed-tools "*"` with the prompt on stdin. No API key. Uses the user's existing Claude Code login. Bundle declaration + Claude Code CLI version pin are the remaining harness-build-commit work. |
+| Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. At v8, every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Real trials are blocked on Qwen + Gemma judge wiring (Claude instrument is wired). |
 
 ## What's needed before trial zero can fire
 
@@ -110,14 +111,30 @@ To wire up:
 
 ### 3. Pin the Claude transfer-probe instrument bundle (pre-reg §"Test subjects")
 
+**Wired via the Claude Code CLI in headless mode** (NOT the Anthropic API). Uses the user's existing Claude Code installation and login session — no API key needed, same model behavior as interactive Claude Code sessions, no SDK dependency.
+
 Required:
-- Anthropic API access (`ANTHROPIC_API_KEY`).
-- The specific Claude version pinned.
+- The `claude` CLI on `PATH` (or set `DRIFTWOOD_CLAUDE_CODE_BIN` to its path).
+- An active Claude Code login (run `claude` once interactively to authenticate; the CLI caches the session).
+- The specific Claude model name pinned in the bundle (passed via `--model`).
+- The pinned sampling params recorded in the bundle for audit. Note: Claude Code CLI does not expose a `--temperature` flag, so the bundle's `sampling_temperature` documents Claude's in-effect default rather than overriding it. The seed-sensitivity gate still passes because Claude's default temperature is > 0 and varied outputs follow naturally.
+
+Invocation contract (matches Qwen's one-shot text generation so A-vs-B-vs-C is comparable across instruments):
+- `--max-turns 1` (single-turn — no tool-use loop)
+- `--disallowed-tools "Bash,Read,Write,...,SlashCommand,KillShell"` (no tool invocations)
+- `--output-format json` (structured response with token counts + duration + cost)
+- Prompt passed via stdin (avoids shell-quoting issues for long design contexts)
 
 To wire up:
-1. Set env var `ANTHROPIC_API_KEY`.
-2. Implement `ClaudeInstrument.complete()` in `harness/instrument.py` (replace the stub with `anthropic.Anthropic(...).messages.create(...)`).
-3. Commit the bundle declaration.
+1. Verify `claude --version` works on your system (`DRIFTWOOD_CLAUDE_CODE_BIN` defaults to `claude` from PATH).
+2. Run `claude` once interactively if not already authenticated.
+3. The `ClaudeInstrument.complete()` implementation in [`harness/instrument.py`](harness/instrument.py) is already wired; commit the bundle declaration to pin the model + version. The bundle's `inference_engine` field should record the Claude Code CLI version (parseable from `claude --version`).
+
+**Seed handling.** Claude Code does NOT accept a seed parameter. The `seed` argument is recorded on every `InstrumentResponse` for audit-trail purposes (per pre-reg §11 "auditability is recorded, not gated") but does NOT deterministically reproduce. Same-seed re-runs will diverge; this is expected and accepted per the v4 layer-confusion correction (the benchmark needs sampled variance across seeds, not byte-identical reproducibility).
+
+Optional env vars:
+- `DRIFTWOOD_CLAUDE_CODE_BIN` — path to the `claude` binary (default: looked up on PATH).
+- `DRIFTWOOD_CLAUDE_CODE_TIMEOUT_SECONDS` — per-invocation timeout (default: 300).
 
 ### 4. Run the fairness audit on both games' flattened B (Layer 3 of B-construction)
 
