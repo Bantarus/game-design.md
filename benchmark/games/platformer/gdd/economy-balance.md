@@ -12,11 +12,6 @@ balance_targets:
     tolerance: [4, 8]
     measure: "median {resources.ember} value at the moment of any in-level checkpoint touch, skilled-player tier-3 level"
     status: draft
-  median_time_per_flight:
-    target_kind: range
-    target: { near: 7000, tolerance: 3000 }
-    measure: "median wall-clock milliseconds from spawn-or-checkpoint to next death-or-checkpoint, all tiers"
-    status: draft
   median_time_to_complete_level:
     target_kind: scalar
     target: 180000
@@ -51,13 +46,11 @@ balance_targets:
 
 ## Tokens
 
-Seven balance targets covering all three v0.2 `target_kind` values: four `scalar`, one `range`, and two `distribution_over_categories`. Each is referenced from at least one of: a loop's `balance_targets:`, a resource's `velocity_target:`, a content-schema's `balance_refs:`, or a `verify_targets[]` block (if/when added). Any target not referenced fires `orphaned-entity` (warning).
+Six balance targets, each driven by a specific number named in the design brief. Two are `scalar`, two are `distribution_over_categories` (where the per-category breakdown is itself part of the design — per-tier difficulty curve, per-region level distribution), and two more are `scalar`. No targets are present here to demonstrate `target_kind` variety; the kinds fell out of the brief's content. Each target is referenced from at least one of: a loop's `balance_targets:`, a resource's `velocity_target:`, a content-schema's `balance_refs:`, or a `verify_targets[]` block (if/when added). Any target not referenced fires `orphaned-entity` (warning).
 
 ## Rationale
 
-**`ember_velocity` is the binding hud-feel constraint.** Median ember of 6 (out of 12 max) at the moment of checkpoint-touch is the design call: visible-but-tense, with 6 ember representing roughly 2 dashes + 2 short glides of remaining mobility. A run where ember habitually maxes out (median 11-12) means the level over-supplies ember and tension is dead; a run where ember habitually empties (median 0-2) means the level under-supplies and the player can't recover from a bad route. The `[4, 8]` band defines the acceptable design space.
-
-**`median_time_per_flight` is `target_kind: range` to make the band-shape explicit.** A flight is 5–10 seconds; the `{ near: 7000, tolerance: 3000 }` form expresses "7 seconds ± 3" — the same band as `[4000, 10000]` but the matcher-form makes the design intent clearer (the target *is* a band; the player should rarely complete a flight in 2 seconds and rarely take 15).
+**`ember_velocity` is the binding hud-feel constraint.** Median ember of 6 (out of 12 max) at the moment of checkpoint-touch is the design call from the brief ("A skilled player on a tier-3 level finishes with about 6 ember in the meter — visible but tense"). The `[4, 8]` band defines the acceptable design space.
 
 **`median_time_to_complete_level: 180000ms` (3 min) is the design contract.** Any tier-3 level that routinely exceeds 5 minutes has a missing checkpoint or a difficulty miscalibration. Tier-1 levels target ~90 seconds; tier-5 levels target ~5 minutes. The tolerance band `[120000, 300000]` is for the tier-3 median specifically; per-tier targets would be a v0.5 refinement.
 

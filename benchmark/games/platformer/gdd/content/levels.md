@@ -6,7 +6,7 @@ status: draft
 last_verified: "2026-05-23"
 entity: levels
 schema:
-  required: [id, name, region, difficulty_tier, entry, exit, time_target_ms, checkpoints, ember_pickups, lethal_regions]
+  required: [id, name, region, difficulty_tier, entry, exit, time_target_ms, checkpoints, platforms, ember_pickups, lethal_regions]
   properties:
     id:               { type: string, pattern: "^[a-z][a-z0-9_]*$" }
     name:             { type: string, minLength: 1 }
@@ -35,6 +35,18 @@ schema:
         properties:
           x: { type: integer }
           y: { type: integer }
+    platforms:
+      type: array
+      minItems: 1
+      items:
+        type: object
+        required: [x, y, width, height]
+        properties:
+          x:       { type: integer }
+          y:       { type: integer }
+          width:   { type: integer, minimum: 1 }
+          height:  { type: integer, minimum: 1 }
+          surface: { enum: [solid, one_way] }
     ember_pickups:
       type: array
       items:
@@ -55,7 +67,6 @@ schema:
           width:  { type: integer, minimum: 1 }
           height: { type: integer, minimum: 1 }
           tag:    { enum: [lava, spike, void, crusher] }
-    layout_ref: { type: string }
     notes:      { type: string }
 data_dir: ../../content/levels
 count_target: 40
@@ -69,11 +80,13 @@ balance_refs:
 
 A level is a YAML object under `content/levels/<id>.yaml` whose filename stem matches its `id`. The schema (frontmatter `schema:`) is JSON-Schema-shaped: `required` lists the required keys; `properties` declares per-key constraints.
 
-Positions (`entry`, `exit`, `checkpoints[*]`, `ember_pickups[*]`, `lethal_regions[*]`) are integer coordinates in micro_units — the fixed-point unit declared by `{invariants.fixed_point_simulation_state}`. The coordinate system origin is the level's bottom-left; +x is east, +y is up. A level's playable region is implicitly the bounding box of all declared positions; geometry outside that box is not simulated.
+Positions (`entry`, `exit`, `checkpoints[*]`, `ember_pickups[*]`, `lethal_regions[*]`, `platforms[*]`) are integer coordinates in micro_units — the fixed-point unit declared by `{invariants.fixed_point_simulation_state}`. The coordinate system origin is the level's bottom-left; +x is east, +y is up. A level's playable region is implicitly the bounding box of all declared positions; geometry outside that box is not simulated.
+
+`platforms` is the level's *passable geometry* — the rectangles the moth lands on. Each is an axis-aligned bounding box at `(x, y)` with `(width, height)` in micro_units, plus an optional `surface` tag (`solid` = collides from all six sides, the default; `one_way` = collides only from above, the moth can jump up through it from below). A level's platforms are what makes the cave traversable; a level with no platforms is unplayable (`minItems: 1`).
 
 `lethal_regions` is a list of axis-aligned bounding boxes the moth dies on contact with. Four tags are legal: `lava` (animated, in the caverns/fault_lines/hot_springs visual sets), `spike` (static, all regions), `void` (an off-level death — falling into space below the playable region, no visual but lethal on contact), `crusher` (timed-cycle obstacles in hot_springs and summit). The tag drives presentation only; all four are equally lethal at simulation level (single hit, instant respawn).
 
-`layout_ref` (optional) is a string reference to a binary or text layout file (e.g. a Tiled-format `.tmx` or a custom grid encoding) that defines the level's *passable geometry* — the platforms, walls, and ceilings the moth collides with non-lethally. The schema does not constrain `layout_ref`'s format; it is an implementation hand-off pointer. A level without `layout_ref` is geometry-empty — only the entry/exit/checkpoints/lethal_regions/embers exist, useful for tutorial levels with no traversal between them.
+The level schema is intentionally complete: an agent given the schema plus one representative entity below should be able to author a new playable level *entirely from the schema* — every rectangle, every position, every value the moth's simulation needs. There is no opaque "layout file" pointer; the schema describes the level fully.
 
 ## Representative Example
 
@@ -90,22 +103,26 @@ name: "First Breath"
 region: caverns
 difficulty_tier: 1
 time_target_ms: 90000
-entry:  { x: 1000,  y: 1000  }
-exit:   { x: 12000, y: 1000  }
+entry:  { x: 1000,  y: 1500 }
+exit:   { x: 12000, y: 1500 }
 checkpoints:
-  - { x: 4000,  y: 1000 }
-  - { x: 8000,  y: 1000 }
+  - { x: 4000, y: 1500 }
+  - { x: 8000, y: 1500 }
+platforms:
+  - { x: 500,   y: 1000, width: 2500, height: 200, surface: solid }
+  - { x: 3500,  y: 1000, width: 2000, height: 200, surface: solid }
+  - { x: 6000,  y: 1000, width: 2500, height: 200, surface: solid }
+  - { x: 9000,  y: 1000, width: 3500, height: 200, surface: solid }
 ember_pickups:
-  - { x: 3000,  y: 1500, ember_value: 1 }
-  - { x: 5500,  y: 2200, ember_value: 1 }
-  - { x: 9000,  y: 1800, ember_value: 2 }
+  - { x: 3000, y: 1800, ember_value: 1 }
+  - { x: 5500, y: 2500, ember_value: 1 }
+  - { x: 9000, y: 2100, ember_value: 2 }
 lethal_regions:
-  - { x: 0,     y: 0, width: 13000, height: 200, tag: void }
-layout_ref: "layouts/caverns_01.tmx"
-notes: "Tutorial level. Single horizontal traversal, two checkpoints, one void floor as the lethal boundary. Three ember pickups demonstrate the resource without making it scarce. Tier 1: 0-4 deaths is acceptable per balance band."
+  - { x: 0, y: 0, width: 13000, height: 200, tag: void }
+notes: "Tutorial level. Four solid platforms with small gaps the player jumps across; the gaps between platforms are over the void floor, which is the only lethal region. Two checkpoints (at the second and third platform). Three ember pickups demonstrate the resource without making it scarce. Tier 1: 0-4 deaths is the acceptable balance band."
 ```
 
-This level is the *unit test* for the schema: from it alone, an agent should be able to implement a new level of similar shape (e.g. a new tier-1 caverns level, or a new tier-3 fault_lines level by extrapolating tier/region differences from the design intent) without further reference. If that fails, the schema is under-specified — surface the gap rather than work around it (see §11.1 of `docs/spec.md`).
+This level is the *unit test* for the schema: from it alone, an agent should be able to implement a new level of similar shape (e.g. a new tier-1 caverns level, or a new tier-3 fault_lines level by extrapolating tier/region differences from the design intent) without further reference. The level is *completely described* by the schema — there is no opaque external file the agent needs to author. If that fails, the schema is under-specified — surface the gap rather than work around it (see §11.1 of `docs/spec.md`).
 
 ## Balance Notes
 
@@ -121,4 +138,4 @@ Lethal regions (no `minItems`) — a level may have zero declared lethal regions
 
 - Whether to introduce a `secret_ember_pickups:` array as a sibling to `ember_pickups:`, for the discoverable hidden-route collectibles. Argument for: encodes the "discovery" secondary aesthetic. Argument against: the schema can already represent them as `ember_pickups` with `ember_value: 4` placed in a hidden location. Currently no; revisit if discoverability becomes a v0.5 design goal.
 - Whether to support per-level `pillars_override:` (a level that emphasizes a specific pillar more than others). Currently no — pillars are immutable per-project; per-level emphasis is encoded in the geometry, not in the schema.
-- Whether `lethal_regions[*].tag` should drive *simulation* behavior (e.g. `crusher` having a movement pattern). Currently no — all four are equally lethal at simulation; the tag is presentation. If `crusher` needs a movement cycle, that goes in `layout_ref`, not in the schema.
+- Whether `lethal_regions[*].tag` should drive *simulation* behavior (e.g. `crusher` having a movement pattern). Currently no — all four are equally lethal at simulation; the tag is presentation. If `crusher` needs a movement cycle, that would extend the schema with a `crusher_cycles:` array (or similar) declaring movement period and amplitude — explicitly *in* the schema, not in an opaque external file.

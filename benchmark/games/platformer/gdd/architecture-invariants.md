@@ -22,15 +22,6 @@ invariants:
       - "{loops.flight}"
     enforcement: advisory
     severity: warning
-  data_behavior_separation:
-    kind: architectural_pattern
-    rule: "Entities are composed of data-only structures; movement, collision, and ember-resource logic live in stateless systems that query them. No gameplay rules inside presentation/render code."
-    applies_to:
-      - "{entities.player_moth}"
-      - "{entities.ember_pickup}"
-      - "{entities.checkpoint}"
-    enforcement: advisory
-    severity: warning
   state_not_in_presentation:
     kind: layer_boundary
     rule: "Persistent simulation state (moth_movement, level_progress, position/velocity, ember/hp values) is owned by the simulation layer; the presentation layer reads but never owns or mutates it. Camera position, animation frame, and visual-effect particles MAY live in presentation."
@@ -41,11 +32,6 @@ invariants:
       - "{resources.ember}"
     enforcement: lint
     severity: error
-  cross_layer_via_events:
-    kind: communication
-    rule: "Communication between simulation and presentation layers is one-way asynchronous events emitted by the simulation; presentation never holds direct references to simulation objects."
-    enforcement: advisory
-    severity: warning
   deterministic_given_input:
     kind: determinism
     rule: "Given a fixed sequence of input events (each timestamped to a simulation tick), every simulation state at every tick is reproducible byte-for-byte. There is no internal RNG in the simulation path; {distributions.ember_flicker_jitter} is cosmetic-only and lives in presentation. Two replays of the same input sequence produce byte-identical simulation state at every tick."
@@ -58,7 +44,7 @@ invariants:
 
 ## Tokens
 
-Six invariants govern the codebase. Each declares a *property of the generated code*, not a tool used to generate it. The spec explicitly forbids naming engines, frameworks, or renderers here.
+Four invariants govern the codebase. Each declares a *property of the generated code*, not a tool used to generate it. The spec explicitly forbids naming engines, frameworks, or renderers here. Each invariant here is anchored in a specific claim from the design brief — the integer-position commitment, the fixed-timestep commitment, the sim-state-not-presentation commitment, and the deterministic-replay-as-feature commitment. Two further architectural-pattern invariants the spec offers as common idioms (data/behavior separation; cross-layer via events) are *not* declared here: the brief is silent on those choices and the spec's design discipline calls for invariants to be anchored in the game's needs, not in the spec's pattern library.
 
 ## Rationale
 
@@ -78,23 +64,11 @@ A platformer that updates simulation at render-frame rate gives different physic
 
 **Advisory at v0.2.0-alpha** because reliable static detection of "is the simulation tick rate-coupled to render?" requires AST analysis at the call-graph level. A future linter check could promote this to `enforcement: lint` once a project-supplied adapter declares the simulation-tick callsite.
 
-### data_behavior_separation
-
-Advisory because no fully reliable static check exists for "is this logic in the wrong layer?" The reminder is for human/agent review: an entity is plain data; logic that *transforms* an entity belongs in a system (`rules.*` when those are declared at status >= prototyped).
-
-The platformer has a specific failure mode this invariant blocks: animation systems that "predict" the next physics tick to interpolate visually. If the animation system runs simulation logic ("if velocity_y > 0 then play falling_anim"), the visual-prediction can desync from actual physics — the moth visibly enters the falling animation a frame before it actually starts falling, breaking the "what I see is what I commit to" pillar.
-
 ### state_not_in_presentation
 
 Statically checkable on a project that follows the recommended layout: scan presentation-layer source files (`implementation_pointers` map under `presentation:`, if declared) for mutations of fields owned by `{states.*}` or `{resources.*}`. Any write triggers the violation.
 
 The carve-out for camera/animation/particles is deliberate — those are *derived* from simulation state, not simulation state proper. A camera that smoothly follows the moth's interpolated position is presentation; the moth's actual position is simulation.
-
-### cross_layer_via_events
-
-Advisory at v0.2.0-alpha because cross-layer call topology is hard to lint without an AST. A clean adapter for `gdmd verify` would observe event traffic and assert no direct references; that promotes this to `enforcement: verify` in a later version.
-
-The platformer's specific application: the simulation emits `{events.jump_pressed}` when a jump becomes airborne, and the presentation listens to play the jump animation. The presentation does NOT poll `moth_movement.state == airborne` directly — it reacts to the transition event. This makes the presentation layer engine-replaceable.
 
 ### deterministic_given_input
 

@@ -29,7 +29,7 @@ A single distribution. By design.
 
 - `output_domain: real` (not integer): the jitter is a render-time visual effect, not a state-affecting roll. The presentation layer can use any continuous distribution; the simulation layer never reads this value.
 - `seed: nondeterministic` (not `deterministic_per_run`): explicitly non-cross-engine-deterministic — different installs can flicker differently without breaking replay. This is the carve-out the spec permits for cosmetic uses (§4.7's D-016 framing about gaussian being reserved for non-cross-engine cosmetic noise).
-- `implemented_in:` points at the *presentation* layer (`src/embergrave/presentation/...`), not the simulation. The data-vs-presentation separation invariant (`{invariants.data_behavior_separation}`) holds.
+- `implemented_in:` points at the *presentation* layer (`src/embergrave/presentation/...`), not the simulation. The layer boundary invariant (`{invariants.state_not_in_presentation}`) is satisfied because the jitter is presentation-owned and produces no simulation-state mutation.
 
 **Why declare it at all?** Without the declaration, any agent reading the spec would either invent a different visual-jitter solution (likely with the wrong determinism property — accidentally seeding from a gameplay clock, breaking replay) or omit the visual flicker entirely (the ember feeling dead). The declaration anchors the design intent and makes the cosmetic-only contract explicit.
 

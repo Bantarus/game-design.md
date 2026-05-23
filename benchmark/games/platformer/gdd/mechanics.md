@@ -112,14 +112,6 @@ verbs:
       - { resolve: "{rules.level_completion}" }
     status: draft
     implemented_in: ["src/embergrave/verbs/exit_level.py"]
-  select_region:
-    actor: "{entities.player_moth}"
-    cost: 0
-    target_schema: { type: region_identifier }
-    effects:
-      - { kind: navigate_region_select }
-    status: draft
-    implemented_in: ["src/embergrave/verbs/select_region.py"]
   reach_summit:
     actor: system
     cost: 0
@@ -231,7 +223,9 @@ This file owns the four flat namespaces of the moment-to-moment game: `entities`
 
 **Position is fixed-point integer.** All `position_x/y` and `velocity_x/y` fields use `fixed_point: micro_units` (one micro_unit = 1/1000 of a world unit). This is the architectural commitment that makes the simulation deterministic given input — float position breaks byte-identical replay (see `{invariants.fixed_point_simulation_state}`). The presentation layer renders by dividing back to floats for screen-space pixels; the simulation layer never sees those floats.
 
-**Verbs — three input verbs declare feel, eight are mechanical glue.** `jump`, `dash`, and `glide` are the three the player feels per-millisecond — each declares a `feel:` ref to `gdd/feel.md`. The eight others (`refuel_ember`, `touch_checkpoint`, `restart_at_checkpoint`, `enter_level`, `exit_level`, `select_region`, `reach_summit`, `advance_tick`) are system-actor verbs that resolve game state without a haptic moment. `feel:` is reserved for verbs the player consciously *commits* to. `advance_tick` is the per-tick simulation-advance verb that drives `{rules.physics_tick}`; it fires every simulation tick (60Hz) regardless of player input.
+**Verbs — three input verbs declare feel, seven are mechanical glue.** `jump`, `dash`, and `glide` are the three the player feels per-millisecond — each declares a `feel:` ref to `gdd/feel.md`. The seven others (`refuel_ember`, `touch_checkpoint`, `restart_at_checkpoint`, `enter_level`, `exit_level`, `reach_summit`, `advance_tick`) are system-actor verbs that resolve game state without a haptic moment. `feel:` is reserved for verbs the player consciously *commits* to.
+
+**`advance_tick` is a v0.3-candidate friction artifact, kept deliberately.** The platformer's per-tick physics simulation has no natural player-verb to attach to — the simulation advances every tick (60Hz) regardless of input. To satisfy the spec's "rules are triggered by a verb" requirement, `advance_tick` exists as a system verb that does nothing except trigger `{rules.physics_tick}`. This is not polish; it is a real spec friction surfaced by authoring a non-turn-based game against a spec whose existing examples are all turn-based. The friction is logged as a v0.3 candidate: the spec may benefit from a first-class tick/clock concept distinct from player verbs. Kept here as-is (not papered over) because the friction is the finding.
 
 **Resources — hp and ember.** `hp` is per_run with max 1 — every hit is lethal; this is the "one-hit-kill platformer" design call. `ember` is per_run with max 12 (12 dashes' worth if hoarded; ~4 dashes plus 12 short glides in practice). `ember.velocity_target` ties to `{balance_targets.ember_velocity}` — the design call is that a skilled player on a tier-3 level burns and refuels ember at a rate that keeps the meter visible-but-tense (median 4-6 ember mid-level).
 

@@ -24,7 +24,6 @@ loops:
     intended_aesthetics: [sensation, challenge]
     feel_priority: high
     balance_targets:
-      - "{balance_targets.median_time_per_flight}"
       - "{balance_targets.ember_velocity}"
     status: draft
     implemented_in: ["src/embergrave/loops/flight.py"]
@@ -51,7 +50,6 @@ loops:
     timescale: meta
     duration: "~30-90 min"
     sequence:
-      - select_region: "{verbs.select_region}"
       - levels:        "{loops.level}"
       - reach_summit:  "{verbs.reach_summit}"
     intended_dynamics:

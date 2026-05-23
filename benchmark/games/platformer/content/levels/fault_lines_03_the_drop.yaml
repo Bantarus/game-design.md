@@ -11,23 +11,35 @@ time_target_ms: 210000
 entry:  { x: 1000,  y: 20000 }
 exit:   { x: 8000,  y: 500   }
 checkpoints:
-  - { x: 1500,  y: 17000 }
-  - { x: 4000,  y: 11000 }
-  - { x: 6500,  y: 5000  }
+  - { x: 1500, y: 17500 }
+  - { x: 4000, y: 11500 }
+  - { x: 6500, y: 5500  }
+platforms:
+  # Entry shelf at top
+  - { x: 500,   y: 19500, width: 2500, height: 300, surface: solid }
+  # Descent series — ledges on alternating sides
+  - { x: 5000,  y: 17000, width: 1500, height: 200, surface: solid }
+  - { x: 1000,  y: 14000, width: 1500, height: 200, surface: solid }
+  - { x: 3500,  y: 11500, width: 1500, height: 200, surface: one_way }
+  - { x: 6000,  y: 9000,  width: 1500, height: 200, surface: solid }
+  - { x: 1500,  y: 7000,  width: 1500, height: 200, surface: solid }
+  - { x: 5500,  y: 5500,  width: 2000, height: 200, surface: solid }
+  - { x: 2500,  y: 3500,  width: 1500, height: 200, surface: one_way }
+  # Exit shelf at bottom
+  - { x: 6500,  y: 500,   width: 2500, height: 200, surface: solid }
 ember_pickups:
-  - { x: 2200,  y: 18800, ember_value: 1 }
-  - { x: 3800,  y: 14500, ember_value: 2 }
-  - { x: 5500,  y: 12200, ember_value: 1 }
-  - { x: 4200,  y: 9000,  ember_value: 1 }
-  - { x: 7100,  y: 7400,  ember_value: 2 }
-  - { x: 3000,  y: 3000,  ember_value: 1 }
-  - { x: 6800,  y: 1800,  ember_value: 3 }
+  - { x: 2200, y: 19300, ember_value: 1 }
+  - { x: 3800, y: 15000, ember_value: 2 }
+  - { x: 5500, y: 12500, ember_value: 1 }
+  - { x: 4200, y: 9500,  ember_value: 1 }
+  - { x: 7100, y: 7800,  ember_value: 2 }
+  - { x: 3000, y: 4000,  ember_value: 1 }
+  - { x: 6800, y: 1800,  ember_value: 3 }
 lethal_regions:
-  - { x: 0,    y: 0,    width: 9000, height: 200,  tag: void  }
-  - { x: 0,    y: 6000, width: 500,  height: 2000, tag: spike }
-  - { x: 8500, y: 6000, width: 500,  height: 2000, tag: spike }
-  - { x: 0,    y: 12500, width: 500, height: 2000, tag: spike }
-  - { x: 8500, y: 12500, width: 500, height: 2000, tag: spike }
-  - { x: 3500, y: 0,    width: 2000, height: 400,  tag: lava  }
-layout_ref: "layouts/fault_lines_03.tmx"
-notes: "Vertical descent level. Player enters at top (y=20000) and must descend to exit at bottom (y=500). Three intermediate checkpoints break the ~20000-micro-unit drop into four sections. Side walls are spike-tagged in the middle bands to punish lateral overshoot during dashes. Bottom-center carries a lava strip; final approach to exit is to the right. Ember pickups distributed to allow 1–2 dashes per section. Tier 3: 5–15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player."
+  - { x: 0,    y: 0,     width: 9000, height: 200,  tag: void  }
+  - { x: 0,    y: 6000,  width: 500,  height: 2000, tag: spike }
+  - { x: 8500, y: 6000,  width: 500,  height: 2000, tag: spike }
+  - { x: 0,    y: 12500, width: 500,  height: 2000, tag: spike }
+  - { x: 8500, y: 12500, width: 500,  height: 2000, tag: spike }
+  - { x: 3500, y: 0,     width: 2000, height: 400,  tag: lava  }
+notes: "Vertical descent level. Player enters at top (y=20000) and must descend to exit at bottom (y=500). Three intermediate checkpoints break the ~20000-micro_unit drop into four sections. Side walls in the middle bands are spike-tagged to punish lateral overshoot during dashes. Bottom-center carries a lava strip; final approach to exit is to the right. Two of the platforms are one_way (the moth can jump up through them from below) to allow alternate routes back up after a missed checkpoint. Ember pickups distributed to allow 1-2 dashes per section. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player."
