@@ -20,9 +20,15 @@ recorded for audit purposes; strict byte-identity is NOT required (GPU
 non-determinism is expected; the audit records the divergence rate for
 the F-009 report).
 
-Per pre-reg §"Judge" Layer 3 (v7), the blinding-leak calibration runs
-N=30 outputs across A/B/C on one calibration task, then evaluates the
-judge in TWO PHASES:
+Per pre-reg §"Judge" Layer 3 (v8 — was v7), the blinding-leak calibration
+runs N=90 outputs across A/B/C (30 per condition) on one calibration task,
+then evaluates the judge in TWO PHASES. N was bumped from 30 → 90 at v8
+because at N=30 the Wilson CI is wide enough that "includes 1/3" only
+rules out a *large* leak (a small residual leak at, say, 45% passes
+because the CI spans both 33% and 45%). At N=90 the half-width tightens
+to ~0.10, catching ~10pp-or-larger leaks. Blinding-leak calibration is
+just the judge predicting condition on stored outputs (no instrument
+generation per evaluation phase), so the larger N is nearly free.
 
   Phase 1 (positive control / judge fitness): judge predicts conditions
   on RAW outputs (no sanitization). PASS iff above chance with
@@ -301,7 +307,7 @@ def calibrate_blinding(
     instrument: Instrument,
     judge: Judge,
     calibration_task: Task,
-    n_per_condition: int = 10,
+    n_per_condition: int = 30,  # v8: bumped from 10 → 30 (total N=90)
 ) -> BlindingLeakResult:
     """Two-phase blinding-leak calibration (pre-reg v7).
 

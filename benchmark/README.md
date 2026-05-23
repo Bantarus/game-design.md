@@ -1,6 +1,6 @@
 # `benchmark/` — Phase 5 help-benchmark scaffolding
 
-> The harness for the Phase 5 help-benchmark whose pre-registration is locked at commit `27a4381` (chain: `f76f4c2 → a9425e8 → 77ae3a5 → 78f150c → 766e07b → 27a4381`). See [`docs/v0.2-phase5-pre-registration.md`](../docs/v0.2-phase5-pre-registration.md) for the locked gate, [`docs/v0.2-phase5-help-benchmark-scope.md`](../docs/v0.2-phase5-help-benchmark-scope.md) for the framing.
+> The harness for the Phase 5 help-benchmark whose pre-registration is locked at the v8 commit (chain: `f76f4c2 → a9425e8 → 77ae3a5 → 78f150c → 766e07b → 27a4381 → 4d322bf → f996187 → <v8 commit>`). See [`docs/v0.2-phase5-pre-registration.md`](../docs/v0.2-phase5-pre-registration.md) for the locked gate, [`docs/v0.2-phase5-help-benchmark-scope.md`](../docs/v0.2-phase5-help-benchmark-scope.md) for the framing.
 
 ## Layout
 
@@ -39,7 +39,9 @@ benchmark/
     judge.py              # Judge abstraction + MockJudge + stubs
     checklist.py          # Objective intent checklist evaluator
     calibration.py        # Instrument-calibration + blinding-leak calibration
-    run_trial.py          # Main trial entry point (atomic per invocation)
+    content_preservation.py  # v8: sanitizer's positive control + anchor library
+    sanitization.py       # v7+: SHA-locked sanitizer (applied at trial scoring + calibration)
+    run_trial.py          # Main trial entry point (sanitizes before scoring at v8)
     audits/               # Layer-3 fairness audit artifacts (populated at trial-build)
     trials/               # Per-trial JSON records (populated during trials)
 ```
@@ -59,8 +61,9 @@ benchmark/
 | Fairness audit prompt (B Layer 3) | **Done** (template) | Authored. Needs an auxiliary LLM judge wired up to actually run. |
 | Trial harness skeleton | **Done** (scaffold) | `tasks.py`, `conditions.py`, `instrument.py`, `judge.py`, `checklist.py`, `calibration.py`, `run_trial.py`. End-to-end smoke-tested with MockInstrument + MockJudge. |
 | Calibration smoke runs | **Mock-only** | Calibration code path works; the seed-sensitivity gate correctly *fails* MockInstrument (as designed — mock outputs only vary by seed integer). Real-instrument calibration is blocked on instrument wiring. |
-| Blinding-leak calibration | **Mock-only** | Code path works with MockJudge; real calibration is blocked on judge wiring. |
-| Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. Real trials are blocked on instrument + judge wiring. |
+| Blinding-leak calibration | **Mock-only** | Two-phase code path works with MockJudge (correctly fails Phase 1 as designed; v8 bumped N to 90). Real calibration is blocked on judge wiring. |
+| Content-preservation calibration (v8) | **Mock-only** | Sanitizer's positive control. Anchor library at `harness/content_preservation.py` (3 correct + 3 incorrect per game on the easy task). MockJudge correctly fails Phase A (length heuristic can't read correctness). Real calibration is blocked on judge wiring. |
+| Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. At v8, every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Real trials are blocked on instrument + judge wiring. |
 
 ## What's needed before trial zero can fire
 
@@ -136,7 +139,7 @@ python -m benchmark.harness.run_calibration --instrument claude
 
 Both bundles must pass all three gates (structural / seed-sensitivity / rubric-reachability). The same-seed audit is recorded but not gated.
 
-### 6. Run blinding-leak calibration on the pinned judge — TWO PHASES (pre-reg v7 §"Judge" Layer 3)
+### 6. Run blinding-leak calibration on the pinned judge — TWO PHASES (pre-reg v7 §"Judge" Layer 3, N bumped at v8)
 
 ```
 python -m benchmark.harness.run_blinding_leak_calibration \
@@ -145,7 +148,9 @@ python -m benchmark.harness.run_blinding_leak_calibration \
 
 (Stub entrypoint.)
 
-N=30 outputs (10 per A/B/C) on the easy_platformer task. **Two-phase gate per pre-reg v7:**
+**N=90 outputs (30 per A/B/C)** on the easy_platformer task. (v7's N=30 had a wide enough Wilson CI that "includes 1/3" only ruled out a *large* leak; v8 bumped to 90 to catch ~10pp-or-larger residual leaks — half-width ~0.10 near p=0.5. The 90 outputs are generated once via the instrument; both phases re-score the same 90, so the marginal cost over v7 is one extra scoring pass on stored text.)
+
+**Two-phase gate per pre-reg v7:**
 
 - **Phase 1 — Positive control / judge fitness.** Judge predicts each output's condition on the RAW outputs (no sanitization applied; spec-vocabulary in A intact, prose-style markers in B intact). **PASS iff** judge's accuracy is *above chance* with statistical significance — lower bound of 95% Wilson CI > 1/3. Proves the judge is a fair adversary that CAN detect tells.
 - **Sanitize.** Apply [`harness/sanitization.py::sanitize_output`](harness/sanitization.py) to every output. (Pre-reg-locked; sanitizer changes require pre-reg supersession.)
@@ -153,11 +158,33 @@ N=30 outputs (10 per A/B/C) on the easy_platformer task. **Two-phase gate per pr
 
 **Overall pass requires BOTH phases.** Fail modes:
 - **Phase 1 fails** → the judge is too weak to detect even un-sanitized tells. Re-pin the judge (family rule must still hold). Phase-1 failure invalidates the judge, not the blinding.
-- **Phase 2 fails** → the blinding leaks even after sanitization. Strengthen `sanitization.py` (add more patterns), re-run from Phase 2 only — Phase 1 holds because the judge already passed fitness.
+- **Phase 2 fails** → the blinding leaks even after sanitization. Strengthen `sanitization.py` (add more patterns), re-run from Phase 2 only — Phase 1 holds because the judge already passed fitness. **Counterweighted by step 6b below: tuning sanitization toward more stripping must not destroy content the matches-intent judge needs at trial time.**
 
 Why two phases (v7 hardening): a one-phase "at-chance" gate is ambiguous between "blinding works" and "judge too weak to detect anything." A weak judge gets ~chance regardless, which is a false pass. The positive control closes the hole — see pre-reg v6 → v7 audit-trail row #13 and project memory `calibration-positive-control` for the general rule.
 
 The harness's MockJudge demonstrates the gate working as designed: it predicts uniformly at random, so its accuracy lands at ~chance in both phases, and the positive control correctly FAILS (a uniform-random judge isn't a fair adversary). Real Gemma should pass Phase 1 with accuracy clearly above chance (cites visible `{namespace.id}` syntax / canonical headers / "per the spec" phrasing as A-tells) and then Phase 2 should fall to chance after sanitization strips those tells.
+
+### 6b. Run content-preservation calibration — TWO PHASES (pre-reg v8 §"Judge" Layer 3b)
+
+```
+python -m benchmark.harness.run_content_preservation_calibration
+```
+
+(Stub entrypoint.)
+
+The sanitizer's positive control. Step 6 above pressures sanitization toward more aggressive stripping (judge at chance is easier when there's less to read); step 6b is the counterweight that prevents over-stripping from passing the gate vacuously by destroying content. **Both calibrations must pass before trial zero** — a sanitization function passes the v8 apparatus iff it lands in the joint pass region of step 6 (tells removed) AND step 6b (content preserved).
+
+The matches-intent judge (same `score_matches_intent` rubric used at trial scoring time) scores K=3 known-correct + K=3 known-incorrect pre-authored anchors per (game, calibration task) set. Anchors are committed in [`harness/content_preservation.py`](harness/content_preservation.py) — correct anchors span A/B/C styles (so the gate measures content recognition, not style recognition); incorrect anchors span failure modes (off-topic / hand-waving / wrong-on-specifics).
+
+**Phase A — Anchor sanity check** (on RAW anchors). Pass iff `median(correct, raw) ≥ 4` AND `median(incorrect, raw) ≤ 2` AND `raw_gap ≥ 3`, per set. Validates that the anchors are discriminably authored. A Phase-A fail per set means the anchors must be re-authored (re-pin in a pre-reg cycle); Phase-A fail invalidates the *anchors*, not the sanitization.
+
+**Phase B — Content preservation** (on SANITIZED anchors). Pass iff `median(correct, sanitized) ≥ 3` AND `sanitized_gap ≥ 2`, per set. Validates that sanitization preserved enough discriminative signal for the matches-intent judge to still distinguish correct from incorrect anchors. A Phase-B fail per set means the sanitizer is destroying content for that set; tune the sanitizer down in a pre-reg cycle, re-run Phase B only (Phase A holds because the anchors are unchanged); Phase-B fail invalidates the *sanitization*, not the anchors.
+
+**Overall pass requires every per-set result to have both phases passing.**
+
+The harness's MockJudge demonstrates the gate working as designed: it scores by length (not content), so its raw median(correct) and median(incorrect) collapse to similar values and Phase A correctly fails (anchor sanity can't hold against a content-blind judge). A real Gemma judge should pass Phase A with a clear raw gap and then maintain a smaller-but-still-present sanitized gap in Phase B.
+
+See pre-reg v7 → v8 audit-trail row #15 for the rationale and project memory `sanitizer-content-preservation` for the general "every sanitization-style gate needs a content-preservation counterweight" rule.
 
 ### 7. (Then) Trial zero
 
@@ -167,11 +194,13 @@ The trial sweep itself: 660 outputs per the pre-reg's design (3 headline task ty
 
 ## Discipline reminders
 
-Two specific cautions from the user's review of v6 + Game #2 authoring:
+Three specific cautions, in chronological order of when the user surfaced them:
 
-**Intent checklists are about game behavior, not spec-structure.** A criterion like "implements the recipe tree from the brief" is neutral; a criterion like "uses a state machine for the world clock" silently rewards the A-condition output for being spec-shaped and tilts the headline. The 8 task definitions in `benchmark/tasks/` have been authored under this discipline; any future criterion addition should pass the same test. See the `notes:` field on each task for the specific phrasing choices made.
+**Intent checklists are about game behavior, not spec-structure.** (v6 + Game #2 review.) A criterion like "implements the recipe tree from the brief" is neutral; a criterion like "uses a state machine for the world clock" silently rewards the A-condition output for being spec-shaped and tilts the headline. The 8 task definitions in `benchmark/tasks/` have been authored under this discipline; any future criterion addition should pass the same test. See the `notes:` field on each task for the specific phrasing choices made.
 
-**C-prompts get the same good-faith standard as B.** The B-fairness audit (Layer 3) enforces "fair brief, not strawman" on the flattened B with a score-≥-4 gate; the C-prompts in `benchmark/c-prompts/` have been written to the same standard (a genuine minimal description of the game, not an impoverished one-liner). C only feeds the secondary A-vs-C and B-vs-C comparisons, but a strawman C inflates those contexts and muddies the headline's surroundings.
+**C-prompts get the same good-faith standard as B.** (v6 + Game #2 review.) The B-fairness audit (Layer 3) enforces "fair brief, not strawman" on the flattened B with a score-≥-4 gate; the C-prompts in `benchmark/c-prompts/` have been written to the same standard (a genuine minimal description of the game, not an impoverished one-liner). C only feeds the secondary A-vs-C and B-vs-C comparisons, but a strawman C inflates those contexts and muddies the headline's surroundings.
+
+**Trial-time scoring is on SANITIZED outputs only.** (v8.) Every trial sanitizes its subject output via `harness/sanitization.py::sanitize_output` once at scoring time, and BOTH judge calls — matches-intent (Layer 2) and the per-criterion checklist grader (Layer 1 when LLM-graded) — score the sanitized form. Raw subject outputs MUST NEVER reach the scoring judge. The constraint exists because the v7 two-phase blinding-leak calibration validated the judge's behavior on sanitized outputs (Phase 2: judge at chance); Phase 1 was the proof that the judge *can* read condition off raw outputs. If trials scored raw, the judge would be operating in its un-blinded mode against exactly the channel the calibration was designed to close. See pre-reg v7 → v8 audit-trail row #14 and project memory `sanitized-scoring-consistency` for the standing rule.
 
 ## Where the next checkpoint lives
 
@@ -180,7 +209,8 @@ Per the user's standing direction, the next checkpoint is *"calibration has pass
 - Steps 1-3 above (judge + Qwen + Claude wired up) committed.
 - Step 4 (fairness audit) run and passed for both games; flattener SHA frozen.
 - Step 5 (instrument calibration) run and passed for both bundles.
-- Step 6 (blinding-leak calibration) run and passed.
-- No edits to the pre-reg (`27a4381`) — the gate stands.
+- Step 6 (blinding-leak calibration, two-phase at N=90) run and passed.
+- Step 6b (content-preservation calibration, two-phase across both games' anchor sets) run and passed.
+- No edits to the v8 pre-reg — the gate stands.
 
-At that point the harness is loaded, calibrated, and waiting; the only thing left is the `run_trial` invocation that fires trial zero.
+At that point the harness is loaded, both calibrations have landed in the joint pass region (sanitization strips enough to blind the condition-prediction judge AND preserves enough for the matches-intent judge to discriminate good from bad content), and the only thing left is the `run_trial` invocation that fires trial zero.

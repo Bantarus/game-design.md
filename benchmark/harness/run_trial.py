@@ -35,6 +35,7 @@ from .checklist import ChecklistGrader, ChecklistVerdict
 from .conditions import build_a, build_b, build_c, ConditionPayload
 from .instrument import Instrument, InstrumentBundle, MockInstrument
 from .judge import Judge, JudgeBundle, IntentScore, MockJudge
+from .sanitization import sanitize_output, sanitization_sha256
 from .tasks import Task, load_task
 
 
@@ -60,7 +61,9 @@ class TrialRecord:
     c_prompt_sha256: str     # if condition == C; empty otherwise
 
     # Outcome
-    subject_output: str
+    subject_output: str               # RAW — lossless audit trail
+    subject_output_sanitized: str     # what the judge actually scored (v8)
+    sanitization_sha256: str          # SHA of sanitization.py at trial time (v8)
     tokens_input: int
     tokens_output: int
     tool_steps: int
@@ -122,14 +125,24 @@ def run_trial(
     brief_path = HARNESS_DIR.parent / "games" / task.game / "design-brief.md"
     game_brief = brief_path.read_text() if brief_path.exists() else ""
 
-    # Score with the objective checklist
-    grader = ChecklistGrader(judge)
-    verdict = grader.grade(task, response.text)
+    # v8: sanitize the raw output once, score the SANITIZED form in every
+    # judge call. The pre-reg's two-phase blinding-leak calibration validates
+    # that the judge is (a) above chance on RAW outputs (Phase 1 / fitness)
+    # and (b) at chance on SANITIZED outputs (Phase 2 / blinding gate). If
+    # trial scoring used raw, Phase 1 just proved the judge can read condition
+    # off raw outputs — un-blinding the scoring that counts and making the
+    # blinding-leak calibration moot. Both judge calls below score sanitized.
+    sanitized_output = sanitize_output(response.text)
+    san_sha = sanitization_sha256()
 
-    # Score with the matches-intent rubric
+    # Score with the objective checklist (judge call — sanitized)
+    grader = ChecklistGrader(judge)
+    verdict = grader.grade(task, sanitized_output)
+
+    # Score with the matches-intent rubric (judge call — sanitized)
     intent = judge.score_matches_intent(
         task_brief=task.brief,
-        subject_output=response.text,
+        subject_output=sanitized_output,
         game_brief=game_brief,
     )
 
@@ -148,6 +161,8 @@ def run_trial(
         flattener_sha256=flattener_sha,
         c_prompt_sha256=c_prompt_sha,
         subject_output=response.text,
+        subject_output_sanitized=sanitized_output,
+        sanitization_sha256=san_sha,
         tokens_input=response.tokens_input,
         tokens_output=response.tokens_output,
         tool_steps=response.tool_steps,
