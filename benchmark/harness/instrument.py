@@ -134,25 +134,76 @@ class MockInstrument(Instrument):
 # ---------------------------------------------------------------------------
 
 class QwenInstrument(Instrument):
-    """Headline instrument: local Qwen via llama.cpp.
+    """Headline instrument: local Qwen via llama-server (long-running HTTP).
 
-    Requires:
-      - llama.cpp build (the exact version is pinned in the bundle)
-      - the pinned GGUF file at a known path (the SHA-256 is pinned in the bundle)
-      - sampling params as declared in the bundle
-      - chat-template + reasoning-format handling as declared in the bundle
+    Wired through [`benchmark/harness/llama_server.py`](llama_server.py).
+    The server is loaded once per instance (lazy on first complete()), reused
+    across all calls for the lifetime of the QwenInstrument, and released
+    on close() / context-manager exit. For a 330-trial Qwen arm at 30B
+    Q4_K_M, this pays the ~15s model-load cost ONCE instead of per-call —
+    a meaningful saving on the multi-hour sweep.
 
-    The trial-zero command line will set the GGUF path via env var
-    `DRIFTWOOD_QWEN_GGUF_PATH` and the llama.cpp binary via env var
-    `DRIFTWOOD_LLAMA_CPP_BIN`; this class verifies both exist on construction.
+    Usage (long-running, the sweep driver):
+        with QwenInstrument(bundle) as inst:
+            for cell in plan:
+                r = inst.complete(sys_prompt, user_prompt, seed=cell.seed)
+
+    Usage (one-off, the per-cell CLI shape):
+        inst = QwenInstrument(bundle)
+        r = inst.complete(...)
+        inst.close()  # or rely on GC + LlamaServer's stop()
+
+    Pinned env vars at runtime:
+      - DRIFTWOOD_QWEN_GGUF_PATH — path to the Qwen GGUF.
+      - DRIFTWOOD_LLAMA_CPP_BIN  — path to llama-server (default
+                                    ~/llama.cpp/build/bin/llama-server).
+
+    Seed: llama.cpp's seed parameter, set per-call, gives deterministic
+    outputs at temperature=0 for a fixed (model, ngl, ctx_size, batch_size,
+    build SHA) combination. The InstrumentBundle pins all five; the seed
+    is the per-trial varying input. Same-seed re-runs against the same
+    bundle produce byte-identical outputs (verified at the smoke-test
+    commit landing this wiring).
     """
 
-    def __init__(self, bundle: InstrumentBundle):
+    def __init__(
+        self,
+        bundle: InstrumentBundle,
+        *,
+        server: "LlamaServer | None" = None,
+        gguf_path: str | None = None,
+        port: int = 8080,
+    ):
         super().__init__(bundle)
-        self._gguf_path = os.environ.get("DRIFTWOOD_QWEN_GGUF_PATH")
-        self._llama_cpp_bin = os.environ.get("DRIFTWOOD_LLAMA_CPP_BIN")
-        # Verification is deliberately deferred; the harness's calibration smoke
-        # run is the canonical check that the bundle is correctly wired.
+        self._gguf_path = (
+            gguf_path
+            or os.environ.get("DRIFTWOOD_QWEN_GGUF_PATH")
+        )
+        if not self._gguf_path:
+            raise RuntimeError(
+                "QwenInstrument needs DRIFTWOOD_QWEN_GGUF_PATH set (or pass "
+                "gguf_path=... explicitly). The pinned GGUF lives at the path "
+                "computed by benchmark/tools/download_ggufs.sh."
+            )
+        # Lazy server-start: the LlamaServer is not booted until the first
+        # complete() call, so constructing a QwenInstrument (e.g. for tests
+        # that don't actually call it) is cheap.
+        self._server = server
+        self._owns_server = server is None
+        self._port = port
+
+    def _ensure_server(self) -> "LlamaServer":
+        if self._server is None:
+            # Lazy import to avoid pulling httpx into modules that only
+            # touch MockInstrument.
+            from .llama_server import LlamaServer
+            self._server = LlamaServer(
+                gguf_path=self._gguf_path,
+                bundle_id=self.bundle.bundle_id(),
+                port=self._port,
+            )
+            self._server.start()
+        return self._server
 
     def complete(
         self,
@@ -160,17 +211,89 @@ class QwenInstrument(Instrument):
         user_prompt: str,
         seed: int,
     ) -> InstrumentResponse:
-        if not self._gguf_path or not self._llama_cpp_bin:
-            raise NotImplementedError(
-                "QwenInstrument requires DRIFTWOOD_QWEN_GGUF_PATH and "
-                "DRIFTWOOD_LLAMA_CPP_BIN env vars + a wired-up subprocess call. "
-                "Stub pending external infra; see benchmark/README.md."
-            )
-        # TODO: subprocess.run([self._llama_cpp_bin, "-m", self._gguf_path,
-        #                       "--seed", str(seed), ...])
-        # Parse output, count tokens, handle <think>...</think> blocks per bundle.
-        # Return InstrumentResponse(...)
-        raise NotImplementedError("QwenInstrument.complete() stub; wire up llama.cpp invocation.")
+        srv = self._ensure_server()
+        t0 = time.monotonic()
+        response = srv.chat(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=self.bundle.sampling_temperature,
+            top_p=self.bundle.sampling_top_p,
+            top_k=self.bundle.sampling_top_k,
+            max_tokens=self.bundle.sampling_max_tokens,
+            seed=seed,
+        )
+        wall_clock = time.monotonic() - t0
+
+        return InstrumentResponse(
+            text=response.text,
+            tokens_input=response.tokens_input,
+            tokens_output=response.tokens_output,
+            tool_steps=0,  # llama.cpp serves chat-completions; no tool round-trips
+            wall_clock_seconds=wall_clock,
+            bundle_id=self.bundle.bundle_id(),
+            invocation_seed=seed,
+            extra={
+                "qwen_finish_reason": response.finish_reason,
+            },
+        )
+
+    def close(self) -> None:
+        if self._owns_server and self._server is not None:
+            self._server.stop()
+            self._server = None
+
+    def __enter__(self) -> "QwenInstrument":
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+        return False
+
+
+# Pinned Qwen headline-subject bundle for trial zero.
+#
+# Model: Qwen3-Coder-30B-A3B-Instruct (MoE, A3B active params, code-
+# specialized). Pinned at this harness-build commit per pre-reg §"Test
+# subjects" — the headline subject. Three outcomes for the headline gate
+# (success-lift ≥ 25pp, cost-lift ≤ 25%) are all interpretable against
+# this specific pinned bundle; the per-subject McNemar headline is
+# scoped to this exact (model, variant, quant, GGUF SHA, llama.cpp
+# build, sampling params) tuple.
+#
+# Distribution: unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF on HuggingFace
+# (Apache-2.0). Quant: Q4_K_M (18.6 GB on disk). The reference download
+# is via benchmark/tools/download_ggufs.sh; the GGUF SHA-256 below was
+# computed by `sha256sum` after the download and is the audit-trail pin.
+QWEN_HEADLINE_BUNDLE = InstrumentBundle(
+    model_name="Qwen3-Coder-30B-A3B-Instruct",
+    variant="unsloth-gguf",
+    quant="Q4_K_M",
+    gguf_sha256="fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad",
+    inference_engine="llama.cpp-b9306-5d246a7",
+    sampling_temperature=0.0,   # deterministic; seed alone controls reproducibility
+    sampling_top_p=1.0,
+    sampling_top_k=0,
+    sampling_max_tokens=4096,
+    chat_template="jinja-from-gguf",  # llama-server --jinja reads the chat template from GGUF metadata
+    reasoning_format="",  # Qwen3-Coder is non-reasoning by default; no <think> envelope
+    notes=(
+        "Headline subject. MoE shape (~3B active params) — fast on the "
+        "RTX 4090; runs at ~30-50 tokens/sec generation. Hand-rolled "
+        "llama-server wrapper at harness/llama_server.py loads the model "
+        "once per arm (~15s on warm cache, no model-load cost per call). "
+        "Seed determinism verified at the harness-build smoke commit: "
+        "temperature=0 + same seed produces byte-identical output. "
+        "License: Apache-2.0. Source: unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF "
+        "(HuggingFace), Q4_K_M GGUF, SHA-256 above. llama.cpp build SHA "
+        "5d246a7 (version 9306), CUDA-enabled, RTX 4090. (Note: build was "
+        "advanced from b8628/fbd441c to b9306/5d246a7 at this harness-build "
+        "commit because Gemma 4 26B A4B's `gemma4` architecture was added "
+        "to llama.cpp after the older build; updating once unblocks both "
+        "subjects on the same pinned build SHA.)"
+    ),
+)
 
 
 class ClaudeInstrument(Instrument):

@@ -59,14 +59,14 @@ benchmark/
 | Flattener (B Layer 1) | **Done** | Deterministic; smoke-tested on both games (byte-identical re-runs). Verifier passes 0e on both. |
 | Verifier (B Layer 2) | **Done** | Six completeness checks per the pre-reg; passes on both games. |
 | Fairness audit prompt (B Layer 3) | **Done** (template) | Authored. Needs an auxiliary LLM judge wired up to actually run. |
-| Trial harness skeleton | **Done** (scaffold) | `tasks.py`, `conditions.py`, `instrument.py`, `judge.py`, `checklist.py`, `calibration.py`, `run_trial.py`. End-to-end smoke-tested with MockInstrument + MockJudge. |
-| Calibration smoke runs | **Mock-only** | Calibration code path works; the seed-sensitivity gate correctly *fails* MockInstrument (as designed — mock outputs only vary by seed integer). Real-instrument calibration is blocked on instrument wiring. |
-| Blinding-leak calibration | **Mock-only** | Two-phase code path works with MockJudge (correctly fails Phase 1 as designed; v8 bumped N to 90). Real calibration is blocked on judge wiring. |
-| Content-preservation calibration (v8) | **Mock-only** | Sanitizer's positive control. Anchor library at `harness/content_preservation.py` (3 correct + 3 incorrect per game on the easy task). MockJudge correctly fails Phase A (length heuristic can't read correctness). Real calibration is blocked on judge wiring. |
+| Trial harness skeleton | **Done** (scaffold + real wiring) | `tasks.py`, `conditions.py`, `instrument.py`, `judge.py`, `checklist.py`, `calibration.py`, `run_trial.py`, `llama_server.py` (new), `sweep_plan.py`. QwenInstrument + GemmaJudge wired against local llama-server (`harness/llama_server.py`); 21 unit tests with mock-server; end-to-end smoke verified at harness-build commit. |
+| Calibration smoke runs | **Real-ready** | Calibration code path works against real Qwen + Gemma (both wired at this commit). Seed-sensitivity gate uses real Qwen3-Coder seeds (deterministic at temperature 0; verified at harness-build smoke). |
+| Blinding-leak calibration | **Real-ready** | Two-phase code path is wired against GemmaJudge.predict_conditions (real, batched). Verified at harness-build smoke: 3/3 synthetic A/B/C-style outputs correctly classified with specific structural rationales ("YAML frontmatter and `{resources.health}` interpolation — A-tell"). Generation order interleaved (Task 1.3, `44a06d9`) so calibration generation isn't blocked-by-condition. |
+| Content-preservation calibration (v8) | **Real-ready** | Anchor library + GemmaJudge.score_matches_intent (real). MockJudge tests still pass for harness exercise; real calibration runs against the pinned Gemma bundle. |
 | Sanitizer (v9) | **Done** (content-general) | Every rule labeled (S) structural or (E) closed-enumeration drawn from the spec's declared vocabulary — NOT from observed calibration samples. Closes the train/test distribution-shift hole: a closed enumeration of the spec's namespaces, headers, and reference-phrases generalizes to any A-tell the spec offers, not just those observed in calibration. See [`harness/sanitization.py`](harness/sanitization.py) docstring. |
 | Sanitizer-generalization check (v9) | **Mock-ready** | `check_blinding_generalization()` in `harness/calibration.py` runs the Phase-2 at-chance check on REAL trial outputs (not calibration anchors). Two timepoints: pre-sweep small-batch (N=12–30, before full sweep — catches generalization failure after ~20 trials instead of ~660) and post-hoc full-sweep sample (N=60–120, recorded alongside F-009). Real run blocked on instrument + judge wiring. |
 | ClaudeInstrument wiring | **Done** (Claude Code CLI, Opus 4.7 xhigh) | `ClaudeInstrument.complete()` invokes `claude --print --max-turns 5 --no-session-persistence --output-format json --model claude-opus-4-7 --effort xhigh --system-prompt <sys+anti-flailing> --tools ""` in a fresh tempdir per call, prompt on stdin. Canonical-name pin (not alias) locks the model generation; xhigh effort matches the pre-reg's frontier-capability framing. No API key — uses the user's existing Claude Code login. Bundle declaration + CLI version pin are the harness-build commits. |
-| Trial runs | **Mock-only** | One mock trial smoke-tested end-to-end. At v8, every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Real trials are blocked on Qwen + Gemma judge wiring (Claude instrument is wired). |
+| Trial runs | **Real-ready** | Mock and real paths both pass smoke. Every trial sanitizes the subject output before any judge call (matches-intent + checklist grader both score the sanitized form); the trial record carries raw + sanitized + sanitization SHA. Qwen, Claude, and Gemma judge all wired against their respective backends. |
 
 ## What's needed before trial zero can fire
 
@@ -76,13 +76,21 @@ The harness is complete *to the extent code-only work can complete it*. The rema
 
 **The auxiliary judge bundle is pinned at pre-reg v7 (commit landing alongside this README) to Gemma 4 26B A4B (Google), local-inference via llama.cpp.** Non-Qwen, non-Claude family — satisfies the pre-reg's hard family rule (the rule exists to eliminate spec-author interpretive bias and subject overlap; Claude as judge is hard-disqualified by both vectors). Apache-2.0 licensed. No API key required. Runs sequentially alongside the Qwen instrument in the same llama.cpp infrastructure (judge has the full GPU during scoring; generation and judging never compete for VRAM).
 
-The model family + base identity (`gemma-4-26b-a4b`) is normative at v7 pre-reg. The quant + GGUF SHA + llama.cpp version + sampling parameters + chat template are pinned at the harness-build commit per the same bundle-pinning discipline as the instruments. To finalize:
+The model family + base identity (`gemma-4-26b-a4b`) is normative at v7 pre-reg. The quant + GGUF SHA + llama.cpp version + sampling parameters + chat template are pinned at the harness-build commit per the same bundle-pinning discipline as the instruments. **Locked at this harness-build commit:**
 
-1. Build llama.cpp at a chosen release tag (record git SHA in the bundle).
-2. Download the chosen Gemma 4 26B A4B GGUF (record SHA-256 in the bundle).
-3. Set env vars `DRIFTWOOD_GEMMA_GGUF_PATH` and `DRIFTWOOD_LLAMA_CPP_BIN` (same llama.cpp binary as the Qwen instrument).
-4. Implement `GemmaJudge.{score_matches_intent, audit_fairness, predict_conditions}` in `harness/judge.py` — the class + bundle declaration are pinned; the three methods need their subprocess-call bodies wired up.
-5. Commit the finalized bundle declaration (the harness-build commit's SHA becomes the bundle lock).
+- Distribution: `unsloth/gemma-4-26B-A4B-it-GGUF` (HuggingFace, Apache-2.0)
+- Quant: `UD-Q4_K_M` (16.9 GB)
+- GGUF SHA-256: `34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35`
+- llama.cpp build: SHA `5d246a7` (version 9306), CUDA-enabled
+- Reasoning mode: **OFF** (`--reasoning off`) — Gemma 4 is a reasoning model by default; disabling routes generation straight to the locked JSON envelope instead of through internal think→answer, reducing per-call wall by 10-30×. Pre-reg v7 family pin is unaffected.
+- Server invocation: `harness/llama_server.py::LlamaServer` (context-managed; port 8081 by default to avoid Qwen collision)
+- Three judge calls wired: `GemmaJudge.score_matches_intent`, `.audit_fairness`, `.predict_conditions` — each loads its frozen prompt template, sends to the server, parses the locked JSON envelope (tolerant of markdown fences via `_extract_json_object`).
+
+To rebuild this state:
+
+1. Run `benchmark/tools/download_ggufs.sh` (downloads the locked GGUFs to `~/llama.cpp/models/`).
+2. Set env vars `DRIFTWOOD_GEMMA_GGUF_PATH` and `DRIFTWOOD_LLAMA_CPP_BIN`.
+3. The `GemmaJudge` class + `GEMMA_JUDGE_BUNDLE` declaration in `harness/judge.py` are pinned at this commit.
 
 The judge is used for THREE purposes (each with a frozen prompt template committed in `benchmark/tools/`):
 
@@ -99,15 +107,23 @@ All three templates are loaded as text and substituted at runtime — no templat
 ### 2. Pin the Qwen headline instrument bundle (pre-reg §"Test subjects")
 
 Required:
-- Local llama.cpp build at a known version (record the git SHA or release tag).
-- The Qwen GGUF file at a known path (record SHA-256 of the file).
-- Sampling parameters chosen and pinned.
-- Chat template + reasoning-format handling chosen and pinned (the `<think>...</think>` block handling specifically).
+**Locked at this harness-build commit (`QWEN_HEADLINE_BUNDLE`):**
 
-To wire up:
-1. Set env vars `DRIFTWOOD_QWEN_GGUF_PATH` and `DRIFTWOOD_LLAMA_CPP_BIN`.
-2. Implement `QwenInstrument.complete()` in `harness/instrument.py` (replace the stub with the subprocess call).
-3. Commit the bundle declaration: `bundle = InstrumentBundle(model_name=..., quant=..., gguf_sha256=..., ...)` — this freezes the instrument identity.
+- Model: Qwen3-Coder-30B-A3B-Instruct (MoE, A3B active params, code-specialized)
+- Distribution: `unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF` (HuggingFace, Apache-2.0)
+- Quant: `Q4_K_M` (18.6 GB)
+- GGUF SHA-256: `fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad`
+- llama.cpp build: SHA `5d246a7` (version 9306), CUDA-enabled
+- Sampling: `temperature=0.0`, `top_p=1.0`, `top_k=0`, `max_tokens=4096` — deterministic at temperature 0, seed-controlled reproducibility verified at smoke
+- Chat template: `--jinja` (template from GGUF metadata; no per-model wiring)
+- Reasoning format: non-reasoning (Qwen3-Coder; no `<think>` envelope)
+- Server invocation: `harness/llama_server.py::LlamaServer` (port 8080 by default; lazy boot on first `QwenInstrument.complete()`)
+
+To rebuild this state:
+
+1. Run `benchmark/tools/download_ggufs.sh` (downloads the locked GGUF to `~/llama.cpp/models/`).
+2. Set env vars `DRIFTWOOD_QWEN_GGUF_PATH` and `DRIFTWOOD_LLAMA_CPP_BIN`.
+3. The `QwenInstrument` class + `QWEN_HEADLINE_BUNDLE` declaration in `harness/instrument.py` are pinned at this commit.
 
 ### 3. Pin the Claude transfer-probe instrument bundle (pre-reg §"Test subjects")
 
