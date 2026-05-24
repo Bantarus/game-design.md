@@ -1,0 +1,23 @@
+{
+  "step": "B-construction Layer 3 fairness audit",
+  "game": "platformer",
+  "game_name": "Embergrave",
+  "game_pitch": "A precision platformer where you pilot a moth through dark vertical caves, navigating by your own dimming ember.",
+  "timestamp": "20260524T132947Z",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "flattener_path": "benchmark/tools/flattener.py",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "prompt_template_path": "benchmark/tools/fairness_audit_prompt.md",
+  "prompt_template_sha256": "9ebcb0856d27beb542434d3b0676ef6d43838a32a1ca0e7a06d4158dc7757f6a",
+  "brief_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "brief_length_bytes": 73722,
+  "audited_text_first_500": "# Embergrave\n\n> A precision platformer where you pilot a moth through dark vertical caves, navigating by your own dimming ember.\n\nThis game is a platformer, precision, single-player project.\n\nTarget platforms (engine-neutral): desktop, handheld.\n\nThe game's pillars are:\n- Every jump is a commitment; hesitation dims the ember\n- The cave is the puzzle; light is the lens\n- Death is cheap; progress is sticky\n\nThe game explicitly does NOT do these things:\n- Multiplayer\n- Procedural level generation\n-",
+  "judge_output": {
+    "score": 5,
+    "rationale": "The brief is exceptionally fair and highly coherent. It successfully transforms a complex, multi-file structured design into a readable prose summary that maintains logical grouping (Loops, Entities, Verbs, etc.) without descending into a token dump. A developer could use this to understand both the high-level design intent and the low-level technical requirements (like fixed-point math and event-driven architecture) with ease.",
+    "specific_issues": []
+  },
+  "pass_threshold": 4,
+  "passes": true,
+  "wall_clock_seconds": 9.956076647038572
+}

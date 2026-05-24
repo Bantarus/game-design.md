@@ -1,0 +1,23 @@
+{
+  "step": "B-construction Layer 3 fairness audit",
+  "game": "survival",
+  "game_name": "Driftwood",
+  "game_pitch": "A 30-minute survival game about shipwreck on a small island: gather, craft, build the signal pyre, get rescued.",
+  "timestamp": "20260524T132957Z",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "flattener_path": "benchmark/tools/flattener.py",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "prompt_template_path": "benchmark/tools/fairness_audit_prompt.md",
+  "prompt_template_sha256": "9ebcb0856d27beb542434d3b0676ef6d43838a32a1ca0e7a06d4158dc7757f6a",
+  "brief_sha256": "27215404ac257e77250d2bac804d0fd2cf51bb62345f6793bc48ae96d9e1b1b8",
+  "brief_length_bytes": 72313,
+  "audited_text_first_500": "# Driftwood\n\n> A 30-minute survival game about shipwreck on a small island: gather, craft, build the signal pyre, get rescued.\n\nThis game is a survival, crafting, single-player project.\n\nTarget platforms (engine-neutral): desktop, handheld.\n\nThe game's pillars are:\n- The graph is the game\n- Time pressure, not difficulty pressure\n- A real island, not a procedurally-generated one\n\nThe game explicitly does NOT do these things:\n- Combat\n- Procedural generation\n- Metagame progression across runs\n- Mu",
+  "judge_output": {
+    "score": 5,
+    "rationale": "The brief is an exceptionally fair and coherent summary of the design. It successfully groups complex technical data (like the nested loops and entity properties) into a readable prose structure that maintains the 'implementer's perspective' without devolving into a token dump. The transition from high-level pillars to granular rule logic is seamless.",
+    "specific_issues": []
+  },
+  "pass_threshold": 4,
+  "passes": true,
+  "wall_clock_seconds": 8.901961171999574
+}
