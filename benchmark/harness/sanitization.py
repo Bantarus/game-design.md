@@ -75,7 +75,29 @@ Each rule below is labeled (S) or (E) plus its source.
      and section-number references.
   8. (S) Markdown frontmatter blocks (`---...---`) at document start.
      Pattern-shape rule.
-  9. (S) Whitespace normalization: trailing whitespace stripped per
+  9. (E, spec §2.3 + §6.2 required-frontmatter-keys, spec-metadata
+     subset, v11): full-line strip for lines whose leading key is one
+     of `spec`, `spec_version`, `file_type`, `last_verified`,
+     `last_updated`, `implemented_in`, `status`. Closes the v9 leak
+     that Rule 8 missed: Rule 8 only matched `---...---`-fenced
+     Markdown frontmatter, but content-entity YAML files (per spec
+     §6.2) carry the same spec metadata fields *unfenced* at the top
+     of a pure-YAML document — and trial outputs that take the form of
+     content-entity YAML therefore retained the spec-metadata tells
+     after v9 sanitization. The first step-6 run's blinding-leak judge
+     correctly classified 12/12 of a sampled batch by citing exactly
+     this leak ("Uses explicit 'spec: game-design.md' header" 4× for A,
+     4× for B; "Lacks the 'spec:' header" 4× for C). Closed-enumeration
+     scope is the spec-metadata SUBSET only — content keys (id, name,
+     pillars, schema, entity, data_dir, count_target, etc.) are NOT
+     stripped because the matches-intent rubric depends on them. Phase
+     A scored anchors carrying these metadata fields at median 5/5,
+     confirming the rubric doesn't weight them, and Phase B is the
+     bidirectional counterweight that empirically verifies content is
+     preserved across the strip. See pre-reg v10 → v11 audit-trail row
+     #20 and project memory `sanitizer-iteration-stopping-rule` for
+     the principled-iteration discipline this rule was authored under.
+ 10. (S) Whitespace normalization: trailing whitespace stripped per
      line; runs of 3+ blank lines collapsed to 2; trailing newline
      normalized to one. Pattern-shape rule.
 
@@ -215,7 +237,27 @@ SPEC_PHRASE_RE = re.compile("|".join(SPEC_REFERENCE_PHRASES), re.IGNORECASE)
 # Rule 8 (S): Markdown frontmatter blocks at document start.
 FRONTMATTER_RE = re.compile(r"^---\s*\n.*?\n---\s*\n", re.DOTALL)
 
-# Rule 9 (S): whitespace normalization.
+# Rule 9 (E, spec §2.3 + §6.2, v11): spec-frontmatter-metadata keys —
+# full-line strip wherever they appear (handles the unfenced YAML case
+# Rule 8 doesn't cover). Closed-enumeration scope is the spec-metadata
+# subset only; content keys (id, name, pillars, schema, etc.) are
+# explicitly excluded because the matches-intent rubric depends on them.
+SPEC_FRONTMATTER_KEYS = (
+    "spec",
+    "spec_version",
+    "file_type",
+    "last_verified",
+    "last_updated",
+    "implemented_in",
+    "status",
+)
+_FM_KEY_ALT = "|".join(SPEC_FRONTMATTER_KEYS)
+SPEC_FRONTMATTER_LINE_RE = re.compile(
+    rf"^[ \t]*(?:{_FM_KEY_ALT})\s*:.*$",
+    re.MULTILINE,
+)
+
+# Rule 10 (S): whitespace normalization.
 TRAILING_WS_RE = re.compile(r"[ \t]+$", re.MULTILINE)
 MULTI_BLANK_RE = re.compile(r"\n{3,}")
 
@@ -225,7 +267,7 @@ MULTI_BLANK_RE = re.compile(r"\n{3,}")
 # ---------------------------------------------------------------------------
 
 def sanitize_output(raw_text: str) -> str:
-    """Apply the v9 sanitization to one subject output.
+    """Apply the v11 sanitization to one subject output.
 
     Deterministic and idempotent (running twice = once). Order of rules:
 
@@ -236,8 +278,9 @@ def sanitize_output(raw_text: str) -> str:
       5. Remaining heading prefixes (structural)      — strip `##`/`###`
       6. File-boundary markers                        — strip
       7. Spec-reference phrases                       — strip
-      8. Markdown frontmatter at doc start            — strip
-      9. Whitespace normalization                     — collapse
+      8. Markdown frontmatter at doc start (fenced)   — strip
+      9. Spec frontmatter metadata keys (v11, unfenced)— full-line strip
+     10. Whitespace normalization                     — collapse
 
     Returns the sanitized text.
     """
@@ -257,9 +300,11 @@ def sanitize_output(raw_text: str) -> str:
     s = FILE_BOUNDARY_RE.sub("", s)
     # 7. Spec-reference phrases
     s = SPEC_PHRASE_RE.sub("", s)
-    # 8. Markdown frontmatter at document start
+    # 8. Markdown frontmatter at document start (fenced)
     s = FRONTMATTER_RE.sub("", s)
-    # 9. Whitespace normalization
+    # 9. Spec frontmatter metadata keys (unfenced, v11) — see Rule 9 doc above
+    s = SPEC_FRONTMATTER_LINE_RE.sub("", s)
+    # 10. Whitespace normalization
     s = TRAILING_WS_RE.sub("", s)
     s = MULTI_BLANK_RE.sub("\n\n", s)
     s = s.strip() + "\n"
@@ -309,7 +354,27 @@ As the design document says, the cost is 1 ember.
 
 Wall kicks are committed actions. Per the invariants, no undo.
 """
-    print("--- RAW ---")
+
+    # v11 rule 9 self-test: content-entity YAML format (per spec §6.2)
+    # carries the same spec-metadata fields *unfenced* — must also be
+    # stripped to close the blinding-leak Phase-2 leak the v9 sanitizer
+    # missed.
+    sample_unfenced = """```yaml
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: content-entity
+id: fault_lines_07_the_chasm
+status: draft
+implemented_in: ["src/levels/fault_lines/07.py"]
+name: "The Chasm"
+region: fault_lines
+difficulty_tier: 3
+platforms:
+  - { x: 500, y: 19500, width: 2500, status: stable }
+```
+"""
+
+    print("--- RAW (fenced) ---")
     print(sample)
     print(f"--- SANITIZED (SHA={sanitization_sha256()[:16]}) ---")
     print(sanitize_output(sample))
@@ -317,3 +382,8 @@ Wall kicks are committed actions. Per the invariants, no undo.
     once = sanitize_output(sample)
     twice = sanitize_output(once)
     print(f"sanitize(once) == sanitize(twice): {once == twice}")
+    print()
+    print("--- RAW (unfenced content-entity YAML, v11 rule 9 case) ---")
+    print(sample_unfenced)
+    print("--- SANITIZED ---")
+    print(sanitize_output(sample_unfenced))

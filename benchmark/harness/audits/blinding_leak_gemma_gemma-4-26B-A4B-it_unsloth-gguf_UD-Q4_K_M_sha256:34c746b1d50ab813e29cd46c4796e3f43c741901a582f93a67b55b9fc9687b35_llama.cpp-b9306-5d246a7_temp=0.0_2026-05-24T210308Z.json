@@ -1,0 +1,23 @@
+{
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "positive_control": {
+    "phase": "positive_control",
+    "n_outputs": 90,
+    "accuracy": 0.4777777777777778,
+    "accuracy_95_ci_low": 0.37761880660358116,
+    "accuracy_95_ci_high": 0.5797561742151601,
+    "chance_accuracy": 0.3333333333333333,
+    "passed": true
+  },
+  "blinding_gate": {
+    "phase": "blinding_gate",
+    "n_outputs": 90,
+    "accuracy": 0.3111111111111111,
+    "accuracy_95_ci_low": 0.22485715147181132,
+    "accuracy_95_ci_high": 0.4128301854874903,
+    "chance_accuracy": 0.3333333333333333,
+    "passed": true
+  },
+  "overall_passed": true
+}

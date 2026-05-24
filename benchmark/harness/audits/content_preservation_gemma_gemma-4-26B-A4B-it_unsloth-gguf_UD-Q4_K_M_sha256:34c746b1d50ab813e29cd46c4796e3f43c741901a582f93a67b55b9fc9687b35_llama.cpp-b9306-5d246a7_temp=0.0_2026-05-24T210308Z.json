@@ -1,0 +1,82 @@
+{
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "anchor_set_sha256": "b0ceae1858179a6c43568e13dfb89465e36ce912831b3243bb62c3f5b63b39ee",
+  "per_set": [
+    {
+      "game": "platformer",
+      "task_cell_id": "easy_platformer",
+      "n_correct": 3,
+      "n_incorrect": 3,
+      "raw_correct_scores": [
+        5,
+        5,
+        5
+      ],
+      "raw_incorrect_scores": [
+        1,
+        0,
+        1
+      ],
+      "raw_median_correct": 5.0,
+      "raw_median_incorrect": 1.0,
+      "raw_gap": 4.0,
+      "anchor_sanity_passed": true,
+      "anchor_sanity_failure_reasons": [],
+      "sanitized_correct_scores": [
+        5,
+        5,
+        5
+      ],
+      "sanitized_incorrect_scores": [
+        1,
+        0,
+        1
+      ],
+      "sanitized_median_correct": 5.0,
+      "sanitized_median_incorrect": 1.0,
+      "sanitized_gap": 4.0,
+      "content_preservation_passed": true,
+      "content_preservation_failure_reasons": [],
+      "set_passed": true
+    },
+    {
+      "game": "survival",
+      "task_cell_id": "easy_survival",
+      "n_correct": 3,
+      "n_incorrect": 3,
+      "raw_correct_scores": [
+        5,
+        3,
+        5
+      ],
+      "raw_incorrect_scores": [
+        0,
+        0,
+        1
+      ],
+      "raw_median_correct": 5.0,
+      "raw_median_incorrect": 0.0,
+      "raw_gap": 5.0,
+      "anchor_sanity_passed": true,
+      "anchor_sanity_failure_reasons": [],
+      "sanitized_correct_scores": [
+        5,
+        3,
+        5
+      ],
+      "sanitized_incorrect_scores": [
+        0,
+        0,
+        1
+      ],
+      "sanitized_median_correct": 5.0,
+      "sanitized_median_incorrect": 0.0,
+      "sanitized_gap": 5.0,
+      "content_preservation_passed": true,
+      "content_preservation_failure_reasons": [],
+      "set_passed": true
+    }
+  ],
+  "overall_passed": true
+}

@@ -465,38 +465,46 @@ class GemmaJudge(Judge):
     def predict_conditions(
         self,
         outputs: list[tuple[int, str]],
+        *,
+        chunk_size: int = 20,
     ) -> list[ConditionPrediction]:
-        system_prompt = _load_template("blinding_leak_prompt")
-        # Batched prediction: format all outputs into one user message,
-        # let the judge emit a single JSON envelope with the full
-        # predictions array. This matches what the template expects
-        # ("predictions": [...]) and is also faster than per-output
-        # calls (one prompt-cache warm-up, one server call).
-        rendered_outputs = "\n\n".join(
-            f"--- OUTPUT {oid} ---\n{text}" for oid, text in outputs
-        )
-        user_prompt = (
-            f"You will see {len(outputs)} outputs below, each tagged with "
-            "an integer OUTPUT id. For each, predict the condition (A | B "
-            "| C) per the calibration rubric, output a single JSON object "
-            "with a `predictions` array as specified in the prompt.\n\n"
-            f"{rendered_outputs}\n\n"
-            "Respond with exactly the JSON object specified in the prompt."
-        )
-        # Bigger budget for batched predictions: ~80 tokens per output (
-        # short rationale per the template) × N outputs + envelope.
-        max_tokens = max(2048, 200 * len(outputs))
-        parsed, _raw = self._chat_for_json(system_prompt, user_prompt, max_tokens=max_tokens)
+        """Predict the condition for each (oid, text). Batched in chunks
+        of `chunk_size` because Gemma 4 26B A4B's pinned 32k context cannot
+        hold 90 long outputs in one call (Phase-5 step-6 failure mode:
+        90 × ~556 tokens ≈ 52k → HTTP 400). The blinding-leak prompt
+        template line 68 (`benchmark/tools/blinding_leak_prompt.md`)
+        explicitly contracts that batches are processed in isolation, so
+        chunking does not change the judgment per output — only the
+        per-call token budget."""
+        if chunk_size <= 0:
+            raise ValueError(f"chunk_size must be positive, got {chunk_size}")
 
-        preds: list[ConditionPrediction] = []
-        for p in parsed.get("predictions", []):
-            preds.append(ConditionPrediction(
-                output_id=int(p["output_id"]),
-                predicted_condition=str(p["predicted_condition"]).strip().upper()[:1],
-                confidence=float(p.get("confidence", 1.0 / 3.0)),
-                rationale=str(p.get("rationale", "")),
-            ))
-        return preds
+        system_prompt = _load_template("blinding_leak_prompt")
+        all_preds: list[ConditionPrediction] = []
+        for start in range(0, len(outputs), chunk_size):
+            chunk = outputs[start:start + chunk_size]
+            rendered_outputs = "\n\n".join(
+                f"--- OUTPUT {oid} ---\n{text}" for oid, text in chunk
+            )
+            user_prompt = (
+                f"You will see {len(chunk)} outputs below, each tagged with "
+                "an integer OUTPUT id. For each, predict the condition (A | B "
+                "| C) per the calibration rubric, output a single JSON object "
+                "with a `predictions` array as specified in the prompt.\n\n"
+                f"{rendered_outputs}\n\n"
+                "Respond with exactly the JSON object specified in the prompt."
+            )
+            # ~200 tokens per output for the rationale + envelope.
+            max_tokens = max(2048, 200 * len(chunk))
+            parsed, _raw = self._chat_for_json(system_prompt, user_prompt, max_tokens=max_tokens)
+            for p in parsed.get("predictions", []):
+                all_preds.append(ConditionPrediction(
+                    output_id=int(p["output_id"]),
+                    predicted_condition=str(p["predicted_condition"]).strip().upper()[:1],
+                    confidence=float(p.get("confidence", 1.0 / 3.0)),
+                    rationale=str(p.get("rationale", "")),
+                ))
+        return all_preds
 
 
 # ---------------------------------------------------------------------------

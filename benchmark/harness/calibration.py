@@ -479,57 +479,96 @@ class BlindingLeakResult:
     overall_passed: bool
 
 
-def calibrate_blinding(
+@dataclass(frozen=True)
+class BlindingOutputs:
+    """Instrument-generated outputs for blinding-leak calibration.
+
+    Gathered with the instrument up; passed to score_blinding once the
+    instrument is torn down (the Qwen+Gemma sequential-load pattern —
+    they cannot coexist in 24 GB VRAM). Stores the (oid, true_condition,
+    raw_text) tuples so both phases can re-evaluate the same outputs."""
+    instrument_bundle_id: str
+    task_game: str
+    task_cell_id: str
+    n_per_condition: int
+    schedule_seed: int
+    outputs: tuple[tuple[int, str, str], ...]   # (oid, true_condition, raw_text)
+
+    def to_json(self) -> dict:
+        return {
+            "instrument_bundle_id": self.instrument_bundle_id,
+            "task_game": self.task_game,
+            "task_cell_id": self.task_cell_id,
+            "n_per_condition": self.n_per_condition,
+            "schedule_seed": self.schedule_seed,
+            "outputs": [
+                {"oid": oid, "true_condition": cond, "raw_text": text}
+                for (oid, cond, text) in self.outputs
+            ],
+        }
+
+    @classmethod
+    def from_json(cls, data: dict) -> "BlindingOutputs":
+        return cls(
+            instrument_bundle_id=data["instrument_bundle_id"],
+            task_game=data["task_game"],
+            task_cell_id=data["task_cell_id"],
+            n_per_condition=int(data["n_per_condition"]),
+            schedule_seed=int(data["schedule_seed"]),
+            outputs=tuple(
+                (int(o["oid"]), str(o["true_condition"]), str(o["raw_text"]))
+                for o in data["outputs"]
+            ),
+        )
+
+
+def write_blinding_outputs(outputs: BlindingOutputs, out_dir: Path) -> Path:
+    """Persist a gather to disk so a Gemma-side failure doesn't lose the
+    instrument generation work. Replay via `BlindingOutputs.from_json`."""
+    import time
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y-%m-%dT%H%M%SZ", time.gmtime())
+    safe_bundle = outputs.instrument_bundle_id.replace("/", "_")
+    fname = f"blinding_outputs_{safe_bundle}_{outputs.task_cell_id}_{ts}.json"
+    path = out_dir / fname
+    path.write_text(json.dumps(outputs.to_json(), indent=2))
+    return path
+
+
+def read_blinding_outputs(path: Path) -> BlindingOutputs:
+    return BlindingOutputs.from_json(json.loads(path.read_text()))
+
+
+def gather_blinding_outputs(
     instrument: Instrument,
-    judge: Judge,
     calibration_task: Task,
     n_per_condition: int = 30,  # v8: bumped from 10 → 30 (total N=90)
-) -> BlindingLeakResult:
-    """Two-phase blinding-leak calibration (pre-reg v7).
+    schedule_seed: int = 20260524,
+) -> BlindingOutputs:
+    """Generate the K-per-condition outputs in pairing-integrity order.
 
-    Phase 1 (positive control / judge fitness):
-      Predict on RAW outputs. PASS iff accuracy_95_ci_low > 1/3
-      (judge can provably detect tells when present).
+    Call with the instrument's llama-server (if any) already loaded.
+    The returned BlindingOutputs is everything the judge needs; the
+    instrument can be torn down before score_blinding runs.
 
-    [Sanitize.]
-
-    Phase 2 (blinding-leak gate proper):
-      Same judge predicts on SANITIZED outputs. PASS iff
-      accuracy_95_ci_low <= 1/3 <= accuracy_95_ci_high
-      (predictions statistically indistinguishable from chance).
-
-    Overall pass iff both phases pass.
-    """
-    from .sanitization import sanitize_output, sanitization_sha256
-
-    chance = 1.0 / 3.0
-
-    # Build A/B/C payloads
+    Generation order: interleaved across conditions, not blocked. The
+    same pairing-integrity discipline that protects the trial sweep
+    (see harness/sweep_plan.py) applies here at smaller N: if all A
+    samples are generated first and all C samples last, a time-correlated
+    nuisance (Claude rate-limit posture, Qwen drift) lands on one
+    condition more than the others. The judge's at-chance gate would
+    then INCORRECTLY flag time artifacts as content-leak signals.
+    Schedule is shuffled with `schedule_seed` for determinism."""
     payload_a = build_a(calibration_task.game)
     payload_b = build_b(calibration_task.game)
     payload_c = build_c(calibration_task.game)
 
-    # Generation order: interleaved across conditions, not blocked.
-    # The same pairing-integrity discipline that protects the trial sweep
-    # (see harness/sweep_plan.py) applies here at smaller N: if all A
-    # samples are generated first and all C samples last, a time-correlated
-    # nuisance (Claude rate-limit posture, Qwen drift) lands on one
-    # condition more than the others. The judge's at-chance gate would
-    # then INCORRECTLY flag time artifacts as content-leak signals
-    # (predicting condition from latency-correlated output artifacts
-    # rather than spec vocabulary). The fix is the same: build the
-    # generation schedule as a shuffled list of (condition, sample_idx)
-    # tuples, seeded for determinism. The judge still sees its OWN
-    # shuffled view (line 363 below), and that shuffle stays seeded
-    # independently. This change matters even at calibration N=90 — a
-    # 90-call run at Opus xhigh is several minutes; rate-limit walls can
-    # absolutely land mid-calibration.
     schedule: list[tuple[str, "ConditionPayload"]] = []  # noqa: F821
     for cond_name, payload in [("A", payload_a), ("B", payload_b), ("C", payload_c)]:
         for _ in range(n_per_condition):
             schedule.append((cond_name, payload))
     import random as _random_for_schedule
-    schedule_rng = _random_for_schedule.Random(20260524)  # deterministic per harness-build commit
+    schedule_rng = _random_for_schedule.Random(schedule_seed)
     schedule_rng.shuffle(schedule)
 
     outputs: list[tuple[int, str, str]] = []  # (output_id, true_condition, raw_text)
@@ -542,21 +581,46 @@ def calibrate_blinding(
         )
         outputs.append((oid, cond_name, r.text))
 
-    # --- Phase 1: positive control on RAW outputs ----------------------------
+    return BlindingOutputs(
+        instrument_bundle_id=instrument.bundle.bundle_id(),
+        task_game=calibration_task.game,
+        task_cell_id=calibration_task.cell_id,
+        n_per_condition=n_per_condition,
+        schedule_seed=schedule_seed,
+        outputs=tuple(outputs),
+    )
+
+
+def score_blinding(
+    blinding_outputs: BlindingOutputs,
+    judge: Judge,
+    shuffle_seed: int = 42,
+) -> BlindingLeakResult:
+    """Two-phase blinding-leak scoring (Phase 1 raw, Phase 2 sanitized).
+
+    Call with the judge's llama-server (if any) already loaded. The
+    instrument-generated outputs were captured by gather_blinding_outputs
+    and stored on `blinding_outputs`; the instrument process may be
+    torn down."""
+    from .sanitization import sanitize_output, sanitization_sha256
     import random
-    rng = random.Random(42)
+
+    chance = 1.0 / 3.0
+    outputs = list(blinding_outputs.outputs)
+    n = len(outputs)
+    true_by_oid = {o[0]: o[1] for o in outputs}
+
+    # --- Phase 1: positive control on RAW outputs ----------------------------
+    rng = random.Random(shuffle_seed)
     shuffled_raw = outputs.copy()
     rng.shuffle(shuffled_raw)
     raw_inputs = [(o[0], o[2]) for o in shuffled_raw]
     raw_predictions = judge.predict_conditions(raw_inputs)
 
-    true_by_oid = {o[0]: o[1] for o in outputs}
     correct_raw = sum(1 for p in raw_predictions if p.predicted_condition == true_by_oid[p.output_id])
-    n = len(raw_predictions)
     acc_raw = correct_raw / n if n else 0.0
     lo_raw, hi_raw = _wilson_95_ci(correct_raw, n)
-    # PASS iff lower bound > chance (strict above-chance)
-    pc_passed = lo_raw > chance
+    pc_passed = lo_raw > chance  # strict above-chance
     positive_control = BlindingPhaseResult(
         phase="positive_control",
         n_outputs=n,
@@ -569,7 +633,7 @@ def calibrate_blinding(
     # --- Phase 2: blinding gate on SANITIZED outputs -------------------------
     # Same RNG seed so the shuffle order is identical (controls for ordering
     # confounds between the two phases).
-    rng2 = random.Random(42)
+    rng2 = random.Random(shuffle_seed)
     sanitized_outputs = [(oid, cond, sanitize_output(text)) for (oid, cond, text) in outputs]
     shuffled_san = sanitized_outputs.copy()
     rng2.shuffle(shuffled_san)
@@ -579,8 +643,7 @@ def calibrate_blinding(
     correct_san = sum(1 for p in san_predictions if p.predicted_condition == true_by_oid[p.output_id])
     acc_san = correct_san / n if n else 0.0
     lo_san, hi_san = _wilson_95_ci(correct_san, n)
-    # PASS iff CI includes chance (at-chance)
-    bg_passed = lo_san <= chance <= hi_san
+    bg_passed = lo_san <= chance <= hi_san  # CI includes chance
     blinding_gate = BlindingPhaseResult(
         phase="blinding_gate",
         n_outputs=n,
@@ -597,6 +660,23 @@ def calibrate_blinding(
         blinding_gate=blinding_gate,
         overall_passed=(positive_control.passed and blinding_gate.passed),
     )
+
+
+def calibrate_blinding(
+    instrument: Instrument,
+    judge: Judge,
+    calibration_task: Task,
+    n_per_condition: int = 30,
+) -> BlindingLeakResult:
+    """One-shot calibrate — valid when instrument + judge can coexist.
+
+    For Qwen+Gemma the driver MUST sequence (gather → tear down Qwen →
+    bring up Gemma → score), because the two GGUFs do not fit together
+    in 24 GB VRAM. Call gather_blinding_outputs + score_blinding
+    directly in that case (see benchmark/tools/run_step6_calibrations.py).
+    """
+    outputs = gather_blinding_outputs(instrument, calibration_task, n_per_condition)
+    return score_blinding(outputs, judge)
 
 
 def _wilson_95_ci(successes: int, n: int, z: float = 1.96) -> tuple[float, float]:
