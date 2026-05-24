@@ -116,21 +116,36 @@ INSTANCE_SEED_BASE_BY_SUBJECT: dict[str, int] = {
 }
 
 
-# Per-task-type N override for the unpaired C condition. Reconciles
-# the pre-reg arithmetic (§"Power, MDE, and the discordance assumption",
-# line 341): the per-subject total is 330 = 240 paired + 60 C + 30 easy.
-# The stated formula `3 × 2 × 20 × 1` for C resolves to 60 ONLY if the
-# middle factor is 10, not 20 — i.e. C runs at half N for medium / hard
-# / ambiguity. Easy already runs at N=5 across all three conditions
-# (5 × 2 × 3 = 30 per the same line) so no override is needed there.
+# Per-task-type N override for the unpaired C condition. The pre-reg
+# (§"Sample size and statistical reporting", line 341) states per-subject
+# total = 330 = 240 paired + 60 C + 30 easy. The "60" requires C at N=10
+# for m/h/a (the "20" in the printed formula `3 × 2 × 20 × 1` is a typo
+# for "10"); easy is already N=5 across all three conditions.
 #
-# Design rationale (named for the audit trail): C is the unpaired
-# baseline against the headline paired A-vs-B gate; halving its N is
-# defensible because the unpaired statistical demand is lower than the
-# paired one, AND C is the most-expensive-per-call condition (most
-# context-poor → most prone to Claude flailing, per the dynamic-overhead
-# caveat). Capturing the explicit choice here so the planner output
-# matches the pre-reg's stated per-subject total exactly.
+# Methodological rationale (pre-registered, locked pre-trial):
+#   - **C is unpaired and feeds only the secondary A-vs-C and B-vs-C
+#     comparisons**, so its N does NOT bear on the headline. The
+#     headline is the per-subject paired McNemar at N=20 (A vs B); C's
+#     N has zero effect on that gate's power or interpretation.
+#   - **C is halved to N=10 to limit the total Opus-xhigh cost/usage**
+#     on the most-reasoning-heavy condition. A sparse one-paragraph C
+#     prompt is exactly what drives the most internal extended-thinking
+#     and the most denied-tool-call flailing under xhigh; halving N is
+#     where this cost concentration is cheapest to release. (NOTE for
+#     the audit trail: this is total cost/usage exposure, NOT the
+#     cost-lift gate. Cost-lift is the within-Claude A-vs-B headline
+#     gate at ≤ 25%; C is not in that gate, so C's N cannot tighten
+#     or loosen it. A prior recorded rationale conflated the two and
+#     was corrected at this commit.)
+#   - **The secondary A-vs-C / B-vs-C comparisons retain enough power
+#     for the large effects expected there** — any real design
+#     information beats a minimal one-paragraph prompt — and N=10 can
+#     detect a large effect adequately. F-009 does NOT promote A-vs-C
+#     or B-vs-C to headline-grade powered claims; they are context for
+#     where A and B sit above the floor, not load-bearing.
+#
+# The pre-registered rule: C runs at N=10 for medium/hard/ambiguity, at
+# N=5 (full task.n_per_cell) for easy. Locked at this commit.
 C_N_PER_CELL_OVERRIDES: dict[str, int] = {
     "medium": 10,
     "hard": 10,
