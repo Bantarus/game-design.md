@@ -177,47 +177,78 @@ class ClaudeInstrument(Instrument):
     """Transfer-probe instrument: Claude via the Claude Code CLI (headless).
 
     Wired through the user's existing Claude Code installation rather than
-    the Anthropic API. Benefits over the API path: no API key needed (uses
-    the user's Claude Code login session); same model behavior as the
-    user's interactive Claude Code sessions; no SDK dependency.
+    the Anthropic API. Benefits: no API key needed (uses the user's Claude
+    Code subscription/login); no SDK dependency. Pinned at the
+    harness-build commit to Haiku 4.5 specifically (the latest small
+    capability-tier Claude model — see §"Test subjects" + pre-reg).
 
-    Requires:
-      - The `claude` CLI on PATH (or set DRIFTWOOD_CLAUDE_CODE_BIN).
-      - An active Claude Code login (run `claude` once interactively to
-        authenticate; the CLI caches the session).
-      - The pinned Claude model name in the bundle (passed via --model).
-      - The pinned sampling params recorded in the bundle for audit;
-        Claude Code CLI does not expose a `--temperature` flag, so the
-        bundle's `sampling_temperature` is documentation of Claude's
-        in-effect default, not a per-call override. The seed-sensitivity
-        gate (Protocol step 11) still passes because Claude's default
-        temperature is > 0 and same-prompt repeated invocations produce
-        varied outputs naturally.
+    Contamination isolation (the load-bearing fix at this commit).
+      Running `claude` inside the project repo loads .claude/projects/
+      <cwd-hash>/memory/MEMORY.md, which is the entire design history of
+      this benchmark — that would hand the subject the spec via memory
+      and break A-vs-B-vs-C comparability across conditions. Fix: spawn
+      every subprocess with `cwd` set to a fresh empty temp directory
+      OUTSIDE the repo, plus the following hardening flags so the
+      subject runs as a bare LLM:
 
-    Invocation contract (matches Qwen one-shot text generation so the
-    A-vs-B-vs-C comparison is comparable across instruments):
-      - `--max-turns 1`            : single-turn (no tool-use loop)
-      - `--disallowed-tools "*"`   : no tool invocations
-      - `--output-format json`     : structured response with token
-                                      counts and duration
-      - prompt passed via stdin    : avoids shell-quoting issues for
-                                      long design contexts
+        - `cwd=<fresh /tmp/xyz>`        : no CLAUDE.md, no project memory
+                                          loads, no .claude/ in scope.
+        - `--system-prompt <text>`      : REPLACE Claude Code's default
+                                          agentic system prompt (verified
+                                          empirically: a haiku-only
+                                          system-prompt produces haiku
+                                          responses, confirming replace
+                                          semantics — see commit message
+                                          for the probe). NOT
+                                          --append-system-prompt.
+        - `--tools ""`                  : disable all built-in tools
+                                          (cleaner than enumerated
+                                          --disallowed-tools).
+        - `--no-session-persistence`    : no JSONL session log written
+                                          to ~/.claude/projects/...
+                                          (would accumulate per-call
+                                          state otherwise).
+        - `--max-turns 1`               : single-turn; one-shot text
+                                          generation matching Qwen's
+                                          shape so A/B/C is comparable
+                                          across subjects.
+        - `--output-format json`        : structured response.
+
+      Bare mode (`--bare`) is NOT used — it would force ANTHROPIC_API_KEY
+      and lose the subscription login (per `claude --help`: "Anthropic
+      auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings
+      (OAuth and keychain are never read)"). The isolated-cwd path
+      keeps the subscription while neutralizing the contamination.
+
+    Verification — the isolation smoke test (REQUIRED before this
+    instrument counts as wired). See
+    `benchmark/harness/verify_claude_isolation.py`. It runs the
+    instrument against probes that only the project memory could answer
+    (specific finding IDs, decision IDs, fresh-game names, spec
+    section structure). A correctly-isolated subject MUST NOT produce
+    correct answers; a leak means the contamination check failed and
+    the wiring is wrong — fix before any trial counts.
+
+    Residual confound (named, not hidden — recorded in F-009 transfer-
+    probe limitations). Even isolated, Claude runs through the Claude
+    Code harness — which adds ~1874 tokens of intrinsic Claude system
+    context (constitution / safety guidance), processed identically
+    across A/B/C. Qwen runs bare llama.cpp with its own chat-template
+    overhead. So cross-subject lift differences conflate model
+    capability with harness-overhead delta. The HEADLINE (per-subject
+    A-vs-B paired McNemar) is unaffected because the harness overhead
+    is constant across conditions WITHIN a subject. The transfer
+    probe's cross-subject comparisons (Qwen lift vs Claude lift) carry
+    this residual; F-009 reports it alongside the other transfer-probe
+    caveats.
 
     Seed handling: Claude Code does not accept a seed parameter. The
     `seed` arg is recorded on every InstrumentResponse for audit-trail
     purposes (per pre-reg §11 "auditability is recorded, not gated") but
-    does NOT deterministically reproduce. Same-seed re-runs will diverge;
-    that is expected and accepted per the v4 layer-confusion correction.
-
-    The transfer-probe role is documented in pre-reg §"Test subjects" —
-    NOT framed as an "optimistic ceiling," but as a capability-tier
-    transfer test.
+    does NOT deterministically reproduce. Same-seed re-runs will diverge
+    — expected and accepted per the v4 layer-confusion correction (the
+    benchmark needs sampled variance, not byte-identical reproducibility).
     """
-
-    DEFAULT_DISALLOWED_TOOLS = (
-        "Bash,Read,Write,Edit,Grep,Glob,WebFetch,WebSearch,Task,TodoWrite,"
-        "NotebookEdit,SlashCommand,KillShell"
-    )
 
     def __init__(self, bundle: InstrumentBundle):
         super().__init__(bundle)
@@ -232,32 +263,51 @@ class ClaudeInstrument(Instrument):
         user_prompt: str,
         seed: int,
     ) -> InstrumentResponse:
+        import tempfile
+        # --max-turns is set to 5 (not 1) because Claude is heavily agentic-
+        # trained and will occasionally attempt a tool call on the first turn
+        # even with --tools "". When the tool attempt fails, Claude needs an
+        # additional turn to synthesize a text-only response. Empirically
+        # verified: --max-turns 1 fails with `subtype: error_max_turns` /
+        # `stop_reason: tool_use` on probes that prompt tool-attempt behavior;
+        # --max-turns 5 lets Claude recover cleanly (typical num_turns is 1
+        # for tasks where the context is in-prompt; 2-3 if Claude tries a
+        # tool first). Cross-subject comparability is at the METRIC level
+        # (input tokens + output tokens + wall clock + cost), not at the
+        # turn-count level — Qwen has no notion of turns, and the metric is
+        # what the headline measures.
         cmd = [
             self._claude_bin,
             "--print",
-            "--max-turns", "1",
+            "--max-turns", "5",
+            "--no-session-persistence",
             "--output-format", "json",
             "--model", self.bundle.model_name,
-            "--append-system-prompt", system_prompt,
-            "--disallowed-tools", self.DEFAULT_DISALLOWED_TOOLS,
+            "--system-prompt", system_prompt,  # REPLACE default; verified
+            "--tools", "",                     # disable all built-in tools
         ]
-        t0 = time.monotonic()
-        try:
-            proc = subprocess.run(
-                cmd,
-                input=user_prompt,
-                capture_output=True,
-                text=True,
-                timeout=self._timeout_seconds,
-                check=False,
-            )
-        except FileNotFoundError as e:
-            raise NotImplementedError(
-                f"ClaudeInstrument requires the `claude` CLI on PATH (or set "
-                f"DRIFTWOOD_CLAUDE_CODE_BIN). Tried: {self._claude_bin!r}. "
-                f"See benchmark/README.md."
-            ) from e
-        wall_clock = time.monotonic() - t0
+        # Fresh isolated cwd per call: no CLAUDE.md/project-memory leaks.
+        # Per-call dir (not a fixed scratch) so accidental writes by
+        # subprocesses can't accumulate across the ~660-trial sweep.
+        with tempfile.TemporaryDirectory(prefix="claude-isolated-") as scratch:
+            t0 = time.monotonic()
+            try:
+                proc = subprocess.run(
+                    cmd,
+                    input=user_prompt,
+                    capture_output=True,
+                    text=True,
+                    cwd=scratch,
+                    timeout=self._timeout_seconds,
+                    check=False,
+                )
+            except FileNotFoundError as e:
+                raise NotImplementedError(
+                    f"ClaudeInstrument requires the `claude` CLI on PATH (or set "
+                    f"DRIFTWOOD_CLAUDE_CODE_BIN). Tried: {self._claude_bin!r}. "
+                    f"See benchmark/README.md."
+                ) from e
+            wall_clock = time.monotonic() - t0
 
         if proc.returncode != 0:
             raise RuntimeError(
@@ -289,7 +339,7 @@ class ClaudeInstrument(Instrument):
             tokens_output=tokens_output,
             # tool_steps = num_turns - 1 (the first turn is the response
             # itself; any additional turn is a tool round-trip). With
-            # --max-turns 1 + --disallowed-tools, this should always be 0.
+            # --max-turns 1 + --tools "" this should always be 0.
             tool_steps=max(0, num_turns - 1),
             wall_clock_seconds=wall_clock,
             bundle_id=self.bundle.bundle_id(),
@@ -298,7 +348,45 @@ class ClaudeInstrument(Instrument):
                 "claude_code_duration_ms": data.get("duration_ms"),
                 "claude_code_total_cost_usd": data.get("total_cost_usd"),
                 "claude_code_num_turns": num_turns,
+                # cache_creation_input_tokens captures Claude's intrinsic
+                # constitution/safety overhead (~1874 tokens, constant
+                # across conditions); recorded for audit and for the F-009
+                # transfer-probe limitations.
+                "claude_code_cache_creation_input_tokens": usage.get("cache_creation_input_tokens"),
+                "claude_code_cache_read_input_tokens": usage.get("cache_read_input_tokens"),
                 # Note: seed is recorded above but Claude Code does NOT use it.
                 # Same-seed re-runs will diverge; recorded for audit, not gated.
             },
         )
+
+
+# Pinned Claude transfer-probe bundle for trial zero (v9 + this commit).
+# Model: claude-haiku-4-5-20251001 (Haiku 4.5, latest small capability-tier
+# Claude model as of the harness-build commit). Pinned to the full
+# model name (not the `haiku` alias) so the bundle stays reproducible if
+# the alias re-points to a newer version later.
+CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
+    model_name="claude-haiku-4-5-20251001",
+    variant="claude-code-cli-headless",
+    quant="",
+    gguf_sha256="",  # not applicable for API-hosted model
+    inference_engine="claude-code-cli-2.1.143",  # update at harness-build commit
+    sampling_temperature=0.0,  # documentation only; Claude Code CLI does not expose --temperature
+    sampling_top_p=1.0,
+    sampling_top_k=0,
+    sampling_max_tokens=4096,
+    chat_template="",  # Claude Code default; not user-controllable
+    reasoning_format="",
+    notes=(
+        "Invoked via Claude Code CLI in headless mode (--print --no-session-"
+        "persistence --max-turns 1 --tools '' --system-prompt <sys> "
+        "--output-format json) with cwd = fresh tempdir per call to "
+        "neutralize project-memory contamination. Subscription login; no "
+        "API key. Residual confound: Claude Code's intrinsic ~1874-token "
+        "constitution/safety overhead is constant across A/B/C within "
+        "the Claude arm but conflates with Qwen's bare-llama.cpp shape "
+        "for cross-subject comparisons; recorded in F-009 transfer-probe "
+        "limitations. Isolation verified via "
+        "benchmark/harness/verify_claude_isolation.py."
+    ),
+)

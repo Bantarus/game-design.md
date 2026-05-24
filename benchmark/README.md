@@ -111,29 +111,44 @@ To wire up:
 
 ### 3. Pin the Claude transfer-probe instrument bundle (pre-reg §"Test subjects")
 
-**Wired via the Claude Code CLI in headless mode** (NOT the Anthropic API). Uses the user's existing Claude Code installation and login session — no API key needed, same model behavior as interactive Claude Code sessions, no SDK dependency.
+**Pinned to Haiku 4.5** (`claude-haiku-4-5-20251001`) and wired via the **Claude Code CLI in headless mode** (NOT the Anthropic API). Uses the user's existing Claude Code subscription — no API key needed, no SDK dependency.
 
-Required:
-- The `claude` CLI on `PATH` (or set `DRIFTWOOD_CLAUDE_CODE_BIN` to its path).
-- An active Claude Code login (run `claude` once interactively to authenticate; the CLI caches the session).
-- The specific Claude model name pinned in the bundle (passed via `--model`).
-- The pinned sampling params recorded in the bundle for audit. Note: Claude Code CLI does not expose a `--temperature` flag, so the bundle's `sampling_temperature` documents Claude's in-effect default rather than overriding it. The seed-sensitivity gate still passes because Claude's default temperature is > 0 and varied outputs follow naturally.
+**Contamination isolation is the load-bearing fix.** Running `claude` inside the project repo would auto-load `~/.claude/projects/-home-bantarus-DEV-game-design/memory/MEMORY.md`, which contains the entire design history of this benchmark (spec rationale, findings, pre-reg discipline). That would hand the subject the spec via memory in every condition — fatal for A-vs-B-vs-C comparability. The fix: every subprocess invocation runs in a **fresh temporary directory outside the repo** (`tempfile.TemporaryDirectory()` per call), so:
 
-Invocation contract (matches Qwen's one-shot text generation so A-vs-B-vs-C is comparable across instruments):
-- `--max-turns 1` (single-turn — no tool-use loop)
-- `--disallowed-tools "Bash,Read,Write,...,SlashCommand,KillShell"` (no tool invocations)
+- No `CLAUDE.md` in scope (cwd is empty; tempdir ancestors `/tmp`, `/` have none).
+- No `.claude/` in scope.
+- No `~/.claude/projects/<cwd-hash>/memory/MEMORY.md` to load (the tempdir's path-hash has no memory dir).
+
+**Why not `--bare`?** Bare mode would force `ANTHROPIC_API_KEY` per `claude --help` ("Anthropic auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings (OAuth and keychain are never read)") — losing the subscription path entirely. Isolated-cwd keeps the subscription while neutralizing contamination.
+
+**Invocation contract** (verified empirically; see [verify_claude_isolation.py](harness/verify_claude_isolation.py)):
+- `cwd = <fresh tempdir per call>` (the contamination fix)
+- `--print` (non-interactive)
+- `--system-prompt <text>` (**replaces** Claude Code's default agentic system prompt — verified by a haiku-only-bot probe that produced haiku responses, not normal answers; NOT `--append-system-prompt`)
+- `--tools ""` (disable all built-in tools)
+- `--no-session-persistence` (no JSONL session log written)
+- `--max-turns 5` (NOT 1 — Claude is heavily agentic-trained and may attempt a tool call even with `--tools ""`; one additional turn lets it recover with a text-only response; cross-subject comparability is at the metric level, not turn-count level)
 - `--output-format json` (structured response with token counts + duration + cost)
+- `--model claude-haiku-4-5-20251001` (pinned full name, NOT the `haiku` alias, so re-aliasing the alias doesn't silently change the instrument)
 - Prompt passed via stdin (avoids shell-quoting issues for long design contexts)
+
+**Required isolation smoke test before this counts as wired.** Run [verify_claude_isolation.py](harness/verify_claude_isolation.py) — 4 probes that only the project memory or repo content could answer (fresh-game name, decision D-018, v8 pre-reg supersession content, the five invariant kinds). A correctly-isolated subject MUST NOT produce correct project-specific answers. Latest run: **4/4 PASS** (subject either offered to use disabled tools or said "I don't have access" — zero project content leaked).
+
+Treat a leak the same way you'd treat a failed calibration gate: stop, fix the wiring, re-run.
+
+**Residual confound (named, recorded in F-009 transfer-probe limitations).** Even isolated, Claude runs through the Claude Code harness with its intrinsic system context: constitution, safety guidance, available-tool descriptions (~2k–4.5k input tokens per call observed in the smoke test), plus a tool-aware response style ("I can use Google Drive to look that up"). This is **constant across A/B/C within the Claude arm**, so the HEADLINE (per-subject paired McNemar) is unaffected — but Qwen runs bare llama.cpp with its own (different) overhead, so cross-subject lift comparisons (Qwen lift vs Claude lift) conflate capability with harness-overhead delta. F-009 reports this alongside the other transfer-probe caveats. Global `~/.claude` config was audited: no `~/.claude/CLAUDE.md` exists, skills/plugins/MCPs are unrelated to the spec, so no spec-specific config leak.
+
+**Seed handling.** Claude Code does NOT accept a seed parameter. The `seed` argument is recorded on every `InstrumentResponse` for audit-trail purposes (per pre-reg §11 "auditability is recorded, not gated") but does NOT deterministically reproduce. Same-seed re-runs will diverge; expected and accepted per the v4 layer-confusion correction (the benchmark needs sampled variance, not byte-identical reproducibility).
 
 To wire up:
 1. Verify `claude --version` works on your system (`DRIFTWOOD_CLAUDE_CODE_BIN` defaults to `claude` from PATH).
 2. Run `claude` once interactively if not already authenticated.
-3. The `ClaudeInstrument.complete()` implementation in [`harness/instrument.py`](harness/instrument.py) is already wired; commit the bundle declaration to pin the model + version. The bundle's `inference_engine` field should record the Claude Code CLI version (parseable from `claude --version`).
-
-**Seed handling.** Claude Code does NOT accept a seed parameter. The `seed` argument is recorded on every `InstrumentResponse` for audit-trail purposes (per pre-reg §11 "auditability is recorded, not gated") but does NOT deterministically reproduce. Same-seed re-runs will diverge; this is expected and accepted per the v4 layer-confusion correction (the benchmark needs sampled variance across seeds, not byte-identical reproducibility).
+3. The `ClaudeInstrument.complete()` implementation in [`harness/instrument.py`](harness/instrument.py) and the pinned `CLAUDE_TRANSFER_PROBE_BUNDLE` are already wired.
+4. Run the isolation smoke test: `python -m benchmark.harness.verify_claude_isolation`. Must report **4/4 ok** before trial-zero readiness.
+5. Update the bundle's `inference_engine` field if the Claude Code CLI version changes from `2.1.143`.
 
 Optional env vars:
-- `DRIFTWOOD_CLAUDE_CODE_BIN` — path to the `claude` binary (default: looked up on PATH).
+- `DRIFTWOOD_CLAUDE_CODE_BIN` — path to the `claude` binary (default: PATH lookup).
 - `DRIFTWOOD_CLAUDE_CODE_TIMEOUT_SECONDS` — per-invocation timeout (default: 300).
 
 ### 4. Run the fairness audit on both games' flattened B (Layer 3 of B-construction)
