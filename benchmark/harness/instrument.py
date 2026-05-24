@@ -179,8 +179,31 @@ class ClaudeInstrument(Instrument):
     Wired through the user's existing Claude Code installation rather than
     the Anthropic API. Benefits: no API key needed (uses the user's Claude
     Code subscription/login); no SDK dependency. Pinned at the
-    harness-build commit to Haiku 4.5 specifically (the latest small
-    capability-tier Claude model — see §"Test subjects" + pre-reg).
+    harness-build commit to **Opus 4.7 at `--effort xhigh`** — the frontier
+    capability tier in the Claude lineup at the time of trial zero. See
+    §"Test subjects" + pre-reg line 133: *"Tests how spec-helpfulness
+    varies with model capability tier"*; the three named outcomes (Claude
+    lift > / ≈ / < Qwen lift) all interpret meaningfully ONLY when the
+    Claude side is on a frontier model. A smaller-tier Claude (Sonnet,
+    Haiku) would collapse the "frontier models infer the structure
+    unaided" outcome (Claude lift < Qwen lift) into "this small model
+    needed the scaffold too," which is uninterpretable as a capability-
+    tier claim. Opus 4.7 at xhigh is the strongest signal available
+    through Claude Code; max is one tier higher and reserved for a
+    redirect if xhigh proves insufficient.
+
+    Model pin discipline. We request `claude-opus-4-7` (the canonical
+    name) not `opus` (the alias). The alias is resolution-deferred and
+    could swap to Opus 4.8 mid-sweep once Anthropic releases it; the
+    canonical name locks the request to this generation. (Unlike Haiku
+    4.5, which exposes a dated full name `claude-haiku-4-5-20251001`,
+    Opus 4.7 does not yet have a dated variant — empirically verified:
+    `claude-opus-4-7-YYYYMMDD` returns 404. `claude-opus-4-7` IS the
+    canonical pin available for this generation.) The actually-served
+    version is still captured per-call in
+    `instrument_extra.claude_code_served_models` from Claude Code's
+    `modelUsage` field — that's the audit backstop if Anthropic adds a
+    dated suffix or rotates a point release behind the canonical name.
 
     Contamination isolation (the load-bearing fix at this commit).
       Running `claude` inside the project repo loads .claude/projects/
@@ -231,16 +254,22 @@ class ClaudeInstrument(Instrument):
 
     Residual confound (named, not hidden — recorded in F-009 transfer-
     probe limitations). Even isolated, Claude runs through the Claude
-    Code harness — which adds ~1874 tokens of intrinsic Claude system
-    context (constitution / safety guidance), processed identically
-    across A/B/C. Qwen runs bare llama.cpp with its own chat-template
-    overhead. So cross-subject lift differences conflate model
-    capability with harness-overhead delta. The HEADLINE (per-subject
-    A-vs-B paired McNemar) is unaffected because the harness overhead
-    is constant across conditions WITHIN a subject. The transfer
-    probe's cross-subject comparisons (Qwen lift vs Claude lift) carry
-    this residual; F-009 reports it alongside the other transfer-probe
-    caveats.
+    Code harness — which adds intrinsic system-context overhead
+    (constitution / safety guidance / available-tool descriptions),
+    processed identically across A/B/C. Re-measured at the Opus-4.7
+    xhigh commit on this instrument: input_tokens ≈ 200 above the
+    user-supplied prompt on minimal probes; cache_creation and
+    cache_read both 0 in the per-call accounting that Claude Code
+    surfaces (the Haiku-era observation of 2k-4.5k overhead was likely
+    a cache-creation artifact of an earlier Claude Code version and
+    does NOT transfer to this instrument). Qwen runs bare llama.cpp
+    with its own chat-template overhead. So cross-subject lift
+    differences conflate model capability with harness-overhead delta.
+    The HEADLINE (per-subject A-vs-B paired McNemar) is unaffected
+    because the harness overhead is constant across conditions WITHIN a
+    subject. The transfer probe's cross-subject comparisons (Qwen lift
+    vs Claude lift) carry this residual; F-009 reports it alongside the
+    other transfer-probe caveats.
 
     Seed handling: Claude Code does not accept a seed parameter. The
     `seed` arg is recorded on every InstrumentResponse for audit-trail
@@ -303,6 +332,16 @@ class ClaudeInstrument(Instrument):
         # the error so per-condition error rates are visible; NOT excluded
         # and NOT retried — exclusion/retry could be condition-dependent and
         # would bias the headline; see pre-reg §"Test subjects").
+        # --effort xhigh enables Claude's "extra-high" thinking budget for
+        # this session. The frontier-capability framing of the transfer
+        # probe (pre-reg line 133) requires the strongest signal Claude
+        # can produce; xhigh is the named tier just below `max`. The
+        # effort level is constant within Claude across A/B/C, so the
+        # per-subject paired-McNemar headline is unaffected; cross-subject
+        # cost-lift comparisons carry the (constant) overhead delta per
+        # the static-overhead caveat (pre-reg §"What this benchmark will
+        # NOT establish"). The effort level is captured per-call in
+        # instrument_extra.claude_code_effort_requested for audit.
         cmd = [
             self._claude_bin,
             "--print",
@@ -310,6 +349,7 @@ class ClaudeInstrument(Instrument):
             "--no-session-persistence",
             "--output-format", "json",
             "--model", self.bundle.model_name,
+            "--effort", "xhigh",
             "--system-prompt", effective_system_prompt,  # REPLACE default; verified
             "--tools", "",                                # disable all built-in tools
         ]
@@ -404,11 +444,19 @@ class ClaudeInstrument(Instrument):
                 # transfer-probe limitations.
                 "claude_code_cache_creation_input_tokens": usage.get("cache_creation_input_tokens"),
                 "claude_code_cache_read_input_tokens": usage.get("cache_read_input_tokens"),
-                # Actually-served model version(s) — pinned via the `haiku`
-                # alias, so the served version may evolve over the sweep
-                # if Anthropic releases a new Haiku. The list keys of
-                # modelUsage are the served version IDs (typically one).
+                # Actually-served model version(s) — we pin to the
+                # canonical `claude-opus-4-7` (not the `opus` alias), but
+                # Anthropic may still rotate point releases behind that
+                # name or add a dated variant during the sweep. Capture
+                # the served keys per call so any rotation is visible
+                # post-hoc. The list keys of modelUsage are the served
+                # version IDs (typically one).
                 "claude_code_served_models": list((data.get("modelUsage") or {}).keys()),
+                # Requested effort tier (pre-reg-relevant: the frontier-
+                # capability framing of the transfer probe requires the
+                # strongest signal Claude can produce). Captured for
+                # audit and so any mid-sweep change is detectable.
+                "claude_code_effort_requested": "xhigh",
                 # Note: seed is recorded above but Claude Code does NOT use it.
                 # Same-seed re-runs will diverge; recorded for audit, not gated.
             },
@@ -416,18 +464,33 @@ class ClaudeInstrument(Instrument):
 
 
 # Pinned Claude transfer-probe bundle for trial zero (v9 + this commit).
-# Model: `haiku` (the alias for the latest small capability-tier Claude
-# model). Using the alias rather than a dated full name (e.g.,
-# claude-haiku-4-5-20251001) lets the transfer probe automatically pick
-# up the latest Haiku release. Reproducibility is preserved at the
-# audit-trail level: Claude Code's --output-format json includes a
-# `modelUsage` map keyed by the actually-served model version (e.g.,
-# "claude-haiku-4-5-20251001"), captured per-call in the trial's
-# `instrument_extra` field. F-009 reports the served version(s) observed
-# over the sweep.
+#
+# Model: `claude-opus-4-7` requested via --model + `xhigh` requested via
+# --effort. This is the FRONTIER-CAPABILITY tier in the Claude lineup at
+# the time of trial zero, per the pre-reg's framing (line 133: "Tests how
+# spec-helpfulness varies with model capability tier" — the probe is only
+# interpretable as a capability-tier claim when the Claude side runs on a
+# frontier model; on Haiku/Sonnet the "Claude lift < Qwen lift" outcome
+# would collapse to "this small Claude needed the scaffold too," which is
+# uninterpretable). xhigh is the named tier just below `max`; if Phase 5
+# calibrations show xhigh is leaving signal on the table, escalation to
+# `max` is the natural redirect.
+#
+# Why the canonical name not the alias. We request `claude-opus-4-7` (not
+# the `opus` alias) so the request itself locks the model generation;
+# the alias would resolve to Opus 4.8 mid-sweep once Anthropic releases
+# it, silently confounding any within-Claude A-vs-B that straddles the
+# rotation. (Unlike Haiku 4.5's dated form `claude-haiku-4-5-20251001`,
+# Opus 4.7 does not yet have a dated variant — empirically verified at
+# this commit: every `claude-opus-4-7-YYYYMMDD` guess returned 404.
+# `claude-opus-4-7` IS the canonical pin available for this generation.)
+# The audit backstop — capturing the actually-served version per call
+# from Claude Code's `modelUsage` — is preserved: any future point-
+# release rotation behind the canonical name is detectable post-hoc, and
+# would land in F-009's "served versions observed" report.
 CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
-    model_name="haiku",
-    variant="claude-code-cli-headless",
+    model_name="claude-opus-4-7",
+    variant="claude-code-cli-headless-effort-xhigh",
     quant="",
     gguf_sha256="",  # not applicable for API-hosted model
     inference_engine="claude-code-cli-2.1.143",  # update at harness-build commit
@@ -436,28 +499,31 @@ CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
     sampling_top_k=0,
     sampling_max_tokens=4096,
     chat_template="",  # Claude Code default; not user-controllable
-    reasoning_format="",
+    reasoning_format="",  # extended thinking enabled via --effort xhigh; output text only — thinking traces not returned in --print JSON
     notes=(
         "Invoked via Claude Code CLI in headless mode (--print --no-session-"
-        "persistence --max-turns 5 --tools '' --system-prompt <sys+steer> "
-        "--output-format json) with cwd = fresh tempdir per call to "
-        "neutralize project-memory contamination. Subscription login; no "
-        "API key. Two named instrument-level confounds (recorded in F-009 "
-        "transfer-probe limitations): (1) STATIC overhead — Claude Code's "
-        "intrinsic ~2k-4.5k-token constitution/safety/tool-description "
-        "overhead, prompt-independent, constant across A/B/C within Claude "
-        "(headline safe; mildly pads cost-lift denominator). (2) DYNAMIC "
-        "overhead — Claude is heavily agentic-trained and may attempt "
-        "denied tool calls when prompts feel context-poor; mitigated by "
-        "the CLAUDE_ANTI_FLAILING_SUFFIX system-prompt steer ('tools are "
-        "disabled... respond with the implementation directly as text'), "
-        "verified post-trial by harness/regime_constancy.py which checks "
-        "that num_turns / tokens / cost / stop_reason distributions are "
-        "comparable across A/B/C within the Claude arm (turning the "
-        "constancy assumption into a measured fact). error_max_turns "
-        "trials count as failures (no exclusion, no retry — would be "
-        "condition-dependent and bias the headline); per-condition error "
-        "rates reported with F-009. Isolation verified via "
-        "benchmark/harness/verify_claude_isolation.py."
+        "persistence --max-turns 5 --tools '' --model claude-opus-4-7 "
+        "--effort xhigh --system-prompt <sys+steer> --output-format json) "
+        "with cwd = fresh tempdir per call to neutralize project-memory "
+        "contamination. Subscription login; no API key. Frontier-capability "
+        "tier per pre-reg line 133 — Opus 4.7 at xhigh effort. Two named "
+        "instrument-level confounds (recorded in F-009 transfer-probe "
+        "limitations): (1) STATIC overhead — Claude Code's intrinsic "
+        "constitution/safety/tool-description overhead, prompt-independent, "
+        "constant across A/B/C within Claude (headline safe; mildly pads "
+        "cost-lift denominator); exact token magnitude re-measured at this "
+        "commit's isolation smoke with Opus xhigh (Haiku-era numbers do not "
+        "transfer). (2) DYNAMIC overhead — Claude is heavily agentic-trained "
+        "and may attempt denied tool calls when prompts feel context-poor; "
+        "mitigated by the CLAUDE_ANTI_FLAILING_SUFFIX system-prompt steer "
+        "('tools are disabled... respond with the implementation directly "
+        "as text'), verified post-trial by harness/regime_constancy.py "
+        "which checks that num_turns / tokens / cost / stop_reason "
+        "distributions are comparable across A/B/C within the Claude arm "
+        "(turning the constancy assumption into a measured fact). "
+        "error_max_turns trials count as failures (no exclusion, no retry "
+        "— would be condition-dependent and bias the headline); per-"
+        "condition error rates reported with F-009. Isolation verified "
+        "via benchmark/harness/verify_claude_isolation.py."
     ),
 )
