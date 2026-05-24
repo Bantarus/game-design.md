@@ -344,18 +344,38 @@ def calibrate_blinding(
     payload_b = build_b(calibration_task.game)
     payload_c = build_c(calibration_task.game)
 
-    outputs: list[tuple[int, str, str]] = []  # (output_id, true_condition, raw_text)
-    oid = 0
+    # Generation order: interleaved across conditions, not blocked.
+    # The same pairing-integrity discipline that protects the trial sweep
+    # (see harness/sweep_plan.py) applies here at smaller N: if all A
+    # samples are generated first and all C samples last, a time-correlated
+    # nuisance (Claude rate-limit posture, Qwen drift) lands on one
+    # condition more than the others. The judge's at-chance gate would
+    # then INCORRECTLY flag time artifacts as content-leak signals
+    # (predicting condition from latency-correlated output artifacts
+    # rather than spec vocabulary). The fix is the same: build the
+    # generation schedule as a shuffled list of (condition, sample_idx)
+    # tuples, seeded for determinism. The judge still sees its OWN
+    # shuffled view (line 363 below), and that shuffle stays seeded
+    # independently. This change matters even at calibration N=90 — a
+    # 90-call run at Opus xhigh is several minutes; rate-limit walls can
+    # absolutely land mid-calibration.
+    schedule: list[tuple[str, "ConditionPayload"]] = []  # noqa: F821
     for cond_name, payload in [("A", payload_a), ("B", payload_b), ("C", payload_c)]:
-        for i in range(n_per_condition):
-            prompt = f"{payload.payload_text}\n\n--- TASK ---\n{calibration_task.brief}"
-            r = instrument.complete(
-                system_prompt="You are a coding agent. Implement the task described, using the provided design context.",
-                user_prompt=prompt,
-                seed=10000 + oid,
-            )
-            outputs.append((oid, cond_name, r.text))
-            oid += 1
+        for _ in range(n_per_condition):
+            schedule.append((cond_name, payload))
+    import random as _random_for_schedule
+    schedule_rng = _random_for_schedule.Random(20260524)  # deterministic per harness-build commit
+    schedule_rng.shuffle(schedule)
+
+    outputs: list[tuple[int, str, str]] = []  # (output_id, true_condition, raw_text)
+    for oid, (cond_name, payload) in enumerate(schedule):
+        prompt = f"{payload.payload_text}\n\n--- TASK ---\n{calibration_task.brief}"
+        r = instrument.complete(
+            system_prompt="You are a coding agent. Implement the task described, using the provided design context.",
+            user_prompt=prompt,
+            seed=10000 + oid,
+        )
+        outputs.append((oid, cond_name, r.text))
 
     # --- Phase 1: positive control on RAW outputs ----------------------------
     import random

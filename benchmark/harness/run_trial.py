@@ -128,6 +128,17 @@ def run_trial(
     brief_path = HARNESS_DIR.parent / "games" / task.game / "design-brief.md"
     game_brief = brief_path.read_text() if brief_path.exists() else ""
 
+    # `response.text` is the FINAL IMPLEMENTATION text — the `result`
+    # field from Claude Code's `--print --output-format json` envelope
+    # (or the equivalent from QwenInstrument). It is explicitly NOT the
+    # subject's internal reasoning trace. On the Claude side, Opus 4.7
+    # at `--effort xhigh` produces a large internal extended-thinking
+    # trace; that trace is NOT surfaced in `--print` output — only the
+    # final assistant text reaches `result` and therefore `response.text`.
+    # The scoring stack (sanitize → checklist judge → matches-intent
+    # judge) operates purely on this final-implementation text, which
+    # is what the benchmark intends to score.
+    #
     # v8: sanitize the raw output once, score the SANITIZED form in every
     # judge call. The pre-reg's two-phase blinding-leak calibration validates
     # that the judge is (a) above chance on RAW outputs (Phase 1 / fitness)

@@ -252,7 +252,24 @@ See pre-reg v8 → v9 audit-trail row #17 and project memory `train-test-distrib
 
 After steps 1-6c land, trial zero is the first run of `python -m benchmark.harness.run_trial` with a real subject. Once that fires, **the pre-registration is frozen and any redirect of gates / B-construction / task set / judge / etc. is no longer possible**.
 
-The trial sweep itself: 660 outputs per the pre-reg's design (3 headline task types × 2 games × 20 N × 2 conditions = 240 paired per subject; plus C unpaired 60 × 2 subjects; plus 5 × 2 × 3 easy = 30 per subject; × 2 subjects = 660). At real instrument speeds (~30s per Qwen invocation, ~10s per Claude invocation, average), a serial sweep takes ~9 hours; parallelization across cells trivially possible.
+The trial sweep itself: 660 outputs per the pre-reg's design (3 headline task types × 2 games × 20 N × 2 conditions = 240 paired per subject; plus C unpaired 60 × 2 subjects [C runs at N=10 for m/h/a, the explicit reconciliation of the pre-reg's stated "60" figure — see [`harness/sweep_plan.py::C_N_PER_CELL_OVERRIDES`](harness/sweep_plan.py)]; plus 5 × 2 × 3 easy = 30 per subject; × 2 subjects = 660). At real instrument speeds (~30s per Qwen invocation, ~10s per Claude invocation, average), a serial sweep takes ~9 hours; parallelization across cells trivially possible.
+
+**Execution-order discipline — interleaved, not blocked.** The driver MUST consume the sweep plan from [`harness/sweep_plan.py`](harness/sweep_plan.py) (CLI emits JSONL, one cell per line, in execution order):
+
+```
+python -m benchmark.harness.sweep_plan --subject claude --shuffle-seed 12345 \
+  | while read cell; do
+      python -m benchmark.harness.run_trial \
+          --subject claude --condition $(jq -r .condition <<<"$cell") \
+          --task $(jq -r .task <<<"$cell") \
+          --game $(jq -r .game <<<"$cell") \
+          --seed $(jq -r .seed <<<"$cell")
+    done
+```
+
+The planner emits per-pair-interleaved cells with a seeded inter-unit shuffle: A_i and B_i of every paired instance run back-to-back, and the order of pairs across the sweep is randomized. This defeats the time-correlated nuisance both subjects carry — Claude rate-limit posture climbing toward the wall over a multi-hour run, and Qwen llama.cpp drift over the same. **`count-as-failure` for `error_max_turns` is unbiased ONLY under interleaved ordering**; under blocked ordering, rate-limit failures correlate with whichever condition runs late, manufacturing a spurious A-vs-B difference. The `shuffle_seed` is part of the harness-build SHA discipline; F-009 records it.
+
+**Pre-sweep usage-watch on the Claude arm.** Opus 4.7 `--effort xhigh` is materially heavier than the Haiku-era assumption (~$0.007/call floor; bigger A trees push it higher). Watch the Claude subscription usage during the pre-sweep batch (N≈20 trials): a usage wall at N=20 is recoverable; a wall at N=300 is not. If pre-sweep batch shows the wall is plausible within the full sweep, the API key earns its keep — switching from subscription to `ANTHROPIC_API_KEY` (requires changing `--bare` to be set and re-running the isolation smoke) is the right operational redirect, not a methodology change.
 
 **After the sweep, run the post-hoc sanitizer-generalization check (pre-reg v9 step 14).** Draw a uniform sample from the full ~660 trial records (N=60–120, distributed across conditions × games × tasks), apply the SHA-locked sanitization, run the condition-prediction judge, report the 95% Wilson CI on accuracy alongside F-009. A CI that includes 1/3 confirms generalization; a CI strictly above 1/3 is recorded as a stated F-009 limitation with the observed leak magnitude — F-009 reports the residual leak as a measured fact and does NOT retroactively re-run.
 
