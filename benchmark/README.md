@@ -111,7 +111,7 @@ To wire up:
 
 ### 3. Pin the Claude transfer-probe instrument bundle (pre-reg §"Test subjects")
 
-**Pinned to Haiku 4.5** (`claude-haiku-4-5-20251001`) and wired via the **Claude Code CLI in headless mode** (NOT the Anthropic API). Uses the user's existing Claude Code subscription — no API key needed, no SDK dependency.
+**Pinned to the `haiku` alias** (latest small capability-tier Claude model — typically Haiku 4.5 at the time of the harness-build commit) and wired via the **Claude Code CLI in headless mode** (NOT the Anthropic API). Uses the user's existing Claude Code subscription — no API key needed, no SDK dependency. The actually-served model version is captured per-call in `instrument_extra.claude_code_served_models` (from Claude Code's `modelUsage` response field) so audit-trail reproducibility is preserved even though the alias may resolve to a newer release over the sweep.
 
 **Contamination isolation is the load-bearing fix.** Running `claude` inside the project repo would auto-load `~/.claude/projects/-home-bantarus-DEV-game-design/memory/MEMORY.md`, which contains the entire design history of this benchmark (spec rationale, findings, pre-reg discipline). That would hand the subject the spec via memory in every condition — fatal for A-vs-B-vs-C comparability. The fix: every subprocess invocation runs in a **fresh temporary directory outside the repo** (`tempfile.TemporaryDirectory()` per call), so:
 
@@ -129,14 +129,21 @@ To wire up:
 - `--no-session-persistence` (no JSONL session log written)
 - `--max-turns 5` (NOT 1 — Claude is heavily agentic-trained and may attempt a tool call even with `--tools ""`; one additional turn lets it recover with a text-only response; cross-subject comparability is at the metric level, not turn-count level)
 - `--output-format json` (structured response with token counts + duration + cost)
-- `--model claude-haiku-4-5-20251001` (pinned full name, NOT the `haiku` alias, so re-aliasing the alias doesn't silently change the instrument)
+- `--model haiku` (the alias, auto-resolves to the latest Haiku release; served version is captured per-call via Claude Code's `modelUsage` response field for audit reproducibility)
 - Prompt passed via stdin (avoids shell-quoting issues for long design contexts)
 
 **Required isolation smoke test before this counts as wired.** Run [verify_claude_isolation.py](harness/verify_claude_isolation.py) — 4 probes that only the project memory or repo content could answer (fresh-game name, decision D-018, v8 pre-reg supersession content, the five invariant kinds). A correctly-isolated subject MUST NOT produce correct project-specific answers. Latest run: **4/4 PASS** (subject either offered to use disabled tools or said "I don't have access" — zero project content leaked).
 
 Treat a leak the same way you'd treat a failed calibration gate: stop, fix the wiring, re-run.
 
-**Residual confound (named, recorded in F-009 transfer-probe limitations).** Even isolated, Claude runs through the Claude Code harness with its intrinsic system context: constitution, safety guidance, available-tool descriptions (~2k–4.5k input tokens per call observed in the smoke test), plus a tool-aware response style ("I can use Google Drive to look that up"). This is **constant across A/B/C within the Claude arm**, so the HEADLINE (per-subject paired McNemar) is unaffected — but Qwen runs bare llama.cpp with its own (different) overhead, so cross-subject lift comparisons (Qwen lift vs Claude lift) conflate capability with harness-overhead delta. F-009 reports this alongside the other transfer-probe caveats. Global `~/.claude` config was audited: no `~/.claude/CLAUDE.md` exists, skills/plugins/MCPs are unrelated to the spec, so no spec-specific config leak.
+**Residual confound (split — recorded in F-009 transfer-probe limitations).** Even isolated, Claude runs through the Claude Code harness. Two separable overheads with different consequences:
+
+- **STATIC overhead** (constitution / safety / tool descriptions / MCP enumeration: ~2k–4.5k input tokens/call). Prompt-independent → constant across A/B/C → **per-subject headline McNemar UNAFFECTED**. Pads cost-lift denominator mildly within Claude. Cross-subject lift-magnitude comparisons carry this static delta; named in F-009 transfer-probe caveats. No mitigation needed.
+- **DYNAMIC overhead** (agentic-flailing: Claude attempts denied tool calls). **Prompt-dependent** → potentially divergent across A/B/C → could regime-distort the within-Claude **cost-lift gate** (one of two headline gates). Mitigation: (1) `ClaudeInstrument.CLAUDE_ANTI_FLAILING_SUFFIX` ("tools are disabled... respond with the implementation directly as text") appended to every Claude system prompt — cuts flailing at the source. (2) `--max-turns 5` lets Claude recover from residual tool-attempts. (3) **Post-trial regime-constancy check** [`harness/regime_constancy.py`](harness/regime_constancy.py): per-(subject, condition) distributions of `num_turns`, tokens, cost, stop_reason, error rate; advisory flags at 2x cell-mean ratio or 10pp error-rate spread within a subject. Run on the pre-sweep batch AND post-hoc on the full sweep; turns the within-Claude regime-constancy assumption into a measured fact.
+
+**`error_max_turns` handling rule (pre-registered).** Trials that hit `subtype: error_max_turns` even at 5 turns **count as failures** (no exclusion, no retry — both would be condition-dependent and bias the headline). Per-condition error rates are recorded in `instrument_extra` on every `TrialRecord` and reported with F-009 via the regime-constancy artifact.
+
+**Global config audit:** no `~/.claude/CLAUDE.md` exists, skills/plugins/MCPs are unrelated to the spec — no spec-specific config leak.
 
 **Seed handling.** Claude Code does NOT accept a seed parameter. The `seed` argument is recorded on every `InstrumentResponse` for audit-trail purposes (per pre-reg §11 "auditability is recorded, not gated") but does NOT deterministically reproduce. Same-seed re-runs will diverge; expected and accepted per the v4 layer-confusion correction (the benchmark needs sampled variance, not byte-identical reproducibility).
 
@@ -145,7 +152,7 @@ To wire up:
 2. Run `claude` once interactively if not already authenticated.
 3. The `ClaudeInstrument.complete()` implementation in [`harness/instrument.py`](harness/instrument.py) and the pinned `CLAUDE_TRANSFER_PROBE_BUNDLE` are already wired.
 4. Run the isolation smoke test: `python -m benchmark.harness.verify_claude_isolation`. Must report **4/4 ok** before trial-zero readiness.
-5. Update the bundle's `inference_engine` field if the Claude Code CLI version changes from `2.1.143`.
+5. Update the bundle's `inference_engine` field if the Claude Code CLI version changes from `2.1.143`. The `model_name` stays as the `haiku` alias; served versions are captured per-call.
 
 Optional env vars:
 - `DRIFTWOOD_CLAUDE_CODE_BIN` — path to the `claude` binary (default: PATH lookup).

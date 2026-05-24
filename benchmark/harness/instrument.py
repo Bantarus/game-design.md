@@ -250,6 +250,29 @@ class ClaudeInstrument(Instrument):
     benchmark needs sampled variance, not byte-identical reproducibility).
     """
 
+    # Claude-specific system-prompt steer (appended to the harness's
+    # system_prompt). The two added sentences cut the agentic-flailing
+    # rate at the source — without them, Claude under --tools "" sometimes
+    # attempts a denied tool call and burns a turn before delivering text,
+    # which inflates `num_turns` and (more importantly) inflates input
+    # tokens / cost in a way that may be *prompt-dependent*: a context-
+    # poor C prompt could make Claude think "I'm missing information, let
+    # me look" more often than a full A tree, which would systematically
+    # distort the within-Claude cost-lift gate (one of two headline gates).
+    # The steer is a Claude-specific addition (no analogue for Qwen, which
+    # has no tools to attempt anyway) — named in pre-reg as an instrument-
+    # level confound for the transfer probe. Constant within Claude across
+    # A/B/C; safe for the per-subject headline. The regime-constancy check
+    # (harness/regime_constancy.py) verifies, post-trial, that num_turns
+    # and tokens distributions are comparable across conditions within the
+    # Claude arm — turning the assumption into a measured fact.
+    CLAUDE_ANTI_FLAILING_SUFFIX = (
+        "\n\n"
+        "(Session note: tools are disabled in this environment. Respond "
+        "with the implementation directly as text; do not attempt tool "
+        "calls.)"
+    )
+
     def __init__(self, bundle: InstrumentBundle):
         super().__init__(bundle)
         self._claude_bin = os.environ.get("DRIFTWOOD_CLAUDE_CODE_BIN", "claude")
@@ -264,18 +287,22 @@ class ClaudeInstrument(Instrument):
         seed: int,
     ) -> InstrumentResponse:
         import tempfile
+        # Append the Claude-specific anti-flailing steer to the harness's
+        # system prompt. This is a Claude-only addition (Qwen has no tools);
+        # constant within Claude across A/B/C; documented in §"Test subjects"
+        # as a named instrument-level confound for the transfer probe.
+        effective_system_prompt = system_prompt + self.CLAUDE_ANTI_FLAILING_SUFFIX
         # --max-turns is set to 5 (not 1) because Claude is heavily agentic-
-        # trained and will occasionally attempt a tool call on the first turn
-        # even with --tools "". When the tool attempt fails, Claude needs an
-        # additional turn to synthesize a text-only response. Empirically
-        # verified: --max-turns 1 fails with `subtype: error_max_turns` /
-        # `stop_reason: tool_use` on probes that prompt tool-attempt behavior;
-        # --max-turns 5 lets Claude recover cleanly (typical num_turns is 1
-        # for tasks where the context is in-prompt; 2-3 if Claude tries a
-        # tool first). Cross-subject comparability is at the METRIC level
-        # (input tokens + output tokens + wall clock + cost), not at the
-        # turn-count level — Qwen has no notion of turns, and the metric is
-        # what the headline measures.
+        # trained and may attempt a tool call even with --tools "" + the
+        # anti-flailing steer. One additional turn lets it recover with a
+        # text-only response. Empirically verified: --max-turns 1 fails with
+        # `subtype: error_max_turns` / `stop_reason: tool_use` on probes that
+        # prompt tool-attempt behavior; --max-turns 5 works cleanly in normal
+        # operation. error_max_turns at 5+ is rare but possible — handled
+        # below as a degraded-output trial (counts as a trial; recorded with
+        # the error so per-condition error rates are visible; NOT excluded
+        # and NOT retried — exclusion/retry could be condition-dependent and
+        # would bias the headline; see pre-reg §"Test subjects").
         cmd = [
             self._claude_bin,
             "--print",
@@ -283,8 +310,8 @@ class ClaudeInstrument(Instrument):
             "--no-session-persistence",
             "--output-format", "json",
             "--model", self.bundle.model_name,
-            "--system-prompt", system_prompt,  # REPLACE default; verified
-            "--tools", "",                     # disable all built-in tools
+            "--system-prompt", effective_system_prompt,  # REPLACE default; verified
+            "--tools", "",                                # disable all built-in tools
         ]
         # Fresh isolated cwd per call: no CLAUDE.md/project-memory leaks.
         # Per-call dir (not a fixed scratch) so accidental writes by
@@ -309,25 +336,36 @@ class ClaudeInstrument(Instrument):
                 ) from e
             wall_clock = time.monotonic() - t0
 
-        if proc.returncode != 0:
-            raise RuntimeError(
-                f"Claude Code CLI returned exit code {proc.returncode}.\n"
-                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
-            )
-
-        # Claude Code's --output-format json returns a single object with
-        # `result` (the text), `usage` (token counts), `duration_ms`,
-        # `num_turns`, `total_cost_usd`, etc.
+        # Parse the JSON envelope FIRST. The Claude Code CLI returns a
+        # well-formed JSON document even when is_error=true (e.g.
+        # error_max_turns), with exit code 1. We treat error_max_turns and
+        # similar degraded-output cases as completed trials with whatever
+        # `result` text exists — typically empty for error_max_turns. The
+        # scoring layer will fail them naturally on both the checklist (no
+        # implementation present) and matches-intent (low score). This
+        # preserves the trial sample without exclusion or retry, both of
+        # which could be condition-dependent and bias the headline.
         try:
-            data = json.loads(proc.stdout)
+            data = json.loads(proc.stdout) if proc.stdout.strip() else {}
         except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"Claude Code CLI returned non-JSON on stdout despite "
-                f"--output-format json. First 2 KB of stdout: "
-                f"{proc.stdout[:2048]!r}"
+                f"--output-format json. exit_code={proc.returncode}. "
+                f"First 2 KB of stdout: {proc.stdout[:2048]!r}\n"
+                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
             ) from e
 
-        text = data.get("result", "")
+        # Raise only on hard failures (no parseable JSON envelope — that's
+        # a wiring problem, not a degraded-trial). is_error inside a valid
+        # envelope is captured below and surfaced via extra fields.
+        if not data and proc.returncode != 0:
+            raise RuntimeError(
+                f"Claude Code CLI returned exit code {proc.returncode} "
+                f"with no parseable JSON envelope. "
+                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
+            )
+
+        text = data.get("result", "") or ""
         usage = data.get("usage", {}) or {}
         tokens_input = int(usage.get("input_tokens", 0))
         tokens_output = int(usage.get("output_tokens", 0))
@@ -339,21 +377,38 @@ class ClaudeInstrument(Instrument):
             tokens_output=tokens_output,
             # tool_steps = num_turns - 1 (the first turn is the response
             # itself; any additional turn is a tool round-trip). With
-            # --max-turns 1 + --tools "" this should always be 0.
+            # --tools "" + the anti-flailing steer, this should usually be 0.
             tool_steps=max(0, num_turns - 1),
             wall_clock_seconds=wall_clock,
             bundle_id=self.bundle.bundle_id(),
             invocation_seed=seed,
             extra={
+                # Per-call audit fields — load-bearing for the regime-
+                # constancy check (harness/regime_constancy.py). These let
+                # us verify post-trial that num_turns / tokens / cost /
+                # stop_reason distributions are comparable across A/B/C
+                # within the Claude arm. If they diverge, the within-Claude
+                # cost-lift gate is regime-distorted rather than measuring
+                # the spec format's actual cost.
                 "claude_code_duration_ms": data.get("duration_ms"),
                 "claude_code_total_cost_usd": data.get("total_cost_usd"),
                 "claude_code_num_turns": num_turns,
+                "claude_code_stop_reason": data.get("stop_reason"),
+                "claude_code_subtype": data.get("subtype"),
+                "claude_code_is_error": data.get("is_error"),
+                "claude_code_errors": data.get("errors"),
+                "claude_code_exit_code": proc.returncode,
                 # cache_creation_input_tokens captures Claude's intrinsic
-                # constitution/safety overhead (~1874 tokens, constant
+                # constitution/safety overhead (~2k-4.5k tokens, constant
                 # across conditions); recorded for audit and for the F-009
                 # transfer-probe limitations.
                 "claude_code_cache_creation_input_tokens": usage.get("cache_creation_input_tokens"),
                 "claude_code_cache_read_input_tokens": usage.get("cache_read_input_tokens"),
+                # Actually-served model version(s) — pinned via the `haiku`
+                # alias, so the served version may evolve over the sweep
+                # if Anthropic releases a new Haiku. The list keys of
+                # modelUsage are the served version IDs (typically one).
+                "claude_code_served_models": list((data.get("modelUsage") or {}).keys()),
                 # Note: seed is recorded above but Claude Code does NOT use it.
                 # Same-seed re-runs will diverge; recorded for audit, not gated.
             },
@@ -361,12 +416,17 @@ class ClaudeInstrument(Instrument):
 
 
 # Pinned Claude transfer-probe bundle for trial zero (v9 + this commit).
-# Model: claude-haiku-4-5-20251001 (Haiku 4.5, latest small capability-tier
-# Claude model as of the harness-build commit). Pinned to the full
-# model name (not the `haiku` alias) so the bundle stays reproducible if
-# the alias re-points to a newer version later.
+# Model: `haiku` (the alias for the latest small capability-tier Claude
+# model). Using the alias rather than a dated full name (e.g.,
+# claude-haiku-4-5-20251001) lets the transfer probe automatically pick
+# up the latest Haiku release. Reproducibility is preserved at the
+# audit-trail level: Claude Code's --output-format json includes a
+# `modelUsage` map keyed by the actually-served model version (e.g.,
+# "claude-haiku-4-5-20251001"), captured per-call in the trial's
+# `instrument_extra` field. F-009 reports the served version(s) observed
+# over the sweep.
 CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
-    model_name="claude-haiku-4-5-20251001",
+    model_name="haiku",
     variant="claude-code-cli-headless",
     quant="",
     gguf_sha256="",  # not applicable for API-hosted model
@@ -379,14 +439,25 @@ CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
     reasoning_format="",
     notes=(
         "Invoked via Claude Code CLI in headless mode (--print --no-session-"
-        "persistence --max-turns 1 --tools '' --system-prompt <sys> "
+        "persistence --max-turns 5 --tools '' --system-prompt <sys+steer> "
         "--output-format json) with cwd = fresh tempdir per call to "
         "neutralize project-memory contamination. Subscription login; no "
-        "API key. Residual confound: Claude Code's intrinsic ~1874-token "
-        "constitution/safety overhead is constant across A/B/C within "
-        "the Claude arm but conflates with Qwen's bare-llama.cpp shape "
-        "for cross-subject comparisons; recorded in F-009 transfer-probe "
-        "limitations. Isolation verified via "
+        "API key. Two named instrument-level confounds (recorded in F-009 "
+        "transfer-probe limitations): (1) STATIC overhead — Claude Code's "
+        "intrinsic ~2k-4.5k-token constitution/safety/tool-description "
+        "overhead, prompt-independent, constant across A/B/C within Claude "
+        "(headline safe; mildly pads cost-lift denominator). (2) DYNAMIC "
+        "overhead — Claude is heavily agentic-trained and may attempt "
+        "denied tool calls when prompts feel context-poor; mitigated by "
+        "the CLAUDE_ANTI_FLAILING_SUFFIX system-prompt steer ('tools are "
+        "disabled... respond with the implementation directly as text'), "
+        "verified post-trial by harness/regime_constancy.py which checks "
+        "that num_turns / tokens / cost / stop_reason distributions are "
+        "comparable across A/B/C within the Claude arm (turning the "
+        "constancy assumption into a measured fact). error_max_turns "
+        "trials count as failures (no exclusion, no retry — would be "
+        "condition-dependent and bias the headline); per-condition error "
+        "rates reported with F-009. Isolation verified via "
         "benchmark/harness/verify_claude_isolation.py."
     ),
 )

@@ -68,33 +68,59 @@ PROBES: tuple[Probe, ...] = (
         question=(
             "Two fresh games were authored for the v0.2 Phase 5 help-benchmark "
             "of the 'game-design.md' specification project. Name the second "
-            "game (Game #2) and its genre. Reply with just the name and genre, "
-            "nothing else."
+            "game (Game #2) and its genre, plus the name of the platformer "
+            "Game #1. Reply with just the names and genres, nothing else."
         ),
-        leak_signals=(r"\bdriftwood\b",),
+        # Require Driftwood AND Embergrave (the platformer fresh game) AND a
+        # genre word. A lucky guess of one survival-game name is plausible
+        # ('Driftwood' is evocative); guessing the platformer's specific name
+        # too is essentially impossible without project access. min_signals=3
+        # requires real leakage to trigger.
+        leak_signals=(
+            r"\bdriftwood\b",
+            r"\bembergrave\b",
+            r"\b(survival|crafting|platformer|precision[- ]?platformer)\b",
+        ),
+        min_signals=3,
         rationale=(
-            "The name 'Driftwood' for the survival/crafting fresh game exists "
-            "only in this project's repo and memory. A model without that "
-            "context cannot guess the name."
+            "'Driftwood' (survival/crafting) and 'Embergrave' (precision "
+            "platformer) are the fresh-game names authored for this project. "
+            "A model could lucky-guess one name; matching all three signals "
+            "(both game names AND a project-specific genre word) requires "
+            "actual project access."
         ),
     ),
     Probe(
         id="decision_d018",
         question=(
             "In the 'game-design.md' v0.2.0-alpha specification, what does "
-            "decision D-018 establish about the PRNG reduction layer? Reply in "
-            "one short sentence citing the decision number."
+            "decision D-018 establish about the PRNG reduction layer? Cite "
+            "the related finding number, the phase it landed in, and the "
+            "specific technique it pins for signed-int64 host languages. "
+            "Reply in one short sentence."
         ),
+        # Project-specific tokens that a guess cannot fabricate:
+        #   F-007 (the bug D-018 ratchets)
+        #   Phase 4++ (the exact phase label)
+        #   32-bit-halves (the specific reduction technique)
+        # A generic guess uses 'reduction' / 'uniform-int' — those are NOT
+        # leak signals here (too plausible). Require 2 of these specific
+        # terms; trip only on actual access.
         leak_signals=(
-            r"\buniform[- ]?int\b.*\breference vector\b",
-            r"\breference vector\b.*\buniform[- ]?int\b",
-            r"\bd-?018\b.*\b(reduction|uniform[- ]?int|reference vector)\b",
+            r"\bf-?\s?007\b",
+            r"\bphase\s*4(\+\+)?\b",
+            r"\b32[- ]?bit[- ]?halves\b",
+            r"\bxtreme\b",
+            r"\bgodot\b.*\bpcg\b",
         ),
+        min_signals=2,
         rationale=(
-            "D-018 (uniform-int reduction reference vector, Phase 4++) is "
-            "specific to this project's decisions log. The phrasing "
-            "'uniform-int reduction reference vector' is the project's exact "
-            "terminology."
+            "D-018 ratchets the F-007 bug at Phase 4++ with the 32-bit-halves "
+            "reduction for signed-int64 hosts. These specific tokens (F-007, "
+            "Phase 4++, 32-bit-halves) exist only in this project. Generic "
+            "PRNG-domain terms (uniform-int, reduction) are NOT leak signals "
+            "because a model can guess them; project-specific tokens are the "
+            "leak signature."
         ),
     ),
     Probe(

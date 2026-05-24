@@ -68,6 +68,9 @@ class TrialRecord:
     tokens_output: int
     tool_steps: int
     wall_clock_seconds: float
+    instrument_extra: dict            # per-instrument audit fields (v9.1: load-bearing
+                                      # for harness/regime_constancy.py — stop_reason,
+                                      # num_turns, subtype, is_error, cost, etc.)
 
     # Scoring
     checklist_verdict: dict  # serialized ChecklistVerdict
@@ -167,6 +170,7 @@ def run_trial(
         tokens_output=response.tokens_output,
         tool_steps=response.tool_steps,
         wall_clock_seconds=response.wall_clock_seconds,
+        instrument_extra=dict(response.extra or {}),
         checklist_verdict=_serialize_verdict(verdict),
         intent_score=_serialize_intent(intent),
         passes_overall=passes_overall,
