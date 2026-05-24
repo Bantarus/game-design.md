@@ -279,15 +279,21 @@ def test_qwen_instrument_uses_injected_server():
         seed=42,
     )
 
-    # Server was called with the right messages + sampling params
+    # Server was called with the right messages + Qwen's documented
+    # stochastic sampling (temperature=0.7, top_p=0.8, top_k=20,
+    # repeat_penalty=1.05). Greedy sampling on the headline subject
+    # would collapse N=20 per cell to N=1 — see QWEN_HEADLINE_BUNDLE
+    # docstring for the layer distinction.
     call = fake_server.chat.call_args
     assert call.kwargs["messages"][0]["role"] == "system"
     assert call.kwargs["messages"][0]["content"] == "You are a coder."
     assert call.kwargs["messages"][1]["role"] == "user"
     assert call.kwargs["messages"][1]["content"] == "Write add."
-    assert call.kwargs["temperature"] == 0.0
+    assert call.kwargs["temperature"] == 0.7
+    assert call.kwargs["top_p"] == 0.8
+    assert call.kwargs["top_k"] == 20
+    assert call.kwargs["repeat_penalty"] == 1.05
     assert call.kwargs["seed"] == 42
-    assert call.kwargs["top_p"] == 1.0
     assert call.kwargs["max_tokens"] == 4096
 
     # Response fields are forwarded

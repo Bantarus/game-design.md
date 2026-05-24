@@ -27,15 +27,29 @@ Why llama-server (HTTP) and not llama-cli (subprocess-per-call):
     own chat template from GGUF metadata — no per-model template
     wiring on our side.
 
-Determinism contract:
-  - `temperature=0` + `seed=<int>` produces deterministic outputs on
-    llama.cpp for a fixed (model, ngl, build, ctx_size, batch_size)
-    combination. The InstrumentBundle pins all those fields.
-  - For the help-benchmark, sampling_temperature=0 across all calls
-    (both Qwen instrument and Gemma judge) makes the benchmark's
-    seed-controlled reproducibility property hold on the Qwen side.
-    (Claude does not support seed; see ClaudeInstrument for the
-    pre-reg-named exception.)
+Sampling — two layers, two requirements (pre-reg §"Protocol" step 11):
+
+  - The QWEN INSTRUMENT needs *cross-seed variance*: K ≥ 5 distinct
+    seeds must produce K distinct outputs (the seed-sensitivity gate).
+    N=20 per cell protects effect detection only by averaging over
+    varied draws; greedy sampling collapses N=20 to N=1 silently.
+    QWEN_HEADLINE_BUNDLE therefore uses Qwen's documented stochastic
+    sampling (temperature=0.7, top_p=0.8, top_k=20, repeat_penalty=1.05).
+  - The GEMMA JUDGE wants *intra-prompt determinism*: the same scored
+    prompt should yield the same score on a re-run, so audit-replay
+    reproduces the rubric judgment. GEMMA_JUDGE_BUNDLE therefore uses
+    greedy sampling (temperature=0). At greedy, llama.cpp's seed is
+    a no-op for the output (same-seed and different-seed both produce
+    the same greedy trajectory at a fixed model/build/ctx).
+
+  This is the layer distinction pre-reg §"Protocol" step 11 names:
+  the benchmark instrument needs sampled variance; the judge does not.
+  Importing byte-identity here was the layer confusion the pre-reg
+  corrected at v4 — restoring it on the instrument side would be a
+  regression.
+
+  (Claude does not expose a seed; same-seed re-runs diverge naturally;
+  see ClaudeInstrument for the pre-reg-named exception.)
 """
 from __future__ import annotations
 
@@ -265,6 +279,7 @@ class LlamaServer:
         temperature: float = 0.0,
         top_p: float = 1.0,
         top_k: int = 0,
+        repeat_penalty: float = 1.0,
         max_tokens: int = 4096,
         seed: int | None = None,
         stop: list[str] | None = None,
@@ -275,6 +290,10 @@ class LlamaServer:
         Returns the assistant's reply text + token counts + finish_reason.
         Uses the OpenAI-compatible envelope; works against any
         OpenAI-shaped server (llama.cpp, vLLM, etc.).
+
+        `repeat_penalty` uses llama.cpp's REST parameter name (the
+        OpenAI envelope ignores it; llama-server consumes it). Default
+        1.0 = disabled, matching llama-server's CLI default.
         """
         if self._client is None:
             raise RuntimeError("LlamaServer.start() not called (use as context manager)")
@@ -289,6 +308,8 @@ class LlamaServer:
         }
         if top_k > 0:
             body["top_k"] = top_k
+        if repeat_penalty != 1.0:
+            body["repeat_penalty"] = repeat_penalty
         if seed is not None:
             body["seed"] = seed
         if stop:

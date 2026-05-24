@@ -1,0 +1,75 @@
+{
+  "bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "canary_prompt_sha256": "3fe2240e6da4d9ce789a7177353a7d447e60de83adb3c9ca9eade289a120476e",
+  "timestamp_iso": "2026-05-24T14:18:19Z",
+  "structural": [
+    {
+      "output_id": 0,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 1,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 2,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 3,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 4,
+      "passed": true,
+      "notes": "no issues detected"
+    }
+  ],
+  "seed_sensitivity": {
+    "distinct_hashes": 5,
+    "total_outputs": 5,
+    "min_pairwise_edit_distance": 581,
+    "shortest_output_length": 722,
+    "pairwise_floor": 144,
+    "passed": true
+  },
+  "rubric_reachability": [
+    {
+      "output_id": 0,
+      "rubric_score": 5,
+      "passed": true
+    },
+    {
+      "output_id": 1,
+      "rubric_score": 5,
+      "passed": true
+    },
+    {
+      "output_id": 2,
+      "rubric_score": 5,
+      "passed": true
+    },
+    {
+      "output_id": 3,
+      "rubric_score": 5,
+      "passed": true
+    },
+    {
+      "output_id": 4,
+      "rubric_score": 5,
+      "passed": true
+    }
+  ],
+  "same_seed_audit": {
+    "same_seed_run_1_sha256": "d2c9578e01992377e44f10a2efa1f7119347889610512a2073c4ee3ef04d66b5",
+    "same_seed_run_2_sha256": "9d469313b8735f716742f5a8056e3568dc229be144f915aacd541275cd77c1eb",
+    "byte_identical": false,
+    "divergence_char_count": 772
+  },
+  "passed": true,
+  "notes": ""
+}

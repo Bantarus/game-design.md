@@ -44,14 +44,25 @@ class InstrumentBundle:
     sampling_temperature: float = 0.0
     sampling_top_p: float = 1.0
     sampling_top_k: int = 0
+    sampling_repetition_penalty: float = 1.0  # 1.0 = disabled (llama.cpp default)
     sampling_max_tokens: int = 4096
     chat_template: str = ""     # e.g. "chatml" (empty for API-default)
     reasoning_format: str = ""  # e.g. "<think>...</think>" (empty for non-reasoning)
     notes: str = ""
 
     def bundle_id(self) -> str:
-        """A short, unique identifier for the bundle (used in trial records)."""
-        return f"{self.model_name}/{self.variant}/{self.quant or 'native'}/{self.sampling_temperature}"
+        """A short, unique identifier for the bundle (used in trial records).
+
+        Embeds the full sampling tuple so two bundles that differ only in
+        sampling get distinct ids — a change to sampling is a change to
+        the instrument per pre-reg §"Test subjects"."""
+        return (
+            f"{self.model_name}/{self.variant}/{self.quant or 'native'}"
+            f"/T={self.sampling_temperature}"
+            f"/Tp={self.sampling_top_p}"
+            f"/Tk={self.sampling_top_k}"
+            f"/Rp={self.sampling_repetition_penalty}"
+        )
 
 
 @dataclass(frozen=True)
@@ -221,6 +232,7 @@ class QwenInstrument(Instrument):
             temperature=self.bundle.sampling_temperature,
             top_p=self.bundle.sampling_top_p,
             top_k=self.bundle.sampling_top_k,
+            repeat_penalty=self.bundle.sampling_repetition_penalty,
             max_tokens=self.bundle.sampling_max_tokens,
             seed=seed,
         )
@@ -272,9 +284,20 @@ QWEN_HEADLINE_BUNDLE = InstrumentBundle(
     quant="Q4_K_M",
     gguf_sha256="fadc3e5f8d42bf7e894a785b05082e47daee4df26680389817e2093056f088ad",
     inference_engine="llama.cpp-b9306-5d246a7",
-    sampling_temperature=0.0,   # deterministic; seed alone controls reproducibility
-    sampling_top_p=1.0,
-    sampling_top_k=0,
+    # Stochastic sampling per Qwen's documented Best Practices for
+    # Qwen3-Coder (both upstream Qwen and unsloth's GGUF page recommend
+    # the same values verbatim, fetched 2026-05-24). The pre-reg's
+    # seed-sensitivity gate (Protocol step 11) requires K=5 distinct
+    # seeds to produce K distinct outputs whose pairwise edit distance
+    # exceeds 20% of the shorter output — greedy (temperature=0) would
+    # collapse N=20 per cell to N=1 and silently destroy the design's
+    # statistical power. min_p stays at llama-server's default 0.05
+    # (Qwen does not override it). repeat_penalty maps to llama.cpp's
+    # REST `repeat_penalty` parameter (passed via LlamaServer.chat()).
+    sampling_temperature=0.7,
+    sampling_top_p=0.8,
+    sampling_top_k=20,
+    sampling_repetition_penalty=1.05,
     sampling_max_tokens=4096,
     chat_template="jinja-from-gguf",  # llama-server --jinja reads the chat template from GGUF metadata
     reasoning_format="",  # Qwen3-Coder is non-reasoning by default; no <think> envelope
@@ -283,15 +306,21 @@ QWEN_HEADLINE_BUNDLE = InstrumentBundle(
         "RTX 4090; runs at ~30-50 tokens/sec generation. Hand-rolled "
         "llama-server wrapper at harness/llama_server.py loads the model "
         "once per arm (~15s on warm cache, no model-load cost per call). "
-        "Seed determinism verified at the harness-build smoke commit: "
-        "temperature=0 + same seed produces byte-identical output. "
-        "License: Apache-2.0. Source: unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF "
-        "(HuggingFace), Q4_K_M GGUF, SHA-256 above. llama.cpp build SHA "
-        "5d246a7 (version 9306), CUDA-enabled, RTX 4090. (Note: build was "
-        "advanced from b8628/fbd441c to b9306/5d246a7 at this harness-build "
-        "commit because Gemma 4 26B A4B's `gemma4` architecture was added "
-        "to llama.cpp after the older build; updating once unblocks both "
-        "subjects on the same pinned build SHA.)"
+        "Sampling pinned to Qwen's documented Best Practices for "
+        "Qwen3-Coder (temperature=0.7, top_p=0.8, top_k=20, "
+        "repetition_penalty=1.05; min_p left at llama-server's default "
+        "0.05 because Qwen does not override it). This is the *opposite* "
+        "of byte-identity — see llama_server.py module docstring for the "
+        "layer distinction pre-reg §\"Protocol\" step 11 names. Cross-seed "
+        "divergence is verified at the harness-build smoke commit (K=5 "
+        "distinct seeds → 5 distinct SHA-256 hashes, pairwise edit "
+        "distance ≥ 20% of shortest output). Same-seed re-runs at this "
+        "stochastic sampling will NOT be byte-identical; the same-seed "
+        "audit in calibrate_instrument records divergence as data for "
+        "F-009 (not as a gate). License: Apache-2.0. Source: unsloth/"
+        "Qwen3-Coder-30B-A3B-Instruct-GGUF (HuggingFace), Q4_K_M GGUF, "
+        "SHA-256 above. llama.cpp build SHA 5d246a7 (version 9306), "
+        "CUDA-enabled, RTX 4090."
     ),
 )
 

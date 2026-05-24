@@ -1,0 +1,78 @@
+{
+  "bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05",
+  "canary_prompt_sha256": "153782c2b363250747f5c7ac4cc87d02a2c9813805bc13281319902f65d9b750",
+  "timestamp_iso": "2026-05-24T18:47:57Z",
+  "structural": [
+    {
+      "output_id": 0,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 1,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 2,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 3,
+      "passed": true,
+      "notes": "no issues detected"
+    },
+    {
+      "output_id": 4,
+      "passed": true,
+      "notes": "no issues detected"
+    }
+  ],
+  "seed_sensitivity": {
+    "distinct_hashes": 5,
+    "total_outputs": 5,
+    "min_pairwise_edit_distance": 119,
+    "shortest_output_length": 1209,
+    "pairwise_floor": 241,
+    "passed": false
+  },
+  "rubric_reachability": [
+    {
+      "output_id": 0,
+      "rubric_score": 5
+    },
+    {
+      "output_id": 1,
+      "rubric_score": 5
+    },
+    {
+      "output_id": 2,
+      "rubric_score": 5
+    },
+    {
+      "output_id": 3,
+      "rubric_score": 5
+    },
+    {
+      "output_id": 4,
+      "rubric_score": 5
+    }
+  ],
+  "rubric_aggregate": {
+    "median_score": 5,
+    "min_score": 5,
+    "n_outputs": 5,
+    "median_threshold": 4,
+    "min_threshold": 1,
+    "passed": true
+  },
+  "same_seed_audit": {
+    "same_seed_run_1_sha256": "4d6ad1dbcfb2315589358ffbe0a49dc8fa35ef0618113a3ab8c5065b5568ebdb",
+    "same_seed_run_2_sha256": "4d6ad1dbcfb2315589358ffbe0a49dc8fa35ef0618113a3ab8c5065b5568ebdb",
+    "byte_identical": true,
+    "divergence_char_count": 0
+  },
+  "passed": false,
+  "notes": ""
+}
