@@ -1,0 +1,89 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 2000047,
+  "timestamp_iso": "2026-05-27T15:24:47Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "27215404ac257e77250d2bac804d0fd2cf51bb62345f6793bc48ae96d9e1b1b8",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Recipe: `cooked_fish`\n\nBelow is the single new file that needs to be added. It conforms to the schema in `gdd/content/recipes.md` and follows the frontmatter/structure pattern set by the `wooden_axe` representative example.\n\n## File: `content/recipes/cooked_fish.yaml`\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: cooked_fish\nstatus: draft\nimplemented_in: [\"src/driftwood/content/recipes/cooked_fish.py\"]\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\ntool_required: wooden_axe\nin_game_minutes_to_craft: 30\n```\n\n## Schema-conformance notes\n\nEvery required field is present and every value sits inside its declared domain:\n\n- **`id`** \u2014 `cooked_fish` matches the `^[a-z][a-z0-9_]*$` pattern and matches the filename stem (`cooked_fish.yaml`).\n- **`name`** \u2014 human-readable string used for the UI panel.\n- **`tier`** \u2014 `2`, inside `[0, 4]`. Per the recipe-tree prose, tier 2 implies the wooden axe as the gating tool tier, which is reflected below in `tool_required`.\n- **`inputs`** \u2014 a non-empty array of `{ item, quantity }` pairs; `raw_fish` matches the id pattern and `quantity: 1` satisfies `minimum: 1`.\n- **`output`** \u2014 single `{ item, quantity, tag }`; `tag: food` is a valid enum value, which is also what `verbs.eat` routes against (its filter is `tag_equals_food`). `hunger_restore_value: 6` is supplied so `rules.eat_resolution` step 2 (`increase_resource ... by=target.hunger_restore_value`) has a value to read.\n- **`station_required`** \u2014 `campfire`, matching the `crafting_station.kind` enum, so `rules.craft_resolution` step 2 (`check_recipe_station`) will require the player to be adjacent to a campfire.\n- **`tool_required`** \u2014 `wooden_axe`, the tier-2 gating tool per the schema prose (\"Tier governs which prior tool/station is implied as a prerequisite\").\n- **`in_game_minutes_to_craft`** \u2014 `30`, an integer \u2265 0, matching the brief's \"about 30 in-game minutes\" and respecting the `integer_resource_quantities` architectural invariant.\n\n## Notes on side-effects (none)\n\n- **No other content files need to change.** The recipe is a leaf addition; nothing else in `content/recipes/` references it, and the recipes content collection's count grows from ~12 to ~13 without breaching any schema bound.\n- **No code changes required.** Per the `recipe_data_immutable_at_runtime` invariant and the design's \"Recipes are data, not code\" guidance, a new recipe ships as one new YAML file loaded by the existing recipe registry at startup.\n- **Balance impact.** `cooked_fish` is a food output, not a pyre input, so it does not contribute to `balance_targets.pyre_input_total` (wood/fiber/stone/flint). It expands the player's food-economy options without perturbing the load-bearing recipe-tree budget.",
+  "subject_output_sanitized": "# New Recipe: `cooked_fish`\n\nBelow is the single new file that needs to be added. It conforms to the schema in `gdd/content/recipes.md` and follows the frontmatter/structure pattern set by the `wooden_axe` representative example.\n\nFile: `content/recipes/cooked_fish.yaml`\n\n```yaml\n\nid: cooked_fish\n\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\ntool_required: wooden_axe\nin_game_minutes_to_craft: 30\n```\n\nSchema-conformance notes\n\nEvery required field is present and every value sits inside its declared domain:\n\n- **`id`** \u2014 `cooked_fish` matches the `^[a-z][a-z0-9_]*$` pattern and matches the filename stem (`cooked_fish.yaml`).\n- **`name`** \u2014 human-readable string used for the UI panel.\n- **`tier`** \u2014 `2`, inside `[0, 4]`. Per the recipe-tree prose, tier 2 implies the wooden axe as the gating tool tier, which is reflected below in `tool_required`.\n- **`inputs`** \u2014 a non-empty array of `{ item, quantity }` pairs; `raw_fish` matches the id pattern and `quantity: 1` satisfies `minimum: 1`.\n- **`output`** \u2014 single `{ item, quantity, tag }`; `tag: food` is a valid enum value, which is also what `eat` routes against (its filter is `tag_equals_food`). `hunger_restore_value: 6` is supplied so `eat_resolution` step 2 (`increase_resource ... by=hunger_restore_value`) has a value to read.\n- **`station_required`** \u2014 `campfire`, matching the `crafting_station.kind` enum, so `craft_resolution` step 2 (`check_recipe_station`) will require the player to be adjacent to a campfire.\n- **`tool_required`** \u2014 `wooden_axe`, the tier-2 gating tool per the schema prose (\"Tier governs which prior tool/station is implied as a prerequisite\").\n- **`in_game_minutes_to_craft`** \u2014 `30`, an integer \u2265 0, matching the brief's \"about 30 in-game minutes\" and respecting the `integer_resource_quantities` architectural invariant.\n\nNotes on side-effects (none)\n\n- **No other content files need to change.** The recipe is a leaf addition; nothing else in `content/recipes/` references it, and the recipes content collection's count grows from ~12 to ~13 without breaching any schema bound.\n- **No code changes required.** Per the `recipe_data_immutable_at_runtime` invariant and the design's \"Recipes are data, not code\" guidance, a new recipe ships as one new YAML file loaded by the existing recipe registry at startup.\n- **Balance impact.** `cooked_fish` is a food output, not a pyre input, so it does not contribute to `pyre_input_total` (wood/fiber/stone/flint). It expands the player's food-economy options without perturbing the load-bearing recipe-tree budget.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 1692,
+  "tool_steps": 0,
+  "wall_clock_seconds": 25.460434456006624,
+  "instrument_extra": {
+    "claude_code_duration_ms": 24739,
+    "claude_code_total_cost_usd": 0.055882,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 0,
+    "claude_code_cache_read_input_tokens": 27104,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": false,
+    "fraction_passing": 0.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier two'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'input one raw fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'output one cooked fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'hunger restore six'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'station campfire'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'craft time thirty minutes'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tagged food'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly matches the task brief and is fully defensible against the design brief. It correctly implements the `cooked_fish` recipe with the specified inputs, output, hunger value, tier, and crafting time. The choice of `wooden_axe` as the `tool_required` aligns with the task's requirement for a tier-2 recipe and the design brief's tier-2 definition.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

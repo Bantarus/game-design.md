@@ -1,0 +1,84 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 2000041,
+  "timestamp_iso": "2026-05-27T15:28:18Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "# `content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\n# Embergrave \u2014 Level: The Chasm\n# Region: Fault Lines (tier 3, slot 07)\n# Designer note:\n#   Vertical descent through six platforms. Alternates wide shelves\n#   (commit-the-jump landings) with narrow wall-hugging ledges\n#   (glide-correct landings). Two mid-descent checkpoints; lava pool\n#   floods the shaft below the exit alcove, so a missed final landing\n#   from p6 is lethal. ~3 min target at skilled pace.\n\nid: fault_lines_07_the_chasm\nname: \"The Chasm\"\nregion: fault_lines\ntier: 3\norder: 7\ntarget_time_seconds: 180          # ~3 min skilled descent\npar_deaths: 6                     # designer estimate, not gated\n\nbounds:\n  x_min: 0\n  x_max: 32\n  y_min: 0\n  y_max: 240                      # y increases downward\n\nambient:\n  music_cue: fault_lines_descent\n  ember_drain_modifier: 1.0       # standard hesitation rule\n  base_darkness: 0.72             # dim region; rewards staying in motion\n\nspawn:\n  x: 16\n  y: 3\n  facing: down\n\nexit:\n  x: 14\n  y: 220\n  w: 4\n  h: 2\n  next_level: fault_lines_08_the_split\n\n# ------------------------------------------------------------------\n# Static geometry \u2014 the shaft walls and the six descent platforms.\n# Coordinates are top-left of each rect.\n# ------------------------------------------------------------------\ngeometry:\n  walls:\n    - { id: wall_L,  x: 0,  y: 0,   w: 1,  h: 240 }   # left shaft wall\n    - { id: wall_R,  x: 31, y: 0,   w: 1,  h: 240 }   # right shaft wall\n    - { id: ceil,    x: 0,  y: 0,   w: 32, h: 1  }    # ceiling cap\n    - { id: floor_L, x: 0,  y: 222, w: 14, h: 2  }    # exit-alcove floor (left of door)\n    - { id: floor_R, x: 18, y: 222, w: 14, h: 2  }    # exit-alcove floor (right of door)\n\n  platforms:\n    # 1) Wide entry shelf \u2014 easy first landing from spawn drop.\n    - id: p1_entry_shelf\n      shape: rect\n      kind: solid\n      x: 5\n      y: 22\n      w: 16\n      h: 2\n\n    # 2) Narrow right-wall ledge \u2014 first commitment jump (drop-and-dash).\n    - id: p2_right_ledge\n      shape: rect\n      kind: narrow\n      x: 25\n      y: 52\n      w: 5\n      h: 1\n\n    # 3) Wide mid shelf \u2014 checkpoint platform.\n    - id: p3_mid_shelf\n      shape: rect\n      kind: solid\n      x: 8\n      y: 86\n      w: 10\n      h: 2\n\n    # 4) Narrow left-wall ledge \u2014 requires a glide drift.\n    - id: p4_left_ledge\n      shape: rect\n      kind: narrow\n      x: 1\n      y: 120\n      w: 5\n      h: 1\n\n    # 5) Wide lower shelf \u2014 second checkpoint, last safe rest.\n    - id: p5_lower_shelf\n      shape: rect\n      kind: solid\n      x: 12\n      y: 158\n      w: 12\n      h: 2\n\n    # 6) Narrow right-wall ledge \u2014 final approach to the exit alcove.\n    - id: p6_right_ledge\n      shape: rect\n      kind: narrow\n      x: 25\n      y: 196\n      w: 5\n      h: 1\n\n# ------------------------------------------------------------------\n# Hazards \u2014 lava pool floods the entire shaft floor below the exit.\n# Lethal on contact; respawn at the last touched checkpoint.\n# ------------------------------------------------------------------\nhazards:\n  - id: chasm_lava\n    kind: lava\n    shape: rect\n    x: 1\n    y: 230\n    w: 30\n    h: 10\n    lethal: true\n    light_emission: 0.15          # faint red glow visible from p6\n\n# ------------------------------------------------------------------\n# Checkpoints \u2014 two along the natural descent path.\n# Spawn is the implicit start; not counted as a level checkpoint.\n# ------------------------------------------------------------------\ncheckpoints:\n  - id: cp_mid\n    x: 12\n    y: 84                         # one tile above p3_mid_shelf surface\n    on_platform: p3_mid_shelf\n    order: 1\n\n  - id: cp_lower\n    x: 18\n    y: 156                        # one tile above p5_lower_shelf surface\n    on_platform: p5_lower_shelf\n    order: 2\n\n# ------------------------------------------------------------------\n# Pickups \u2014 four embers, two each, total +8 ember.\n# Placed slightly off the natural fall line to reward dash/glide use.\n# ------------------------------------------------------------------\npickups:\n  - id: ember_01\n    kind: ember\n    value: 2\n    x: 27\n    y: 48                         # hovering just above p2_right_ledge\n  - id: ember_02\n    kind: ember\n    value: 2\n    x: 3\n    y: 116                        # hovering just above p4_left_ledge\n  - id: ember_03\n    kind: ember\n    value: 2\n    x: 18\n    y: 154                        # centered above p5_lower_shelf\n  - id: ember_04\n    kind: ember\n    value: 2\n    x: 27\n    y: 192                        # above p6_right_ledge, final ember\n\n# ------------------------------------------------------------------\n# Determinism: no RNG seeds, no moving hazards on this level.\n# Replay-safe by construction.\n# ------------------------------------------------------------------\ndeterminism:\n  rng_seed: null\n  moving_entities: []\n```\n\n### Design rationale (per pillars)\n\n- **Commitment.** The shaft alternates wide shelves (p1, p3, p5) with narrow wall-hugging ledges (p2, p4, p6). Because jump arcs lock at input and there is no air control, the player must read each gap before leaping; the narrow ledges force a dash-direction commitment at takeoff.\n- **Vision through motion.** Embers `01`\u2013`04` sit just off the straight-down fall line. Grabbing them on the way down keeps the ember bright, widening the light cone in time to read the next ledge. A hesitant player who clings to p3 or p5 will dim before the next jump becomes visible \u2014 the level punishes stalling without ever spawning a hazard.\n- **Cheap death, sticky progress.** Lava floods the floor (`y=230..240`) so any missed final landing from p6 is instantly lethal, but `cp_lower` at p5 means a death costs only ~30 seconds of replay. `cp_mid` at p3 covers the upper half similarly.\n\n### Files changed\n\n- **Added:** `content/levels/fault_lines_07_the_chasm.yaml`\n- No other files modified; level table / region index pick up the new entry by `id` per the `levels.md` loader convention.",
+  "subject_output_sanitized": "# `content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\n# Embergrave \u2014 Level: The Chasm\n# Region: Fault Lines (tier 3, slot 07)\n# Designer note:\n#   Vertical descent through six platforms. Alternates wide shelves\n#   (commit-the-jump landings) with narrow wall-hugging ledges\n#   (glide-correct landings). Two mid-descent checkpoints; lava pool\n#   floods the shaft below the exit alcove, so a missed final landing\n#   from p6 is lethal. ~3 min target at skilled pace.\n\nid: fault_lines_07_the_chasm\nname: \"The Chasm\"\nregion: fault_lines\ntier: 3\norder: 7\ntarget_time_seconds: 180          # ~3 min skilled descent\npar_deaths: 6                     # designer estimate, not gated\n\nbounds:\n  x_min: 0\n  x_max: 32\n  y_min: 0\n  y_max: 240                      # y increases downward\n\nambient:\n  music_cue: fault_lines_descent\n  ember_drain_modifier: 1.0       # standard hesitation rule\n  base_darkness: 0.72             # dim region; rewards staying in motion\n\nspawn:\n  x: 16\n  y: 3\n  facing: down\n\nexit:\n  x: 14\n  y: 220\n  w: 4\n  h: 2\n  next_level: fault_lines_08_the_split\n\n# ------------------------------------------------------------------\n# Static geometry \u2014 the shaft walls and the six descent platforms.\n# Coordinates are top-left of each rect.\n# ------------------------------------------------------------------\ngeometry:\n  walls:\n    - { id: wall_L,  x: 0,  y: 0,   w: 1,  h: 240 }   # left shaft wall\n    - { id: wall_R,  x: 31, y: 0,   w: 1,  h: 240 }   # right shaft wall\n    - { id: ceil,    x: 0,  y: 0,   w: 32, h: 1  }    # ceiling cap\n    - { id: floor_L, x: 0,  y: 222, w: 14, h: 2  }    # exit-alcove floor (left of door)\n    - { id: floor_R, x: 18, y: 222, w: 14, h: 2  }    # exit-alcove floor (right of door)\n\n  platforms:\n    # 1) Wide entry shelf \u2014 easy first landing from spawn drop.\n    - id: p1_entry_shelf\n      shape: rect\n      kind: solid\n      x: 5\n      y: 22\n      w: 16\n      h: 2\n\n    # 2) Narrow right-wall ledge \u2014 first commitment jump (drop-and-dash).\n    - id: p2_right_ledge\n      shape: rect\n      kind: narrow\n      x: 25\n      y: 52\n      w: 5\n      h: 1\n\n    # 3) Wide mid shelf \u2014 checkpoint platform.\n    - id: p3_mid_shelf\n      shape: rect\n      kind: solid\n      x: 8\n      y: 86\n      w: 10\n      h: 2\n\n    # 4) Narrow left-wall ledge \u2014 requires a glide drift.\n    - id: p4_left_ledge\n      shape: rect\n      kind: narrow\n      x: 1\n      y: 120\n      w: 5\n      h: 1\n\n    # 5) Wide lower shelf \u2014 second checkpoint, last safe rest.\n    - id: p5_lower_shelf\n      shape: rect\n      kind: solid\n      x: 12\n      y: 158\n      w: 12\n      h: 2\n\n    # 6) Narrow right-wall ledge \u2014 final approach to the exit alcove.\n    - id: p6_right_ledge\n      shape: rect\n      kind: narrow\n      x: 25\n      y: 196\n      w: 5\n      h: 1\n\n# ------------------------------------------------------------------\n# Hazards \u2014 lava pool floods the entire shaft floor below the exit.\n# Lethal on contact; respawn at the last touched checkpoint.\n# ------------------------------------------------------------------\nhazards:\n  - id: chasm_lava\n    kind: lava\n    shape: rect\n    x: 1\n    y: 230\n    w: 30\n    h: 10\n    lethal: true\n    light_emission: 0.15          # faint red glow visible from p6\n\n# ------------------------------------------------------------------\n# Checkpoints \u2014 two along the natural descent path.\n# Spawn is the implicit start; not counted as a level checkpoint.\n# ------------------------------------------------------------------\ncheckpoints:\n  - id: cp_mid\n    x: 12\n    y: 84                         # one tile above p3_mid_shelf surface\n    on_platform: p3_mid_shelf\n    order: 1\n\n  - id: cp_lower\n    x: 18\n    y: 156                        # one tile above p5_lower_shelf surface\n    on_platform: p5_lower_shelf\n    order: 2\n\n# ------------------------------------------------------------------\n# Pickups \u2014 four embers, two each, total +8 ember.\n# Placed slightly off the natural fall line to reward dash/glide use.\n# ------------------------------------------------------------------\npickups:\n  - id: ember_01\n    kind: ember\n    value: 2\n    x: 27\n    y: 48                         # hovering just above p2_right_ledge\n  - id: ember_02\n    kind: ember\n    value: 2\n    x: 3\n    y: 116                        # hovering just above p4_left_ledge\n  - id: ember_03\n    kind: ember\n    value: 2\n    x: 18\n    y: 154                        # centered above p5_lower_shelf\n  - id: ember_04\n    kind: ember\n    value: 2\n    x: 27\n    y: 192                        # above p6_right_ledge, final ember\n\n# ------------------------------------------------------------------\n# Determinism: no RNG seeds, no moving hazards on this level.\n# Replay-safe by construction.\n# ------------------------------------------------------------------\ndeterminism:\n  rng_seed: null\n  moving_entities: []\n```\n\nDesign rationale (per pillars)\n\n- **Commitment.** The shaft alternates wide shelves (p1, p3, p5) with narrow wall-hugging ledges (p2, p4, p6). Because jump arcs lock at input and there is no air control, the player must read each gap before leaping; the narrow ledges force a dash-direction commitment at takeoff.\n- **Vision through motion.** Embers `01`\u2013`04` sit just off the straight-down fall line. Grabbing them on the way down keeps the ember bright, widening the light cone in time to read the next ledge. A hesitant player who clings to p3 or p5 will dim before the next jump becomes visible \u2014 the level punishes stalling without ever spawning a hazard.\n- **Cheap death, sticky progress.** Lava floods the floor (`y=230..240`) so any missed final landing from p6 is instantly lethal, but `cp_lower` at p5 means a death costs only ~30 seconds of replay. `cp_mid` at p3 covers the upper half similarly.\n\nFiles changed\n\n- **Added:** `content/levels/fault_lines_07_the_chasm.yaml`\n- No other files modified; level table / region index pick up the new entry by `id` per the `levels.md` loader convention.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 1264,
+  "tokens_output": 4887,
+  "tool_steps": 0,
+  "wall_clock_seconds": 61.74425930599682,
+  "instrument_extra": {
+    "claude_code_duration_ms": 61037,
+    "claude_code_total_cost_usd": 0.128495,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 0,
+    "claude_code_cache_read_input_tokens": 0,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.14285714285714285,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier three'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'six platforms'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'two checkpoints'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'four ember pickups sum eight'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'entry above exit'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'lethal below exit'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly fulfills the task brief and adheres to the design brief's core pillars. It implements exactly six platforms, two checkpoints, and four ember pickups totaling 8 units as requested. The design choices, such as alternating wide shelves with narrow ledges, are explicitly defended in the rationale using the 'Commitment' and 'Vision through motion' pillars from the design brief.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

@@ -1,0 +1,84 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "A",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 2000043,
+  "timestamp_iso": "2026-05-27T15:38:23Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "7123e376b056fd1be17280469b1ddffc6de4ad324906b415c89224534c44ae69",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Level: `fault_lines_07_the_chasm`\n\nAuthoring this as a single new file at `benchmark/games/platformer/content/levels/fault_lines_07_the_chasm.yaml`, conforming to the schema in `gdd/content/levels.md`. I followed `fault_lines_03_the_drop.yaml` as the closest reference (same region, same tier, same vertical-descent shape) and scaled the geometry to the brief's parameters (6 platforms, 2 checkpoints, 4 ember pickups summing to 8).\n\n## `content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: fault_lines_07_the_chasm\nstatus: draft\nimplemented_in: [\"src/embergrave/levels/fault_lines_07_the_chasm.py\"]\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 195000\nentry:  { x: 1000, y: 17500 }\nexit:   { x: 7500, y: 1500  }\ncheckpoints:\n  - { x: 2500, y: 12500 }\n  - { x: 6000, y: 6500  }\nplatforms:\n  # Entry shelf \u2014 wide, top of shaft\n  - { x: 500,   y: 17000, width: 2500, height: 300, surface: solid   }\n  # Upper narrow ledge \u2014 opposite side, forces a committed horizontal leap\n  - { x: 5500,  y: 14500, width: 1200, height: 200, surface: solid   }\n  # Mid-upper one_way \u2014 sits at first checkpoint, recoverable from below\n  - { x: 2000,  y: 12000, width: 1500, height: 200, surface: one_way }\n  # Mid narrow ledge \u2014 opposite side again\n  - { x: 6500,  y: 9500,  width: 1000, height: 200, surface: solid   }\n  # Lower wide platform \u2014 sits at second checkpoint, generous landing\n  - { x: 5000,  y: 6000,  width: 2000, height: 200, surface: solid   }\n  # Exit shelf \u2014 wide, bottom of shaft, right side\n  - { x: 6500,  y: 1000,  width: 2500, height: 300, surface: solid   }\nember_pickups:\n  - { x: 6000, y: 15500, ember_value: 1 }\n  - { x: 2800, y: 13000, ember_value: 2 }\n  - { x: 6900, y: 10500, ember_value: 2 }\n  - { x: 5500, y: 7200,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,    width: 9500, height: 200,  tag: void  }\n  - { x: 1500, y: 200,  width: 4500, height: 600,  tag: lava  }\n  - { x: 0,    y: 5000, width: 400,  height: 3000, tag: spike }\n  - { x: 9100, y: 5000, width: 400,  height: 3000, tag: spike }\nnotes: \"Vertical descent through a narrow shaft. Player enters at top-left (y=17500) and descends to exit at bottom-right (y=1500). Six platforms total: two wide shelves at entry and exit, four narrower ledges in between that alternate sides of the shaft to force committed lateral leaps and dashes. The mid-upper platform is one_way so the player can recover from below if they overshoot during a missed-route. Two checkpoints sit on top of platforms three and five, splitting the ~16000-micro_unit drop into three sections of roughly equal commitment. Side walls in the middle band (y=5000-8000) carry spike strips to punish lateral overshoot during dash recovery. Bottom of the shaft is void plus a central lava strip directly under the exit-approach lanes \u2014 falling past the exit shelf is lethal. Four ember pickups (1 + 2 + 2 + 3 = 8 ember) support roughly one dash plus a short glide per section; the 3-value pickup at y=7200 is the routing reward for cleanly clearing the mid-narrow ledge. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.25 minutes for a skilled player.\"\n```\n\n## Design notes (matches schema + brief)\n\n- **Schema conformance.** `region: fault_lines`, `difficulty_tier: 3`, `time_target_ms: 195000` (within `[60000, 600000]`), 6 platforms (\u22651), 2 checkpoints (within `[1, 5]`), 4 ember pickups each with `ember_value` in `[1, 4]`, lethal regions tagged `void` / `lava` / `spike` (all in the enum).\n- **Coordinates are integer micro_units**, satisfying `{invariants.fixed_point_simulation_state}`. Origin bottom-left; +y up; the bounding box is roughly 9500 \u00d7 18000 micro_units.\n- **Descent route** (natural path):\n  1. Entry shelf (x\u2248500\u20133000, y=17000\u201317300) \u2192 leap+drop right to **upper ledge** (x=5500\u20136700) ~2500 down.\n  2. Cross-shaft leap left+drop to **first checkpoint** atop the one_way mid-upper platform (x=2000\u20133500, y=12000\u201312200).\n  3. Right+drop to **mid narrow ledge** (x=6500\u20137500, y=9500\u20139700) \u2014 narrowest landing, the level's commitment moment.\n  4. Left+drop to **second checkpoint** atop the lower wide platform (x=5000\u20137000, y=6000\u20136200).\n  5. Right+long-drop to **exit shelf** (x=6500\u20139000, y=1000\u20131300); the exit point is at (7500, 1500).\n- **Falling past exit is lethal.** The void strip at y=0\u2013200 covers full width; the central lava strip at y=200\u2013800 / x=1500\u20136000 occupies the floor under the descent corridor. The exit shelf (x=6500\u20139000) avoids the lava in x, so the moth lands cleanly only if it tracks right; a left-drift overshoot hits lava, a long-drift overshoot hits void.\n- **Mixed platform widths.** Two wide shelves (2500 wide), one mid-width (2000), one one_way (1500), two narrow ledges (1200, 1000) \u2014 satisfies \"some axis-aligned, some narrow ledges.\"\n- **Ember economy.** 8 total ember at 3 dashes' worth (dash cost = 3, per `{verbs.dash}`), placed slightly off the strict drop-line so collecting them is a routing choice rather than free \u2014 consistent with `{balance_targets.ember_collected_pct_per_level}` target of 0.80 at tier 3.\n- **Checkpoint placement.** Both checkpoints sit just above a landing platform, so the moth touches each one naturally during the descent (no detour required), keeping the level's friction in geometry rather than in routing \u2014 aligned with the design intent.\n\nNo other files need to change. Since this is a new draft-status content entity (not a modification of an existing one), no `version:` bump or `last_verified:` touch is required on the root file per the anti-drift ritual; the `count_target: 40` in `gdd/content/levels.md` is a soft target and adding one of the 40 doesn't drift it.",
+  "subject_output_sanitized": "# New Level: `fault_lines_07_the_chasm`\n\nAuthoring this as a single new file at `benchmark/games/platformer/content/levels/fault_lines_07_the_chasm.yaml`, conforming to the schema in `gdd/content/levels.md`. I followed `fault_lines_03_the_drop.yaml` as the closest reference (same region, same tier, same vertical-descent shape) and scaled the geometry to the brief's parameters (6 platforms, 2 checkpoints, 4 ember pickups summing to 8).\n\n`content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\n\nid: fault_lines_07_the_chasm\n\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 195000\nentry:  { x: 1000, y: 17500 }\nexit:   { x: 7500, y: 1500  }\ncheckpoints:\n  - { x: 2500, y: 12500 }\n  - { x: 6000, y: 6500  }\nplatforms:\n  # Entry shelf \u2014 wide, top of shaft\n  - { x: 500,   y: 17000, width: 2500, height: 300, surface: solid   }\n  # Upper narrow ledge \u2014 opposite side, forces a committed horizontal leap\n  - { x: 5500,  y: 14500, width: 1200, height: 200, surface: solid   }\n  # Mid-upper one_way \u2014 sits at first checkpoint, recoverable from below\n  - { x: 2000,  y: 12000, width: 1500, height: 200, surface: one_way }\n  # Mid narrow ledge \u2014 opposite side again\n  - { x: 6500,  y: 9500,  width: 1000, height: 200, surface: solid   }\n  # Lower wide platform \u2014 sits at second checkpoint, generous landing\n  - { x: 5000,  y: 6000,  width: 2000, height: 200, surface: solid   }\n  # Exit shelf \u2014 wide, bottom of shaft, right side\n  - { x: 6500,  y: 1000,  width: 2500, height: 300, surface: solid   }\nember_pickups:\n  - { x: 6000, y: 15500, ember_value: 1 }\n  - { x: 2800, y: 13000, ember_value: 2 }\n  - { x: 6900, y: 10500, ember_value: 2 }\n  - { x: 5500, y: 7200,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,    width: 9500, height: 200,  tag: void  }\n  - { x: 1500, y: 200,  width: 4500, height: 600,  tag: lava  }\n  - { x: 0,    y: 5000, width: 400,  height: 3000, tag: spike }\n  - { x: 9100, y: 5000, width: 400,  height: 3000, tag: spike }\nnotes: \"Vertical descent through a narrow shaft. Player enters at top-left (y=17500) and descends to exit at bottom-right (y=1500). Six platforms total: two wide shelves at entry and exit, four narrower ledges in between that alternate sides of the shaft to force committed lateral leaps and dashes. The mid-upper platform is one_way so the player can recover from below if they overshoot during a missed-route. Two checkpoints sit on top of platforms three and five, splitting the ~16000-micro_unit drop into three sections of roughly equal commitment. Side walls in the middle band (y=5000-8000) carry spike strips to punish lateral overshoot during dash recovery. Bottom of the shaft is void plus a central lava strip directly under the exit-approach lanes \u2014 falling past the exit shelf is lethal. Four ember pickups (1 + 2 + 2 + 3 = 8 ember) support roughly one dash plus a short glide per section; the 3-value pickup at y=7200 is the routing reward for cleanly clearing the mid-narrow ledge. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.25 minutes for a skilled player.\"\n```\n\nDesign notes (matches schema + brief)\n\n- **Schema conformance.** `region: fault_lines`, `difficulty_tier: 3`, `time_target_ms: 195000` (within `[60000, 600000]`), 6 platforms (\u22651), 2 checkpoints (within `[1, 5]`), 4 ember pickups each with `ember_value` in `[1, 4]`, lethal regions tagged `void` / `lava` / `spike` (all in the enum).\n- **Coordinates are integer micro_units**, satisfying `fixed_point_simulation_state`. Origin bottom-left; +y up; the bounding box is roughly 9500 \u00d7 18000 micro_units.\n- **Descent route** (natural path):\n  1. Entry shelf (x\u2248500\u20133000, y=17000\u201317300) \u2192 leap+drop right to **upper ledge** (x=5500\u20136700) ~2500 down.\n  2. Cross-shaft leap left+drop to **first checkpoint** atop the one_way mid-upper platform (x=2000\u20133500, y=12000\u201312200).\n  3. Right+drop to **mid narrow ledge** (x=6500\u20137500, y=9500\u20139700) \u2014 narrowest landing, the level's commitment moment.\n  4. Left+drop to **second checkpoint** atop the lower wide platform (x=5000\u20137000, y=6000\u20136200).\n  5. Right+long-drop to **exit shelf** (x=6500\u20139000, y=1000\u20131300); the exit point is at (7500, 1500).\n- **Falling past exit is lethal.** The void strip at y=0\u2013200 covers full width; the central lava strip at y=200\u2013800 / x=1500\u20136000 occupies the floor under the descent corridor. The exit shelf (x=6500\u20139000) avoids the lava in x, so the moth lands cleanly only if it tracks right; a left-drift overshoot hits lava, a long-drift overshoot hits void.\n- **Mixed platform widths.** Two wide shelves (2500 wide), one mid-width (2000), one one_way (1500), two narrow ledges (1200, 1000) \u2014 satisfies \"some axis-aligned, some narrow ledges.\"\n- **Ember economy.** 8 total ember at 3 dashes' worth (dash cost = 3, per `dash`), placed slightly off the strict drop-line so collecting them is a routing choice rather than free \u2014 consistent with `ember_collected_pct_per_level` target of 0.80 at tier 3.\n- **Checkpoint placement.** Both checkpoints sit just above a landing platform, so the moth touches each one naturally during the descent (no detour required), keeping the level's friction in geometry rather than in routing \u2014 aligned with the design intent.\n\nNo other files need to change. Since this is a new draft-status content entity (not a modification of an existing one), no `version:` bump or `last_verified:` touch is required on the root file per the anti-drift ritual; the `count_target: 40` in `gdd/content/levels.md` is a soft target and adding one of the 40 doesn't drift it.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 6381,
+  "tool_steps": 0,
+  "wall_clock_seconds": 78.20379199401941,
+  "instrument_extra": {
+    "claude_code_duration_ms": 77270,
+    "claude_code_total_cost_usd": 0.1773455,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 0,
+    "claude_code_cache_read_input_tokens": 35581,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.2857142857142857,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier three'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'six platforms'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'two checkpoints'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'four ember pickups sum eight'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'entry above exit'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'lethal below exit'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly fulfills the task brief and adheres to the design brief's core pillars. It implements exactly 6 platforms, 2 checkpoints, and 4 ember pickups totaling 8 ember as requested, while correctly placing a lethal void/lava region at the bottom. The design choices, such as alternating platform sides to force 'committed lateral leaps,' directly support the 'Commitment' pillar described in the design brief.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

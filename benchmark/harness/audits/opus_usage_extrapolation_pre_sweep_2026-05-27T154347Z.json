@@ -1,0 +1,32 @@
+{
+  "label": "pre_sweep",
+  "n_trials": 30,
+  "full_sweep_n": 330,
+  "timestamp_iso": "2026-05-27T15:43:47Z",
+  "bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "per_trial_cost_usd_mean": 0.1521,
+  "per_trial_cost_usd_ci_low": 0.1202,
+  "per_trial_cost_usd_ci_high": 0.1874,
+  "per_trial_input_tokens_mean": 222.5,
+  "per_trial_output_tokens_mean": 3838.0,
+  "per_trial_wall_clock_seconds_mean": 50.0,
+  "projected_full_sweep_cost_usd": 50.18,
+  "projected_full_sweep_cost_usd_ci_low": 39.66,
+  "projected_full_sweep_cost_usd_ci_high": 61.85,
+  "projected_full_sweep_input_tokens": 73414.0,
+  "projected_full_sweep_output_tokens": 1266529.0,
+  "projected_full_sweep_wall_clock_hours": 4.58,
+  "per_condition_cost_mean": {
+    "A": 0.2008,
+    "B": 0.1701,
+    "C": 0.0852
+  },
+  "per_condition_n": {
+    "A": 10,
+    "B": 10,
+    "C": 10
+  },
+  "subscription_budget_usd": 50.0,
+  "projected_pct_of_budget": 100.4,
+  "decision_recorded": "flip_api_key"
+}

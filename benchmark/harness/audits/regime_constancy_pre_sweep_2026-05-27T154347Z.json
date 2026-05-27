@@ -1,0 +1,328 @@
+{
+  "label": "pre_sweep",
+  "trials_dir": "/home/bantarus/DEV/game-design/benchmark/harness/trials",
+  "n_trials_total": 30,
+  "cells": [
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "condition": "A",
+      "n_trials": 10,
+      "metrics": {
+        "tokens_input": {
+          "n": 10,
+          "mean": 6.0,
+          "median": 6.0,
+          "p25": 6.0,
+          "p75": 6.0,
+          "minimum": 6.0,
+          "maximum": 6.0,
+          "n_missing": 0
+        },
+        "tokens_output": {
+          "n": 10,
+          "mean": 4847.4,
+          "median": 4502.5,
+          "p25": 2103.5,
+          "p75": 6877.75,
+          "minimum": 1975.0,
+          "maximum": 8995.0,
+          "n_missing": 0
+        },
+        "wall_clock_seconds": {
+          "n": 10,
+          "mean": 59.9694,
+          "median": 55.9097,
+          "p25": 29.4059,
+          "p75": 84.8938,
+          "minimum": 26.9582,
+          "maximum": 103.0398,
+          "n_missing": 0
+        },
+        "tool_steps": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 0.0,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "n_missing": 0
+        },
+        "claude_code_num_turns": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p25": 1.0,
+          "p75": 1.0,
+          "minimum": 1.0,
+          "maximum": 1.0,
+          "n_missing": 0
+        },
+        "claude_code_total_cost_usd": {
+          "n": 10,
+          "mean": 0.2008,
+          "median": 0.2091,
+          "p25": 0.0966,
+          "p75": 0.2643,
+          "minimum": 0.0668,
+          "maximum": 0.3964,
+          "n_missing": 0
+        },
+        "claude_code_duration_ms": {
+          "n": 10,
+          "mean": 59084.1,
+          "median": 55011.0,
+          "p25": 28648.5,
+          "p75": 84005.25,
+          "minimum": 26041.0,
+          "maximum": 102186.0,
+          "n_missing": 0
+        },
+        "claude_code_cache_creation_input_tokens": {
+          "n": 10,
+          "mean": 10765.7,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 26150.25,
+          "minimum": 0.0,
+          "maximum": 37209.0,
+          "n_missing": 0
+        }
+      },
+      "error_rate": 0.0,
+      "stop_reason_counts": {
+        "end_turn": 10
+      },
+      "subtype_counts": {
+        "success": 10
+      }
+    },
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "condition": "B",
+      "n_trials": 10,
+      "metrics": {
+        "tokens_input": {
+          "n": 10,
+          "mean": 6.0,
+          "median": 6.0,
+          "p25": 6.0,
+          "p75": 6.0,
+          "minimum": 6.0,
+          "maximum": 6.0,
+          "n_missing": 0
+        },
+        "tokens_output": {
+          "n": 10,
+          "mean": 3592.9,
+          "median": 3374.0,
+          "p25": 1981.75,
+          "p75": 5303.75,
+          "minimum": 1692.0,
+          "maximum": 5833.0,
+          "n_missing": 0
+        },
+        "wall_clock_seconds": {
+          "n": 10,
+          "mean": 45.8485,
+          "median": 45.1268,
+          "p25": 26.4412,
+          "p75": 64.2933,
+          "minimum": 22.8689,
+          "maximum": 73.7979,
+          "n_missing": 0
+        },
+        "tool_steps": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 0.0,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "n_missing": 0
+        },
+        "claude_code_num_turns": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p25": 1.0,
+          "p75": 1.0,
+          "minimum": 1.0,
+          "maximum": 1.0,
+          "n_missing": 0
+        },
+        "claude_code_total_cost_usd": {
+          "n": 10,
+          "mean": 0.1701,
+          "median": 0.1497,
+          "p25": 0.0848,
+          "p75": 0.2307,
+          "minimum": 0.0559,
+          "maximum": 0.3207,
+          "n_missing": 0
+        },
+        "claude_code_duration_ms": {
+          "n": 10,
+          "mean": 45027.0,
+          "median": 44335.0,
+          "p25": 25611.5,
+          "p75": 63516.75,
+          "minimum": 22046.0,
+          "maximum": 72984.0,
+          "n_missing": 0
+        },
+        "claude_code_cache_creation_input_tokens": {
+          "n": 10,
+          "mean": 11484.4,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 27758.0,
+          "minimum": 0.0,
+          "maximum": 30318.0,
+          "n_missing": 0
+        }
+      },
+      "error_rate": 0.0,
+      "stop_reason_counts": {
+        "end_turn": 10
+      },
+      "subtype_counts": {
+        "success": 10
+      }
+    },
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "condition": "C",
+      "n_trials": 10,
+      "metrics": {
+        "tokens_input": {
+          "n": 10,
+          "mean": 655.4,
+          "median": 635.0,
+          "p25": 6.0,
+          "p75": 1264.0,
+          "minimum": 6.0,
+          "maximum": 1366.0,
+          "n_missing": 0
+        },
+        "tokens_output": {
+          "n": 10,
+          "mean": 3073.6,
+          "median": 2975.0,
+          "p25": 1347.5,
+          "p75": 4683.25,
+          "minimum": 1032.0,
+          "maximum": 5687.0,
+          "n_missing": 0
+        },
+        "wall_clock_seconds": {
+          "n": 10,
+          "mean": 44.1464,
+          "median": 44.0081,
+          "p25": 22.3299,
+          "p75": 63.1014,
+          "minimum": 16.1593,
+          "maximum": 80.0859,
+          "n_missing": 0
+        },
+        "tool_steps": {
+          "n": 10,
+          "mean": 0.0,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 0.0,
+          "minimum": 0.0,
+          "maximum": 0.0,
+          "n_missing": 0
+        },
+        "claude_code_num_turns": {
+          "n": 10,
+          "mean": 1.0,
+          "median": 1.0,
+          "p25": 1.0,
+          "p75": 1.0,
+          "minimum": 1.0,
+          "maximum": 1.0,
+          "n_missing": 0
+        },
+        "claude_code_total_cost_usd": {
+          "n": 10,
+          "mean": 0.0852,
+          "median": 0.0891,
+          "p25": 0.0368,
+          "p75": 0.1278,
+          "minimum": 0.0309,
+          "maximum": 0.144,
+          "n_missing": 0
+        },
+        "claude_code_duration_ms": {
+          "n": 10,
+          "mean": 43305.4,
+          "median": 43238.0,
+          "p25": 21318.5,
+          "p75": 62353.25,
+          "minimum": 15254.0,
+          "maximum": 79170.0,
+          "n_missing": 0
+        },
+        "claude_code_cache_creation_input_tokens": {
+          "n": 10,
+          "mean": 730.2,
+          "median": 0.0,
+          "p25": 0.0,
+          "p75": 0.0,
+          "minimum": 0.0,
+          "maximum": 3702.0,
+          "n_missing": 0
+        }
+      },
+      "error_rate": 0.0,
+      "stop_reason_counts": {
+        "end_turn": 10
+      },
+      "subtype_counts": {
+        "success": 10
+      }
+    }
+  ],
+  "flags": [
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "metric": "tokens_input",
+      "cell_means": {
+        "A": 6.0,
+        "B": 6.0,
+        "C": 655.4
+      },
+      "max_min_ratio": 109.233,
+      "flag_threshold": 2.0,
+      "rationale": "max/min ratio of cell means for tokens_input = 109.23x \u2265 flag threshold 2.0x. Within-subject regime divergence across conditions; if this is on tokens or cost, the within-subject cost-lift gate may be regime-distorted rather than measuring spec-format cost cleanly."
+    },
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "metric": "claude_code_total_cost_usd",
+      "cell_means": {
+        "A": 0.201,
+        "B": 0.17,
+        "C": 0.085
+      },
+      "max_min_ratio": 2.357,
+      "flag_threshold": 2.0,
+      "rationale": "max/min ratio of cell means for claude_code_total_cost_usd = 2.36x \u2265 flag threshold 2.0x. Within-subject regime divergence across conditions; if this is on tokens or cost, the within-subject cost-lift gate may be regime-distorted rather than measuring spec-format cost cleanly."
+    },
+    {
+      "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+      "metric": "claude_code_cache_creation_input_tokens",
+      "cell_means": {
+        "A": 10765.7,
+        "B": 11484.4,
+        "C": 730.2
+      },
+      "max_min_ratio": 15.728,
+      "flag_threshold": 2.0,
+      "rationale": "max/min ratio of cell means for claude_code_cache_creation_input_tokens = 15.73x \u2265 flag threshold 2.0x. Within-subject regime divergence across conditions; if this is on tokens or cost, the within-subject cost-lift gate may be regime-distorted rather than measuring spec-format cost cleanly."
+    }
+  ],
+  "overall_comparable": false
+}

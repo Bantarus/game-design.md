@@ -1,0 +1,84 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 2000041,
+  "timestamp_iso": "2026-05-27T15:33:45Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# Level: `fault_lines_07_the_chasm`\n\n**File:** `content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: fault_lines_07_the_chasm\nstatus: draft\nimplemented_in: [\"src/embergrave/levels/fault_lines_07_the_chasm.py\"]\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 210000\nentry: { x: 1500, y: 17500 }\nexit:  { x: 7000, y: 1500 }\ncheckpoints:\n  - { x: 2400, y: 12200 }\n  - { x: 2000, y: 7200 }\nplatforms:\n  - { x: 500,  y: 17000, width: 2500, height: 200, surface: solid }\n  - { x: 4800, y: 14500, width: 1200, height: 150, surface: solid }\n  - { x: 1500, y: 12000, width: 1800, height: 200, surface: solid }\n  - { x: 5200, y: 9500,  width: 1000, height: 150, surface: one_way }\n  - { x: 1000, y: 7000,  width: 2000, height: 200, surface: solid }\n  - { x: 5500, y: 1000,  width: 2500, height: 300, surface: solid }\nember_pickups:\n  - { x: 1700, y: 17800, ember_value: 1 }\n  - { x: 5400, y: 15000, ember_value: 2 }\n  - { x: 2400, y: 12500, ember_value: 2 }\n  - { x: 6000, y: 9900,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,     width: 8000, height: 500,  tag: void }\n  - { x: 2500, y: 0,     width: 2500, height: 800,  tag: lava }\n  - { x: 0,    y: 9000,  width: 400,  height: 1500, tag: spike }\n  - { x: 7600, y: 13500, width: 400,  height: 1500, tag: spike }\nnotes: \"Vertical descent through a narrow fault-line chasm. Player enters at top-left (y=17500) on a wide solid landing pad, then descends through six platforms \u2014 three solid (wide enough to land cleanly), one narrow ledge (1200 wide, requires a committed jump), one one-way ledge (5200, 9500) that lets the player route back up if they overshoot a section, and a wide bottom exit pad. Two checkpoints (2400, 12200) and (2000, 7200) break the ~16000-micro_unit drop into three roughly equal sections, each ~5500 units of vertical traversal. Side spikes in the middle bands punish lateral overshoot during dashes; a lava strip at the chasm floor (2500-5000 wide) sits directly beneath the exit pad, so falling past the exit-platform edge is lethal \u2014 the final jump must commit east. Four ember pickups (1+2+2+3 = 8 total) are placed to allow 2-3 dashes and a short glide per section without making collection trivial; the 3-value pickup near the one-way ledge rewards the player for routing through the airborne mid-section rather than walling along the left side. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player, with median ember at checkpoint-touch around 6.\"\n```\n\n---\n\n## Schema-conformance audit\n\n| Required field | Value | Constraint | \u2713 |\n|---|---|---|---|\n| `id` | `fault_lines_07_the_chasm` | matches `^[a-z][a-z0-9_]*$` | \u2713 |\n| `name` | `\"The Chasm\"` | non-empty string | \u2713 |\n| `region` | `fault_lines` | in enum | \u2713 |\n| `difficulty_tier` | `3` | integer in [1,5] | \u2713 |\n| `time_target_ms` | `210000` | integer in [60000, 600000] | \u2713 |\n| `entry` | `{x: 1500, y: 17500}` | integer x,y | \u2713 |\n| `exit` | `{x: 7000, y: 1500}` | integer x,y | \u2713 |\n| `checkpoints` | 2 entries | minItems 1, maxItems 5 | \u2713 |\n| `platforms` | 6 entries | minItems 1, valid surface tags | \u2713 |\n| `ember_pickups` | 4 entries, values 1/2/2/3 = **8** | ember_value in [1,4] | \u2713 |\n| `lethal_regions` | 4 entries (void / lava / 2\u00d7 spike) | valid tag enum | \u2713 |\n\n## Design-intent audit\n\n- **Top \u2192 bottom shaft.** Entry y=17500, exit y=1500 \u2014 vertical drop of 16000 micro_units across the playable column.\n- **Six platforms, mixed shapes.** Three wide solid (2500/1800/2000), one narrow ledge (1200), one one-way ledge (1000) for alternate routing, one wide solid exit pad (2500).\n- **Two checkpoints along the natural descent.** Both sit on top of solid platforms (platform 3 and platform 5), partitioning the drop into three ~5500-unit segments \u2014 consistent with tier-3 cadence in `fault_lines_03_the_drop`.\n- **Four ember pickups totaling 8.** Distributed roughly one-per-section, with the highest-value (3) placed near the one-way ledge as a route-finding incentive.\n- **Lethal floor beneath the exit.** A void strip across the whole floor (y < 500) plus a lava strip (2500-wide, y < 800) directly under the exit-pad gap \u2014 falling past the exit is lethal, satisfying the design intent.\n- **Region flavor.** Side spikes in middle bands match the `fault_lines_03_the_drop` pattern of punishing lateral overshoot during dashes.",
+  "subject_output_sanitized": "# Level: `fault_lines_07_the_chasm`\n\n**File:** `content/levels/fault_lines_07_the_chasm.yaml`\n\n```yaml\n\nid: fault_lines_07_the_chasm\n\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 210000\nentry: { x: 1500, y: 17500 }\nexit:  { x: 7000, y: 1500 }\ncheckpoints:\n  - { x: 2400, y: 12200 }\n  - { x: 2000, y: 7200 }\nplatforms:\n  - { x: 500,  y: 17000, width: 2500, height: 200, surface: solid }\n  - { x: 4800, y: 14500, width: 1200, height: 150, surface: solid }\n  - { x: 1500, y: 12000, width: 1800, height: 200, surface: solid }\n  - { x: 5200, y: 9500,  width: 1000, height: 150, surface: one_way }\n  - { x: 1000, y: 7000,  width: 2000, height: 200, surface: solid }\n  - { x: 5500, y: 1000,  width: 2500, height: 300, surface: solid }\nember_pickups:\n  - { x: 1700, y: 17800, ember_value: 1 }\n  - { x: 5400, y: 15000, ember_value: 2 }\n  - { x: 2400, y: 12500, ember_value: 2 }\n  - { x: 6000, y: 9900,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,     width: 8000, height: 500,  tag: void }\n  - { x: 2500, y: 0,     width: 2500, height: 800,  tag: lava }\n  - { x: 0,    y: 9000,  width: 400,  height: 1500, tag: spike }\n  - { x: 7600, y: 13500, width: 400,  height: 1500, tag: spike }\nnotes: \"Vertical descent through a narrow fault-line chasm. Player enters at top-left (y=17500) on a wide solid landing pad, then descends through six platforms \u2014 three solid (wide enough to land cleanly), one narrow ledge (1200 wide, requires a committed jump), one one-way ledge (5200, 9500) that lets the player route back up if they overshoot a section, and a wide bottom exit pad. Two checkpoints (2400, 12200) and (2000, 7200) break the ~16000-micro_unit drop into three roughly equal sections, each ~5500 units of vertical traversal. Side spikes in the middle bands punish lateral overshoot during dashes; a lava strip at the chasm floor (2500-5000 wide) sits directly beneath the exit pad, so falling past the exit-platform edge is lethal \u2014 the final jump must commit east. Four ember pickups (1+2+2+3 = 8 total) are placed to allow 2-3 dashes and a short glide per section without making collection trivial; the 3-value pickup near the one-way ledge rewards the player for routing through the airborne mid-section rather than walling along the left side. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player, with median ember at checkpoint-touch around 6.\"\n```\n\n---\n\nSchema-conformance audit\n\n| Required field | Value | Constraint | \u2713 |\n|---|---|---|---|\n| `id` | `fault_lines_07_the_chasm` | matches `^[a-z][a-z0-9_]*$` | \u2713 |\n| `name` | `\"The Chasm\"` | non-empty string | \u2713 |\n| `region` | `fault_lines` | in enum | \u2713 |\n| `difficulty_tier` | `3` | integer in [1,5] | \u2713 |\n| `time_target_ms` | `210000` | integer in [60000, 600000] | \u2713 |\n| `entry` | `{x: 1500, y: 17500}` | integer x,y | \u2713 |\n| `exit` | `{x: 7000, y: 1500}` | integer x,y | \u2713 |\n| `checkpoints` | 2 entries | minItems 1, maxItems 5 | \u2713 |\n| `platforms` | 6 entries | minItems 1, valid surface tags | \u2713 |\n| `ember_pickups` | 4 entries, values 1/2/2/3 = **8** | ember_value in [1,4] | \u2713 |\n| `lethal_regions` | 4 entries (void / lava / 2\u00d7 spike) | valid tag enum | \u2713 |\n\nDesign-intent audit\n\n- **Top \u2192 bottom shaft.** Entry y=17500, exit y=1500 \u2014 vertical drop of 16000 micro_units across the playable column.\n- **Six platforms, mixed shapes.** Three wide solid (2500/1800/2000), one narrow ledge (1200), one one-way ledge (1000) for alternate routing, one wide solid exit pad (2500).\n- **Two checkpoints along the natural descent.** Both sit on top of solid platforms (platform 3 and platform 5), partitioning the drop into three ~5500-unit segments \u2014 consistent with tier-3 cadence in `fault_lines_03_the_drop`.\n- **Four ember pickups totaling 8.** Distributed roughly one-per-section, with the highest-value (3) placed near the one-way ledge as a route-finding incentive.\n- **Lethal floor beneath the exit.** A void strip across the whole floor (y < 500) plus a lava strip (2500-wide, y < 800) directly under the exit-pad gap \u2014 falling past the exit is lethal, satisfying the design intent.\n- **Region flavor.** Side spikes in middle bands match the `fault_lines_03_the_drop` pattern of punishing lateral overshoot during dashes.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 5404,
+  "tool_steps": 0,
+  "wall_clock_seconds": 64.99696244602092,
+  "instrument_extra": {
+    "claude_code_duration_ms": 64205,
+    "claude_code_total_cost_usd": 0.149118,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 0,
+    "claude_code_cache_read_input_tokens": 27976,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.2857142857142857,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier three'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'six platforms'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'two checkpoints'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'four ember pickups sum eight'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'entry above exit'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'lethal below exit'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly fulfills all requirements of the task brief while adhering to the design brief's pillars. It implements exactly six platforms, two checkpoints, and four ember pickups totaling 8 units as requested. The level design (vertical descent, lethal floor below exit, and tier-3 difficulty) is defensible against the design brief's description of the Fault Lines region and the 'Cheap Death' pillar.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

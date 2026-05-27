@@ -1,0 +1,84 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "A",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 2000042,
+  "timestamp_iso": "2026-05-27T15:23:01Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "7123e376b056fd1be17280469b1ddffc6de4ad324906b415c89224534c44ae69",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "Looking at the design context, I need to author a new tier-3 fault_lines descent level. The reference example `fault_lines_03_the_drop.yaml` is the closest template \u2014 same region, same tier, same descent shape \u2014 so I'll match its conventions (vertical shaft, alternating ledges, side-wall spikes for fault_lines flavor, lava at the bottom).\n\n**Design choices anchored to the brief:**\n- **6 platforms total** = 3 wider shelves (entry, a mid-shaft one-way, exit) + 3 narrow alternating ledges\n- **2 checkpoints** placed on the left ledge mid-shaft and the lower-right ledge \u2014 natural rest points on the descent path\n- **4 ember pickups, ~8 total ember** distributed 1+2+2+3 across the three sections (small reward up top, larger reward near the exit, matching `fault_lines_03`'s pattern)\n- **Lava bed + void floor** below the exit shelf; **side-wall spikes** mid-shaft are the fault_lines region signature for punishing lateral dash overshoot\n- **`time_target_ms: 200000`** (~3.3 min), well inside the tier-3 `[120000, 300000]` tolerance band from `{balance_targets.median_time_to_complete_level}`\n\n**Path through the shaft (top \u2192 bottom):** entry shelf \u2192 narrow right ledge \u2192 narrow left ledge (CP1) \u2192 mid one-way platform \u2192 narrow right ledge (CP2) \u2192 exit shelf.\n\n---\n\n**New file: `benchmark/games/platformer/content/levels/fault_lines_07_the_chasm.yaml`**\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: fault_lines_07_the_chasm\nstatus: draft\nimplemented_in: [\"src/embergrave/levels/fault_lines_07_the_chasm.py\"]\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 200000\nentry:  { x: 1500,  y: 16500 }\nexit:   { x: 8000,  y: 800   }\ncheckpoints:\n  - { x: 2200, y: 10700 }\n  - { x: 7000, y: 4700  }\nplatforms:\n  # Entry shelf at top\n  - { x: 500,   y: 16000, width: 2500, height: 300, surface: solid   }\n  # Narrow ledge, right side\n  - { x: 5500,  y: 13500, width: 1500, height: 200, surface: solid   }\n  # Narrow ledge, left side (carries checkpoint 1)\n  - { x: 1500,  y: 10500, width: 1500, height: 200, surface: solid   }\n  # Wider mid-shaft platform \u2014 one_way to permit re-routing back up after a missed checkpoint\n  - { x: 3500,  y: 7500,  width: 2000, height: 200, surface: one_way }\n  # Narrow ledge, right side (carries checkpoint 2)\n  - { x: 6500,  y: 4500,  width: 1300, height: 200, surface: solid   }\n  # Exit shelf at bottom\n  - { x: 7000,  y: 800,   width: 2500, height: 300, surface: solid   }\nember_pickups:\n  - { x: 3000, y: 14500, ember_value: 1 }\n  - { x: 2200, y: 11500, ember_value: 2 }\n  - { x: 4500, y: 8500,  ember_value: 2 }\n  - { x: 7500, y: 2500,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,     width: 10000, height: 200,  tag: void  }\n  - { x: 0,    y: 200,   width: 7000,  height: 600,  tag: lava  }\n  - { x: 0,    y: 7000,  width: 500,   height: 2500, tag: spike }\n  - { x: 9500, y: 11000, width: 500,   height: 2500, tag: spike }\nnotes: \"Tier-3 fault_lines vertical descent. Player enters at the top of a ~16000-micro_unit shaft and descends through six platforms \u2014 three wider shelves (entry, mid-shaft one_way, exit) interleaved with three narrow ledges that alternate sides across the shaft. Two checkpoints (on the left narrow ledge at y=10700 and the lower right narrow ledge at y=4700) break the descent into three sections of roughly equal vertical span. Four ember pickups totaling 8 ember (1+2+2+3) give the player ~2 dashes or one sustained glide per section, with a larger payout near the exit. A wide lava bed occupies the bottom of the shaft to the left of the exit shelf; the absolute floor is void, so falling past the exit shelf (whether short or long) is lethal. Side-wall spike strips mid-shaft punish lateral overshoot during dashes \u2014 the fault_lines region signature. Tier 3 balance band: 5-15 deaths acceptable per {balance_targets.median_deaths_per_level}; first-clear target ~3.3 minutes for a skilled player, within the tier-3 [120000, 300000] tolerance band.\"\n```\n\n---\n\n**Schema conformance check** (against `gdd/content/levels.md`):\n\n| Field | Constraint | Value |\n|---|---|---|\n| `id` | `^[a-z][a-z0-9_]*$` | `fault_lines_07_the_chasm` \u2713 |\n| `region` | enum | `fault_lines` \u2713 |\n| `difficulty_tier` | 1\u20135 | `3` \u2713 |\n| `time_target_ms` | 60000\u2013600000 | `200000` \u2713 |\n| `checkpoints` | minItems 1, maxItems 5 | 2 items \u2713 |\n| `platforms` | minItems 1 | 6 items, surfaces `solid`/`one_way` \u2713 |\n| `ember_pickups` | `ember_value` 1\u20134 | 4 items, values 1/2/2/3 \u2713 |\n| `lethal_regions` | `tag` enum | tags `void`/`lava`/`spike` \u2713 |\n\n**Anti-drift note:** This is a new content entity at `status: draft`, so per `AGENTS.md` no `version:`/`last_updated:` bump on the root `game-design.md` is strictly required by adding a draft level \u2014 but in a real commit I'd run `gdmd lint benchmark/games/platformer` to verify no `broken-ref` or `orphaned-entity` findings before pushing.",
+  "subject_output_sanitized": "Looking at the design context, I need to author a new tier-3 fault_lines descent level. The reference example `fault_lines_03_the_drop.yaml` is the closest template \u2014 same region, same tier, same descent shape \u2014 so I'll match its conventions (vertical shaft, alternating ledges, side-wall spikes for fault_lines flavor, lava at the bottom).\n\n**Design choices anchored to the brief:**\n- **6 platforms total** = 3 wider shelves (entry, a mid-shaft one-way, exit) + 3 narrow alternating ledges\n- **2 checkpoints** placed on the left ledge mid-shaft and the lower-right ledge \u2014 natural rest points on the descent path\n- **4 ember pickups, ~8 total ember** distributed 1+2+2+3 across the three sections (small reward up top, larger reward near the exit, matching `fault_lines_03`'s pattern)\n- **Lava bed + void floor** below the exit shelf; **side-wall spikes** mid-shaft are the fault_lines region signature for punishing lateral dash overshoot\n- **`time_target_ms: 200000`** (~3.3 min), well inside the tier-3 `[120000, 300000]` tolerance band from `median_time_to_complete_level`\n\n**Path through the shaft (top \u2192 bottom):** entry shelf \u2192 narrow right ledge \u2192 narrow left ledge (CP1) \u2192 mid one-way platform \u2192 narrow right ledge (CP2) \u2192 exit shelf.\n\n---\n\n**New file: `benchmark/games/platformer/content/levels/fault_lines_07_the_chasm.yaml`**\n\n```yaml\n\nid: fault_lines_07_the_chasm\n\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 200000\nentry:  { x: 1500,  y: 16500 }\nexit:   { x: 8000,  y: 800   }\ncheckpoints:\n  - { x: 2200, y: 10700 }\n  - { x: 7000, y: 4700  }\nplatforms:\n  # Entry shelf at top\n  - { x: 500,   y: 16000, width: 2500, height: 300, surface: solid   }\n  # Narrow ledge, right side\n  - { x: 5500,  y: 13500, width: 1500, height: 200, surface: solid   }\n  # Narrow ledge, left side (carries checkpoint 1)\n  - { x: 1500,  y: 10500, width: 1500, height: 200, surface: solid   }\n  # Wider mid-shaft platform \u2014 one_way to permit re-routing back up after a missed checkpoint\n  - { x: 3500,  y: 7500,  width: 2000, height: 200, surface: one_way }\n  # Narrow ledge, right side (carries checkpoint 2)\n  - { x: 6500,  y: 4500,  width: 1300, height: 200, surface: solid   }\n  # Exit shelf at bottom\n  - { x: 7000,  y: 800,   width: 2500, height: 300, surface: solid   }\nember_pickups:\n  - { x: 3000, y: 14500, ember_value: 1 }\n  - { x: 2200, y: 11500, ember_value: 2 }\n  - { x: 4500, y: 8500,  ember_value: 2 }\n  - { x: 7500, y: 2500,  ember_value: 3 }\nlethal_regions:\n  - { x: 0,    y: 0,     width: 10000, height: 200,  tag: void  }\n  - { x: 0,    y: 200,   width: 7000,  height: 600,  tag: lava  }\n  - { x: 0,    y: 7000,  width: 500,   height: 2500, tag: spike }\n  - { x: 9500, y: 11000, width: 500,   height: 2500, tag: spike }\nnotes: \"Tier-3 fault_lines vertical descent. Player enters at the top of a ~16000-micro_unit shaft and descends through six platforms \u2014 three wider shelves (entry, mid-shaft one_way, exit) interleaved with three narrow ledges that alternate sides across the shaft. Two checkpoints (on the left narrow ledge at y=10700 and the lower right narrow ledge at y=4700) break the descent into three sections of roughly equal vertical span. Four ember pickups totaling 8 ember (1+2+2+3) give the player ~2 dashes or one sustained glide per section, with a larger payout near the exit. A wide lava bed occupies the bottom of the shaft to the left of the exit shelf; the absolute floor is void, so falling past the exit shelf (whether short or long) is lethal. Side-wall spike strips mid-shaft punish lateral overshoot during dashes \u2014 the fault_lines region signature. Tier 3 balance band: 5-15 deaths acceptable per median_deaths_per_level; first-clear target ~3.3 minutes for a skilled player, within the tier-3 [120000, 300000] tolerance band.\"\n```\n\n---\n\n**Schema conformance check** (against `gdd/content/levels.md`):\n\n| Field | Constraint | Value |\n|---|---|---|\n| `id` | `^[a-z][a-z0-9_]*$` | `fault_lines_07_the_chasm` \u2713 |\n| `region` | enum | `fault_lines` \u2713 |\n| `difficulty_tier` | 1\u20135 | `3` \u2713 |\n| `time_target_ms` | 60000\u2013600000 | `200000` \u2713 |\n| `checkpoints` | minItems 1, maxItems 5 | 2 items \u2713 |\n| `platforms` | minItems 1 | 6 items, surfaces `solid`/`one_way` \u2713 |\n| `ember_pickups` | `ember_value` 1\u20134 | 4 items, values 1/2/2/3 \u2713 |\n| `lethal_regions` | `tag` enum | tags `void`/`lava`/`spike` \u2713 |\n\n**Anti-drift note:** This is a new content entity at `status: draft`, so per `AGENTS.md` no `version:`/`last_updated:` bump on the root `game-design.md` is strictly required by adding a draft level \u2014 but in a real commit I'd run `gdmd lint benchmark/games/platformer` to verify no `broken-ref` or `orphaned-entity` findings before pushing.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 8995,
+  "tool_steps": 0,
+  "wall_clock_seconds": 103.03977395099355,
+  "instrument_extra": {
+    "claude_code_duration_ms": 102186,
+    "claude_code_total_cost_usd": 0.2426955,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 0,
+    "claude_code_cache_read_input_tokens": 35581,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.2857142857142857,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier three'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'six platforms'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "[STUB] permissive keyword match on 'two checkpoints'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'four ember pickups sum eight'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'entry above exit'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'lethal below exit'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly fulfills the task brief and adheres to the design brief's constraints. It implements exactly six platforms, two checkpoints, and four ember pickups totaling 8 ember as requested. The inclusion of side-wall spikes is a defensible design choice for the 'fault_lines' region, and the time target of 200,000ms aligns with the tier-3 median time specified in the design brief.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

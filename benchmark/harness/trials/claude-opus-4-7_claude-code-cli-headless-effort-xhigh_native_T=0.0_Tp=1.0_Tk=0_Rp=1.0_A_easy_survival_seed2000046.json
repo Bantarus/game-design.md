@@ -1,0 +1,89 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "A",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 2000046,
+  "timestamp_iso": "2026-05-27T15:16:26Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "f0156ea59df9b3b466c54095d9ba4e1a261a2b6ab38d5449fea5f39640bad8bb",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Recipe: `cooked_fish`\n\nFollowing the schema in `gdd/content/recipes.md` and the structural pattern set by `wooden_axe.yaml` / `fiber_rope.yaml` / `signal_pyre.yaml`, the recipe is one new file at `benchmark/games/survival/content/recipes/cooked_fish.yaml`. No other files need to change \u2014 recipes are data, loaded at game start (per the `recipe_data_immutable_at_runtime` invariant), and the data-driven entity entry in `gdd/mechanics.md` (`entities.recipes`) already covers registration via the `data_source` directory glob.\n\n## File: `content/recipes/cooked_fish.yaml`\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: cooked_fish\nstatus: draft\nimplemented_in: [\"src/driftwood/content/recipes/cooked_fish.py\"]\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\ntool_required: wooden_axe\nin_game_minutes_to_craft: 30\n```\n\n## Notes on the authoring choices\n\n- **`id: cooked_fish`** \u2014 lowercase snake_case, matches the filename stem (`cooked_fish.yaml`), satisfying the schema's `^[a-z][a-z0-9_]*$` pattern and the convention used by every other recipe in `content/recipes/`.\n- **`tier: 2`** \u2014 per `gdd/content/recipes.md` (\"0: no tool \u2192 1: knife \u2192 2: wooden axe \u2192 3: pickaxe \u2192 4: pyre\"). The task specifies the wooden axe as the gating tool tier, which is tier 2.\n- **`inputs`** \u2014 single `{ item: raw_fish, quantity: 1 }` pair. `raw_fish` is the natural item-id for the tidepool-fishing output enumerated under `entities.resource_node.kind` in `gdd/mechanics.md` (`tidepool`).\n- **`output.tag: food`** \u2014 required so `verbs.eat` accepts the item (see `eat`'s `target_schema.filter: tag_equals_food` in `gdd/mechanics.md`).\n- **`output.hunger_restore_value: 6`** \u2014 the `rules.eat_resolution` rule reads `{target.hunger_restore_value}` and increases `{resources.hunger}` by that amount, clamped to `[0, 12]`. 6 is half the meter's max, which is consistent with the brief's \"cooked fish is a substantial meal.\"\n- **`station_required: campfire`** \u2014 gates the craft to \"adjacent to the campfire\" via `rules.craft_resolution`'s `check_recipe_station` step.\n- **`tool_required: wooden_axe`** \u2014 the tier-2 gating tool. The wooden axe must be in inventory with remaining durability > 0 at craft time. (The wooden axe is not \"used\" on a fish \u2014 `tool_required` is the *gating* tool for the tier, not a tool that participates in the recipe's mechanical resolution. This matches how `fiber_rope` lists `belt_knife` as tier-1 gating without the knife being literally consumed.)\n- **`in_game_minutes_to_craft: 30`** \u2014 matches the task, and is on the fast side of the recipe spectrum (rope is 30; standard recipes default to 60; pyre layers are 90; the full pyre is 360). The recipes-md schema explicitly cites \"rope is 30\" as the precedent for a fast craft.\n- **`output.quantity: 1`** \u2014 1 raw_fish \u2192 1 cooked_fish, no multiplier.\n\n## Anti-drift check\n\nPer `AGENTS.md` \u00a7\"Anti-drift ritual,\" authoring a new content entity in a `data_source`-backed collection does **not** require touching the root `game-design.md`'s `version:` or the `gdd/content/recipes.md` schema \u2014 the schema and `count_target: 12` already accommodate this addition (the new file moves the directory toward that target). The new file's own frontmatter carries:\n\n- `status: draft` \u2014 consistent with the other v0.1 recipes; will ratchet to `prototyped`/`implemented` once `src/driftwood/content/recipes/cooked_fish.py` lands.\n- `implemented_in: [\"src/driftwood/content/recipes/cooked_fish.py\"]` \u2014 the conventional path predicted by the sibling recipes; the file does not need to exist yet (the field is a forward pointer that the anti-drift ritual updates when source lands).\n- `spec_version: 0.2.0-alpha` \u2014 matches the surrounding tree.\n\nRunning `gdmd lint benchmark/games/survival` after the file lands should pass clean: the recipe's `inputs.item: raw_fish` is a string id (no `{...}` namespace ref to resolve), the `tag: food` is in the enum, and `tool_required: wooden_axe` cross-references a known recipe output id \u2014 no `broken-ref` or `orphaned-entity` findings.",
+  "subject_output_sanitized": "# New Recipe: `cooked_fish`\n\nFollowing the schema in `gdd/content/recipes.md` and the structural pattern set by `wooden_axe.yaml` / `fiber_rope.yaml` / `signal_pyre.yaml`, the recipe is one new file at `benchmark/games/survival/content/recipes/cooked_fish.yaml`. No other files need to change \u2014 recipes are data, loaded at game start (per the `recipe_data_immutable_at_runtime` invariant), and the data-driven entity entry in `gdd/mechanics.md` (`recipes`) already covers registration via the `data_source` directory glob.\n\nFile: `content/recipes/cooked_fish.yaml`\n\n```yaml\n\nid: cooked_fish\n\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\ntool_required: wooden_axe\nin_game_minutes_to_craft: 30\n```\n\nNotes on the authoring choices\n\n- **`id: cooked_fish`** \u2014 lowercase snake_case, matches the filename stem (`cooked_fish.yaml`), satisfying the schema's `^[a-z][a-z0-9_]*$` pattern and the convention used by every other recipe in `content/recipes/`.\n- **`tier: 2`** \u2014 per `gdd/content/recipes.md` (\"0: no tool \u2192 1: knife \u2192 2: wooden axe \u2192 3: pickaxe \u2192 4: pyre\"). The task specifies the wooden axe as the gating tool tier, which is tier 2.\n- **`inputs`** \u2014 single `{ item: raw_fish, quantity: 1 }` pair. `raw_fish` is the natural item-id for the tidepool-fishing output enumerated under `resource_node.kind` in `gdd/mechanics.md` (`tidepool`).\n- **`output.tag: food`** \u2014 required so `eat` accepts the item (see `eat`'s `target_schema.filter: tag_equals_food` in `gdd/mechanics.md`).\n- **`output.hunger_restore_value: 6`** \u2014 the `eat_resolution` rule reads `hunger_restore_value` and increases `hunger` by that amount, clamped to `[0, 12]`. 6 is half the meter's max, which is consistent with the brief's \"cooked fish is a substantial meal.\"\n- **`station_required: campfire`** \u2014 gates the craft to \"adjacent to the campfire\" via `craft_resolution`'s `check_recipe_station` step.\n- **`tool_required: wooden_axe`** \u2014 the tier-2 gating tool. The wooden axe must be in inventory with remaining durability > 0 at craft time. (The wooden axe is not \"used\" on a fish \u2014 `tool_required` is the *gating* tool for the tier, not a tool that participates in the recipe's mechanical resolution. This matches how `fiber_rope` lists `belt_knife` as tier-1 gating without the knife being literally consumed.)\n- **`in_game_minutes_to_craft: 30`** \u2014 matches the task, and is on the fast side of the recipe spectrum (rope is 30; standard recipes default to 60; pyre layers are 90; the full pyre is 360). The recipes-md schema explicitly cites \"rope is 30\" as the precedent for a fast craft.\n- **`output.quantity: 1`** \u2014 1 raw_fish \u2192 1 cooked_fish, no multiplier.\n\nAnti-drift check\n\nPer `AGENTS.md` \u00a7\"Anti-drift ritual,\" authoring a new content entity in a `data_source`-backed collection does **not** require touching the root `game-design.md`'s `version:` or the `gdd/content/recipes.md` schema \u2014 the schema and `count_target: 12` already accommodate this addition (the new file moves the directory toward that target). The new file's own frontmatter carries:\n\n- `status: draft` \u2014 consistent with the other v0.1 recipes; will ratchet to `prototyped`/`implemented` once `src/driftwood/content/recipes/cooked_fish.py` lands.\n- `implemented_in: [\"src/driftwood/content/recipes/cooked_fish.py\"]` \u2014 the conventional path predicted by the sibling recipes; the file does not need to exist yet (the field is a forward pointer that the anti-drift ritual updates when source lands).\n- `spec_version: 0.2.0-alpha` \u2014 matches the surrounding tree.\n\nRunning `gdmd lint benchmark/games/survival` after the file lands should pass clean: the recipe's `inputs.item: raw_fish` is a string id (no `{...}` namespace ref to resolve), the `tag: food` is in the enum, and `tool_required: wooden_axe` cross-references a known recipe output id \u2014 no `broken-ref` or `orphaned-entity` findings.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 2141,
+  "tool_steps": 0,
+  "wall_clock_seconds": 30.489302597998176,
+  "instrument_extra": {
+    "claude_code_duration_ms": 29751,
+    "claude_code_total_cost_usd": 0.27147375,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 34867,
+    "claude_code_cache_read_input_tokens": 0,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": false,
+    "fraction_passing": 0.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier two'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'input one raw fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'output one cooked fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'hunger restore six'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'station campfire'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'craft time thirty minutes'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tagged food'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly implements the task brief by creating a YAML recipe for 'cooked_fish' that meets all specified requirements: 1 raw_fish input, 1 cooked_fish output, 6 hunger restoration, tier 2 (wooden axe gating), and a 30-minute craft time. Every design choice, such as the station requirement (campfire) and the hunger value, is directly supported by the task brief or the design brief's established mechanics (e.g., cooked fish refills 6 hunger).",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

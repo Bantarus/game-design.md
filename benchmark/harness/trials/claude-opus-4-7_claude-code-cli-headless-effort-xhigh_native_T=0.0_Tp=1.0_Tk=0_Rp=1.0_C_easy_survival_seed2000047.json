@@ -1,0 +1,89 @@
+{
+  "subject_bundle_id": "claude-opus-4-7/claude-code-cli-headless-effort-xhigh/native/T=0.0/Tp=1.0/Tk=0/Rp=1.0",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 2000047,
+  "timestamp_iso": "2026-05-27T15:17:40Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "# New Recipe: `cooked_fish`\n\nBelow is the new recipe file. It is the only file that needs to be added; it conforms to the recipe schema documented in `gdd/content/recipes.md` (id / tier / station / tool / inputs / outputs / craft_time, plus an embedded `item` block declaring the produced food item's properties \u2014 same pattern used by the other consumable-producing recipes like `berry_mash` and `boiled_water`).\n\n**File:** `content/recipes/cooked_fish.yaml`\n\n```yaml\n# Cooked fish \u2014 tier-2 cooking recipe.\n# Player roasts a raw_fish at the campfire into a more nutritious cooked_fish.\n# Gated behind the wooden axe tier (matches the rest of the t2 chain that\n# unlocks once the player has felled their first tree and built a sawhorse).\n\nid: cooked_fish\nname: Cooked Fish\ntier: 2\n\n# Crafting requirements\nstation: campfire           # must be performed at a built campfire\ntool_required: wooden_axe   # tier-2 gating tool (per the recipe-tree spec)\n\ninputs:\n  - item: raw_fish\n    quantity: 1\n\noutputs:\n  - item: cooked_fish\n    quantity: 1\n\n# ~30 in-game minutes. One in-game day is ~6 minutes of wall-clock split\n# across 4 phases (~90 in-game min per phase), so this is roughly a third\n# of a phase \u2014 i.e. about 1 wall-clock minute of crafting time.\ncraft_time_minutes: 30\n\n# Item definition for the produced good. cooked_fish is a food item; eating\n# it refills 6 hunger. No thirst effect, no health effect, not stackable\n# beyond the default food stack size (inherits engine default).\nitem:\n  id: cooked_fish\n  name: Cooked Fish\n  type: food\n  description: >\n    A fillet of fish, roasted over the campfire until it flakes. Keeps\n    longer than raw fish and fills you up more.\n  effects:\n    hunger_restore: 6\n  consumed_on_use: true\n\n# Notes for designers (ignored by the loader):\n# - Sits in the same tier-2 \"campfire cooking\" cluster as berry_mash.\n# - Encourages routing the player past a tidepool (raw_fish source) on\n#   Day 2\u20133 once the wooden axe + campfire are online, which is the\n#   pre-registered intended path for avoiding the Day-4 food crash.\n```\n\n### Why these values\n\n- **`tier: 2` / `tool_required: wooden_axe`** \u2014 matches the prompt's \"tier-2 (requires the wooden axe as the gating tool tier)\". Per the design pillars, tier gating is what makes \"the graph is the game\" legible.\n- **`station: campfire`** \u2014 explicit in the prompt (\"at a campfire\").\n- **`inputs` / `outputs`** \u2014 1 \u2192 1 conversion, as specified.\n- **`craft_time_minutes: 30`** \u2014 the prompt's \"about 30 in-game minutes.\" With ~6 wall-clock minutes per in-game day (~24 in-game hours), 30 in-game minutes \u2248 1.25 wall-clock seconds of compressed time, which the loader resolves against the day clock; consistent with other cooking recipes.\n- **`item.effects.hunger_restore: 6`** \u2014 directly from the prompt. Placed under the embedded `item` block so this single file is self-contained (no edits required to a separate items registry, per the \"one new file\" constraint).\n- **`consumed_on_use: true`** \u2014 standard for food items so the eat action removes it from inventory.",
+  "subject_output_sanitized": "# New Recipe: `cooked_fish`\n\nBelow is the new recipe file. It is the only file that needs to be added; it conforms to the recipe schema documented in `gdd/content/recipes.md` (id / tier / station / tool / inputs / outputs / craft_time, plus an embedded `item` block declaring the produced food item's properties \u2014 same pattern used by the other consumable-producing recipes like `berry_mash` and `boiled_water`).\n\n**File:** `content/recipes/cooked_fish.yaml`\n\n```yaml\n# Cooked fish \u2014 tier-2 cooking recipe.\n# Player roasts a raw_fish at the campfire into a more nutritious cooked_fish.\n# Gated behind the wooden axe tier (matches the rest of the t2 chain that\n# unlocks once the player has felled their first tree and built a sawhorse).\n\nid: cooked_fish\nname: Cooked Fish\ntier: 2\n\n# Crafting requirements\nstation: campfire           # must be performed at a built campfire\ntool_required: wooden_axe   # tier-2 gating tool (per the recipe-tree spec)\n\ninputs:\n  - item: raw_fish\n    quantity: 1\n\noutputs:\n  - item: cooked_fish\n    quantity: 1\n\n# ~30 in-game minutes. One in-game day is ~6 minutes of wall-clock split\n# across 4 phases (~90 in-game min per phase), so this is roughly a third\n# of a phase \u2014 i.e. about 1 wall-clock minute of crafting time.\ncraft_time_minutes: 30\n\n# Item definition for the produced good. cooked_fish is a food item; eating\n# it refills 6 hunger. No thirst effect, no health effect, not stackable\n# beyond the default food stack size (inherits engine default).\nitem:\n  id: cooked_fish\n  name: Cooked Fish\n  type: food\n  description: >\n    A fillet of fish, roasted over the campfire until it flakes. Keeps\n    longer than raw fish and fills you up more.\n  effects:\n    hunger_restore: 6\n  consumed_on_use: true\n\n# Notes for designers (ignored by the loader):\n# - Sits in the same tier-2 \"campfire cooking\" cluster as berry_mash.\n# - Encourages routing the player past a tidepool (raw_fish source) on\n#   Day 2\u20133 once the wooden axe + campfire are online, which is the\n#   pre-registered intended path for avoiding the Day-4 food crash.\n```\n\nWhy these values\n\n- **`tier: 2` / `tool_required: wooden_axe`** \u2014 matches the prompt's \"tier-2 (requires the wooden axe as the gating tool tier)\". Per the design pillars, tier gating is what makes \"the graph is the game\" legible.\n- **`station: campfire`** \u2014 explicit in the prompt (\"at a campfire\").\n- **`inputs` / `outputs`** \u2014 1 \u2192 1 conversion, as specified.\n- **`craft_time_minutes: 30`** \u2014 the prompt's \"about 30 in-game minutes.\" With ~6 wall-clock minutes per in-game day (~24 in-game hours), 30 in-game minutes \u2248 1.25 wall-clock seconds of compressed time, which the loader resolves against the day clock; consistent with other cooking recipes.\n- **`item.effects.hunger_restore: 6`** \u2014 directly from the prompt. Placed under the embedded `item` block so this single file is self-contained (no edits required to a separate items registry, per the \"one new file\" constraint).\n- **`consumed_on_use: true`** \u2014 standard for food items so the eat action removes it from inventory.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 6,
+  "tokens_output": 1711,
+  "tool_steps": 0,
+  "wall_clock_seconds": 26.27202760698856,
+  "instrument_extra": {
+    "claude_code_duration_ms": 25476,
+    "claude_code_total_cost_usd": 0.0659425,
+    "claude_code_num_turns": 1,
+    "claude_code_stop_reason": "end_turn",
+    "claude_code_subtype": "success",
+    "claude_code_is_error": false,
+    "claude_code_errors": null,
+    "claude_code_exit_code": 0,
+    "claude_code_cache_creation_input_tokens": 3702,
+    "claude_code_cache_read_input_tokens": 0,
+    "claude_code_served_models": [
+      "claude-opus-4-7"
+    ],
+    "claude_code_effort_requested": "xhigh"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": false,
+    "fraction_passing": 0.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'file authored'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tier two'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'input one raw fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'output one cooked fish'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'hunger restore six'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'station campfire'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'craft time thirty minutes'; replace with judge call before trials count."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": false,
+        "rationale": "[STUB] permissive keyword match on 'tagged food'; replace with judge call before trials count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly matches the task brief and adheres to the design brief's logic. It correctly implements the 1:1 ratio, the 6-hunger refill, the campfire station, and the tier-2 wooden axe requirement. The craft time of 30 in-game minutes is correctly interpreted in the context of the design brief's day rhythm.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}
