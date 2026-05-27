@@ -57,13 +57,22 @@ class InstrumentBundle:
 
         Embeds the full sampling tuple so two bundles that differ only in
         sampling get distinct ids — a change to sampling is a change to
-        the instrument per pre-reg §"Test subjects"."""
+        the instrument per pre-reg §"Test subjects".
+
+        v13-D: `Mt=<max_tokens>` added after the v12-D smoke surfaced a
+        cap-bind on cell #1 of trial zero (medium task; 4096-token cap
+        truncated implementation). The cap IS part of bundle identity
+        (different caps produce different output distributions at the
+        cap boundary); making it visible in bundle_id surfaces bundle
+        changes in F-009 aggregation and audit filenames.
+        """
         return (
             f"{self.model_name}/{self.variant}/{self.quant or 'native'}"
             f"/T={self.sampling_temperature}"
             f"/Tp={self.sampling_top_p}"
             f"/Tk={self.sampling_top_k}"
             f"/Rp={self.sampling_repetition_penalty}"
+            f"/Mt={self.sampling_max_tokens}"
         )
 
 
@@ -300,7 +309,20 @@ QWEN_HEADLINE_BUNDLE = InstrumentBundle(
     sampling_top_p=0.8,
     sampling_top_k=20,
     sampling_repetition_penalty=1.05,
-    sampling_max_tokens=4096,
+    # v13-D bump: 4096 → 8192. The v12-D trial-zero smoke (cell #1, A medium
+    # survival seed=1000128) hit the 4096-token cap mid-rule, with the judge
+    # explicitly citing "incomplete, cutting off mid-sentence." Easy task
+    # outputs in step 6 calibration max at ~2k tokens (0/90 cap-hits); the
+    # cap was off-axis for that calibration's workload but binds for medium/
+    # hard/ambiguity tasks where YAML implementations require deeper coverage.
+    # Bumped to 8192 (still comfortably within 32k ctx for input tokens ~22k
+    # + output ~8k = ~30k; 32k ctx supports it without a ctx_size change).
+    # The cap is now ~2× the heaviest expected medium implementation, leaving
+    # margin for unusual cases. The bundle SHA changes; v13-D supersession
+    # records the audit trail. (Cell #1 of trial zero was discarded as
+    # produced under the obsolete bundle.) See pre-reg v12-D → v13-D audit
+    # trail row #23.
+    sampling_max_tokens=8192,
     chat_template="jinja-from-gguf",  # llama-server --jinja reads the chat template from GGUF metadata
     reasoning_format="",  # Qwen3-Coder is non-reasoning by default; no <think> envelope
     notes=(

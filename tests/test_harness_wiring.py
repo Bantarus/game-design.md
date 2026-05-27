@@ -294,7 +294,7 @@ def test_qwen_instrument_uses_injected_server():
     assert call.kwargs["top_k"] == 20
     assert call.kwargs["repeat_penalty"] == 1.05
     assert call.kwargs["seed"] == 42
-    assert call.kwargs["max_tokens"] == 4096
+    assert call.kwargs["max_tokens"] == 8192  # v13-D bump from 4096
 
     # Response fields are forwarded
     assert r.text == "def add(a, b): return a + b"
