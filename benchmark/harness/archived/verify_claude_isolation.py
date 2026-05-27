@@ -32,9 +32,9 @@ against a more confabulation-prone model. In both, the truth-anchor
 grader stays correct because it asks "did the subject reproduce the
 fact?" rather than "did the subject answer at all?".
 
-Run:
+Run (post v12-D archive):
 
-  python -m benchmark.harness.verify_claude_isolation
+  python -m benchmark.harness.archived.verify_claude_isolation
 
 Exit code 0 = all probes passed (no leak). Exit code 1 = at least one
 probe produced a correct project-specific answer (LEAK detected).
@@ -48,6 +48,11 @@ at Opus 4.7 / --effort xhigh rates is materially more expensive than the
 earlier Haiku-era smoke (extended-thinking output budget is large); on
 the order of $0.10–$0.50 per smoke run rather than < $0.01. Re-run
 parsimoniously.
+
+NOTE (v12-D): this module was moved to `benchmark/harness/archived/`
+alongside ClaudeInstrument when the Opus transfer probe was deferred.
+The wiring + isolation discipline remain unchanged; re-activation
+re-runs this smoke from the new path. See `archived/README.md`.
 """
 from __future__ import annotations
 
@@ -55,7 +60,7 @@ import re
 import sys
 from dataclasses import dataclass
 
-from .instrument import ClaudeInstrument, CLAUDE_TRANSFER_PROBE_BUNDLE
+from .instrument_claude import ClaudeInstrument, CLAUDE_TRANSFER_PROBE_BUNDLE
 
 
 @dataclass(frozen=True)

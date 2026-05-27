@@ -49,7 +49,8 @@ Sampling — two layers, two requirements (pre-reg §"Protocol" step 11):
   regression.
 
   (Claude does not expose a seed; same-seed re-runs diverge naturally;
-  see ClaudeInstrument for the pre-reg-named exception.)
+  see archived/instrument_claude.py::ClaudeInstrument for the
+  pre-reg-named exception, archived at v12-D.)
 """
 from __future__ import annotations
 

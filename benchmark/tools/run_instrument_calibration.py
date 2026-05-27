@@ -63,10 +63,12 @@ from benchmark.harness.calibration import (
 )
 from benchmark.harness.instrument import (
     QWEN_HEADLINE_BUNDLE,
-    CLAUDE_TRANSFER_PROBE_BUNDLE,
-    ClaudeInstrument,
     QwenInstrument,
 )
+# Claude transfer-probe imports are deferred (loaded only when --subject claude)
+# because the instrument is archived under v12-D scope reduction. The active
+# benchmark execution runs Qwen-only; re-activation re-enables Claude via
+# the archived module — see `benchmark/harness/archived/README.md`.
 from benchmark.harness.judge import GemmaJudge, GEMMA_JUDGE_BUNDLE
 
 
@@ -143,9 +145,24 @@ def gather_qwen() -> CanaryGather:
 
 
 def gather_claude() -> CanaryGather:
-    """Run Claude's K+2 canary invocations. No llama-server involved."""
+    """Run Claude's K+2 canary invocations. No llama-server involved.
+
+    Imports deferred (v12-D): the Claude instrument lives at
+    `benchmark/harness/archived/instrument_claude.py`. The active benchmark
+    execution runs Qwen-only; this function is reachable only via the
+    `--subject claude` path which is intended for re-activation, not the
+    current execution. If the archived module has been moved or removed,
+    ImportError surfaces here with a pointer back to v12-D's archival
+    decision.
+    """
+    from benchmark.harness.archived.instrument_claude import (
+        CLAUDE_TRANSFER_PROBE_BUNDLE,
+        ClaudeInstrument,
+    )
     print(f"[+] Claude: K={CALIBRATION_K} canary invocations + 2 same-seed via Claude Code CLI...", file=sys.stderr)
     print(f"    bundle: {CLAUDE_TRANSFER_PROBE_BUNDLE.bundle_id()}", file=sys.stderr)
+    print(f"    NOTE: re-activation path — ClaudeInstrument archived at v12-D.",
+          file=sys.stderr)
     t0 = time.monotonic()
     inst = ClaudeInstrument(CLAUDE_TRANSFER_PROBE_BUNDLE)
     gather = gather_canary_responses(inst, seeds=CANARY_SEEDS)

@@ -112,7 +112,16 @@ from .tasks import Task, load_all_tasks
 # invalidate any prior plan.
 INSTANCE_SEED_BASE_BY_SUBJECT: dict[str, int] = {
     "qwen": 1_000_000,
-    "claude": 2_000_000,
+    # "claude": 2_000_000,
+    # ^^^ RESERVED — DO NOT REASSIGN. v12-D scope reduction archived the
+    # Claude transfer probe under `benchmark/harness/archived/`. The
+    # seed_base 2_000_000 is preserved here as a comment so that a future
+    # re-activation re-adds the entry with the same deterministic seed
+    # allocation — re-activated sweeps will produce bit-identical seeds
+    # with this commit's design-of-record. See
+    # `benchmark/harness/archived/README.md` for the full re-activation
+    # procedure; see `docs/v0.2-phase5-pre-registration.md` v12 → v12-D
+    # audit-trail row #22 for the constraint that triggered deferral.
 }
 
 

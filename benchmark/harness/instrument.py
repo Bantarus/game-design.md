@@ -1,25 +1,27 @@
 """Instrument abstraction: the subject LLM under test.
 
-Two instrument bundles are pinned at the harness-build commit per pre-reg
-§"Test subjects":
+One instrument bundle is active for the current benchmark execution
+(pre-reg v12-D scope reduction, see `docs/v0.2-phase5-pre-registration.md`):
   - Headline: a specific Qwen variant (model + quant + GGUF SHA +
     llama.cpp build + sampling params + chat template) running locally.
-  - Transfer probe: a specific Claude version, invoked via the Claude
-    Code CLI in headless mode (NOT the Anthropic API — uses the user's
-    existing Claude Code installation and authentication; no API key).
 
-Both instruments speak through the same `Instrument` interface so the
-harness can parametrize subject without conditionals throughout the trial
-loop.
+The pre-registered transfer-probe identity (Opus 4.7 at `--effort xhigh`
+via Claude Code CLI) is **archived not deleted** under
+`benchmark/harness/archived/instrument_claude.py`. It remains the named
+transfer-probe-of-record for any future formal validation; v12-D defers
+the probe under THIS benchmark execution only. Re-activation procedure:
+see `benchmark/harness/archived/README.md`.
 
-Concrete implementations are stubbed pending external infra:
+The `Instrument` interface is preserved unchanged so re-activation
+re-imports `ClaudeInstrument` + `CLAUDE_TRANSFER_PROBE_BUNDLE` from the
+archived module and the trial loop parametrizes subject without changes.
+
+Concrete implementations:
   - `QwenInstrument`     — requires local llama.cpp build + GGUF model + flags.
-  - `ClaudeInstrument`   — requires the `claude` CLI binary on PATH
-                            (Claude Code, headless / `--print` mode) and
-                            an active Claude Code session/login. No
-                            Anthropic API key needed.
   - `MockInstrument`     — returns canned responses, lets the harness be
                             exercised end-to-end without external infra.
+  - `ClaudeInstrument`   — ARCHIVED at v12-D. Lives at
+                            `benchmark/harness/archived/instrument_claude.py`.
 """
 from __future__ import annotations
 
@@ -325,357 +327,18 @@ QWEN_HEADLINE_BUNDLE = InstrumentBundle(
 )
 
 
-class ClaudeInstrument(Instrument):
-    """Transfer-probe instrument: Claude via the Claude Code CLI (headless).
-
-    Wired through the user's existing Claude Code installation rather than
-    the Anthropic API. Benefits: no API key needed (uses the user's Claude
-    Code subscription/login); no SDK dependency. Pinned at the
-    harness-build commit to **Opus 4.7 at `--effort xhigh`** — the frontier
-    capability tier in the Claude lineup at the time of trial zero. See
-    §"Test subjects" + pre-reg line 133: *"Tests how spec-helpfulness
-    varies with model capability tier"*; the three named outcomes (Claude
-    lift > / ≈ / < Qwen lift) all interpret meaningfully ONLY when the
-    Claude side is on a frontier model. A smaller-tier Claude (Sonnet,
-    Haiku) would collapse the "frontier models infer the structure
-    unaided" outcome (Claude lift < Qwen lift) into "this small model
-    needed the scaffold too," which is uninterpretable as a capability-
-    tier claim. Opus 4.7 at xhigh is the strongest signal available
-    through Claude Code; max is one tier higher and reserved for a
-    redirect if xhigh proves insufficient.
-
-    Model pin discipline. We request `claude-opus-4-7` (the canonical
-    name) not `opus` (the alias). The alias is resolution-deferred and
-    could swap to Opus 4.8 mid-sweep once Anthropic releases it; the
-    canonical name locks the request to this generation. (Unlike Haiku
-    4.5, which exposes a dated full name `claude-haiku-4-5-20251001`,
-    Opus 4.7 does not yet have a dated variant — empirically verified:
-    `claude-opus-4-7-YYYYMMDD` returns 404. `claude-opus-4-7` IS the
-    canonical pin available for this generation.) The actually-served
-    version is still captured per-call in
-    `instrument_extra.claude_code_served_models` from Claude Code's
-    `modelUsage` field — that's the audit backstop if Anthropic adds a
-    dated suffix or rotates a point release behind the canonical name.
-
-    Contamination isolation (the load-bearing fix at this commit).
-      Running `claude` inside the project repo loads .claude/projects/
-      <cwd-hash>/memory/MEMORY.md, which is the entire design history of
-      this benchmark — that would hand the subject the spec via memory
-      and break A-vs-B-vs-C comparability across conditions. Fix: spawn
-      every subprocess with `cwd` set to a fresh empty temp directory
-      OUTSIDE the repo, plus the following hardening flags so the
-      subject runs as a bare LLM:
-
-        - `cwd=<fresh /tmp/xyz>`        : no CLAUDE.md, no project memory
-                                          loads, no .claude/ in scope.
-        - `--system-prompt <text>`      : REPLACE Claude Code's default
-                                          agentic system prompt (verified
-                                          empirically: a haiku-only
-                                          system-prompt produces haiku
-                                          responses, confirming replace
-                                          semantics — see commit message
-                                          for the probe). NOT
-                                          --append-system-prompt.
-        - `--tools ""`                  : disable all built-in tools
-                                          (cleaner than enumerated
-                                          --disallowed-tools).
-        - `--no-session-persistence`    : no JSONL session log written
-                                          to ~/.claude/projects/...
-                                          (would accumulate per-call
-                                          state otherwise).
-        - `--max-turns 1`               : single-turn; one-shot text
-                                          generation matching Qwen's
-                                          shape so A/B/C is comparable
-                                          across subjects.
-        - `--output-format json`        : structured response.
-
-      Bare mode (`--bare`) is NOT used — it would force ANTHROPIC_API_KEY
-      and lose the subscription login (per `claude --help`: "Anthropic
-      auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings
-      (OAuth and keychain are never read)"). The isolated-cwd path
-      keeps the subscription while neutralizing the contamination.
-
-    Verification — the isolation smoke test (REQUIRED before this
-    instrument counts as wired). See
-    `benchmark/harness/verify_claude_isolation.py`. It runs the
-    instrument against probes that only the project memory could answer
-    (specific finding IDs, decision IDs, fresh-game names, spec
-    section structure). A correctly-isolated subject MUST NOT produce
-    correct answers; a leak means the contamination check failed and
-    the wiring is wrong — fix before any trial counts.
-
-    Residual confound (named, not hidden — recorded in F-009 transfer-
-    probe limitations). Even isolated, Claude runs through the Claude
-    Code harness — which adds intrinsic system-context overhead
-    (constitution / safety guidance / available-tool descriptions),
-    processed identically across A/B/C. Re-measured at the Opus-4.7
-    xhigh commit on this instrument: input_tokens ≈ 200 above the
-    user-supplied prompt on minimal probes; cache_creation and
-    cache_read both 0 in the per-call accounting that Claude Code
-    surfaces (the Haiku-era observation of 2k-4.5k overhead was likely
-    a cache-creation artifact of an earlier Claude Code version and
-    does NOT transfer to this instrument). Qwen runs bare llama.cpp
-    with its own chat-template overhead. So cross-subject lift
-    differences conflate model capability with harness-overhead delta.
-    The HEADLINE (per-subject A-vs-B paired McNemar) is unaffected
-    because the harness overhead is constant across conditions WITHIN a
-    subject. The transfer probe's cross-subject comparisons (Qwen lift
-    vs Claude lift) carry this residual; F-009 reports it alongside the
-    other transfer-probe caveats.
-
-    Seed handling: Claude Code does not accept a seed parameter. The
-    `seed` arg is recorded on every InstrumentResponse for audit-trail
-    purposes (per pre-reg §11 "auditability is recorded, not gated") but
-    does NOT deterministically reproduce. Same-seed re-runs will diverge
-    — expected and accepted per the v4 layer-confusion correction (the
-    benchmark needs sampled variance, not byte-identical reproducibility).
-    """
-
-    # Claude-specific system-prompt steer (appended to the harness's
-    # system_prompt). The two added sentences cut the agentic-flailing
-    # rate at the source — without them, Claude under --tools "" sometimes
-    # attempts a denied tool call and burns a turn before delivering text,
-    # which inflates `num_turns` and (more importantly) inflates input
-    # tokens / cost in a way that may be *prompt-dependent*: a context-
-    # poor C prompt could make Claude think "I'm missing information, let
-    # me look" more often than a full A tree, which would systematically
-    # distort the within-Claude cost-lift gate (one of two headline gates).
-    # The steer is a Claude-specific addition (no analogue for Qwen, which
-    # has no tools to attempt anyway) — named in pre-reg as an instrument-
-    # level confound for the transfer probe. Constant within Claude across
-    # A/B/C; safe for the per-subject headline. The regime-constancy check
-    # (harness/regime_constancy.py) verifies, post-trial, that num_turns
-    # and tokens distributions are comparable across conditions within the
-    # Claude arm — turning the assumption into a measured fact.
-    CLAUDE_ANTI_FLAILING_SUFFIX = (
-        "\n\n"
-        "(Session note: tools are disabled in this environment. Respond "
-        "with the implementation directly as text; do not attempt tool "
-        "calls.)"
-    )
-
-    def __init__(self, bundle: InstrumentBundle):
-        super().__init__(bundle)
-        self._claude_bin = os.environ.get("DRIFTWOOD_CLAUDE_CODE_BIN", "claude")
-        self._timeout_seconds = int(os.environ.get(
-            "DRIFTWOOD_CLAUDE_CODE_TIMEOUT_SECONDS", "300"
-        ))
-
-    def complete(
-        self,
-        system_prompt: str,
-        user_prompt: str,
-        seed: int,
-    ) -> InstrumentResponse:
-        import tempfile
-        # Append the Claude-specific anti-flailing steer to the harness's
-        # system prompt. This is a Claude-only addition (Qwen has no tools);
-        # constant within Claude across A/B/C; documented in §"Test subjects"
-        # as a named instrument-level confound for the transfer probe.
-        effective_system_prompt = system_prompt + self.CLAUDE_ANTI_FLAILING_SUFFIX
-        # --max-turns is set to 5 (not 1) because Claude is heavily agentic-
-        # trained and may attempt a tool call even with --tools "" + the
-        # anti-flailing steer. One additional turn lets it recover with a
-        # text-only response. Empirically verified: --max-turns 1 fails with
-        # `subtype: error_max_turns` / `stop_reason: tool_use` on probes that
-        # prompt tool-attempt behavior; --max-turns 5 works cleanly in normal
-        # operation. error_max_turns at 5+ is rare but possible — handled
-        # below as a degraded-output trial (counts as a trial; recorded with
-        # the error so per-condition error rates are visible; NOT excluded
-        # and NOT retried — exclusion/retry could be condition-dependent and
-        # would bias the headline; see pre-reg §"Test subjects").
-        # --effort xhigh enables Claude's "extra-high" thinking budget for
-        # this session. The frontier-capability framing of the transfer
-        # probe (pre-reg line 133) requires the strongest signal Claude
-        # can produce; xhigh is the named tier just below `max`. The
-        # effort level is constant within Claude across A/B/C, so the
-        # per-subject paired-McNemar headline is unaffected; cross-subject
-        # cost-lift comparisons carry the (constant) overhead delta per
-        # the static-overhead caveat (pre-reg §"What this benchmark will
-        # NOT establish"). The effort level is captured per-call in
-        # instrument_extra.claude_code_effort_requested for audit.
-        cmd = [
-            self._claude_bin,
-            "--print",
-            "--max-turns", "5",
-            "--no-session-persistence",
-            "--output-format", "json",
-            "--model", self.bundle.model_name,
-            "--effort", "xhigh",
-            "--system-prompt", effective_system_prompt,  # REPLACE default; verified
-            "--tools", "",                                # disable all built-in tools
-        ]
-        # Fresh isolated cwd per call: no CLAUDE.md/project-memory leaks.
-        # Per-call dir (not a fixed scratch) so accidental writes by
-        # subprocesses can't accumulate across the ~660-trial sweep.
-        with tempfile.TemporaryDirectory(prefix="claude-isolated-") as scratch:
-            t0 = time.monotonic()
-            try:
-                proc = subprocess.run(
-                    cmd,
-                    input=user_prompt,
-                    capture_output=True,
-                    text=True,
-                    cwd=scratch,
-                    timeout=self._timeout_seconds,
-                    check=False,
-                )
-            except FileNotFoundError as e:
-                raise NotImplementedError(
-                    f"ClaudeInstrument requires the `claude` CLI on PATH (or set "
-                    f"DRIFTWOOD_CLAUDE_CODE_BIN). Tried: {self._claude_bin!r}. "
-                    f"See benchmark/README.md."
-                ) from e
-            wall_clock = time.monotonic() - t0
-
-        # Parse the JSON envelope FIRST. The Claude Code CLI returns a
-        # well-formed JSON document even when is_error=true (e.g.
-        # error_max_turns), with exit code 1. We treat error_max_turns and
-        # similar degraded-output cases as completed trials with whatever
-        # `result` text exists — typically empty for error_max_turns. The
-        # scoring layer will fail them naturally on both the checklist (no
-        # implementation present) and matches-intent (low score). This
-        # preserves the trial sample without exclusion or retry, both of
-        # which could be condition-dependent and bias the headline.
-        try:
-            data = json.loads(proc.stdout) if proc.stdout.strip() else {}
-        except json.JSONDecodeError as e:
-            raise RuntimeError(
-                f"Claude Code CLI returned non-JSON on stdout despite "
-                f"--output-format json. exit_code={proc.returncode}. "
-                f"First 2 KB of stdout: {proc.stdout[:2048]!r}\n"
-                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
-            ) from e
-
-        # Raise only on hard failures (no parseable JSON envelope — that's
-        # a wiring problem, not a degraded-trial). is_error inside a valid
-        # envelope is captured below and surfaced via extra fields.
-        if not data and proc.returncode != 0:
-            raise RuntimeError(
-                f"Claude Code CLI returned exit code {proc.returncode} "
-                f"with no parseable JSON envelope. "
-                f"stderr (last 2 KB): {proc.stderr[-2048:]!r}"
-            )
-
-        text = data.get("result", "") or ""
-        usage = data.get("usage", {}) or {}
-        tokens_input = int(usage.get("input_tokens", 0))
-        tokens_output = int(usage.get("output_tokens", 0))
-        num_turns = int(data.get("num_turns", 0))
-
-        return InstrumentResponse(
-            text=text,
-            tokens_input=tokens_input,
-            tokens_output=tokens_output,
-            # tool_steps = num_turns - 1 (the first turn is the response
-            # itself; any additional turn is a tool round-trip). With
-            # --tools "" + the anti-flailing steer, this should usually be 0.
-            tool_steps=max(0, num_turns - 1),
-            wall_clock_seconds=wall_clock,
-            bundle_id=self.bundle.bundle_id(),
-            invocation_seed=seed,
-            extra={
-                # Per-call audit fields — load-bearing for the regime-
-                # constancy check (harness/regime_constancy.py). These let
-                # us verify post-trial that num_turns / tokens / cost /
-                # stop_reason distributions are comparable across A/B/C
-                # within the Claude arm. If they diverge, the within-Claude
-                # cost-lift gate is regime-distorted rather than measuring
-                # the spec format's actual cost.
-                "claude_code_duration_ms": data.get("duration_ms"),
-                "claude_code_total_cost_usd": data.get("total_cost_usd"),
-                "claude_code_num_turns": num_turns,
-                "claude_code_stop_reason": data.get("stop_reason"),
-                "claude_code_subtype": data.get("subtype"),
-                "claude_code_is_error": data.get("is_error"),
-                "claude_code_errors": data.get("errors"),
-                "claude_code_exit_code": proc.returncode,
-                # cache_creation_input_tokens captures Claude's intrinsic
-                # constitution/safety overhead (~2k-4.5k tokens, constant
-                # across conditions); recorded for audit and for the F-009
-                # transfer-probe limitations.
-                "claude_code_cache_creation_input_tokens": usage.get("cache_creation_input_tokens"),
-                "claude_code_cache_read_input_tokens": usage.get("cache_read_input_tokens"),
-                # Actually-served model version(s) — we pin to the
-                # canonical `claude-opus-4-7` (not the `opus` alias), but
-                # Anthropic may still rotate point releases behind that
-                # name or add a dated variant during the sweep. Capture
-                # the served keys per call so any rotation is visible
-                # post-hoc. The list keys of modelUsage are the served
-                # version IDs (typically one).
-                "claude_code_served_models": list((data.get("modelUsage") or {}).keys()),
-                # Requested effort tier (pre-reg-relevant: the frontier-
-                # capability framing of the transfer probe requires the
-                # strongest signal Claude can produce). Captured for
-                # audit and so any mid-sweep change is detectable.
-                "claude_code_effort_requested": "xhigh",
-                # Note: seed is recorded above but Claude Code does NOT use it.
-                # Same-seed re-runs will diverge; recorded for audit, not gated.
-            },
-        )
 
 
-# Pinned Claude transfer-probe bundle for trial zero (v9 + this commit).
-#
-# Model: `claude-opus-4-7` requested via --model + `xhigh` requested via
-# --effort. This is the FRONTIER-CAPABILITY tier in the Claude lineup at
-# the time of trial zero, per the pre-reg's framing (line 133: "Tests how
-# spec-helpfulness varies with model capability tier" — the probe is only
-# interpretable as a capability-tier claim when the Claude side runs on a
-# frontier model; on Haiku/Sonnet the "Claude lift < Qwen lift" outcome
-# would collapse to "this small Claude needed the scaffold too," which is
-# uninterpretable). xhigh is the named tier just below `max`; if Phase 5
-# calibrations show xhigh is leaving signal on the table, escalation to
-# `max` is the natural redirect.
-#
-# Why the canonical name not the alias. We request `claude-opus-4-7` (not
-# the `opus` alias) so the request itself locks the model generation;
-# the alias would resolve to Opus 4.8 mid-sweep once Anthropic releases
-# it, silently confounding any within-Claude A-vs-B that straddles the
-# rotation. (Unlike Haiku 4.5's dated form `claude-haiku-4-5-20251001`,
-# Opus 4.7 does not yet have a dated variant — empirically verified at
-# this commit: every `claude-opus-4-7-YYYYMMDD` guess returned 404.
-# `claude-opus-4-7` IS the canonical pin available for this generation.)
-# The audit backstop — capturing the actually-served version per call
-# from Claude Code's `modelUsage` — is preserved: any future point-
-# release rotation behind the canonical name is detectable post-hoc, and
-# would land in F-009's "served versions observed" report.
-CLAUDE_TRANSFER_PROBE_BUNDLE = InstrumentBundle(
-    model_name="claude-opus-4-7",
-    variant="claude-code-cli-headless-effort-xhigh",
-    quant="",
-    gguf_sha256="",  # not applicable for API-hosted model
-    inference_engine="claude-code-cli-2.1.143",  # update at harness-build commit
-    sampling_temperature=0.0,  # documentation only; Claude Code CLI does not expose --temperature
-    sampling_top_p=1.0,
-    sampling_top_k=0,
-    sampling_max_tokens=4096,
-    chat_template="",  # Claude Code default; not user-controllable
-    reasoning_format="",  # extended thinking enabled via --effort xhigh; output text only — thinking traces not returned in --print JSON
-    notes=(
-        "Invoked via Claude Code CLI in headless mode (--print --no-session-"
-        "persistence --max-turns 5 --tools '' --model claude-opus-4-7 "
-        "--effort xhigh --system-prompt <sys+steer> --output-format json) "
-        "with cwd = fresh tempdir per call to neutralize project-memory "
-        "contamination. Subscription login; no API key. Frontier-capability "
-        "tier per pre-reg line 133 — Opus 4.7 at xhigh effort. Two named "
-        "instrument-level confounds (recorded in F-009 transfer-probe "
-        "limitations): (1) STATIC overhead — Claude Code's intrinsic "
-        "constitution/safety/tool-description overhead, prompt-independent, "
-        "constant across A/B/C within Claude (headline safe; mildly pads "
-        "cost-lift denominator); exact token magnitude re-measured at this "
-        "commit's isolation smoke with Opus xhigh (Haiku-era numbers do not "
-        "transfer). (2) DYNAMIC overhead — Claude is heavily agentic-trained "
-        "and may attempt denied tool calls when prompts feel context-poor; "
-        "mitigated by the CLAUDE_ANTI_FLAILING_SUFFIX system-prompt steer "
-        "('tools are disabled... respond with the implementation directly "
-        "as text'), verified post-trial by harness/regime_constancy.py "
-        "which checks that num_turns / tokens / cost / stop_reason "
-        "distributions are comparable across A/B/C within the Claude arm "
-        "(turning the constancy assumption into a measured fact). "
-        "error_max_turns trials count as failures (no exclusion, no retry "
-        "— would be condition-dependent and bias the headline); per-"
-        "condition error rates reported with F-009. Isolation verified "
-        "via benchmark/harness/verify_claude_isolation.py."
-    ),
-)
+# --- ARCHIVED AT v12-D ---
+# ClaudeInstrument + CLAUDE_TRANSFER_PROBE_BUNDLE + CLAUDE_ANTI_FLAILING_SUFFIX
+# moved to `benchmark/harness/archived/instrument_claude.py` at v12-D scope
+# reduction (pre-reg supersession `1bb0803 → ...`). The pre-registered Opus
+# 4.7 / xhigh transfer-probe identity remains the design-of-record; v12-D
+# defers the probe under THIS benchmark execution only (step 6c read (c)
+# FLIP_API_KEY rule fired at 100.4% of default subscription budget; user
+# chose deferral over API-key fallback and v12-substitute paths). A future
+# re-activation re-imports from `archived/instrument_claude.py` and re-adds
+# `claude` to `harness/sweep_plan.py::INSTANCE_SEED_BASE_BY_SUBJECT` with
+# the reserved `seed_base=2_000_000`. See `archived/README.md` for the full
+# re-activation procedure.
+# --- END ARCHIVED v12-D ---

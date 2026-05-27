@@ -69,7 +69,7 @@ from benchmark.harness.calibration import (
     check_blinding_generalization,
     write_generalization_check_result,
 )
-from benchmark.harness.instrument import (
+from benchmark.harness.archived.instrument_claude import (
     CLAUDE_TRANSFER_PROBE_BUNDLE,
     ClaudeInstrument,
 )
@@ -84,7 +84,7 @@ from benchmark.harness.run_trial import run_trial, write_trial_record
 from benchmark.harness.sweep_plan import plan_sweep
 from benchmark.harness.tasks import load_task
 
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 TRIALS_DIR = REPO_ROOT / "benchmark" / "harness" / "trials"
 AUDITS_DIR = REPO_ROOT / "benchmark" / "harness" / "audits"
 GEMMA_PORT = 8081
@@ -253,7 +253,7 @@ def run_isolation_check() -> bool:
     print("[+] Pre-flight: ClaudeInstrument isolation check (~$0.10–$0.50)...",
           file=sys.stderr)
     rc = subprocess.call(
-        [sys.executable, "-m", "benchmark.harness.verify_claude_isolation"],
+        [sys.executable, "-m", "benchmark.harness.archived.verify_claude_isolation"],
         cwd=str(REPO_ROOT),
     )
     return rc == 0

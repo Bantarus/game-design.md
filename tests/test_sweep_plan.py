@@ -28,8 +28,8 @@ from benchmark.harness.sweep_plan import (
 
 
 @pytest.fixture(scope="module")
-def claude_plan():
-    return plan_sweep(subject="claude", shuffle_seed=12345)
+def qwen_plan():
+    return plan_sweep(subject="qwen", shuffle_seed=12345)
 
 
 @pytest.fixture(scope="module")
@@ -37,7 +37,7 @@ def qwen_plan():
     return plan_sweep(subject="qwen", shuffle_seed=12345)
 
 
-def test_total_cells_per_subject(claude_plan, qwen_plan):
+def test_total_cells_per_subject(qwen_plan):
     """Per pre-reg §"Power, MDE, and the discordance assumption" line 341:
     per-subject total = 330 = 240 paired + 60 C (m/h/a) + 30 easy.
 
@@ -50,12 +50,14 @@ def test_total_cells_per_subject(claude_plan, qwen_plan):
       easy paired:  1 task type × 2 games × 5 N × 2 conditions   =  20
       easy C:       1 task type × 2 games × 5 N × 1 condition    =  10
                                                             total = 330
+
+    v12-D: Claude arm deferred (archived under benchmark/harness/archived/);
+    single-subject (Qwen) total is 330 by construction.
     """
-    assert len(claude_plan) == 330
     assert len(qwen_plan) == 330
 
 
-def test_c_n_per_cell_overrides_applied(claude_plan):
+def test_c_n_per_cell_overrides_applied(qwen_plan):
     """C cells run at half N for m/h/a (n_c=10) and full N for easy (n_c=5).
 
     Counts per (task, game) for C:
@@ -66,7 +68,7 @@ def test_c_n_per_cell_overrides_applied(claude_plan):
                                   total = 70 C cells
     """
     c_counts: dict[str, int] = {}
-    for cell in claude_plan:
+    for cell in qwen_plan:
         if cell.condition == "C":
             c_counts[cell.task] = c_counts.get(cell.task, 0) + 1
     assert c_counts["easy"] == 10, f"easy C={c_counts['easy']} (expected 10)"
@@ -76,12 +78,12 @@ def test_c_n_per_cell_overrides_applied(claude_plan):
     assert sum(c_counts.values()) == 70
 
 
-def test_per_instance_cell_count(claude_plan):
+def test_per_instance_cell_count(qwen_plan):
     """Every instance contributes A and B (paired). C is contributed only
     by the first n_c instances per (task, game) — see
     C_N_PER_CELL_OVERRIDES. Instances beyond n_c get [A, B] but no C."""
     instances: dict[str, list[TrialCell]] = {}
-    for cell in claude_plan:
+    for cell in qwen_plan:
         instances.setdefault(cell.instance_id, []).append(cell)
     for iid, cells in instances.items():
         conds = sorted(c.condition for c in cells)
@@ -94,11 +96,11 @@ def test_per_instance_cell_count(claude_plan):
         )
 
 
-def test_paired_cells_adjacent_and_same_unit(claude_plan):
+def test_paired_cells_adjacent_and_same_unit(qwen_plan):
     """For every (game, task, seed_n) instance, A and B are adjacent
     in execution order AND share the same unit_id."""
     by_instance: dict[str, list[TrialCell]] = {}
-    for cell in claude_plan:
+    for cell in qwen_plan:
         by_instance.setdefault(cell.instance_id, []).append(cell)
 
     for iid, cells in by_instance.items():
@@ -123,13 +125,13 @@ def test_paired_cells_adjacent_and_same_unit(claude_plan):
         assert ab_sorted[0].seed == ab_sorted[1].seed
 
 
-def test_c_cells_unpaired_role(claude_plan):
+def test_c_cells_unpaired_role(qwen_plan):
     """C cells carry pair_role='unpaired_c' and are alone in their unit."""
     unit_to_cells: dict[str, list[TrialCell]] = {}
-    for cell in claude_plan:
+    for cell in qwen_plan:
         unit_to_cells.setdefault(cell.unit_id, []).append(cell)
 
-    for cell in claude_plan:
+    for cell in qwen_plan:
         if cell.condition == "C":
             assert cell.pair_role == "unpaired_c"
             unit_members = unit_to_cells[cell.unit_id]
@@ -139,7 +141,7 @@ def test_c_cells_unpaired_role(claude_plan):
             )
 
 
-def test_within_pair_coin_flips(claude_plan):
+def test_within_pair_coin_flips(qwen_plan):
     """The within-pair coin should produce a mix of A-first and B-first
     orderings across the sweep (not deterministic A-first).
 
@@ -150,7 +152,7 @@ def test_within_pair_coin_flips(claude_plan):
     a_first = 0
     b_first = 0
     by_unit: dict[str, list[TrialCell]] = {}
-    for cell in claude_plan:
+    for cell in qwen_plan:
         by_unit.setdefault(cell.unit_id, []).append(cell)
     for unit_id, cells in by_unit.items():
         if len(cells) == 2:  # paired unit
@@ -168,8 +170,8 @@ def test_within_pair_coin_flips(claude_plan):
 
 def test_plan_is_deterministic():
     """Same inputs → same plan, byte-for-byte."""
-    p1 = plan_sweep(subject="claude", shuffle_seed=12345)
-    p2 = plan_sweep(subject="claude", shuffle_seed=12345)
+    p1 = plan_sweep(subject="qwen", shuffle_seed=12345)
+    p2 = plan_sweep(subject="qwen", shuffle_seed=12345)
     assert len(p1) == len(p2)
     for c1, c2 in zip(p1, p2):
         assert c1 == c2
@@ -177,8 +179,8 @@ def test_plan_is_deterministic():
 
 def test_different_seeds_produce_different_orders():
     """Different shuffle_seeds → measurably different orderings."""
-    p1 = plan_sweep(subject="claude", shuffle_seed=12345)
-    p2 = plan_sweep(subject="claude", shuffle_seed=67890)
+    p1 = plan_sweep(subject="qwen", shuffle_seed=12345)
+    p2 = plan_sweep(subject="qwen", shuffle_seed=67890)
     # Same cell set (same conditions × tasks × games × seeds), but
     # different order.
     assert set((c.instance_id, c.condition) for c in p1) == \
@@ -198,8 +200,8 @@ def test_within_pair_seed_is_independent_of_shuffle_seed():
     """Changing only within_pair_seed flips coins but the inter-unit
     order should depend only on shuffle_seed — verify the two seeds
     are independent levers."""
-    p1 = plan_sweep(subject="claude", shuffle_seed=12345, within_pair_seed=0)
-    p2 = plan_sweep(subject="claude", shuffle_seed=12345, within_pair_seed=99)
+    p1 = plan_sweep(subject="qwen", shuffle_seed=12345, within_pair_seed=0)
+    p2 = plan_sweep(subject="qwen", shuffle_seed=12345, within_pair_seed=99)
     # Same unit-shuffle order: extracting unit_ids in order should match.
     units_p1 = []
     seen = set()
@@ -218,28 +220,38 @@ def test_within_pair_seed_is_independent_of_shuffle_seed():
     )
 
 
-def test_subject_seed_bases_differ(claude_plan, qwen_plan):
-    """Qwen and Claude use different seed bases — instance seeds should
-    not collide across subjects."""
-    claude_seeds = {c.seed for c in claude_plan}
-    qwen_seeds = {c.seed for c in qwen_plan}
-    assert not (claude_seeds & qwen_seeds), (
-        "instance seeds collide between qwen and claude — bases too close"
+def test_qwen_seed_base_isolated_from_reserved_claude_range():
+    """v12-D scope reduction archived the Claude transfer probe; the Claude
+    `seed_base=2_000_000` is preserved as a RESERVED comment in
+    INSTANCE_SEED_BASE_BY_SUBJECT so re-activation produces bit-identical
+    seeds. This test verifies that Qwen's seed range never collides with
+    the reserved Claude range — re-activation can re-add `"claude": 2_000_000`
+    without seed collisions.
+
+    Qwen seeds: 1_000_000 + instance_idx (0..329) → 1_000_000..1_000_329.
+    Reserved Claude range: 2_000_000..2_000_329 (same allocation pattern).
+    """
+    qp = plan_sweep(subject="qwen", shuffle_seed=0)
+    qwen_seeds = {c.seed for c in qp}
+    reserved_claude_range = set(range(2_000_000, 2_000_000 + 330))
+    assert not (qwen_seeds & reserved_claude_range), (
+        "Qwen seeds collide with the reserved Claude range — re-activation "
+        "would produce non-deterministic seed allocation"
     )
 
 
-def test_no_duplicate_cells(claude_plan):
+def test_no_duplicate_cells(qwen_plan):
     """No (subject, condition, task, game, seed) tuple appears twice."""
     keys = [
-        (c.subject, c.condition, c.task, c.game, c.seed) for c in claude_plan
+        (c.subject, c.condition, c.task, c.game, c.seed) for c in qwen_plan
     ]
     assert len(keys) == len(set(keys))
 
 
-def test_order_indices_are_contiguous(claude_plan):
+def test_order_indices_are_contiguous(qwen_plan):
     """order_index is 0..N-1 with no gaps."""
-    indices = sorted(c.order_index for c in claude_plan)
-    assert indices == list(range(len(claude_plan)))
+    indices = sorted(c.order_index for c in qwen_plan)
+    assert indices == list(range(len(qwen_plan)))
 
 
 def test_unknown_subject_raises():
@@ -250,7 +262,7 @@ def test_unknown_subject_raises():
 def test_cli_emits_jsonl(tmp_path, capsys):
     """The CLI emits one JSON object per line, in execution order."""
     from benchmark.harness.sweep_plan import main as cli_main
-    rc = cli_main(["--subject", "claude", "--shuffle-seed", "0"])
+    rc = cli_main(["--subject", "qwen", "--shuffle-seed", "0"])
     assert rc == 0
     captured = capsys.readouterr()
     lines = captured.out.strip().splitlines()
@@ -260,5 +272,5 @@ def test_cli_emits_jsonl(tmp_path, capsys):
     for i, line in enumerate(lines):
         obj = json.loads(line)
         assert obj["order_index"] == i
-        assert obj["subject"] == "claude"
+        assert obj["subject"] == "qwen"
         assert obj["condition"] in ("A", "B", "C")
