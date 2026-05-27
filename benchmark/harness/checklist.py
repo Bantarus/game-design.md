@@ -68,23 +68,24 @@ class ChecklistGrader:
     def _grade_criterion(
         self, crit: ChecklistCriterion, task: Task, output: str
     ) -> CriterionVerdict:
-        """Grade one criterion. Uses a tight yes/no judge prompt.
+        """Grade one criterion. Routes through `Judge.grade_checklist_criterion`
+        (v14-D wiring).
 
-        STUB: until the aux judge is wired up, this returns a permissive
-        substring-based grade for very simple criteria, and a 'cannot grade'
-        verdict for everything else. The intent is for the wired-up Judge
-        to replace this with a real grading call.
+        The judge implementation uses the prompt template at
+        `write_checklist_template_for_judge` below and returns
+        `(passed, rationale)` per the pre-reg's binary-yes/no contract.
+        Pre-v14-D this method was stubbed with a permissive keyword match
+        marked `[STUB] ... replace with judge call before trials count.`
         """
-        # Permissive: if any keyword from the criterion id appears in the
-        # output, count it as "passed" — purely to let the harness exercise
-        # end-to-end without a wired-up judge. This is NOT scoring; it's a
-        # placeholder.
-        keyword = crit.id.replace("_", " ")[:30]
-        passed = keyword in output.lower() or crit.id.replace("_", "") in output.lower()
+        passed, rationale = self.judge.grade_checklist_criterion(
+            criterion_id=crit.id,
+            criterion_description=crit.description,
+            subject_output=output,
+        )
         return CriterionVerdict(
             criterion_id=crit.id,
             passed=passed,
-            rationale=f"[STUB] permissive keyword match on '{keyword}'; replace with judge call before trials count.",
+            rationale=rationale,
         )
 
 

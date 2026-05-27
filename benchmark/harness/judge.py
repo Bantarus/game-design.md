@@ -187,6 +187,29 @@ class Judge(ABC):
         outputs: list[tuple[int, str]],  # [(output_id, blinded_text), ...]
     ) -> list[ConditionPrediction]: ...
 
+    @abstractmethod
+    def grade_checklist_criterion(
+        self,
+        criterion_id: str,
+        criterion_description: str,
+        subject_output: str,
+    ) -> tuple[bool, str]:
+        """Grade one objective intent checklist criterion.
+
+        Per pre-reg §"Judge" Layer 1: a binary yes/no grade against a
+        specific criterion. Uses the prompt template at
+        `benchmark.harness.checklist.write_checklist_template_for_judge`.
+
+        Returns (passed, rationale) — `passed` is the yes/no verdict;
+        `rationale` is the judge's 1-2 sentence explanation citing specific
+        text in the output (per the template's instructions).
+
+        v14-D: wired into the active scoring stack. Prior to v14-D this
+        method did not exist and `ChecklistGrader._grade_criterion` used a
+        permissive keyword-match stub.
+        """
+        ...
+
 
 # ---------------------------------------------------------------------------
 # Mock judge — for harness exercise WITHOUT external infra
@@ -239,6 +262,23 @@ class MockJudge(Judge):
                 rationale="[MOCK] uniform-random prediction.",
             ))
         return preds
+
+    def grade_checklist_criterion(
+        self,
+        criterion_id: str,
+        criterion_description: str,
+        subject_output: str,
+    ) -> tuple[bool, str]:
+        # Mock: permissive keyword-match on the criterion id (preserves the
+        # pre-v14-D stub behavior so existing tests + smoke trials continue
+        # to work without external infra). NOT a real grade — for harness
+        # exercise only.
+        keyword = criterion_id.replace("_", " ")[:30]
+        passed = (
+            keyword in subject_output.lower()
+            or criterion_id.replace("_", "") in subject_output.lower()
+        )
+        return (passed, f"[MOCK] permissive keyword match on '{keyword}'.")
 
 
 # ---------------------------------------------------------------------------
@@ -506,6 +546,56 @@ class GemmaJudge(Judge):
                 ))
         return all_preds
 
+    def grade_checklist_criterion(
+        self,
+        criterion_id: str,
+        criterion_description: str,
+        subject_output: str,
+    ) -> tuple[bool, str]:
+        """Grade one checklist criterion via the SHA-pinned Gemma judge.
+
+        Uses the prompt template at
+        `benchmark.harness.checklist.write_checklist_template_for_judge`
+        which already interpolates criterion_id + criterion_description at
+        template-build time (f-string) and leaves `{SUBJECT_OUTPUT}` as a
+        `.format()`-able placeholder. We fill that placeholder, send the
+        full prompt as the user message under a minimal system framing,
+        parse the judge's JSON `{passed, rationale}` response, and return
+        (passed, rationale).
+
+        The judge runs at the same temperature=0 / seed=0 it uses for the
+        other three pre-reg-pinned calls — deterministic across re-runs on
+        the same hardware (per v10's same-seed audit on the instrument
+        side; the judge side has historically been deterministic at
+        temperature=0 in our build).
+        """
+        from benchmark.harness.checklist import (
+            ChecklistCriterion,
+            write_checklist_template_for_judge,
+        )
+        crit = ChecklistCriterion(
+            id=criterion_id,
+            description=criterion_description,
+        )
+        template = write_checklist_template_for_judge(crit)
+        # The template has `{SUBJECT_OUTPUT}` (single braces) as a .format
+        # placeholder and `{{...}}` (escaped braces) for the JSON example.
+        # `.format(SUBJECT_OUTPUT=...)` fills the placeholder and converts
+        # `{{...}}` to literal `{...}` for the example.
+        user_prompt = template.format(SUBJECT_OUTPUT=subject_output)
+        # Minimal system framing — the template carries the full role
+        # definition + question + JSON contract, so the system prompt only
+        # reinforces "respond with JSON only."
+        system_prompt = (
+            "You are an objective rubric grader for a help-benchmark trial. "
+            "Respond with exactly the JSON object specified in the user message; "
+            "do not include any other text."
+        )
+        parsed, _raw = self._chat_for_json(system_prompt, user_prompt)
+        passed = bool(parsed.get("passed", False))
+        rationale = str(parsed.get("rationale", ""))
+        return (passed, rationale)
+
 
 # ---------------------------------------------------------------------------
 # Alternative-family judges (API-based, not the v7 pin)
@@ -544,6 +634,13 @@ class GeminiJudge(Judge):
             raise NotImplementedError("GeminiJudge requires GEMINI_API_KEY env var. Stub.")
         raise NotImplementedError("GeminiJudge.predict_conditions stub.")
 
+    def grade_checklist_criterion(
+        self, criterion_id, criterion_description, subject_output
+    ) -> tuple[bool, str]:
+        if not self._api_key:
+            raise NotImplementedError("GeminiJudge requires GEMINI_API_KEY env var. Stub.")
+        raise NotImplementedError("GeminiJudge.grade_checklist_criterion stub.")
+
 
 class OpenAIJudge(Judge):
     """OpenAI GPT-family aux judge. Requires OPENAI_API_KEY."""
@@ -566,3 +663,10 @@ class OpenAIJudge(Judge):
         if not self._api_key:
             raise NotImplementedError("OpenAIJudge requires OPENAI_API_KEY env var. Stub.")
         raise NotImplementedError("OpenAIJudge.predict_conditions stub.")
+
+    def grade_checklist_criterion(
+        self, criterion_id, criterion_description, subject_output
+    ) -> tuple[bool, str]:
+        if not self._api_key:
+            raise NotImplementedError("OpenAIJudge requires OPENAI_API_KEY env var. Stub.")
+        raise NotImplementedError("OpenAIJudge.grade_checklist_criterion stub.")
