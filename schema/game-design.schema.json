@@ -83,19 +83,49 @@
       "type": "object",
       "required": ["type", "status"],
       "properties": {
-        "type": { "enum": ["actor", "content_collection", "terrain", "currency", "system_object"] },
+        "type": {
+          "enum": ["actor", "content_collection", "terrain", "currency", "system_object", "instance_container"],
+          "description": "Entity cardinality. `actor`: a single instance (the player, a boss). `content_collection`: many templates from `data_source/*.yaml`. `instance_container` (F-008 v0.3): N owned instances each carrying per-instance runtime state — closes the gap the three-layer (actor / content_collection / scalar-resource) vocabulary couldn't express."
+        },
         "properties": { "type": "object" },
         "data_source": { "type": "string" },
         "schema_ref": { "$ref": "#/$defs/TokenRef" },
         "count_target": { "type": "integer", "minimum": 0 },
+        "capacity": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "F-008 v0.3: maximum simultaneous instances for `type: instance_container`. The container holds 0..capacity instances at any moment."
+        },
+        "holds_template_from": {
+          "$ref": "#/$defs/TokenRef",
+          "description": "F-008 v0.3: required for `type: instance_container`. Token ref to the `{entities.<kind>}` content_collection that defines the templates instances are drawn from. The container holds runtime instances of these templates."
+        },
+        "per_instance_state": {
+          "type": "object",
+          "description": "F-008 v0.3: required for `type: instance_container`. Sub-schema declaring the runtime-state fields each owned instance carries (durability, charges, quantity, etc.). Field values are type declarations in the same shape as content_collection.schema.properties. Validation of per-instance values against this sub-schema is the engine's responsibility at runtime."
+        },
         "status": { "$ref": "#/$defs/Status" },
         "implemented_in": { "$ref": "#/$defs/ImplementedIn" }
       },
       "allOf": [
         {
-          "if":   { "properties": { "type": { "const": "content_collection" } } },
-          "then": { "required": ["data_source"] },
-          "else": { "required": ["properties", "implemented_in"] }
+          "if":   { "properties": { "type": { "const": "content_collection" } }, "required": ["type"] },
+          "then": { "required": ["data_source"] }
+        },
+        {
+          "if":   { "properties": { "type": { "const": "instance_container" } }, "required": ["type"] },
+          "then": { "required": ["capacity", "holds_template_from", "per_instance_state", "implemented_in"] }
+        },
+        {
+          "if": {
+            "not": {
+              "properties": {
+                "type": { "enum": ["content_collection", "instance_container"] }
+              },
+              "required": ["type"]
+            }
+          },
+          "then": { "required": ["properties", "implemented_in"] }
         }
       ],
       "additionalProperties": true

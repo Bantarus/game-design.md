@@ -6,8 +6,8 @@ name: "Hollow Hold"
 short_pitch: "A 30-minute four-party dungeon descent where loot pity floors keep every run honest."
 genre_tags: [party-rpg, dungeon-crawler, single-player]
 status: draft
-version: 0.1.0
-last_updated: "2026-05-22"
+version: 0.2.0
+last_updated: "2026-05-28"
 target_platforms_neutral: [desktop, handheld]
 pillars:
   - "Four characters, one shared decision per turn"

@@ -10,13 +10,21 @@ entities:
     type: actor
     properties:
       position: { kind: world_coordinate }
-      inventory_capacity_slots: 12
-      stack_size_per_slot: 8
+      inventory: { from: "{entities.player_inventory}" }
       hp: { from: "{resources.hp}" }
       hunger: { from: "{resources.hunger}" }
       thirst: { from: "{resources.thirst}" }
     status: draft
     implemented_in: ["src/driftwood/mechanics/player.py"]
+  player_inventory:
+    type: instance_container
+    capacity: 12
+    holds_template_from: "{entities.recipes}"
+    per_instance_state:
+      remaining_durability: { type: integer, minimum: 0 }
+      quantity:             { type: integer, minimum: 1, maximum: 8, default: 1 }
+    status: draft
+    implemented_in: ["src/driftwood/mechanics/inventory.py"]
   resource_node:
     type: terrain
     properties:
@@ -80,7 +88,7 @@ verbs:
       time_cost: { in_game_minutes: 15 }
       consumes: target_food_item
     target_schema:
-      type: inventory_item
+      type: "{entities.player_inventory}"
       filter: "tag_equals_food"
     effects:
       - { resolve: "{rules.eat_resolution}" }
@@ -495,7 +503,7 @@ The complete mechanical surface: 5 entities (one of which is the `recipes` conte
 
 The five entities partition the world into the things-that-act, the things-that-yield, the things-that-craft, the player's win-condition object, and the data-only recipe collection.
 
-- `player` is the sole actor. Its inventory is a property (12 slots, 8-per-slot stacking) — see the friction-artifact note below for why inventory is not modeled as `resources`.
+- `player` is the sole actor. Its inventory is a first-class `instance_container` entity (`{entities.player_inventory}`, capacity 12, 8-per-slot stacking via `per_instance_state.quantity`) referenced by the player's `inventory:` property — see the per-instance-state note below.
 - `resource_node` is hand-authored per-island; the brief enumerates the kinds (tree, stone outcrop, fiber plant, berry bush, tidepool, spring, flint outcrop). The `yield_per_harvest_with_correct_tool` field encodes the brief's "bare hands gives a small amount, the right tool gives a useful amount."
 - `crafting_station` is the built-world-object class. The four kinds enumerated cover everything the brief lists (campfire, sawhorse, shelter, still). The `durability` field is non-zero because the brief implies stations are not infinite (a fire burns out).
 - `recipes` is the content collection — see `gdd/content/recipes.md` for the schema and `content/recipes/*.yaml` for the per-recipe data. Twelve recipes total (under the §6 inline-content threshold of 20, but externalized to demonstrate the data-as-content pattern and to make the Easy benchmark task (author a new recipe) genuinely authorable from a schema + one YAML example).
@@ -509,9 +517,9 @@ The four verbs the brief names — gather / craft / eat-drink-sleep / build-the-
 
 ### Resources
 
-Only three resources: the vital meters `hp`, `hunger`, `thirst`. Inventory contents (how much wood, fiber, stone, flint, plus per-instance items like tools with their own durability) are NOT modeled as `resources` — they are per-item entries inside `entities.player.inventory_capacity_slots` × `stack_size_per_slot`. The spec's `resources:` namespace is for scalar vital quantities (HP-like, mana-like, meter-like); inventory is structured data on an entity.
+Only three resources: the vital meters `hp`, `hunger`, `thirst`. Inventory contents (how much wood, fiber, stone, flint, plus per-instance items like tools with their own durability) are NOT modeled as `resources` — they live inside `{entities.player_inventory}`, an `instance_container` (spec §4.1, F-008 v0.3 resolution) holding up to 12 instances drawn from `{entities.recipes}` templates, with `per_instance_state` carrying `remaining_durability` and `quantity` per instance. The spec's `resources:` namespace is for scalar vital quantities (HP-like, mana-like, meter-like); inventory is a structured container.
 
-**The per-instance state on inventory items is a real friction the spec doesn't yet model cleanly.** A wooden axe has its own remaining-uses counter (durability); when the player has two wooden axes, each tracks its own. The spec has `entities` (templates) and `content_collection` (data sets) but no first-class concept of "a runtime inventory of multi-instance items with per-instance state." This game models it via `entities.player.inventory_capacity_slots` (slot count) + an implicit understanding that each slot carries an item id + per-item runtime state (remaining uses for tools, count for stacks), but the spec gives no direct vocabulary for it. **Flagged as a v0.3 candidate finding: the spec may benefit from a first-class concept of multi-instance owned items with per-instance state, distinct from `content_collection` (templates) and `resources` (scalar quantities).**
+**Per-instance state on owned items is the F-008 v0.3 resolution.** A wooden axe has its own remaining-uses counter (durability); when the player has two wooden axes, each tracks its own. In the original v0.1 / v0.2.0-alpha authoring this required smuggling the state shape into prose because the three-layer entity vocabulary (`actor` + `content_collection` + `resources`) couldn't express "N owned instances each carrying per-instance runtime state." F-008's resolution at v0.3 adds `instance_container` as a peer entity type (spec §4.1) — Driftwood's `player_inventory` declares `capacity: 12`, `holds_template_from: "{entities.recipes}"`, and a `per_instance_state:` sub-schema for `remaining_durability` (countdown from each recipe's `output.starting_durability`) and `quantity` (stack count, 1-8 per slot).
 
 ### States
 

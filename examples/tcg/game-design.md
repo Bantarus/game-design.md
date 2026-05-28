@@ -6,8 +6,8 @@ name: "Lattice"
 short_pitch: "A 20-minute asymmetric two-player TCG. Pick an archetype, play three best-of-three games, win on cards not luck."
 genre_tags: [tcg, two-player, head-to-head]
 status: draft
-version: 0.1.0
-last_updated: "2026-05-22"
+version: 0.2.0
+last_updated: "2026-05-28"
 target_platforms_neutral: [desktop, web]
 pillars:
   - "Cards decide games, not lucky draws"

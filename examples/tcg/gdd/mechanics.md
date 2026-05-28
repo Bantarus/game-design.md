@@ -19,6 +19,19 @@ entities:
     data_source: ../../content/cards
     count_target: 220
     status: draft
+  battlefield:
+    type: instance_container
+    capacity: 200
+    holds_template_from: "{entities.cards}"
+    per_instance_state:
+      controller:         { enum: [local, opponent] }
+      tapped:             { type: boolean, default: false }
+      summoning_sickness: { type: boolean, default: true }
+      counters_plus_one:  { type: integer, minimum: 0, default: 0 }
+      counters_minus_one: { type: integer, minimum: 0, default: 0 }
+      damage_taken:       { type: integer, minimum: 0, default: 0 }
+    status: draft
+    implemented_in: []
 verbs:
   play_card:
     actor: "{entities.player}"
@@ -193,6 +206,8 @@ Owns entities, verbs, resources, states, and rules for Lattice. The `phase_state
 ## Rationale
 
 **Two state machines, two shapes.** `{states.card_state}` is the deckbuilder-style lifecycle with `exiled` as a terminal sink. `{states.phase_state}` is a *cyclic* machine — each turn goes `untap → upkeep → main → combat → endphase → untap (opponent)`. Cyclic machines satisfy `state-machine-coverage` as long as every node has at least one outgoing transition.
+
+**Cards on the battlefield carry per-instance state via `instance_container`.** `{entities.battlefield}` (spec §4.1, F-008 v0.3 resolution) holds up to 200 instances drawn from `{entities.cards}` templates, with `per_instance_state` carrying `controller` (which player owns the instance), `tapped` (tap state), `summoning_sickness` (the turn-of-arrival lock), `counters_plus_one` / `counters_minus_one` (stat modifiers), and `damage_taken` (cumulative damage on creatures). Before F-008's v0.3 resolution, this state was invisible to the token surface — the `card_state` machine tracked zone but couldn't express per-instance runtime data. Cards in `in_deck`, `in_hand`, `graveyard`, or `exiled` are addressed by template id alone (no per-instance state matters in those zones); on-board cards live in this container.
 
 **Six verbs.** Four player-issued (`play_card`, `attack`, `end_turn`, `mulligan`), two system-issued (`draw_card`, `start_game`). The system verbs handle the game's invariants (initial draw, first-player coin flip, turn-start draw).
 

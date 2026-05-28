@@ -12,6 +12,7 @@ entities:
       hp:    { from: "{resources.hp}" }
       mp:    { from: "{resources.mp}" }
       gold:  { from: "{resources.gold}" }
+      inventory: { from: "{entities.player_inventory}" }
       party_size: 4
     status: draft
     implemented_in: []
@@ -20,6 +21,17 @@ entities:
     data_source: ../../content/items
     count_target: 50
     status: draft
+  player_inventory:
+    type: instance_container
+    capacity: 24
+    holds_template_from: "{entities.items}"
+    per_instance_state:
+      remaining_durability: { type: integer, minimum: 0 }
+      charges:              { type: integer, minimum: 0 }
+      quantity:             { type: integer, minimum: 1, default: 1 }
+      equipped_by_member:   { type: integer, minimum: -1, maximum: 3, default: -1 }
+    status: draft
+    implemented_in: []
 verbs:
   act:
     actor: "{entities.player}"
@@ -156,3 +168,5 @@ Owns entities, verbs, resources, states, and rules for Hollow Hold. Distribution
 **The character lifecycle has revival.** `{states.character_lifecycle.unconscious}` can transition back to `alive` via the `revive` event (a held item, a healer spell, or the post-battle medic mechanic). Only `dead` is terminal. This makes Hollow Hold less punishing than a roguelike — encounters that wipe one character don't end the quest if the remaining party can clutch a revive.
 
 **Three resources, shared across the party.** `hp` and `mp` are tracked per-character at runtime, but for the design doc they're the *shape* of every character's pool (max 100 hp, max 40 mp). `gold` is the party's shared currency.
+
+**Inventory is an `instance_container`.** `{entities.player_inventory}` (spec §4.1, F-008 v0.3 resolution) holds up to 24 instances drawn from `{entities.items}` templates, with `per_instance_state` carrying `remaining_durability` (per-equipment wear), `charges` (per-consumable uses), `quantity` (stack count), and `equipped_by_member` (which of the 4 party members has it equipped; -1 = unequipped). Before F-008's v0.3 resolution, this would have been smuggled into prose because the entity vocabulary had no slot for "N owned instances each with per-instance runtime state." Party members themselves remain scalar (`party_size: 4`); promoting them to a content_collection + container is a separate v0.4+ ratchet.

@@ -210,9 +210,26 @@ entities:
     schema_ref: "{content_schema.cards}"
     status: balanced
     count_target: 220
+  # F-008 v0.3: instance_container — N owned instances with per-instance state.
+  player_inventory:
+    type: instance_container
+    capacity: 12
+    holds_template_from: "{entities.items}"     # content_collection of templates
+    per_instance_state:                         # runtime fields per owned instance
+      remaining_durability: { type: integer, minimum: 0 }
+      charges:              { type: integer, minimum: 0 }
+      quantity:             { type: integer, minimum: 1, maximum: 8, default: 1 }
+    status: prototyped
+    implemented_in: ["src/inventory.py"]
 ```
 
-**Required keys per entity (top-level):** `type` (`actor | content_collection | terrain | currency | system_object`), `status`, `implemented_in` (omit only for `content_collection` types — those carry it per-entity-file). `properties` is required for non-`content_collection` types; `data_source` is required for `content_collection` types and must point to an existing directory.
+**Required keys per entity (top-level):** `type` (`actor | content_collection | terrain | currency | system_object | instance_container`), `status`, `implemented_in` (omit only for `content_collection` types — those carry it per-entity-file). `properties` is required for `actor / terrain / currency / system_object`; `data_source` is required for `content_collection` types and must point to an existing directory; `capacity` + `holds_template_from` + `per_instance_state` are required for `instance_container` types.
+
+**Entity cardinality covers three cases.** `actor` is one (the player, a boss); `content_collection` is many-templated (cards in a library, recipes in a cookbook — each entry is a template from `data_source/*.yaml`); `instance_container` (F-008 v0.3) is many-instanced (12 inventory slots each holding an owned item with its own durability/charges/quantity, 4 party members each with their own hp/mp/equipment, cards on the battlefield each with their own +1/+1 counters). The three together make the entity-type vocabulary complete on cardinality.
+
+**`instance_container` is the F-008 resolution.** The v0.2.0-alpha three-layer vocabulary (`actor` + `content_collection` + `resources`) had no way to express "N owned instances each carrying per-instance runtime state" — the gap forced authoring workarounds in survival inventories, RPG parties, and TCG board states. F-008 v0.3 closes the gap: an `instance_container` declares (a) the `capacity:` (how many simultaneous instances), (b) the `holds_template_from:` content_collection (what each instance IS, by reference to a template), and (c) the `per_instance_state:` sub-schema (what runtime fields each instance carries beyond the template). The `per_instance_state:` sub-schema uses the same shape as content-schema files' `schema.properties:` (§6.1) — type declarations with `type`, `minimum`, `maximum`, `default`, etc. Engines validate per-instance values against this sub-schema at runtime.
+
+**Addressing specific instances** (e.g., "this wooden axe vs. that wooden axe in the player's inventory") is a deferred sub-question — the addressing DSL gets designed against tick-combat's concrete combat-resolution needs (the per-instance hp/lifecycle case), not speculatively. F-008's first wave lands the base shape against aggregate-addressing cases (party-rpg party members, tcg board cards, Driftwood inventory) where rules operate at the container level (`consume_from_inventory`, `add_to_inventory`); per-instance addressing follows in a subsequent v0.3 step driven by tick-combat.
 
 ### 4.2 `verbs`
 
@@ -1273,6 +1290,7 @@ The schema is working if, from a cold context, an AI coding agent can implement 
 | Seven core namespaces + `feel` + `balance_targets` | | **new** (§4) — the entire surface |
 | Named distributions for all randomness | | **new** (§4.8) — strict at v0.1 |
 | First-class clocks (`{clocks.<id>}` namespace) | | **new** (§4.7) — F-010 resolution at v0.3 |
+| `instance_container` entity type + `per_instance_state:` | | **new** (§4.1) — F-008 resolution at v0.3; completes entity-cardinality coverage (one / many-templated / many-instanced) |
 | Content-heavy data pattern (`data_source:`) | | **new** (§6) |
 | Architecture invariants, state-machine totality, `verify` adapter contract | | **new** (§4.11, §4.4, §9.5) — adapted from a parallel research effort and re-grounded engine-neutral (the source assumed a web engine; we express codebase properties and a pluggable adapter contract instead). |
 
