@@ -446,3 +446,338 @@ def test_write_to_template_field_silent_without_instance_containers(make_tree):
     res = _lint(make_tree())  # baseline tree, no instance_container
     findings = [f for f in res.findings if f.rule == "write-to-template-field"]
     assert findings == []
+
+
+# ---- Task 6 anti-staleness rules (v0.3) --------------------------------------
+# `stale-section` extension (configurable threshold + status-aware skip),
+# `prototyped-without-pointer` (new), and `shipped-stale-doc` (new).
+# All three are config-aware via LintConfig (default thresholds 30/30/180).
+# Tests inject `now` to make time deterministic (otherwise threshold edges
+# would depend on the wall clock when pytest runs).
+
+from datetime import datetime as _dt
+
+
+def _lint_with_config(root, **config_kw):
+    """Helper: lint a tree with a custom LintConfig."""
+    cfg = linter.LintConfig(**config_kw)
+    return linter.run_all(Tree.load(root), config=cfg)
+
+
+# ---- prototyped-without-pointer (NEW) -----------------------------------------
+
+def test_prototyped_without_pointer_silent_on_fresh_baseline(make_tree):
+    """Baseline subfiles all have last_verified ~7 days before today; the
+    default threshold is 30 days, so the new rule emits zero findings on a
+    fresh tree. (Also the baseline test_baseline_lints_clean test would
+    catch any regression here at exit-code 0; warnings would still slip
+    through.) Calibration anchor: baselines pass under defaults."""
+    res = _lint(make_tree())
+    findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"]
+    assert findings == [], (
+        "prototyped-without-pointer must not fire on fresh baselines:\n"
+        + "\n".join(f.message for f in findings)
+    )
+
+
+def test_prototyped_without_pointer_fires_on_stale_file(make_tree):
+    """Subfile's last_verified is 60 days before our injected `now`; default
+    threshold 30. Tokens at status: prototyped with implemented_in: [] are
+    flagged."""
+    # Baseline already has subfiles at last_verified="2026-05-21" with tokens
+    # at status: prototyped and implemented_in: []. We just need now to be far
+    # enough out for the file to be "stale" per the default threshold.
+    root = make_tree()
+    far_future = _dt(2026, 7, 30)  # 70 days after last_verified=2026-05-21
+    res = _lint_with_config(root, now=far_future)
+    findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"]
+    assert findings, (
+        "expected prototyped-without-pointer findings on stale baseline; got: "
+        + ", ".join(f"{f.rule}:{f.location}" for f in res.findings)
+    )
+    assert all(f.severity == "warning" for f in findings)
+    # Warning, not error — exit code stays clean.
+    assert res.exit_code == 0
+
+
+def test_prototyped_without_pointer_silent_when_impl_populated(make_tree):
+    """A subfile that's stale BUT whose tokens declare implemented_in: paths
+    doesn't fire the rule. (The rule is about missing pointers, not
+    staleness alone — staleness alone is `stale-section`'s job.)"""
+    mech = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-21"
+implemented_in: ["nonexistent/**/*.py"]
+entities:
+  player:
+    type: actor
+    status: prototyped
+    properties:
+      hp: 10
+    implemented_in: ["src/player.py"]
+verbs:
+  do_thing:
+    actor: "{entities.player}"
+    cost: { resource: "{resources.energy}", amount: 1 }
+    target_schema: { type: "{entities.player}" }
+    effects: [{ kind: noop }]
+    status: prototyped
+    implemented_in: ["src/do_thing.py"]
+resources:
+  energy:
+    scope: per_turn
+    min: 0
+    max: 3
+    visibility: hud
+    status: prototyped
+    implemented_in: ["src/energy.py"]
+"""
+    root = make_tree({"gdd/mechanics.md": mech})
+    far_future = _dt(2026, 7, 30)  # 70 days stale, far past threshold
+    res = _lint_with_config(root, now=far_future)
+    findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"
+                and "mechanics.md" in f.file]
+    # Tokens with populated implemented_in don't trip the rule.
+    assert findings == [], (
+        "tokens with implemented_in must not fire prototyped-without-pointer:\n"
+        + "\n".join(f"{f.location}: {f.message}" for f in findings)
+    )
+
+
+def test_prototyped_without_pointer_silent_on_draft_tokens(make_tree):
+    """A token at status: draft with empty implemented_in does NOT fire the
+    rule — `draft` is exempt because code may legitimately not exist yet."""
+    mech = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-21"
+entities:
+  player:
+    type: actor
+    status: draft
+    properties:
+      hp: 10
+verbs:
+  do_thing:
+    actor: "{entities.player}"
+    cost: { resource: "{resources.energy}", amount: 1 }
+    target_schema: { type: "{entities.player}" }
+    effects: [{ kind: noop }]
+    status: draft
+resources:
+  energy:
+    scope: per_turn
+    min: 0
+    max: 3
+    visibility: hud
+    status: draft
+"""
+    root = make_tree({"gdd/mechanics.md": mech})
+    far_future = _dt(2026, 12, 31)  # very stale
+    res = _lint_with_config(root, now=far_future)
+    findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"
+                and "mechanics.md" in f.file]
+    assert findings == [], (
+        "draft tokens must not fire prototyped-without-pointer:\n"
+        + "\n".join(f"{f.location}: {f.message}" for f in findings)
+    )
+
+
+def test_prototyped_without_pointer_threshold_configurable(make_tree):
+    """Bumping --prototyped-stale-days above the doc's age silences the rule;
+    dropping it below the doc's age makes it fire. Confirms the threshold
+    is the lever we expose."""
+    root = make_tree()
+    now = _dt(2026, 6, 10)  # 20 days after last_verified=2026-05-21
+    # 20 days old vs threshold 50 → silent.
+    res_silent = _lint_with_config(root, now=now, prototyped_stale_days=50)
+    findings_silent = [f for f in res_silent.findings if f.rule == "prototyped-without-pointer"]
+    assert findings_silent == []
+    # 20 days old vs threshold 10 → fires.
+    res_fires = _lint_with_config(root, now=now, prototyped_stale_days=10)
+    findings_fires = [f for f in res_fires.findings if f.rule == "prototyped-without-pointer"]
+    assert findings_fires
+
+
+# ---- shipped-stale-doc (NEW) -------------------------------------------------
+
+_SHIPPED_SUBFILE = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: shipped
+last_verified: "2025-11-01"
+---
+
+## Tokens
+"""
+
+
+def test_shipped_stale_doc_silent_below_threshold(make_tree):
+    """Shipped file last_verified=2025-11-01, now=2026-01-01 → 61 days old;
+    default threshold 180; rule silent."""
+    root = make_tree({"gdd/glossary.md": _SHIPPED_SUBFILE})
+    res = _lint_with_config(root, now=_dt(2026, 1, 1))
+    findings = [f for f in res.findings if f.rule == "shipped-stale-doc"]
+    assert findings == []
+
+
+def test_shipped_stale_doc_fires_above_threshold(make_tree):
+    """Shipped file last_verified=2025-11-01, now=2026-06-01 → 212 days old;
+    default threshold 180; rule fires."""
+    root = make_tree({"gdd/glossary.md": _SHIPPED_SUBFILE})
+    res = _lint_with_config(root, now=_dt(2026, 6, 1))
+    findings = [f for f in res.findings if f.rule == "shipped-stale-doc"]
+    assert findings, (
+        "expected shipped-stale-doc; got rules: "
+        + ", ".join(f.rule for f in res.findings)
+    )
+    assert all(f.severity == "warning" for f in findings)
+    assert any("212 days" in f.message for f in findings)
+    assert res.exit_code == 0  # warning, not error
+
+
+def test_shipped_stale_doc_silent_on_non_shipped(make_tree):
+    """Same file age but at status: balanced — rule silent (only shipped
+    fires this rule). The 90-day stale-section path would fire only if impl
+    mtime differed; we don't trip that here."""
+    sub = _SHIPPED_SUBFILE.replace("status: shipped", "status: balanced")
+    root = make_tree({"gdd/glossary.md": sub})
+    res = _lint_with_config(root, now=_dt(2026, 6, 1))
+    findings = [f for f in res.findings if f.rule == "shipped-stale-doc"]
+    assert findings == []
+
+
+def test_shipped_stale_doc_threshold_configurable(make_tree):
+    """At now=2026-06-01 the doc is 212 days old. Bumping threshold to 365
+    silences the rule; dropping to 30 still fires it."""
+    root = make_tree({"gdd/glossary.md": _SHIPPED_SUBFILE})
+    res_silent = _lint_with_config(root, now=_dt(2026, 6, 1), shipped_stale_days=365)
+    findings_silent = [f for f in res_silent.findings if f.rule == "shipped-stale-doc"]
+    assert findings_silent == []
+
+    res_fires = _lint_with_config(root, now=_dt(2026, 6, 1), shipped_stale_days=30)
+    findings_fires = [f for f in res_fires.findings if f.rule == "shipped-stale-doc"]
+    assert findings_fires
+
+
+# ---- stale-section (extended: configurable threshold + status-aware) ---------
+
+def test_stale_section_skips_draft_status(make_tree, tmp_path):
+    """Files at status: draft are exempt from stale-section — at draft the
+    impl pointer is often planned-but-unbacked or stub code, so an mtime
+    drift isn't a meaningful signal."""
+    # Build a draft subfile pointing at a freshly-modified impl file.
+    # We need an impl file that exists AND has a recent mtime relative to
+    # the doc's last_verified.
+    impl_dir = tmp_path / "src"
+    impl_dir.mkdir(exist_ok=True)
+    impl_path = impl_dir / "stuff.py"
+    impl_path.write_text("# stub\n")
+    # Set the impl mtime well after last_verified.
+    new_mtime = _dt(2027, 1, 1).timestamp()
+    import os
+    os.utime(impl_path, (new_mtime, new_mtime))
+    sub = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: draft
+last_verified: "2026-05-21"
+implemented_in: ["src/stuff.py"]
+---
+
+## Tokens
+"""
+    # Place the subfile under tmp_path so impl path resolves.
+    root = make_tree({"gdd/stuff.md": sub})
+    # make_tree builds the tree elsewhere; move impl into the tree root.
+    tree_impl_dir = root / "src"
+    tree_impl_dir.mkdir(exist_ok=True)
+    tree_impl_path = tree_impl_dir / "stuff.py"
+    tree_impl_path.write_text("# stub\n")
+    os.utime(tree_impl_path, (new_mtime, new_mtime))
+
+    res = _lint(root)
+    stale = [f for f in res.findings if f.rule == "stale-section" and "stuff.md" in f.file]
+    assert stale == [], (
+        "stale-section must skip files at status=draft (v0.3 Task 6 extension); "
+        f"got: {[f.message for f in stale]}"
+    )
+
+
+def test_stale_section_fires_at_prototyped_above_threshold(make_tree, tmp_path):
+    """At status: prototyped with impl mtime > last_verified + 30 days,
+    stale-section fires. Confirms the rule still works post-extension."""
+    sub = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-21"
+implemented_in: ["src/stuff.py"]
+---
+
+## Tokens
+"""
+    root = make_tree({"gdd/stuff.md": sub})
+    impl = root / "src" / "stuff.py"
+    impl.parent.mkdir(exist_ok=True)
+    impl.write_text("# stub\n")
+    import os
+    new_mtime = _dt(2027, 1, 1).timestamp()  # 8mo after last_verified
+    os.utime(impl, (new_mtime, new_mtime))
+
+    res = _lint(root)
+    stale = [f for f in res.findings if f.rule == "stale-section" and "stuff.md" in f.file]
+    assert stale, (
+        "expected stale-section on prototyped file with newer impl; got: "
+        + ", ".join(f"{f.rule}:{f.location}" for f in res.findings)
+    )
+    assert all(f.severity == "warning" for f in stale)
+
+
+def test_stale_section_threshold_configurable(make_tree, tmp_path):
+    """The --stale-days CLI option threads to LintConfig.stale_days."""
+    sub = """\
+---
+spec: game-design.md
+spec_version: 0.1.1
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-21"
+implemented_in: ["src/stuff.py"]
+---
+
+## Tokens
+"""
+    root = make_tree({"gdd/stuff.md": sub})
+    impl = root / "src" / "stuff.py"
+    impl.parent.mkdir(exist_ok=True)
+    impl.write_text("# stub\n")
+    import os
+    # 15 days newer than last_verified
+    drift_mtime = _dt(2026, 6, 5).timestamp()
+    os.utime(impl, (drift_mtime, drift_mtime))
+
+    # Tight threshold (5d) → fires
+    res_fires = _lint_with_config(root, stale_days=5)
+    findings_fires = [f for f in res_fires.findings
+                      if f.rule == "stale-section" and "stuff.md" in f.file]
+    assert findings_fires
+
+    # Lenient threshold (30d, default) → silent
+    res_silent = _lint_with_config(root, stale_days=30)
+    findings_silent = [f for f in res_silent.findings
+                       if f.rule == "stale-section" and "stuff.md" in f.file]
+    assert findings_silent == []

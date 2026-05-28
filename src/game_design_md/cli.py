@@ -30,9 +30,25 @@ def main() -> None:
 @main.command("lint", help="Lint a game-design.md tree. Emits JSON to stdout.")
 @click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
                                         path_type=Path))
-def lint_cmd(path: Path) -> None:
+@click.option("--stale-days", type=int, default=30, show_default=True,
+              help="`stale-section`: max days impl source can be newer than "
+                   "doc's `last_verified:` before warning.")
+@click.option("--prototyped-stale-days", type=int, default=30, show_default=True,
+              help="`prototyped-without-pointer`: tokens at status>=prototyped "
+                   "without `implemented_in:` are flagged when file's "
+                   "`last_verified:` exceeds this age.")
+@click.option("--shipped-stale-days", type=int, default=180, show_default=True,
+              help="`shipped-stale-doc`: files at status=shipped are flagged "
+                   "when `last_verified:` exceeds this age.")
+def lint_cmd(path: Path, stale_days: int, prototyped_stale_days: int,
+             shipped_stale_days: int) -> None:
     tree = Tree.load(path)
-    result = linter.run_all(tree)
+    config = linter.LintConfig(
+        stale_days=stale_days,
+        prototyped_stale_days=prototyped_stale_days,
+        shipped_stale_days=shipped_stale_days,
+    )
+    result = linter.run_all(tree, config=config)
     click.echo(json.dumps(result.to_dict(), indent=2))
     sys.exit(result.exit_code)
 

@@ -1,13 +1,21 @@
 """All v0.1.1 linter rules.
 
-Each `rule_<name>(tree)` returns a list[Finding]. `run_all(tree)` runs them
-all and packages the result as a `LintResult` (whose `.to_dict()` matches
-the JSON shape documented in `docs/spec.md` §9.1).
+Each `rule_<name>(tree)` returns a list[Finding]. `run_all(tree, config=None)`
+runs them all and packages the result as a `LintResult` (whose `.to_dict()`
+matches the JSON shape documented in `docs/spec.md` §9.1).
+
+v0.3 (Task 6) introduces `LintConfig` for the anti-staleness rule family
+(`stale-section`, `prototyped-without-pointer`, `shipped-stale-doc`). The
+config carries configurable thresholds with sensible defaults; rules that
+don't need config keep the `(tree)` signature and the dispatcher routes
+config to the ones that do.
 """
 from __future__ import annotations
 
+import inspect
 import re
 from collections import defaultdict
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -15,6 +23,38 @@ from typing import Any, Callable, Iterable
 from .findings import Finding, LintResult
 from .refs import TOKEN_REF_RE, walk_refs
 from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+
+
+@dataclass(frozen=True)
+class LintConfig:
+    """Configurable thresholds for the anti-staleness rule family (Task 6 v0.3).
+
+    All values are in days. Defaults are chosen against reasonable
+    maintenance-cadence assumptions, NOT against the in-repo trees'
+    `last_verified` distribution — at the v0.3 commit the in-repo trees were
+    all touched within ~7 days by recent retro-touches, so they trivially
+    pass any threshold ≥ 8 days. The defaults below let the rules fire only
+    when an entry looks genuinely stale by reasonable standards:
+
+      - `stale_days` (30): a doc that hasn't been re-verified while its
+        impl source has continued to move for over a month is likely drifting.
+      - `prototyped_stale_days` (30): a token marked past-draft without an
+        impl pointer, on a doc the agent hasn't touched in over a month, is
+        either stale spec or non-code prototyping that should declare itself.
+      - `shipped_stale_days` (180): a shipped section that hasn't been
+        re-verified in 6 months is highly suspect of having drifted from
+        production code. Promoted from `gdmd status` (where it's currently
+        a surfaced flag) to `gdmd lint` (where it now blocks via warning).
+
+    For projects with non-default cadence (hobby pace where prototyped-for-
+    3-months is normal, or production pace where prototyped-for-2-weeks is
+    alarming), override via `gdmd lint --stale-days N
+    --prototyped-stale-days N --shipped-stale-days N`.
+    """
+    stale_days: int = 30
+    prototyped_stale_days: int = 30
+    shipped_stale_days: int = 180
+    now: datetime | None = None  # injectable for tests
 
 # ---- Canonical section orders (spec §7.1) ---------------------------------------
 
@@ -464,11 +504,27 @@ def rule_broken_implementation_pointer(tree: Tree) -> list[Finding]:
     return findings
 
 
-def rule_stale_section(tree: Tree) -> list[Finding]:
+def rule_stale_section(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
+    """File's impl source mtime is newer than its `last_verified:` by more
+    than `config.stale_days` days.
+
+    v0.3 Task 6 extensions:
+      - Threshold is configurable via `config.stale_days` (default 30).
+      - Status-aware skip: files at `status` level < prototyped (i.e.
+        `draft`, `cut`, `deferred`) are exempt — at those statuses there is
+        no meaningful "impl drift" to detect, since `implemented_in:` is
+        either unbacked (draft) or paused (deferred/cut). `experimental` is
+        treated as level 1 per STATUS_LEVELS (code exists, design under
+        evaluation — drift IS meaningful, so the rule still applies).
+    """
+    config = config or LintConfig()
     findings: list[Finding] = []
     for pf in tree.files:
         if pf.file_type not in ("subfile", "content-schema", "content-entity"):
             continue
+        status = pf.frontmatter.get("status")
+        if STATUS_LEVELS.get(status or "draft", 0) < 1:
+            continue  # v0.3 Task 6: skip draft / cut / deferred files
         lv_raw = pf.frontmatter.get("last_verified")
         if not isinstance(lv_raw, str):
             continue
@@ -490,17 +546,145 @@ def rule_stale_section(tree: Tree) -> list[Finding]:
                 if not src.is_file():
                     continue
                 mtime = datetime.fromtimestamp(src.stat().st_mtime)
-                if (mtime - lv).days > 30:
+                if (mtime - lv).days > config.stale_days:
                     findings.append(Finding(
                         rule="stale-section", severity="warning",
                         file=pf.rel_str, location="last_verified",
                         message=(
                             f"source {src.relative_to(tree.root)} is "
                             f"{(mtime - lv).days} days newer than "
-                            f"last_verified={lv_raw}"
+                            f"last_verified={lv_raw} "
+                            f"(threshold: {config.stale_days})"
                         ),
                     ))
                     break
+    return findings
+
+
+# v0.3 Task 6: anti-staleness rules using LintConfig.
+_ACTIVE_STATUSES_FOR_POINTER = frozenset(
+    {"prototyped", "implemented", "balanced", "shipped", "experimental"}
+)
+
+
+def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
+    """Per-token rule: tokens at `status` ≥ prototyped (i.e. prototyped /
+    implemented / balanced / shipped / experimental) with empty `implemented_in:`,
+    on subfiles whose `last_verified:` exceeds `config.prototyped_stale_days`.
+
+    Signal: a token marked as past-draft without an impl pointer, that the
+    agent hasn't re-verified recently, has likely fallen out of sync —
+    either the spec advanced but the code didn't, or vice versa.
+
+    What this rule CANNOT distinguish (and is documented in spec §9.1):
+      - Stale spec the agent forgot to update (the target case).
+      - Genuine non-code prototyping (paper sketch / conceptual exploration).
+
+    For the second case, the AUTHOR's response options are:
+      - Use `status: experimental` for design-under-active-evaluation
+        (lifecycle state added in D-020) — note that `experimental` is in
+        the active set; this rule still fires on experimental tokens
+        without impl. The right response there is to populate a placeholder
+        `implemented_in:` (e.g. a docs path).
+      - Populate `implemented_in:` with a placeholder path (e.g.
+        `["docs/sketches/foo.md"]`) when the section is being actively
+        prototyped without code yet. The lint then doesn't fire.
+      - Accept the warning as a real workflow signal (the spec lacks
+        vocabulary for "actively prototyping without code yet" — that's a
+        v0.4+ vocabulary-extension question to surface, not a rule to
+        silence).
+
+    Tokens at status `draft | cut | deferred` are exempt (code may
+    legitimately not exist at those states per STATUS_LEVELS).
+    """
+    config = config or LintConfig()
+    now = config.now or datetime.now()
+    findings: list[Finding] = []
+
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        lv_raw = pf.frontmatter.get("last_verified")
+        if not isinstance(lv_raw, str):
+            continue
+        try:
+            lv = datetime.strptime(lv_raw, "%Y-%m-%d")
+        except ValueError:
+            continue
+        days_old = (now - lv).days
+        if days_old <= config.prototyped_stale_days:
+            continue  # file recently verified; rule's premise (stale doc) doesn't hold
+        for ns in SUBFILE_NAMESPACES:
+            block = pf.frontmatter.get(ns)
+            if not isinstance(block, dict):
+                continue
+            for tname, token in block.items():
+                if not isinstance(token, dict):
+                    continue
+                ts = token.get("status")
+                if ts not in _ACTIVE_STATUSES_FOR_POINTER:
+                    continue
+                impl = token.get("implemented_in")
+                if impl:  # has at least one entry
+                    continue
+                findings.append(Finding(
+                    rule="prototyped-without-pointer", severity="warning",
+                    file=pf.rel_str, location=f"{ns}.{tname}",
+                    message=(
+                        f"{ns}.{tname} is at status {ts!r} but has no "
+                        f"`implemented_in:`, and the file's last_verified="
+                        f"{lv_raw} is {days_old} days old "
+                        f"(threshold: {config.prototyped_stale_days}). "
+                        f"Either the spec drifted from code, or this is "
+                        f"non-code prototyping that should declare itself "
+                        f"(see spec §9.1)."
+                    ),
+                ))
+    return findings
+
+
+def rule_shipped_stale_doc(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
+    """File at `status: shipped` whose `last_verified:` exceeds
+    `config.shipped_stale_days` (default 180).
+
+    Promoted from `gdmd status`'s `--shipped-stale-days` flag to the
+    blocking-warning tier in lint at v0.3. A shipped section that hasn't
+    been re-verified in 6 months is highly suspect of having drifted from
+    production code; lint catches it instead of waiting for an explicit
+    `gdmd status` invocation.
+
+    Distinct from `stale-section` (which compares impl mtime against doc
+    last_verified): this rule fires on doc-recency alone, regardless of
+    whether impl files have moved.
+    """
+    config = config or LintConfig()
+    now = config.now or datetime.now()
+    findings: list[Finding] = []
+
+    for pf in tree.files:
+        if pf.file_type not in ("subfile", "content-schema", "content-entity"):
+            continue
+        if pf.frontmatter.get("status") != "shipped":
+            continue
+        lv_raw = pf.frontmatter.get("last_verified")
+        if not isinstance(lv_raw, str):
+            continue
+        try:
+            lv = datetime.strptime(lv_raw, "%Y-%m-%d")
+        except ValueError:
+            continue
+        days_old = (now - lv).days
+        if days_old > config.shipped_stale_days:
+            findings.append(Finding(
+                rule="shipped-stale-doc", severity="warning",
+                file=pf.rel_str, location="last_verified",
+                message=(
+                    f"status=shipped file last_verified={lv_raw} is "
+                    f"{days_old} days old (threshold: "
+                    f"{config.shipped_stale_days}); shipped sections drift "
+                    f"fast from production code without re-verification."
+                ),
+            ))
     return findings
 
 
@@ -842,7 +1026,7 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
 
 # ---- Dispatch -----------------------------------------------------------------
 
-ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
+ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_broken_ref,
     rule_missing_pillars,
     rule_missing_core_loop,
@@ -854,15 +1038,32 @@ ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
     rule_orphaned_entity,
     rule_unreferenced_verb,
     rule_broken_implementation_pointer,
-    rule_stale_section,
+    rule_stale_section,                  # v0.3 Task 6: now config-aware
     rule_balance_target_untyped,
     rule_determinism_undetermined_rule,
     rule_write_to_template_field,
     rule_invariant_violation,
+    rule_prototyped_without_pointer,     # v0.3 Task 6: NEW
+    rule_shipped_stale_doc,              # v0.3 Task 6: NEW
 ]
 
 
-def run_all(tree: Tree) -> LintResult:
+def _accepts_config(fn: Callable) -> bool:
+    """Compile-time check: does a rule accept the optional `config` kwarg?"""
+    try:
+        return "config" in inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+
+
+_CONFIG_AWARE_RULES: frozenset = frozenset(r for r in ALL_RULES if _accepts_config(r))
+
+
+def run_all(tree: Tree, config: LintConfig | None = None) -> LintResult:
+    """Run every rule. Rules that declare `config:` in their signature
+    receive the LintConfig (default values when `config=None`); the rest
+    take just `tree`."""
+    config = config or LintConfig()
     findings: list[Finding] = []
     for parse_err_path, msg in tree.parse_errors:
         try:
@@ -874,6 +1075,9 @@ def run_all(tree: Tree) -> LintResult:
             location="", message=msg,
         ))
     for r in ALL_RULES:
-        findings.extend(r(tree))
+        if r in _CONFIG_AWARE_RULES:
+            findings.extend(r(tree, config=config))
+        else:
+            findings.extend(r(tree))
     result = LintResult(findings=findings, files_scanned=len(tree.files))
     return result
