@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000043,
+  "timestamp_iso": "2026-05-28T00:09:49Z",
+  "order_index": 99,
+  "instance_id": "easy_platformer_003",
+  "unit_id": "easy_platformer_003_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "```yaml\n# Level: fault_lines_07_the_chasm\n# Region: fault_lines\n# Tier: 3\n# Description: A vertical descent through a fault line shaft with narrow ledges and checkpoints\n\nname: \"The Chasm\"\nregion: fault_lines\ntier: 3\ndescription: |\n  Descend through the fault lines in this vertical shaft. \n  Navigate narrow ledges and use your ember wisely to see the path ahead.\n  \n  * Checkpoints: Two along the natural descent path\n  * Ember pickups: Four (total 8 ember)\n  * Exit point: Bottom of shaft, below which lies lava\n\nplayer:\n  start_position: [100, 50]\n\n# Platforms are defined as rectangles [x, y, width, height]\nplatforms:\n  # Vertical shaft walls\n  - [0, 0, 20, 300]      # Left wall\n  - [198, 0, 20, 300]    # Right wall\n  \n  # Platform 1 - Initial platform\n  - [80, 60, 40, 10]\n  \n  # Platform 2 - Narrow ledge\n  - [100, 100, 20, 10]\n  \n  # Platform 3 - Slanted platform\n  - [90, 140, 30, 10]\n  \n  # Platform 4 - Narrow ledge\n  - [110, 180, 20, 10]\n  \n  # Platform 5 - Axis-aligned platform\n  - [80, 220, 40, 10]\n  \n  # Platform 6 - Final platform before exit\n  - [90, 260, 30, 10]\n\n# Checkpoints along the natural descent path\ncheckpoints:\n  - position: [100, 100]   # After first narrow ledge\n  - position: [90, 220]    # After axis-aligned platform\n\n# Ember pickups (total 8 ember)\nember_pickups:\n  - position: [105, 65]\n  - position: [105, 145]\n  - position: [115, 185]\n  - position: [95, 265]\n\n# Exit point\nexit:\n  position: [95, 290]\n  size: [20, 10]\n\n# Lava region at bottom (lethal)\nlava:\n  position: [0, 290]\n  size: [220, 300]\n\n# Lighting and visual effects\nlighting:\n  ambient_brightness: 0.2\n  ember_light_cone_angle: 45\n  ember_dimming_rate: 0.1\n\n# Physics settings\nphysics:\n  gravity: 0.5\n  jump_power: 8\n  dash_power: 12\n  glide_slowdown: 0.3\n  ember_consumption_rate:\n    dash: 2\n    glide: 0.5\n```",
+  "tokens_input": 693,
+  "tokens_output": 683,
+  "tool_steps": 0,
+  "wall_clock_seconds": 4.568810439988738,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

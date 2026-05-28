@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000006,
+  "timestamp_iso": "2026-05-27T23:28:59Z",
+  "order_index": 36,
+  "instance_id": "ambiguity_platformer_006",
+  "unit_id": "ambiguity_platformer_006_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "# Embergrave Collectible Design: \"Lumina\"\n\n## Name\n**Lumina**\n\n## Effect\nWhen collected, a Lumina grants the player a **temporary boost to ember brightness** for 10 seconds. During this time, the player's ember light cone widens by 50% and the dimming rate is halved. The boost is **stacked with the player's natural motion-based ember brightness**, so moving well still rewards better vision.\n\n## Placement and Authoring\n- **Placement**: Lumina appears as a small, glowing orb that can be placed anywhere in a level's geometry.\n- **Authoring**: Level designers specify placement as a simple point in 3D space (x,y,z) during level creation. The game engine automatically places it at the specified location and ensures it's visible but not obstructed by solid geometry.\n- **Constraints**: \n  - Lumina can only be placed on or near solid surfaces that allow the player to land on them.\n  - Each level can contain between 1-3 Lumina collectibles, with a maximum of 1 per region.\n  - Lumina must be placed in areas where the player would naturally need better visibility (e.g., tight passages, dark corners).\n\n## Rationale\n\n### Against \"Commitment\"\nThe Lumina doesn't change the fundamental commitment aspect of jumps or dashes. It's an optional enhancement that doesn't alter jump physics or dash mechanics\u2014players still commit to their actions as before.\n\n### Against \"Vision Through Motion\"\nLumina reinforces this pillar by rewarding exploration over repetitive grinding:\n- Players must actively explore the level to find Lumina\n- Collecting it provides a temporary benefit that encourages movement\n- The boost is time-limited, so players must use it strategically rather than just collecting it repeatedly\n- It's tied to exploration, not to grinding or repetition\n\n### Against \"Cheap Death, Sticky Progress\"\nLumina supports sticky progress because:\n- If a player dies while using a Lumina boost, they retain their progress up to the last checkpoint\n- The temporary boost encourages players to take risks and explore more dangerous areas\n- It's a consumable resource that can be used strategically without penalty\n\n## Design Choices\n\n### Duration (10 seconds)\nThis duration is chosen because:\n- It's long enough to allow meaningful exploration or passage through dark sections\n- It's short enough that players won't become complacent or rely on it for entire segments\n- It aligns with the game's philosophy of \"cheap death\" - players can die quickly trying to use it, but progress is sticky\n\n### Brightness Boost (50% wider cone + halved dimming)\nThis is a balanced reward that:\n- Provides enough benefit to encourage exploration without being overpowered\n- Reinforces the core mechanic of ember brightness being tied to motion\n- Allows players to see more of their surroundings while still maintaining challenge\n- The halved dimming rate ensures that movement is still rewarded\n\n### Quantity (1-3 per level, max 1 per region)\nThis quantity is chosen because:\n- It's enough to provide meaningful exploration incentives without overwhelming the player\n- It prevents repetitive grinding since players can only collect one per region\n- It fits within the established pattern of having a few key collectibles per level segment\n- The regional limit prevents excessive collection without encouraging repetition\n\n### Placement Constraints\nThese constraints ensure that:\n- Lumina doesn't break the intended challenge design of levels\n- Players must actually explore to find them (they're not just in obvious places)\n- They don't interfere with core gameplay mechanics like landing or movement\n\nThe Lumina collectible enhances Embergrave's core loop by rewarding exploration and providing a strategic resource that players can use to overcome particularly challenging sections, while maintaining the game's emphasis on commitment, motion-based vision, and sticky progress.",
+  "tokens_input": 734,
+  "tokens_output": 787,
+  "tool_steps": 0,
+  "wall_clock_seconds": 6.863125332980417,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

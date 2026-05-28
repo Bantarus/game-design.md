@@ -1,0 +1,71 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000041,
+  "timestamp_iso": "2026-05-28T00:44:04Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: fault_lines_07_the_chasm\nstatus: draft\nimplemented_in: [\"src/embergrave/levels/fault_lines_07_the_chasm.py\"]\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 210000\nentry: { x: 1000, y: 20000 }\nexit: { x: 8000, y: 500 }\ncheckpoints:\n  - { x: 1500, y: 17500 }\n  - { x: 4000, y: 11500 }\nplatforms:\n  - { x: 500, y: 19500, width: 2500, height: 300, surface: solid }\n  - { x: 5000, y: 17000, width: 1500, height: 200, surface: solid }\n  - { x: 1000, y: 14000, width: 1500, height: 200, surface: solid }\n  - { x: 3500, y: 11500, width: 1500, height: 200, surface: one_way }\n  - { x: 6000, y: 9000, width: 1500, height: 200, surface: solid }\n  - { x: 1500, y: 7000, width: 1500, height: 200, surface: solid }\n  - { x: 5500, y: 5500, width: 2000, height: 200, surface: solid }\nember_pickups:\n  - { x: 2200, y: 19300, ember_value: 1 }\n  - { x: 3800, y: 15000, ember_value: 2 }\n  - { x: 5500, y: 12500, ember_value: 1 }\n  - { x: 4200, y: 9500, ember_value: 1 }\nlethal_regions:\n  - { x: 0, y: 0, width: 9000, height: 200, tag: void }\n  - { x: 0, y: 6000, width: 500, height: 2000, tag: spike }\n  - { x: 8500, y: 6000, width: 500, height: 2000, tag: spike }\n  - { x: 0, y: 12500, width: 500, height: 2000, tag: spike }\n  - { x: 8500, y: 12500, width: 500, height: 2000, tag: spike }\n  - { x: 3500, y: 0, width: 2000, height: 400, tag: lava }\nnotes: Vertical descent level. Player enters at top (y=20000) and must descend to exit at bottom (y=500). Two intermediate checkpoints break the ~20000-micro_unit drop into three sections. Side walls in the middle bands are spike-tagged to punish lateral overshoot during dashes. Bottom-center carries a lava strip; final approach to exit is to the right. One of the platforms is one_way (the moth can jump up through it from below) to allow alternate routes back up after a missed checkpoint. Ember pickups distributed to allow 1-2 dashes per section. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player.\n```",
+  "subject_output_sanitized": "```yaml\n\nid: fault_lines_07_the_chasm\n\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 210000\nentry: { x: 1000, y: 20000 }\nexit: { x: 8000, y: 500 }\ncheckpoints:\n  - { x: 1500, y: 17500 }\n  - { x: 4000, y: 11500 }\nplatforms:\n  - { x: 500, y: 19500, width: 2500, height: 300, surface: solid }\n  - { x: 5000, y: 17000, width: 1500, height: 200, surface: solid }\n  - { x: 1000, y: 14000, width: 1500, height: 200, surface: solid }\n  - { x: 3500, y: 11500, width: 1500, height: 200, surface: one_way }\n  - { x: 6000, y: 9000, width: 1500, height: 200, surface: solid }\n  - { x: 1500, y: 7000, width: 1500, height: 200, surface: solid }\n  - { x: 5500, y: 5500, width: 2000, height: 200, surface: solid }\nember_pickups:\n  - { x: 2200, y: 19300, ember_value: 1 }\n  - { x: 3800, y: 15000, ember_value: 2 }\n  - { x: 5500, y: 12500, ember_value: 1 }\n  - { x: 4200, y: 9500, ember_value: 1 }\nlethal_regions:\n  - { x: 0, y: 0, width: 9000, height: 200, tag: void }\n  - { x: 0, y: 6000, width: 500, height: 2000, tag: spike }\n  - { x: 8500, y: 6000, width: 500, height: 2000, tag: spike }\n  - { x: 0, y: 12500, width: 500, height: 2000, tag: spike }\n  - { x: 8500, y: 12500, width: 500, height: 2000, tag: spike }\n  - { x: 3500, y: 0, width: 2000, height: 400, tag: lava }\nnotes: Vertical descent level. Player enters at top (y=20000) and must descend to exit at bottom (y=500). Two intermediate checkpoints break the ~20000-micro_unit drop into three sections. Side walls in the middle bands are spike-tagged to punish lateral overshoot during dashes. Bottom-center carries a lava strip; final approach to exit is to the right. One of the platforms is one_way (the moth can jump up through it from below) to allow alternate routes back up after a missed checkpoint. Ember pickups distributed to allow 1-2 dashes per section. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player.\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 18861,
+  "tokens_output": 932,
+  "tool_steps": 0,
+  "wall_clock_seconds": 10.554281571006868,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.7142857142857143,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The output is a level definition file that correctly specifies the region as 'fault_lines' and the id as 'fault_lines_07_the_chasm'."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": true,
+        "rationale": "The subject output explicitly sets `difficulty_tier: 3` in the YAML data and confirms the tier requirement in the `notes` section."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": false,
+        "rationale": "The 'platforms' list in the YAML output contains 7 platform entries, whereas the criterion requires exactly 6."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "The `checkpoints` list in the YAML contains exactly two entries, and the `notes` section confirms the inclusion of two intermediate checkpoints."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": false,
+        "rationale": "The output contains exactly 4 ember pickups, but their values (1, 2, 1, 1) sum to 5, which is outside the required range of 6-10 (8 \u00b1 2)."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": true,
+        "rationale": "The entry Y-coordinate is 20000 and the exit Y-coordinate is 500, which satisfies the requirement that the entry point is at a higher world-coordinate Y than the exit point."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": true,
+        "rationale": "The exit point is at y: 500, and there is a lethal region (lava) at y: 0 with a height of 400, placing it below the exit."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 3,
+    "rationale": "The output partially meets the brief by providing the correct level ID, region, tier, and general vertical structure. However, it contains a significant gap regarding the ember pickup requirement: the task brief specifies four pickups worth a total of about 8 ember, but the output provides four pickups totaling only 5 ember (1+2+1+1). Additionally, it includes several unsupported additions in the form of spike-tagged side walls which were not requested in the task brief.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

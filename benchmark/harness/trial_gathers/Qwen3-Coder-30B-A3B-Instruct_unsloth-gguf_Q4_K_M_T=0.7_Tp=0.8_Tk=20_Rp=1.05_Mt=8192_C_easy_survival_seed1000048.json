@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000048,
+  "timestamp_iso": "2026-05-28T01:19:42Z",
+  "order_index": 223,
+  "instance_id": "easy_survival_003",
+  "unit_id": "easy_survival_003_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "```yaml\n# File: content/recipes/cooked_fish.yaml\n\nname: cooked_fish\ndescription: A perfectly cooked fish, ready to eat.\ntype: food\nnutrition: 6\ntool_requirement: wooden_axe\ntier: 2\ncraft_time: 30\ningredients:\n  raw_fish: 1\noutput: cooked_fish\ncrafting_station: campfire\n```",
+  "tokens_input": 769,
+  "tokens_output": 86,
+  "tool_steps": 0,
+  "wall_clock_seconds": 1.3086690809868742,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

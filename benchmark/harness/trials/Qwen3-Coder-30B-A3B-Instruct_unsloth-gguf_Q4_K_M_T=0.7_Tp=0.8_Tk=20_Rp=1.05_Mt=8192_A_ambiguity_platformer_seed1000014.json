@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "A",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000014,
+  "timestamp_iso": "2026-05-27T23:32:17Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7123e376b056fd1be17280469b1ddffc6de4ad324906b415c89224534c44ae69",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "I'll implement a new collectible for Embergrave that rewards exploration without encouraging repetitive grinding. Let me analyze the game's design principles first.\n\nLooking at the design documents, I need to create something that:\n1. Aligns with \"Every jump is a commitment\" - shouldn't encourage spamming inputs\n2. Aligns with \"The cave is the puzzle; light is the lens\" - should enhance the exploration aspect\n3. Aligns with \"Death is cheap; progress is sticky\" - shouldn't make death more punishing\n\nBased on the existing collectibles (ember pickups), I'll create a **\"Secret Ember\"** collectible that provides a larger ember boost but is hidden and requires careful exploration to find.\n\n## New Collectible Design: Secret Ember\n\n```yaml\n---\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: secret_ember\nstatus: draft\nimplemented_in: [\"src/embergrave/entities/secret_ember.py\"]\nname: \"Secret Ember\"\nregion: any\ndifficulty_tier: any\ntime_target_ms: any\nentry: { x: 0, y: 0 }\nexit: { x: 0, y: 0 }\ncheckpoints: []\nplatforms: []\nember_pickups: []\nlethal_regions: []\nnotes: \"A special collectible that provides a large ember boost (4 units) but is hidden and requires exploration to find. Placed in hard-to-reach locations or behind one-way platforms.\"\n---\n\n# Secret Ember Collectible\n\n## Design Rationale\n\n### Alignment with Game Pillars\n\n**Every jump is a commitment**: The Secret Ember reinforces this pillar by requiring players to commit to challenging, precise movements to reach it. Unlike regular ember pickups which are typically visible and accessible, finding a Secret Ember requires the player to make deliberate, potentially risky jumps - exactly the kind of commitment the game encourages.\n\n**The cave is the puzzle; light is the lens**: Secret Embers add layers of exploration to the cave puzzle. They create hidden routes that players must discover through careful observation of the environment. The ember's light becomes a tool for discovery rather than just navigation.\n\n**Death is cheap; progress is sticky**: Secret Embers are not required for progression, so finding one doesn't penalize players who miss it. If a player dies trying to reach a Secret Ember, they can simply retry without losing access to the level's main path. The collectible adds to the \"discovery\" aesthetic without creating a barrier.\n\n### Placement Strategy\n\nSecret Embers should be placed in locations that:\n- Require precise platforming or exploration\n- Are not immediately obvious from standard play\n- Can be reached via creative routes (like one-way platforms, hidden paths)\n- Are positioned where players will notice them during careful playthroughs\n- Have a clear visual clue (but not so obvious as to remove the challenge)\n\n### Effect\n\nEach Secret Ember provides +4 ember units when collected. This is significant but not game-changing:\n- It's 4 units, which equals one full dash (the most expensive movement action)\n- It's more than a regular pickup but less than the maximum possible\n- This encourages players to collect them when they can afford to spend ember on exploration\n\n### Balance Considerations\n\nThe design follows existing patterns in the game:\n- Regular ember pickups are 1-2 units (see `caverns_01_first_breath.yaml`)\n- The maximum ember is 12 units\n- Secret Embers are placed strategically, not in every level (see `balance_targets.levels_per_region`)\n\n### Implementation Notes\n\nSecret Embers will be implemented as a new entity type that behaves similarly to regular ember pickups:\n- Positioned like regular pickups (x, y coordinates)\n- Have a collectible property (like `collected`)\n- Emit the same event when collected\n- Are treated identically to regular pickups in terms of collision detection\n\nThe key difference is that Secret Embers are placed by level designers to create discovery moments rather than being part of the standard platforming path.\n\n## Example Level Placement\n\nA level could include a Secret Ember at:\n```yaml\nsecret_ember_pickups:\n  - { x: 5000, y: 2000, ember_value: 4 }\n```\n\nThis would be placed in a location that requires careful platforming to reach (perhaps behind an obstacle or requiring a precise dash), but is not necessary for completion.\n\n## Technical Implementation\n\nSecret Embers will be added to the level schema with a new field `secret_ember_pickups` that mirrors the structure of `ember_pickups`. This follows the existing pattern without adding complexity.\n\nThe implementation will:\n- Add a new entity type `secret_ember_pickup`\n- Add it to the level schema\n- Implement the same collection mechanics as regular ember pickups\n- Ensure it appears in the presentation layer with appropriate visual design\n\nThis approach maintains the game's focus on precision movement while rewarding exploration without creating grind.\n\n## Summary\n\nThe Secret Ember collectible reinforces all three pillars:\n1. **Commitment**: Requires precise jumps to reach\n2. **Exploration**: Hidden locations that reveal themselves through careful play \n3. **Progression**: Not required for completion, so doesn't create unfair barriers\n\nThe 4-unit boost is balanced against the game's existing mechanics and provides a meaningful reward without being overpowered.\n\n```",
+  "subject_output_sanitized": "I'll implement a new collectible for Embergrave that rewards exploration without encouraging repetitive grinding. Let me analyze the game's design principles first.\n\nLooking at the design documents, I need to create something that:\n1. Aligns with \"Every jump is a commitment\" - shouldn't encourage spamming inputs\n2. Aligns with \"The cave is the puzzle; light is the lens\" - should enhance the exploration aspect\n3. Aligns with \"Death is cheap; progress is sticky\" - shouldn't make death more punishing\n\nBased on the existing collectibles (ember pickups), I'll create a **\"Secret Ember\"** collectible that provides a larger ember boost but is hidden and requires careful exploration to find.\n\nNew Collectible Design: Secret Ember\n\n```yaml\n---\n\nid: secret_ember\n\nname: \"Secret Ember\"\nregion: any\ndifficulty_tier: any\ntime_target_ms: any\nentry: { x: 0, y: 0 }\nexit: { x: 0, y: 0 }\ncheckpoints: []\nplatforms: []\nember_pickups: []\nlethal_regions: []\nnotes: \"A special collectible that provides a large ember boost (4 units) but is hidden and requires exploration to find. Placed in hard-to-reach locations or behind one-way platforms.\"\n---\n\n# Secret Ember Collectible\n\nDesign Rationale\n\nAlignment with Game Pillars\n\n**Every jump is a commitment**: The Secret Ember reinforces this pillar by requiring players to commit to challenging, precise movements to reach it. Unlike regular ember pickups which are typically visible and accessible, finding a Secret Ember requires the player to make deliberate, potentially risky jumps - exactly the kind of commitment the game encourages.\n\n**The cave is the puzzle; light is the lens**: Secret Embers add layers of exploration to the cave puzzle. They create hidden routes that players must discover through careful observation of the environment. The ember's light becomes a tool for discovery rather than just navigation.\n\n**Death is cheap; progress is sticky**: Secret Embers are not required for progression, so finding one doesn't penalize players who miss it. If a player dies trying to reach a Secret Ember, they can simply retry without losing access to the level's main path. The collectible adds to the \"discovery\" aesthetic without creating a barrier.\n\nPlacement Strategy\n\nSecret Embers should be placed in locations that:\n- Require precise platforming or exploration\n- Are not immediately obvious from standard play\n- Can be reached via creative routes (like one-way platforms, hidden paths)\n- Are positioned where players will notice them during careful playthroughs\n- Have a clear visual clue (but not so obvious as to remove the challenge)\n\nEffect\n\nEach Secret Ember provides +4 ember units when collected. This is significant but not game-changing:\n- It's 4 units, which equals one full dash (the most expensive movement action)\n- It's more than a regular pickup but less than the maximum possible\n- This encourages players to collect them when they can afford to spend ember on exploration\n\nBalance Considerations\n\nThe design follows existing patterns in the game:\n- Regular ember pickups are 1-2 units (see `caverns_01_first_breath.yaml`)\n- The maximum ember is 12 units\n- Secret Embers are placed strategically, not in every level (see `levels_per_region`)\n\nImplementation Notes\n\nSecret Embers will be implemented as a new entity type that behaves similarly to regular ember pickups:\n- Positioned like regular pickups (x, y coordinates)\n- Have a collectible property (like `collected`)\n- Emit the same event when collected\n- Are treated identically to regular pickups in terms of collision detection\n\nThe key difference is that Secret Embers are placed by level designers to create discovery moments rather than being part of the standard platforming path.\n\nExample Level Placement\n\nA level could include a Secret Ember at:\n```yaml\nsecret_ember_pickups:\n  - { x: 5000, y: 2000, ember_value: 4 }\n```\n\nThis would be placed in a location that requires careful platforming to reach (perhaps behind an obstacle or requiring a precise dash), but is not necessary for completion.\n\nTechnical Implementation\n\nSecret Embers will be added to the level schema with a new field `secret_ember_pickups` that mirrors the structure of `ember_pickups`. This follows the existing pattern without adding complexity.\n\nThe implementation will:\n- Add a new entity type `secret_ember_pickup`\n- Add it to the level schema\n- Implement the same collection mechanics as regular ember pickups\n- Ensure it appears in the presentation layer with appropriate visual design\n\nThis approach maintains the game's focus on precision movement while rewarding exploration without creating grind.\n\nSummary\n\nThe Secret Ember collectible reinforces all three pillars:\n1. **Commitment**: Requires precise jumps to reach\n2. **Exploration**: Hidden locations that reveal themselves through careful play\n3. **Progression**: Not required for completion, so doesn't create unfair barriers\n\nThe 4-unit boost is balanced against the game's existing mechanics and provides a meaningful reward without being overpowered.\n\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 23808,
+  "tokens_output": 1110,
+  "tool_steps": 0,
+  "wall_clock_seconds": 13.48691854000208,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject proposes a specific named collectible called 'Secret Ember' rather than using a placeholder."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the effect of the collectible, stating: 'Each Secret Ember provides +4 ember units when collected.'"
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output specifies placement locations (hard-to-reach, behind one-way platforms, or hidden paths) and mentions constraints regarding frequency (placed strategically, not in every level)."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing 'Secret Embers' in hard-to-reach, non-obvious locations that require precise movement. It avoids rewarding grinding by making the collectibles non-essential for progression and ensuring they are placed strategically rather than being part of a repetitive loop."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design aligns with the commitment pillar by requiring 'precise, potentially risky jumps' and 'deliberate' movements to reach the collectible, ensuring players must commit to their actions rather than spamming inputs."
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design reinforces the 'light is the lens' pillar by using the ember as a tool for discovery and does not introduce any HUD elements that would distract from the ember."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The subject explicitly aligns with the pillar by stating that Secret Embers are not required for progression and that dying while attempting to reach one does not penalize the player or block access to the main path."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The output focuses solely on a new collectible (Secret Ember) and does not introduce combat, story-driven moments, procedural generation, or persistent meta-progression."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": true,
+        "rationale": "The subject defends the proposed '4 units' value by citing existing balance ranges, specifically noting that regular pickups are 1-2 units and the maximum ember is 12 units."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output fully meets the task brief by introducing a 'Secret Ember' that rewards exploration without adding forbidden features like meta-progression. The design choice of a 4-unit value is defensible as it is significant but stays within the established ember capacity (12) and provides a meaningful reward (equivalent to one dash). Every design choice is explicitly mapped back to the three core pillars (Commitment, Vision, Cheap Death) as requested.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": true
+}

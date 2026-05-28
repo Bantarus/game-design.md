@@ -1,0 +1,71 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000040,
+  "timestamp_iso": "2026-05-28T00:50:01Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "```yaml\n# Level: fault_lines_07_the_chasm\n# Tier: 3 (Fault Lines)\n# Description: A vertical descent through a fault line shaft with narrow ledges and platforms\n\nname: \"The Chasm\"\nregion: \"fault_lines\"\ndifficulty: 3\nlength: \"medium\"\ncheckpoint_count: 2\nember_pickups: 4\nexit_position: [100, 500]\nstart_position: [100, 0]\n\n# The level is a vertical shaft with platforms arranged in a descending path\n# Player starts at top of shaft and must navigate down through six platforms\n# Two checkpoints along the natural descent path\n# Four ember pickups to collect\n\nplatforms:\n  # Initial platform at start (top)\n  - type: \"static\"\n    position: [100, 0]\n    size: [200, 20]\n    material: \"fault_line\"\n\n  # First platform - wide but requires precise jump\n  - type: \"static\"\n    position: [80, 80]\n    size: [120, 20]\n    material: \"fault_line\"\n\n  # Second platform - narrow ledge requiring careful movement\n  - type: \"static\"\n    position: [130, 160]\n    size: [60, 20]\n    material: \"fault_line\"\n\n  # Third platform - diagonal alignment\n  - type: \"static\"\n    position: [60, 240]\n    size: [100, 20]\n    material: \"fault_line\"\n    angle: -15\n\n  # Fourth platform - narrow and requires precise dash\n  - type: \"static\"\n    position: [120, 320]\n    size: [40, 20]\n    material: \"fault_line\"\n\n  # Fifth platform - wide but requires careful landing\n  - type: \"static\"\n    position: [80, 400]\n    size: [120, 20]\n    material: \"fault_line\"\n\n  # Sixth platform - final platform before exit\n  - type: \"static\"\n    position: [100, 480]\n    size: [100, 20]\n    material: \"fault_line\"\n\n# Checkpoints along natural descent path\ncheckpoints:\n  - position: [100, 160]  # After second platform\n    name: \"Checkpoint One\"\n    \n  - position: [100, 320]  # After fourth platform\n    name: \"Checkpoint Two\"\n\n# Ember pickups distributed along the path\nember_pickups:\n  - position: [120, 60]\n    value: 2\n    \n  - position: [150, 140]\n    value: 2\n    \n  - position: [100, 300]\n    value: 2\n    \n  - position: [90, 460]\n    value: 2\n\n# Lava region at bottom of shaft\nlava_region:\n  position: [0, 500]\n  size: [200, 100]\n  lethal: true\n\n# Exit platform (must be reached to complete level)\nexit_platform:\n  type: \"static\"\n  position: [90, 500]\n  size: [20, 20]\n  material: \"fault_line\"\n\n# Environment settings\nenvironment:\n  ambient_light: 0.1\n  ember_drain_rate: 0.01\n  ember_regen_rate: 0.005\n  gravity: 0.5\n  jump_power: 8.0\n  dash_power: 12.0\n  glide_power: 3.0\n\n# Player starting state\nplayer:\n  initial_ember: 10\n  max_ember: 10\n  ember_dimming_factor: 0.95\n```",
+  "subject_output_sanitized": "```yaml\n# Level: fault_lines_07_the_chasm\n# Tier: 3 (Fault Lines)\n# Description: A vertical descent through a fault line shaft with narrow ledges and platforms\n\nname: \"The Chasm\"\nregion: \"fault_lines\"\ndifficulty: 3\nlength: \"medium\"\ncheckpoint_count: 2\nember_pickups: 4\nexit_position: [100, 500]\nstart_position: [100, 0]\n\n# The level is a vertical shaft with platforms arranged in a descending path\n# Player starts at top of shaft and must navigate down through six platforms\n# Two checkpoints along the natural descent path\n# Four ember pickups to collect\n\nplatforms:\n  # Initial platform at start (top)\n  - type: \"static\"\n    position: [100, 0]\n    size: [200, 20]\n    material: \"fault_line\"\n\n  # First platform - wide but requires precise jump\n  - type: \"static\"\n    position: [80, 80]\n    size: [120, 20]\n    material: \"fault_line\"\n\n  # Second platform - narrow ledge requiring careful movement\n  - type: \"static\"\n    position: [130, 160]\n    size: [60, 20]\n    material: \"fault_line\"\n\n  # Third platform - diagonal alignment\n  - type: \"static\"\n    position: [60, 240]\n    size: [100, 20]\n    material: \"fault_line\"\n    angle: -15\n\n  # Fourth platform - narrow and requires precise dash\n  - type: \"static\"\n    position: [120, 320]\n    size: [40, 20]\n    material: \"fault_line\"\n\n  # Fifth platform - wide but requires careful landing\n  - type: \"static\"\n    position: [80, 400]\n    size: [120, 20]\n    material: \"fault_line\"\n\n  # Sixth platform - final platform before exit\n  - type: \"static\"\n    position: [100, 480]\n    size: [100, 20]\n    material: \"fault_line\"\n\n# Checkpoints along natural descent path\ncheckpoints:\n  - position: [100, 160]  # After second platform\n    name: \"Checkpoint One\"\n\n  - position: [100, 320]  # After fourth platform\n    name: \"Checkpoint Two\"\n\n# Ember pickups distributed along the path\nember_pickups:\n  - position: [120, 60]\n    value: 2\n\n  - position: [150, 140]\n    value: 2\n\n  - position: [100, 300]\n    value: 2\n\n  - position: [90, 460]\n    value: 2\n\n# Lava region at bottom of shaft\nlava_region:\n  position: [0, 500]\n  size: [200, 100]\n  lethal: true\n\n# Exit platform (must be reached to complete level)\nexit_platform:\n  type: \"static\"\n  position: [90, 500]\n  size: [20, 20]\n  material: \"fault_line\"\n\n# Environment settings\nenvironment:\n  ambient_light: 0.1\n  ember_drain_rate: 0.01\n  ember_regen_rate: 0.005\n  gravity: 0.5\n  jump_power: 8.0\n  dash_power: 12.0\n  glide_power: 3.0\n\n# Player starting state\nplayer:\n  initial_ember: 10\n  max_ember: 10\n  ember_dimming_factor: 0.95\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 693,
+  "tokens_output": 857,
+  "tool_steps": 0,
+  "wall_clock_seconds": 4.406046771997353,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.8571428571428571,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The output provides a level definition file that specifies the region as 'fault_lines' and includes the required ID 'fault_lines_07_the_chasm' in the header comment."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": true,
+        "rationale": "The subject output explicitly specifies the tier in multiple places, including the comment `# Tier: 3 (Fault Lines)` and the field `difficulty: 3`."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "The 'platforms' list contains exactly 6 platform entries, ranging from the 'Initial platform at start' to the 'Sixth platform'."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "The output explicitly defines 'checkpoint_count: 2' and provides a 'checkpoints' list containing exactly two entries: 'Checkpoint One' and 'Checkpoint Two'."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": true,
+        "rationale": "The output contains exactly 4 ember pickups, each with a value of 2, resulting in a total sum of 8."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "The start_position Y-coordinate is 0 and the exit_position Y-coordinate is 500, meaning the player is ascending rather than descending."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": true,
+        "rationale": "The output includes a 'lava_region' with 'lethal: true' at position [0, 500], which is at the same vertical level as the exit platform [90, 500], effectively placing a lethal region at the bottom of the shaft."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 3,
+    "rationale": "The output meets the core structural requirements of the task, including the platform count, checkpoint count, and ember pickup count. However, it contains several significant unsupported additions that contradict the design brief's constraints on level authorship. Specifically, the agent attempted to define global physics constants (gravity, jump power, etc.) and player state (initial ember) which the design brief explicitly states are 'not part of the design' and should be handled by the engine/builder, not the level author.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

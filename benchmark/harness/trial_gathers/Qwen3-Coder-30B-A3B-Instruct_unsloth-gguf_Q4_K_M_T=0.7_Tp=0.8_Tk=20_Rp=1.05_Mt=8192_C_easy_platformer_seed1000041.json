@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000041,
+  "timestamp_iso": "2026-05-28T00:33:29Z",
+  "order_index": 145,
+  "instance_id": "easy_platformer_001",
+  "unit_id": "easy_platformer_001_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "```yaml\n# Embergrave Level: fault_lines_07_the_chasm\n# Tier: 3 (Fault Lines)\n# Description: Vertical descent through a fault line shaft with narrow ledges and platforms\n\nname: \"The Chasm\"\nregion: \"fault_lines\"\ndifficulty: 3\nlength: \"medium\"\ntime_estimate: \"3:00\"\n\n# Initial player state\nplayer:\n  x: 100\n  y: 50\n  ember: 10\n\n# Level geometry - vertical shaft with platforms\ngeometry:\n  # Shaft walls\n  walls:\n    - {x: 0, y: 0, width: 20, height: 400}   # Left wall\n    - {x: 180, y: 0, width: 20, height: 400} # Right wall\n  \n  # Platforms (6 total)\n  platforms:\n    # Platform 1 - Starting platform\n    - {x: 80, y: 100, width: 40, height: 10}\n    \n    # Platform 2 - Narrow ledge\n    - {x: 120, y: 150, width: 20, height: 10}\n    \n    # Platform 3 - Wide platform\n    - {x: 60, y: 200, width: 80, height: 10}\n    \n    # Platform 4 - Narrow ledge\n    - {x: 130, y: 250, width: 20, height: 10}\n    \n    # Platform 5 - Wide platform\n    - {x: 70, y: 300, width: 60, height: 10}\n    \n    # Platform 6 - Narrow ledge\n    - {x: 125, y: 350, width: 20, height: 10}\n  \n  # Void/lava area at bottom (lethal)\n  lava:\n    - {x: 0, y: 380, width: 200, height: 20}\n\n# Checkpoints\ncheckpoints:\n  - x: 100\n    y: 180\n    id: \"checkpoint_1\"\n    \n  - x: 100\n    y: 330\n    id: \"checkpoint_2\"\n\n# Ember pickups (4 total, worth ~8 ember)\npickups:\n  - x: 90\n    y: 120\n    value: 2\n    \n  - x: 130\n    y: 220\n    value: 2\n    \n  - x: 80\n    y: 320\n    value: 2\n    \n  - x: 135\n    y: 370\n    value: 2\n\n# Exit point\nexit:\n  x: 100\n  y: 390\n  width: 20\n  height: 10\n\n# Level metadata\nmetadata:\n  author: \"Embergrave Team\"\n  version: \"1.0\"\n  description: \"Descend through a fault line shaft with narrow ledges and platforms. \n                Navigate carefully - the chasm below is deadly.\"\n```",
+  "tokens_input": 693,
+  "tokens_output": 724,
+  "tool_steps": 0,
+  "wall_clock_seconds": 5.245071267010644,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

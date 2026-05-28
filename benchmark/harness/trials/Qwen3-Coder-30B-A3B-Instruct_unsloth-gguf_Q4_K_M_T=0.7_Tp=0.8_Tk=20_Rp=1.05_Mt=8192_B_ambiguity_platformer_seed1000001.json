@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000001,
+  "timestamp_iso": "2026-05-28T02:19:17Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Collectible: \"Wisp\"\n\n## Design Rationale\n\nI'll add a new collectible called \"Wisp\" that rewards exploration without encouraging repetitive grinding. This aligns with Embergrave's pillars by:\n1. **Every jump is a commitment** - Wisp collection requires precise movement, not just repetition\n2. **The cave is the puzzle; light is the lens** - Finding Wisps reveals hidden routes and patterns in the cave geometry\n3. **Death is cheap; progress is sticky** - Wisps are purely optional collectibles that don't affect core progression\n\n## The Wisp Collectible\n\n### Name: Wisp\n\n### Effect:\nWhen collected, Wisps provide a temporary visual enhancement to the ember light cone. This creates a \"map reveal\" effect where previously dark areas of the level become visible for a short duration (3 seconds). This supports exploration without creating a gameplay mechanic that players must repeat.\n\n### Placement and Authoring:\n- Wisps are placed as optional collectibles in levels, similar to ember pickups\n- They have a `wisp_value` property (1-2) that determines how much of the map they reveal\n- They can be placed anywhere in a level's geometry, including hidden or hard-to-reach locations\n- Levels may include 0-3 Wisps per level\n\n### Constraints:\n- Wisps are not required for progression - levels must be completable without collecting any\n- Wisps cannot be collected during flight (to maintain the \"commitment\" pillar)\n- Wisps only affect visibility, not gameplay mechanics or resource management\n- Wisps are not tied to specific checkpoints or routes\n\n## Implementation\n\n### 1. New Entity Type: `wisp_pickup`\n\n```yaml\n# In gdd/mechanics.md - Add to Entities section\n**Entity `wisp_pickup`** is of type terrain. Properties: `position_x`={fixed_point=micro_units}, `position_y`={fixed_point=micro_units}, `wisp_value`={type=integer, default=1}, `collected`={type=boolean, default=false}.\n```\n\n### 2. New Verb: `collect_wisp`\n\n```yaml\n# In gdd/mechanics.md - Add to Verbs section\n**Action `collect_wisp`** is performed by system. Cost: 0. Targets: type=entities.wisp_pickup, filter=uncollected_and_overlapping_moth. Effects: resolve rules.wisp_collection.\n```\n\n### 3. New Rule: `wisp_collection`\n\n```yaml\n# In gdd/systems/physics.md - Add to Rules section\n**Rule `wisp_collection`**. Triggered by action verbs.collect_wisp. Steps: (1) `read_property` with source=wisp_pickup.wisp_value, into=delta; (2) `emit_event` with value=events.wisp_collected; (3) `mark_collected` with target=wisp_pickup. Outputs: wisp_revealed, event_emitted.\n```\n\n### 4. New Event: `wisp_collected`\n\n```yaml\n# In gdd/mechanics.md - Add to Events section\n**Event `wisp_collected`**. The player has collected a Wisp; emitted by {rules.wisp_collection}.\n```\n\n### 5. Updated Level Schema\n\n```yaml\n# In gdd/content/levels.md - Update the schema properties section\n- `wisps`: {type=array, items={type=object, required=[x, y, wisp_value], properties={x={type=integer}, y={type=integer}, wisp_value={type=integer, minimum=1, maximum=2}}}}\n```\n\n### 6. Updated Level Example\n\n```yaml\n# In content/levels/caverns_01_first_breath.yaml - Add to the ember_pickups section\nwisps:\n  - { x: 3500, y: 2000, wisp_value: 1 }\n```\n\n### 7. New Event Reference in State Machine\n\n```yaml\n# In gdd/mechanics.md - Update the moth_movement state machine transitions to include a wisp collection effect\n```\n\n## Design Justification Against Pillars and Balance\n\n### Against \"Every jump is a commitment\"\n- Wisps only reveal information, not gameplay mechanics\n- Collecting them requires precise positioning, reinforcing commitment to movement\n- No new input options or mechanics are added that would reduce commitment\n\n### Against \"The cave is the puzzle; light is the lens\"  \n- Wisps provide additional visual information that helps players understand the cave's geometry\n- They reward exploration and pattern recognition, not just memorization\n- The reveal effect is tied to the ember system, maintaining the light as the primary lens\n\n### Against \"Death is cheap; progress is sticky\"\n- Wisps are purely optional collectibles\n- They don't affect core progression or resource management\n- Players can collect them at their own pace without penalty\n\n### Balance Considerations\n- **Quantity**: 0-3 Wisps per level matches the exploration reward without overloading levels\n- **Value**: 1-2 value range keeps them optional but meaningful (1 for basic reveal, 2 for more extensive visibility)\n- **Placement**: No constraints on placement ensure level designers can create interesting routes\n- **Non-impact**: Wisps don't affect ember mechanics or checkpoints, keeping the core experience unchanged\n\nThis implementation provides a reward system that supports exploration while maintaining all core pillars and balance considerations of Embergrave.",
+  "subject_output_sanitized": "# New Collectible: \"Wisp\"\n\nDesign Rationale\n\nI'll add a new collectible called \"Wisp\" that rewards exploration without encouraging repetitive grinding. This aligns with Embergrave's pillars by:\n1. **Every jump is a commitment** - Wisp collection requires precise movement, not just repetition\n2. **The cave is the puzzle; light is the lens** - Finding Wisps reveals hidden routes and patterns in the cave geometry\n3. **Death is cheap; progress is sticky** - Wisps are purely optional collectibles that don't affect core progression\n\nThe Wisp Collectible\n\nName: Wisp\n\nEffect:\nWhen collected, Wisps provide a temporary visual enhancement to the ember light cone. This creates a \"map reveal\" effect where previously dark areas of the level become visible for a short duration (3 seconds). This supports exploration without creating a gameplay mechanic that players must repeat.\n\nPlacement and Authoring:\n- Wisps are placed as optional collectibles in levels, similar to ember pickups\n- They have a `wisp_value` property (1-2) that determines how much of the map they reveal\n- They can be placed anywhere in a level's geometry, including hidden or hard-to-reach locations\n- Levels may include 0-3 Wisps per level\n\nConstraints:\n- Wisps are not required for progression - levels must be completable without collecting any\n- Wisps cannot be collected during flight (to maintain the \"commitment\" pillar)\n- Wisps only affect visibility, not gameplay mechanics or resource management\n- Wisps are not tied to specific checkpoints or routes\n\nImplementation\n\n1. New Entity Type: `wisp_pickup`\n\n```yaml\n# In gdd/mechanics.md - Add to Entities section\n**Entity `wisp_pickup`** is of type terrain. Properties: `position_x`={fixed_point=micro_units}, `position_y`={fixed_point=micro_units}, `wisp_value`={type=integer, default=1}, `collected`={type=boolean, default=false}.\n```\n\n2. New Verb: `collect_wisp`\n\n```yaml\n# In gdd/mechanics.md - Add to Verbs section\n**Action `collect_wisp`** is performed by system. Cost: 0. Targets: type=wisp_pickup, filter=uncollected_and_overlapping_moth. Effects: resolve wisp_collection.\n```\n\n3. New Rule: `wisp_collection`\n\n```yaml\n# In gdd/systems/physics.md - Add to Rules section\n**Rule `wisp_collection`**. Triggered by action collect_wisp. Steps: (1) `read_property` with source=wisp_pickup.wisp_value, into=delta; (2) `emit_event` with value=wisp_collected; (3) `mark_collected` with target=wisp_pickup. Outputs: wisp_revealed, event_emitted.\n```\n\n4. New Event: `wisp_collected`\n\n```yaml\n# In gdd/mechanics.md - Add to Events section\n**Event `wisp_collected`**. The player has collected a Wisp; emitted by wisp_collection.\n```\n\n5. Updated Level Schema\n\n```yaml\n# In gdd/content/levels.md - Update the schema properties section\n- `wisps`: {type=array, items={type=object, required=[x, y, wisp_value], properties={x={type=integer}, y={type=integer}, wisp_value={type=integer, minimum=1, maximum=2}}}}\n```\n\n6. Updated Level Example\n\n```yaml\n# In content/levels/caverns_01_first_breath.yaml - Add to the ember_pickups section\nwisps:\n  - { x: 3500, y: 2000, wisp_value: 1 }\n```\n\n7. New Event Reference in State Machine\n\n```yaml\n# In gdd/mechanics.md - Update the moth_movement state machine transitions to include a wisp collection effect\n```\n\nDesign Justification Against Pillars and Balance\n\nAgainst \"Every jump is a commitment\"\n- Wisps only reveal information, not gameplay mechanics\n- Collecting them requires precise positioning, reinforcing commitment to movement\n- No new input options or mechanics are added that would reduce commitment\n\nAgainst \"The cave is the puzzle; light is the lens\"\n- Wisps provide additional visual information that helps players understand the cave's geometry\n- They reward exploration and pattern recognition, not just memorization\n- The reveal effect is tied to the ember system, maintaining the light as the primary lens\n\nAgainst \"Death is cheap; progress is sticky\"\n- Wisps are purely optional collectibles\n- They don't affect core progression or resource management\n- Players can collect them at their own pace without penalty\n\nBalance Considerations\n- **Quantity**: 0-3 Wisps per level matches the exploration reward without overloading levels\n- **Value**: 1-2 value range keeps them optional but meaningful (1 for basic reveal, 2 for more extensive visibility)\n- **Placement**: No constraints on placement ensure level designers can create interesting routes\n- **Non-impact**: Wisps don't affect ember mechanics or checkpoints, keeping the core experience unchanged\n\nThis implementation provides a reward system that supports exploration while maintaining all core pillars and balance considerations of Embergrave.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 18902,
+  "tokens_output": 1157,
+  "tool_steps": 0,
+  "wall_clock_seconds": 11.88145415802137,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.8888888888888888,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject output proposes a specific named collectible called \"Wisp\" rather than using a placeholder."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the effect of collecting a Wisp: 'Wisps provide a temporary visual enhancement to the ember light cone... where previously dark areas of the level become visible for a short duration (3 seconds).'"
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output specifies placement locations ('anywhere in a level's geometry, including hidden or hard-to-reach locations') and a quantity constraint ('0-3 Wisps per level')."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing Wisps in 'hidden or hard-to-reach locations' to reveal map geometry, while preventing grinding by making them 'purely optional' and limiting them to '0-3 Wisps per level' with no impact on core progression."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design explicitly reinforces the commitment pillar by stating 'Wisps cannot be collected during flight (to maintain the \"commitment\" pillar)' and ensuring they do not provide mechanics that allow players to undo decisions or bypass core movement challenges."
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design enhances the existing ember light cone rather than introducing a parallel HUD, and it explicitly states that Wisps do not affect resource management, maintaining consistency with the ember-as-light-and-resource pillar."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The design explicitly states that Wisps are 'purely optional collectibles that don't affect core progression' and 'don't affect ember mechanics or checkpoints,' ensuring death does not penalize progress."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The output introduces a new collectible (Wisp) that provides a visual effect but does not include combat, story-driven moments, procedural generation, or persistent meta-progression."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": false,
+        "rationale": "While the subject defines numbers (e.g., 0-3 Wisps per level, 3-second duration, 1-2 wisp_value), it fails to defend them against existing game balance ranges or cite comparable existing numbers from the game."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly aligns with the design brief's pillars. The 'Wisp' collectible provides visual information (supporting 'Vision through motion') without adding new movement verbs or combat (respecting 'What you cannot do'). The quantity (0-3 per level) and the fact that they are purely optional and do not affect resource management or checkpoints directly support the 'Cheap death, sticky progress' pillar.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

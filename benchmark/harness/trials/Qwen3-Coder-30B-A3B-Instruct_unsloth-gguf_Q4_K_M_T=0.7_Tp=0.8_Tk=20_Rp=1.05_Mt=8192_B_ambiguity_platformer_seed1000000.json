@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000000,
+  "timestamp_iso": "2026-05-28T01:43:31Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Collectible Design for Embergrave\n\n## Name: **Echo Resonance**\n\n## Effect:\nWhen collected, Echo Resonance grants the player a temporary \"Resonance Boost\" that:\n1. Temporarily increases the ember drain rate from 1/60 seconds to 1/30 seconds while gliding (doubling the ember consumption)\n2. Allows the player to see a visual indicator of all checkpoint positions in the current level for 5 seconds\n3. Provides a small visual glow effect around the player's silhouette during this period\n\n## Placement and Level Design:\nEcho Resonance collectibles are placed as **optional hidden items** within levels, typically requiring exploration or knowledge of alternate routes to discover. They would be placed in locations such as:\n- Behind one-way platforms\n- In narrow passages that require precise movement\n- Near dead-end sections where the player might backtrack\n\nEach level could contain 1-2 Echo Resonance collectibles, with a maximum of 4 across all levels.\n\n## Design Rationale:\n\n### Alignment with \"Every jump is a commitment\":\nThe Echo Resonance effect does not change the fundamental commitment mechanic. Instead, it provides information that helps players make better decisions about their route planning. The increased ember drain during gliding is a conscious trade-off - players must choose between seeing the route ahead and preserving their ember for future movement.\n\n### Alignment with \"The cave is the puzzle; light is the lens\":\nEcho Resonance serves as an information-enhancing tool that complements the player's natural vision through ember. It doesn't change the geometry or make the puzzle easier, but provides a way to see more of the level's structure at once - essentially allowing the player to \"see\" more of the cave with their light.\n\n### Alignment with \"Death is cheap; progress is sticky\":\nEcho Resonance does not provide any permanent progression benefits. It only affects gameplay during a single flight loop, and its effects are temporary. Players can collect it multiple times without needing to re-complete levels, but each collection is just a momentary benefit that doesn't change the fundamental difficulty curve.\n\n## Implementation Details:\n\n### Entity Properties:\n```yaml\nEntity `echo_pickup`:\n  type: terrain\n  properties:\n    position_x: {fixed_point=micro_units}\n    position_y: {fixed_point=micro_units}\n    collected: {type=boolean, default=false}\n```\n\n### Verb:\n```yaml\nAction `collect_echo_resonance`:\n  performed_by: system\n  cost: 0\n  targets: type=entities.echo_pickup, filter=uncollected_and_overlapping_moth\n  effects: resolve rules.echo_collection\n```\n\n### Rule:\n```yaml\nRule `echo_collection`:\n  triggered_by: action verbs.collect_echo_resonance\n  steps:\n    (1) `set_temporary_resonance_boost` with duration=300 ticks (5 seconds)\n    (2) `reveal_all_checkpoints_for_duration` with duration=300 ticks\n    (3) `emit_event` with value=events.echo_resonance_collected\n```\n\n### Event:\n```yaml\nEvent `echo_resonance_collected`:\n  status: draft\n  description: Player collected an echo resonance pickup\n  implemented_in: src/embergrave/presentation/visual_effects.py\n```\n\n### Game Feel:\nThe Echo Resonance collection would have a distinct visual and audio effect - a subtle \"ping\" sound, a bright flash around the player's silhouette, and a momentary increase in the ember's glow intensity. This reinforces that collecting it is a meaningful action with a visible reward.\n\n## Balance Considerations:\n\n### Quantity per Level:\n1-2 per level, max 4 across all levels - this aligns with the \"discovery\" secondary aesthetic without encouraging repetitive grinding.\n\n### Effect Duration:\n5 seconds (300 ticks) - long enough to be useful but short enough that it doesn't make gameplay easier overall. This duration is in line with the game's emphasis on precise timing.\n\n### Visual Indicator:\nThe checkpoint revelation is temporary and only lasts for the duration of the boost, so it doesn't remove the challenge of remembering routes. It simply provides a momentary aid when needed.\n\n## Why This Design Works:\n\n1. **It rewards exploration** - players who discover hidden paths or backtrack to find secret collectibles are rewarded with a useful tool\n2. **It doesn't reward grinding** - there's no permanent benefit, so players aren't incentivized to repeat sections just to collect more\n3. **It aligns with the game's core mechanics** - the boost is directly related to ember consumption and movement\n4. **It fits within the existing system architecture** - it uses existing rules and events without requiring new systems\n5. **It supports the \"discovery\" aesthetic** - players who find these items experience a moment of reward and discovery\n\nThis collectible maintains the precision platformer's focus on skill while providing an optional challenge for exploratory players, fitting perfectly within Embergrave's design philosophy.",
+  "subject_output_sanitized": "# New Collectible Design for Embergrave\n\nName: **Echo Resonance**\n\nEffect:\nWhen collected, Echo Resonance grants the player a temporary \"Resonance Boost\" that:\n1. Temporarily increases the ember drain rate from 1/60 seconds to 1/30 seconds while gliding (doubling the ember consumption)\n2. Allows the player to see a visual indicator of all checkpoint positions in the current level for 5 seconds\n3. Provides a small visual glow effect around the player's silhouette during this period\n\nPlacement and Level Design:\nEcho Resonance collectibles are placed as **optional hidden items** within levels, typically requiring exploration or knowledge of alternate routes to discover. They would be placed in locations such as:\n- Behind one-way platforms\n- In narrow passages that require precise movement\n- Near dead-end sections where the player might backtrack\n\nEach level could contain 1-2 Echo Resonance collectibles, with a maximum of 4 across all levels.\n\nDesign Rationale:\n\nAlignment with \"Every jump is a commitment\":\nThe Echo Resonance effect does not change the fundamental commitment mechanic. Instead, it provides information that helps players make better decisions about their route planning. The increased ember drain during gliding is a conscious trade-off - players must choose between seeing the route ahead and preserving their ember for future movement.\n\nAlignment with \"The cave is the puzzle; light is the lens\":\nEcho Resonance serves as an information-enhancing tool that complements the player's natural vision through ember. It doesn't change the geometry or make the puzzle easier, but provides a way to see more of the level's structure at once - essentially allowing the player to \"see\" more of the cave with their light.\n\nAlignment with \"Death is cheap; progress is sticky\":\nEcho Resonance does not provide any permanent progression benefits. It only affects gameplay during a single flight loop, and its effects are temporary. Players can collect it multiple times without needing to re-complete levels, but each collection is just a momentary benefit that doesn't change the fundamental difficulty curve.\n\nImplementation Details:\n\nEntity Properties:\n```yaml\nEntity `echo_pickup`:\n  type: terrain\n  properties:\n    position_x: {fixed_point=micro_units}\n    position_y: {fixed_point=micro_units}\n    collected: {type=boolean, default=false}\n```\n\nVerb:\n```yaml\nAction `collect_echo_resonance`:\n  performed_by: system\n  cost: 0\n  targets: type=echo_pickup, filter=uncollected_and_overlapping_moth\n  effects: resolve echo_collection\n```\n\nRule:\n```yaml\nRule `echo_collection`:\n  triggered_by: action collect_echo_resonance\n  steps:\n    (1) `set_temporary_resonance_boost` with duration=300 ticks (5 seconds)\n    (2) `reveal_all_checkpoints_for_duration` with duration=300 ticks\n    (3) `emit_event` with value=echo_resonance_collected\n```\n\nEvent:\n```yaml\nEvent `echo_resonance_collected`:\n\n  description: Player collected an echo resonance pickup\n\n```\n\nGame Feel:\nThe Echo Resonance collection would have a distinct visual and audio effect - a subtle \"ping\" sound, a bright flash around the player's silhouette, and a momentary increase in the ember's glow intensity. This reinforces that collecting it is a meaningful action with a visible reward.\n\nBalance Considerations:\n\nQuantity per Level:\n1-2 per level, max 4 across all levels - this aligns with the \"discovery\" secondary aesthetic without encouraging repetitive grinding.\n\nEffect Duration:\n5 seconds (300 ticks) - long enough to be useful but short enough that it doesn't make gameplay easier overall. This duration is in line with the game's emphasis on precise timing.\n\nVisual Indicator:\nThe checkpoint revelation is temporary and only lasts for the duration of the boost, so it doesn't remove the challenge of remembering routes. It simply provides a momentary aid when needed.\n\nWhy This Design Works:\n\n1. **It rewards exploration** - players who discover hidden paths or backtrack to find secret collectibles are rewarded with a useful tool\n2. **It doesn't reward grinding** - there's no permanent benefit, so players aren't incentivized to repeat sections just to collect more\n3. **It aligns with the game's core mechanics** - the boost is directly related to ember consumption and movement\n4. **It fits within the existing system architecture** - it uses existing rules and events without requiring new systems\n5. **It supports the \"discovery\" aesthetic** - players who find these items experience a moment of reward and discovery\n\nThis collectible maintains the precision platformer's focus on skill while providing an optional challenge for exploratory players, fitting perfectly within Embergrave's design philosophy.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 18902,
+  "tokens_output": 1046,
+  "tool_steps": 0,
+  "wall_clock_seconds": 10.477710123028373,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.8888888888888888,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject output proposes a specific named collectible called 'Echo Resonance' rather than using a placeholder."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the observable effects of collecting the item, such as increasing the ember drain rate, revealing checkpoint positions, and providing a visual glow effect."
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output specifies placement locations (behind one-way platforms, narrow passages, near dead-ends) and quantity constraints (1-2 per level, maximum of 4 across all levels)."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing Echo Resonance in hidden, hard-to-reach locations like behind one-way platforms. It avoids grinding by ensuring the effects are temporary and providing no permanent progression benefits, explicitly stating there is no incentive to repeat levels."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design adheres to the commitment pillar by introducing a trade-off (increased ember drain) rather than an undo mechanic, and explicitly states that the effect is temporary and does not change the fundamental commitment mechanic."
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design adheres to the 'vision through motion' pillar by tying the benefit to increased ember consumption (doubling the drain rate) and avoids a parallel HUD by using a visual glow effect and temporary checkpoint revelation within the game world."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The design provides a temporary, non-permanent boost that does not penalize the player for dying or introduce any counters that reset or grow back upon death."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The output focuses solely on a collectible item and does not introduce combat, story-driven moments, procedural generation, or persistent meta-progression."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": false,
+        "rationale": "While the subject provides specific numbers (e.g., 1/30 seconds, 5 seconds, 1-2 per level), it fails to defend them against existing balance ranges or cite comparable existing numbers from the game's established mechanics."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 2,
+    "rationale": "The output introduces a collectible that provides information (checkpoint locations) which contradicts the 'Vision through motion' pillar, where the ember is the sole lens for reading the cave. Furthermore, the proposed quantity (max 4 across all levels) is mathematically impossible given the design brief's requirement of 40 levels. While it attempts to defend its choices, the core mechanic of revealing checkpoints undermines the 'Commitment' pillar by providing external information that bypasses the player's need to learn the cave through movement.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

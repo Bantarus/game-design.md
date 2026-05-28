@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "B",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000002,
+  "timestamp_iso": "2026-05-27T23:49:07Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# Design: New Collectible - \"Echo Spark\"\n\n## Name\n**Echo Spark**\n\n## Effect\nWhen collected, Echo Sparks grant the player a temporary visual indicator that highlights all previously visited checkpoints within the current level. This serves as a navigation aid without providing gameplay advantages (no movement boost, no ember refund, no time bonus).\n\n## Placement and Level Design\n\n### Where it appears:\n- **Location**: In-level terrain, like ember pickups\n- **Authoring**: As a new field in level YAML schema under `echo_sparks: []`\n- **Constraints**: \n  - Must be placed on solid platforms (same as checkpoints)\n  - Must not overlap with any existing platform or lethal region\n  - Can only be placed where the moth can reasonably land and collect it\n\n### Schema Addition:\n```yaml\necho_sparks: {type=array, items={type=object, required=[x, y], properties={x={type=integer}, y={type=integer}}}}\n```\n\n## Design Rationale\n\n### Alignment with Pillars:\n\n1. **Every jump is a commitment**: Echo Sparks don't change the fundamental commitment aspect of jumps. They provide visual guidance that helps players plan routes more efficiently, but don't eliminate the need for careful movement or decision-making. The player still needs to commit to each leap - they're just better informed about where they've been.\n\n2. **The cave is the puzzle; light is the lens**: Echo Sparks enhance the \"vision through motion\" concept by making the player's exploration path visible. They act as an extension of the ember's vision, showing where the player has traveled rather than how to traverse the cave. The visual feedback comes from the player's own exploration, not from external clues.\n\n3. **Death is cheap; progress is sticky**: Echo Sparks reinforce sticky progress by making the player's journey more meaningful. They reward exploration (which builds a sense of accomplishment) while being safe to collect repeatedly without penalty. Since they don't affect gameplay mechanics, collecting them doesn't create a risk-reward imbalance that would make death feel punitive.\n\n### Alignment with Game Philosophy:\n\n- **No combat or story elements**: Echo Sparks are purely navigational aids - no combat, no narrative function.\n- **Hand-crafted levels**: They're designed by level designers who must place them strategically, not generated procedurally.\n- **Precision platformer**: They support precision by making exploration more efficient, not by changing the physics of movement.\n\n### Balance Considerations:\n\n#### Quantity:\n**1-3 per level**, with a target of 2 per level (consistent with ember pickups)\n\nThis number is chosen to:\n- Provide meaningful visual feedback without overwhelming the player\n- Align with the existing balance target for ember pickups (median 80% collection)\n- Maintain the \"exploration reward\" without making it feel like grinding\n\n#### Placement Strategy:\nThe placement of Echo Sparks follows a similar pattern to checkpoints:\n- They're placed at points where exploration is valuable (often near complex route choices or difficult sections)\n- They're not placed in obvious \"grind zones\" but rather in areas where they add strategic value\n- The number is balanced to ensure players don't need to collect them all to complete a level\n\n### Visual Design:\n\n**Presentation**: \n- Flash effect when collected (similar to ember pickup collection)\n- Temporary visual overlay showing previously visited checkpoints\n- Duration: 10 seconds or until next checkpoint touch\n- Low-opacity indicator that doesn't interfere with gameplay visibility\n\nThis is consistent with the game's minimal visual feedback philosophy - it provides helpful information without creating visual clutter or distraction.\n\n## Implementation Notes\n\n### Rule Addition:\nA new rule `echo_spark_collection` would be added to handle collecting Echo Sparks, similar to `ember_collection`. This rule would:\n1. Mark the spark as collected\n2. Trigger a presentation event for visual feedback\n3. Set a timer-based state for checkpoint highlighting\n\n### Entity:\nAn `echo_spark` entity type would be added to match the pattern of `ember_pickup`.\n\n### System Integration:\nThe system would follow the same pattern as other terrain pickups, using overlap checks during physics ticks and emitting appropriate verbs.\n\n## Summary\n\nEcho Sparks reward exploration by providing a visual memory of previously visited locations. They enhance the \"vision through motion\" pillar by making the player's journey more visible, while maintaining the commitment aspect since they don't change the core mechanics or reduce difficulty. They are safe to collect repeatedly without penalty, supporting the \"cheap death, sticky progress\" principle, and align with the hand-crafted, precision platformer nature of the game.\n\nThis collectible adds discovery value without creating grinding behavior, fits naturally within the existing design patterns, and supports the core pillars without contradicting the established balance targets.",
+  "subject_output_sanitized": "# Design: New Collectible - \"Echo Spark\"\n\nName\n**Echo Spark**\n\nEffect\nWhen collected, Echo Sparks grant the player a temporary visual indicator that highlights all previously visited checkpoints within the current level. This serves as a navigation aid without providing gameplay advantages (no movement boost, no ember refund, no time bonus).\n\nPlacement and Level Design\n\nWhere it appears:\n- **Location**: In-level terrain, like ember pickups\n- **Authoring**: As a new field in level YAML schema under `echo_sparks: []`\n- **Constraints**:\n  - Must be placed on solid platforms (same as checkpoints)\n  - Must not overlap with any existing platform or lethal region\n  - Can only be placed where the moth can reasonably land and collect it\n\nSchema Addition:\n```yaml\necho_sparks: {type=array, items={type=object, required=[x, y], properties={x={type=integer}, y={type=integer}}}}\n```\n\nDesign Rationale\n\nAlignment with Pillars:\n\n1. **Every jump is a commitment**: Echo Sparks don't change the fundamental commitment aspect of jumps. They provide visual guidance that helps players plan routes more efficiently, but don't eliminate the need for careful movement or decision-making. The player still needs to commit to each leap - they're just better informed about where they've been.\n\n2. **The cave is the puzzle; light is the lens**: Echo Sparks enhance the \"vision through motion\" concept by making the player's exploration path visible. They act as an extension of the ember's vision, showing where the player has traveled rather than how to traverse the cave. The visual feedback comes from the player's own exploration, not from external clues.\n\n3. **Death is cheap; progress is sticky**: Echo Sparks reinforce sticky progress by making the player's journey more meaningful. They reward exploration (which builds a sense of accomplishment) while being safe to collect repeatedly without penalty. Since they don't affect gameplay mechanics, collecting them doesn't create a risk-reward imbalance that would make death feel punitive.\n\nAlignment with Game Philosophy:\n\n- **No combat or story elements**: Echo Sparks are purely navigational aids - no combat, no narrative function.\n- **Hand-crafted levels**: They're designed by level designers who must place them strategically, not generated procedurally.\n- **Precision platformer**: They support precision by making exploration more efficient, not by changing the physics of movement.\n\nBalance Considerations:\n\nQuantity:\n**1-3 per level**, with a target of 2 per level (consistent with ember pickups)\n\nThis number is chosen to:\n- Provide meaningful visual feedback without overwhelming the player\n- Align with the existing balance target for ember pickups (median 80% collection)\n- Maintain the \"exploration reward\" without making it feel like grinding\n\nPlacement Strategy:\nThe placement of Echo Sparks follows a similar pattern to checkpoints:\n- They're placed at points where exploration is valuable (often near complex route choices or difficult sections)\n- They're not placed in obvious \"grind zones\" but rather in areas where they add strategic value\n- The number is balanced to ensure players don't need to collect them all to complete a level\n\nVisual Design:\n\n**Presentation**:\n- Flash effect when collected (similar to ember pickup collection)\n- Temporary visual overlay showing previously visited checkpoints\n- Duration: 10 seconds or until next checkpoint touch\n- Low-opacity indicator that doesn't interfere with gameplay visibility\n\nThis is consistent with the game's minimal visual feedback philosophy - it provides helpful information without creating visual clutter or distraction.\n\nImplementation Notes\n\nRule Addition:\nA new rule `echo_spark_collection` would be added to handle collecting Echo Sparks, similar to `ember_collection`. This rule would:\n1. Mark the spark as collected\n2. Trigger a presentation event for visual feedback\n3. Set a timer-based state for checkpoint highlighting\n\nEntity:\nAn `echo_spark` entity type would be added to match the pattern of `ember_pickup`.\n\nSystem Integration:\nThe system would follow the same pattern as other terrain pickups, using overlap checks during physics ticks and emitting appropriate verbs.\n\nSummary\n\nEcho Sparks reward exploration by providing a visual memory of previously visited locations. They enhance the \"vision through motion\" pillar by making the player's journey more visible, while maintaining the commitment aspect since they don't change the core mechanics or reduce difficulty. They are safe to collect repeatedly without penalty, supporting the \"cheap death, sticky progress\" principle, and align with the hand-crafted, precision platformer nature of the game.\n\nThis collectible adds discovery value without creating grinding behavior, fits naturally within the existing design patterns, and supports the core pillars without contradicting the established balance targets.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 18902,
+  "tokens_output": 970,
+  "tool_steps": 0,
+  "wall_clock_seconds": 11.11905504600145,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject output proposes a specific named collectible called 'Echo Spark' throughout the design document."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the effect: 'When collected, Echo Sparks grant the player a temporary visual indicator that highlights all previously visited checkpoints within the current level.'"
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output specifies placement locations (solid platforms, in-level terrain), constraints (must not overlap lethal regions, must be reachable by the moth), and quantity limits (1-3 per level)."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing sparks in valuable, non-obvious locations to aid navigation, while explicitly avoiding grinding by providing no gameplay advantages (no movement boost or bonuses) and limiting quantity to 1-3 per level."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design explicitly states that Echo Sparks do not change fundamental commitment aspects or movement mechanics, ensuring players still must commit to each leap without any 'undo' or 'take-back' functionality."
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design aligns with the 'vision through motion' pillar by using the collectible as an extension of the ember's vision to show the player's path, and it avoids a parallel HUD by using a low-opacity in-world visual overlay."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The design explicitly states that Echo Sparks are 'safe to collect repeatedly without penalty' and do not provide gameplay advantages like refunds or bonuses, ensuring death remains cheap and progress remains sticky."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The design explicitly states it contains 'no combat, no narrative function' and specifies that items are placed by designers rather than being 'generated procedurally'."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": true,
+        "rationale": "The subject defends the quantity of Echo Sparks (1-3 per level) by citing a comparable existing number (ember pickups) and aligning it with existing balance targets."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly meets the task brief by introducing a new collectible ('Echo Spark') that adheres to all design constraints. The design choice to provide a navigational aid (highlighting checkpoints) is defensible against the 'Vision through motion' pillar and avoids adding forbidden features like combat or story. The quantity (1-3 per level) is logically consistent with the existing ember pickup density and the game's scale.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": true
+}

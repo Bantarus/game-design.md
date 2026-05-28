@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "A",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000042,
+  "timestamp_iso": "2026-05-28T00:14:34Z",
+  "order_index": 111,
+  "instance_id": "easy_platformer_002",
+  "unit_id": "easy_platformer_002_AB",
+  "pair_role": "second_of_pair",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "7123e376b056fd1be17280469b1ddffc6de4ad324906b415c89224534c44ae69",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "I'll create a new Embergrave level called `fault_lines_07_the_chasm` that fits the design requirements for a tier-3 fault-lines descent.\n\nLooking at the existing levels, I can see the pattern:\n- It should be in the fault_lines region (as specified)\n- Tier 3 difficulty \n- Vertical descent with platforms\n- Two checkpoints along the natural descent path\n- Four ember pickups totaling about 8 ember\n- A void/lava region at the bottom\n\nLet me create this level:\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: fault_lines_07_the_chasm\nstatus: draft\nimplemented_in: [\"src/embergrave/levels/fault_lines_07_the_chasm.py\"]\nname: \"The Chasm\"\nregion: fault_lines\ndifficulty_tier: 3\ntime_target_ms: 210000\nentry:  { x: 1000,  y: 20000 }\nexit:   { x: 1000,  y: 500 }\ncheckpoints:\n  - { x: 1500, y: 15000 }\n  - { x: 1500, y: 8000 }\nplatforms:\n  # Entry shelf at top\n  - { x: 500,   y: 19500, width: 2500, height: 300, surface: solid }\n  # Descent series with varying platform widths\n  - { x: 1000,  y: 17000, width: 1000, height: 200, surface: solid }\n  - { x: 500,   y: 14000, width: 1000, height: 200, surface: solid }\n  - { x: 1000,  y: 11000, width: 800,  height: 200, surface: solid }\n  - { x: 500,   y: 8000,  width: 1000, height: 200, surface: solid }\n  - { x: 1000,  y: 5000,  width: 1000, height: 200, surface: solid }\n  - { x: 500,   y: 2000,  width: 1000, height: 200, surface: solid }\n  # Exit shelf at bottom\n  - { x: 500,   y: 500,   width: 2500, height: 300, surface: solid }\nember_pickups:\n  - { x: 1200, y: 18000, ember_value: 2 }\n  - { x: 600,  y: 14500, ember_value: 2 }\n  - { x: 1200, y: 9500,  ember_value: 3 }\n  - { x: 600,  y: 3500,  ember_value: 1 }\nlethal_regions:\n  - { x: 0,    y: 0,     width: 2500, height: 200,  tag: void  }\n  - { x: 0,    y: 2000,  width: 300,  height: 1000, tag: spike }\n  - { x: 2200, y: 2000,  width: 300,  height: 1000, tag: spike }\nnotes: \"Vertical descent through a chasm. Player enters at top (y=20000) and must descend to exit at bottom (y=500). Six platforms form the descent path with varying widths, creating tight jumps. Two checkpoints (at y=15000 and y=8000) mark natural progress points. Four ember pickups (totaling 8 ember) distributed to support the climb. Void region at bottom prevents falling past exit. Tier 3: 5-15 deaths is the acceptable band; first-clear should take ~3.5 minutes for a skilled player.\"\n```",
+  "tokens_input": 23767,
+  "tokens_output": 980,
+  "tool_steps": 0,
+  "wall_clock_seconds": 12.272911303996807,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

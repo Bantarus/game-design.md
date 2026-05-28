@@ -1,0 +1,76 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000049,
+  "timestamp_iso": "2026-05-28T00:49:57Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, refilling 6 hunger when eaten.\nrecipe:\n  - ingredient: raw_fish\n    count: 1\n  - ingredient: campfire\n    count: 1\ncraft_time: 30\ntool_tier: 2\nresult:\n  item: cooked_fish\n  count: 1\neffects:\n  - type: hunger\n    amount: 6\n```",
+  "subject_output_sanitized": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, refilling 6 hunger when eaten.\nrecipe:\n  - ingredient: raw_fish\n    count: 1\n  - ingredient: campfire\n    count: 1\ncraft_time: 30\ntool_tier: 2\nresult:\n  item: cooked_fish\n  count: 1\neffects:\n  - type: hunger\n    amount: 6\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 769,
+  "tokens_output": 107,
+  "tool_steps": 0,
+  "wall_clock_seconds": 1.967314979992807,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The output is a recipe definition file that includes the required id `cooked_fish` in both the filename comment and the `name` field."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": true,
+        "rationale": "The output explicitly sets `tool_tier: 2`, which satisfies the requirement for a tier 2 recipe."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": true,
+        "rationale": "The recipe includes 'raw_fish' with a count of 1 as its primary ingredient."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": true,
+        "rationale": "The recipe's result section explicitly specifies 'item: cooked_fish' with a 'count: 1'."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": true,
+        "rationale": "The output explicitly declares a hunger restoration value of 6 in both the description ('refilling 6 hunger when eaten') and the effects block ('amount: 6')."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": true,
+        "rationale": "The recipe explicitly includes 'campfire' as an ingredient with a count of 1, fulfilling the requirement for the campfire to be the crafting station."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": true,
+        "rationale": "The subject output explicitly sets 'craft_time: 30', which meets the requirement of being approximately 30 in-game minutes."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": true,
+        "rationale": "The output declares the item is edible through the description 'refilling 6 hunger when eaten' and the effect 'type: hunger'."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly matches the task brief and adheres to the design brief's logic. It correctly implements the 1:1 ratio of raw_fish to cooked_fish, specifies the campfire as the required station, and sets the hunger refill to 6 as requested. The tier-2 designation and 30-minute craft time also align exactly with the task instructions.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": true
+}

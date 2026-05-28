@@ -1,0 +1,76 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000047,
+  "timestamp_iso": "2026-05-27T23:27:14Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, restoring hunger when eaten.\nrecipe:\n  tier: 2\n  time: 30\n  inputs:\n    - item: raw_fish\n      count: 1\n  outputs:\n    - item: cooked_fish\n      count: 1\n  requires:\n    - item: campfire\n      count: 1\ncrafting_station: campfire\neffect:\n  type: food\n  hunger: 6\n```",
+  "subject_output_sanitized": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, restoring hunger when eaten.\nrecipe:\n  tier: 2\n  time: 30\n  inputs:\n    - item: raw_fish\n      count: 1\n  outputs:\n    - item: cooked_fish\n      count: 1\n  requires:\n    - item: campfire\n      count: 1\ncrafting_station: campfire\neffect:\n  type: food\n  hunger: 6\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 769,
+  "tokens_output": 117,
+  "tool_steps": 0,
+  "wall_clock_seconds": 1.8597729759931099,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The output is a recipe definition file that includes the required id `cooked_fish` in the name field."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": true,
+        "rationale": "The recipe explicitly sets the tier to 2 in the `recipe.tier` field, matching the requirement."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": true,
+        "rationale": "The recipe inputs list specifies exactly 1 'raw_fish' as the primary ingredient."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": true,
+        "rationale": "The recipe's outputs section explicitly defines 'item: cooked_fish' with a 'count: 1'."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": true,
+        "rationale": "The output explicitly declares 'hunger: 6' within the effect block, meeting the requirement to restore 6 hunger."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": true,
+        "rationale": "The output explicitly defines the crafting station as a campfire through both the 'requires' list and the 'crafting_station: campfire' field."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": true,
+        "rationale": "The recipe's 'time' field is explicitly set to 30, which meets the requirement of being approximately 30 in-game minutes."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": true,
+        "rationale": "The output declares the item is edible through the description ('restoring hunger when eaten') and explicitly sets the effect type to 'food'."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 5,
+    "rationale": "The output perfectly matches the task brief and adheres to the design brief's constraints. It correctly implements the 1:1 ratio of raw_fish to cooked_fish, assigns the correct hunger refill value of 6, and places the recipe in Tier 2 as requested. The requirement for a campfire is correctly handled via both the 'requires' and 'crafting_station' fields.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": true
+}

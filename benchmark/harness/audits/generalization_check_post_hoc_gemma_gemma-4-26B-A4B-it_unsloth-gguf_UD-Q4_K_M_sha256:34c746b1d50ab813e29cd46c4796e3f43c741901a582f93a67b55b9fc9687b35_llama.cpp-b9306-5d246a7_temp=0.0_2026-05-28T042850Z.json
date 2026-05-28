@@ -1,0 +1,12 @@
+{
+  "label": "post_hoc",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "n_outputs": 120,
+  "accuracy": 0.525,
+  "accuracy_95_ci_low": 0.43626835924004914,
+  "accuracy_95_ci_high": 0.6121806272071544,
+  "chance_accuracy": 0.3333333333333333,
+  "passed": false,
+  "notes": "N=120 uniform sample from full Qwen sweep; chunk_size=3 for Gemma 32k ctx; predictions=63/120"
+}

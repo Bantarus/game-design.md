@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000000,
+  "timestamp_iso": "2026-05-28T01:43:20Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "# Embergrave \u2014 New Collectible Design\n\n## Name: **Resonance Shard**\n\n### Effect:\nWhen collected, a Resonance Shard grants the player a temporary \"Echo Light\" boost that:\n- Increases ember light radius by 20% for 8 seconds\n- Makes the player's ember flicker slightly (visual indicator of active effect)\n- Does NOT affect ember consumption rates or movement mechanics\n\n### Placement and Level Design:\nResonance Shards appear as small, crystalline fragments embedded in cave walls or suspended from ledges. Each level contains exactly **3 Resonance Shards**.\n\nLevel designers place them as follows:\n- 1 shard in a visually prominent but challenging-to-reach location (rewarding exploration)\n- 1 shard in a hidden or obscured area requiring careful navigation to discover\n- 1 shard that can only be reached after completing a specific movement sequence or puzzle\n\n### Placement Constraints:\n- Shards must be placed within 10 units of the player's starting position or within a checkpoint's area\n- Each shard must be reachable via normal gameplay mechanics (no flying, no wall-climbing)\n- Shards cannot be placed in areas that are entirely inaccessible due to deadly geometry\n- Shards must not be placed in locations where they'd be immediately obvious or trivially obtainable\n\n## Design Rationale\n\n### Against *Commitment*:\nThe Resonance Shard reinforces commitment by requiring players to make precise, well-timed decisions to collect it. The 8-second duration means players must commit to a path that includes collecting the shard rather than simply avoiding it. If they hesitate or take a wrong turn, they may lose the temporary light boost before they can retrace their steps.\n\n### Against *Vision Through Motion*:\nThe shard rewards exploration and movement through its placement in challenging but non-blocking locations. Players who move well and explore thoroughly will find these items, while those who stand still or hesitate will miss them. The temporary light boost is a direct reward for active play, not passive waiting.\n\n### Against *Cheap Death, Sticky Progress*:\nThe shard's effect is entirely visual and temporary, meaning deaths don't penalize players for collecting it. Since the shard is a single-use item that provides no mechanical advantage beyond vision (no movement speed or new abilities), losing it doesn't create unfair progression barriers.\n\n### Balance Rationale:\n- **Quantity**: 3 shards per level matches the existing number of checkpoints, creating a meaningful but not overwhelming exploration incentive\n- **Duration**: 8 seconds is long enough to be useful for navigating complex sections but short enough to prevent it from becoming a crutch\n- **Effect**: The 20% light increase is substantial enough to be noticeable and helpful, but the flickering visual effect makes it clear that it's temporary\n\n## Implementation Code:\n\n```python\n# In game/collectibles.py\n\nclass ResonanceShard:\n    def __init__(self):\n        self.name = \"Resonance Shard\"\n        self.duration = 8.0  # seconds\n        self.light_boost = 1.2  # 20% increase\n        self.max_per_level = 3\n        self.collected = False\n        \n    def collect(self, player):\n        if not self.collected:\n            self.collected = True\n            player.apply_echo_light_effect(self.duration, self.light_boost)\n            return True\n        return False\n\n# In game/player.py\n\nclass Player:\n    def __init__(self):\n        self.echo_light_active = False\n        self.echo_light_timer = 0.0\n        self.base_light_radius = 5.0\n        self.current_light_radius = self.base_light_radius\n        \n    def apply_echo_light_effect(self, duration, boost_factor):\n        self.echo_light_active = True\n        self.echo_light_timer = duration\n        self.current_light_radius *= boost_factor\n        # Visual effect: ember flickers (handled by renderer)\n        \n    def update(self, delta_time):\n        if self.echo_light_active:\n            self.echo_light_timer -= delta_time\n            if self.echo_light_timer <= 0:\n                self.echo_light_active = False\n                self.current_light_radius = self.base_light_radius\n```\n\nThis design adds meaningful exploration incentive without creating grind or breaking the core mechanics, staying true to Embergrave's pillars and aesthetic.",
+  "subject_output_sanitized": "# Embergrave \u2014 New Collectible Design\n\nName: **Resonance Shard**\n\nEffect:\nWhen collected, a Resonance Shard grants the player a temporary \"Echo Light\" boost that:\n- Increases ember light radius by 20% for 8 seconds\n- Makes the player's ember flicker slightly (visual indicator of active effect)\n- Does NOT affect ember consumption rates or movement mechanics\n\nPlacement and Level Design:\nResonance Shards appear as small, crystalline fragments embedded in cave walls or suspended from ledges. Each level contains exactly **3 Resonance Shards**.\n\nLevel designers place them as follows:\n- 1 shard in a visually prominent but challenging-to-reach location (rewarding exploration)\n- 1 shard in a hidden or obscured area requiring careful navigation to discover\n- 1 shard that can only be reached after completing a specific movement sequence or puzzle\n\nPlacement Constraints:\n- Shards must be placed within 10 units of the player's starting position or within a checkpoint's area\n- Each shard must be reachable via normal gameplay mechanics (no flying, no wall-climbing)\n- Shards cannot be placed in areas that are entirely inaccessible due to deadly geometry\n- Shards must not be placed in locations where they'd be immediately obvious or trivially obtainable\n\nDesign Rationale\n\nAgainst *Commitment*:\nThe Resonance Shard reinforces commitment by requiring players to make precise, well-timed decisions to collect it. The 8-second duration means players must commit to a path that includes collecting the shard rather than simply avoiding it. If they hesitate or take a wrong turn, they may lose the temporary light boost before they can retrace their steps.\n\nAgainst *Vision Through Motion*:\nThe shard rewards exploration and movement through its placement in challenging but non-blocking locations. Players who move well and explore thoroughly will find these items, while those who stand still or hesitate will miss them. The temporary light boost is a direct reward for active play, not passive waiting.\n\nAgainst *Cheap Death, Sticky Progress*:\nThe shard's effect is entirely visual and temporary, meaning deaths don't penalize players for collecting it. Since the shard is a single-use item that provides no mechanical advantage beyond vision (no movement speed or new abilities), losing it doesn't create unfair progression barriers.\n\nBalance Rationale:\n- **Quantity**: 3 shards per level matches the existing number of checkpoints, creating a meaningful but not overwhelming exploration incentive\n- **Duration**: 8 seconds is long enough to be useful for navigating complex sections but short enough to prevent it from becoming a crutch\n- **Effect**: The 20% light increase is substantial enough to be noticeable and helpful, but the flickering visual effect makes it clear that it's temporary\n\nImplementation Code:\n\n```python\n# In game/collectibles.py\n\nclass ResonanceShard:\n    def __init__(self):\n        self.name = \"Resonance Shard\"\n        self.duration = 8.0  # seconds\n        self.light_boost = 1.2  # 20% increase\n        self.max_per_level = 3\n        self.collected = False\n\n    def collect(self, player):\n        if not self.collected:\n            self.collected = True\n            player.apply_echo_light_effect(self.duration, self.light_boost)\n            return True\n        return False\n\n# In game/player.py\n\nclass Player:\n    def __init__(self):\n        self.echo_light_active = False\n        self.echo_light_timer = 0.0\n        self.base_light_radius = 5.0\n        self.current_light_radius = self.base_light_radius\n\n    def apply_echo_light_effect(self, duration, boost_factor):\n        self.echo_light_active = True\n        self.echo_light_timer = duration\n        self.current_light_radius *= boost_factor\n        # Visual effect: ember flickers (handled by renderer)\n\n    def update(self, delta_time):\n        if self.echo_light_active:\n            self.echo_light_timer -= delta_time\n            if self.echo_light_timer <= 0:\n                self.echo_light_active = False\n                self.current_light_radius = self.base_light_radius\n```\n\nThis design adds meaningful exploration incentive without creating grind or breaking the core mechanics, staying true to Embergrave's pillars and aesthetic.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 734,
+  "tokens_output": 886,
+  "tool_steps": 0,
+  "wall_clock_seconds": 5.786296476988355,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject output proposes a specific named collectible called 'Resonance Shard' rather than using a placeholder."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the effect of collecting the item, stating it 'grants the player a temporary \"Echo Light\" boost' that increases the light radius by 20%."
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output explicitly specifies the quantity ('exactly 3 Resonance Shards' per level) and various placement constraints, such as distance from checkpoints and reachability via normal mechanics."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing shards in challenging, hidden, or puzzle-based locations, while preventing grinding by limiting each level to exactly 3 shards and providing only a temporary, non-mechanical visual boost."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design reinforces the commitment pillar by using a temporary 8-second boost that requires players to commit to a specific path, noting that 'if they hesitate or take a wrong turn, they may lose the temporary light boost before they can retrace their steps.'"
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design adheres to the 'vision through motion' pillar by using the ember itself as the source of the light boost (increasing light radius) and avoids a parallel HUD by using a visual flicker of the ember as the indicator."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The design explicitly states that the shard's effect is temporary and that 'deaths don't penalize players for collecting it,' ensuring no loss of progress or growing counters upon death."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The output focuses solely on a collectible item design and does not introduce combat, story-driven moments, procedural generation, or persistent meta-progression."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": true,
+        "rationale": "The subject defends its numbers in the 'Balance Rationale' section, specifically stating that the quantity of 3 shards 'matches the existing number of checkpoints' to justify the count."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 3,
+    "rationale": "The output introduces a new collectible that aligns with the 'Vision through motion' pillar by providing a light boost, but it contains a significant design contradiction regarding the 'Cheap death, sticky progress' pillar. By requiring shards to be placed within 10 units of the player's starting position or a checkpoint, it creates a 'safe zone' reward that contradicts the brief's intent for exploration to be a risk/reward mechanic. Additionally, the placement constraint of 'within 10 units of a checkpoint' fundamentally limits the 'exploration' goal requested in the task brief, as it prevents shards from being placed in the deep, dangerous parts of a level where vision is most needed.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

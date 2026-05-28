@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "B",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000006,
+  "timestamp_iso": "2026-05-28T00:16:25Z",
+  "order_index": 114,
+  "instance_id": "ambiguity_platformer_006",
+  "unit_id": "ambiguity_platformer_006_AB",
+  "pair_role": "first_of_pair",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Collectible: \"Echo Spark\"\n\n## Design Overview\n\nI'll add a new collectible called \"Echo Spark\" that rewards exploration while maintaining Embergrave's core pillars.\n\n### Name\n**Echo Spark**\n\n### Effect\nCollecting an Echo Spark grants the player a temporary visual indicator showing the last 3 seconds of their path, displayed as a faint glow trail behind the moth. This helps with route memorization and planning without being a gameplay mechanic.\n\n### Placement and Authoring\n- **Location**: Can be placed anywhere in levels (like ember pickups)\n- **Authoring**: Similar to ember pickups - `{x: integer, y: integer, type: \"echo_spark\"}`\n- **Constraints**: \n  - Maximum of 3 per level (to avoid grinding)\n  - Must be placed on solid platforms or one-way surfaces\n  - Cannot be in lethal regions\n  - Must be positioned where it's visible but not obstructive\n\n## Design Rationale\n\n### Against the Pillars\n\n**Every jump is a commitment**: \n- Echo Sparks don't provide new movement options, so they don't add choice that would dilute commitment\n- The trail only shows past motion, not future path planning - it doesn't change the fundamental \"commitment\" nature of jumps\n- The temporary nature (3 seconds) means players must actively use this information rather than rely on it passively\n\n**The cave is the puzzle; light is the lens**:\n- Echo Sparks provide additional visual information but do NOT change how the player sees or navigates through the cave\n- They work as an extension of the ember's visual guidance, not a separate lens\n- The trail only appears during active play, reinforcing that the cave itself is the puzzle\n\n**Death is cheap; progress is sticky**:\n- Echo Sparks are purely visual and don't affect survival mechanics\n- They're collected at the same rate as checkpoints - once touched, they're gone permanently for that run\n- They don't provide any gameplay advantage (no resource gain or movement boost) so death doesn't penalize exploration\n\n### Against the Prose Rationale\n\n**\"The cave is the puzzle; light is the lens\"**: \n- Echo Sparks complement rather than replace the ember as the primary visual guidance tool\n- They provide a secondary visual aid that helps with memory of routes, supporting the puzzle-solving nature\n\n**\"Death is cheap; progress is sticky\"**: \n- Echo Sparks are collected like checkpoints - they're part of the player's progress through the level\n- Once collected, they remain collected for the entire run (like checkpoints)\n- They don't provide any resource or movement advantages that would encourage repetitive collection\n\n### Balance Considerations\n\n**Quantity per level (3 max)**:\n- Matches the design principle of \"rewarding exploration without grinding\" \n- 3 seconds of path history is enough to help with route memorization but not so much that it becomes a gameplay tool\n- This aligns with the existing balance targets where ember pickups are placed for strategic value, not abundance\n\n**Placement constraints**:\n- Ensures Echo Sparks don't become part of the core navigation challenge\n- Prevents them from being placed in lethal regions or on platforms that would be dangerous to collect\n- Aligns with the \"no procedural generation\" and \"no combat\" non-goals by requiring deliberate authoring\n\n## Implementation Plan\n\n### Entity Schema Extension\n```yaml\n# In content/levels schema:\necho_sparks: {type=array, items={type=object, required=[x, y], properties={x={type=integer}, y={type=integer}}}}\n```\n\n### New Verb/Rule Pair\n**Verb**: `collect_echo_spark` (similar to `refuel_ember`)\n**Rule**: `echo_spark_collection` (similar to `ember_collection`)\n\n### Visual Implementation\n- When collected, the Echo Spark would trigger a visual effect in the presentation layer\n- A trail would be rendered showing the last 3 seconds of the moth's path with a fading glow effect\n- This trail would be purely visual and not affect gameplay\n\nThis design choice maintains Embergrave's core identity while adding a subtle exploration reward that doesn't compromise its fundamental mechanics or aesthetics.",
+  "tokens_input": 18902,
+  "tokens_output": 865,
+  "tool_steps": 0,
+  "wall_clock_seconds": 10.363791307987412,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

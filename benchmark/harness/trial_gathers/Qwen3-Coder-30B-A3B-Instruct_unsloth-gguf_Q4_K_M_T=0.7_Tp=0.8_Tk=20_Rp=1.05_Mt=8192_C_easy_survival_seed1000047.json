@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000047,
+  "timestamp_iso": "2026-05-27T23:27:14Z",
+  "order_index": 33,
+  "instance_id": "easy_survival_002",
+  "unit_id": "easy_survival_002_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, restoring hunger when eaten.\nrecipe:\n  tier: 2\n  time: 30\n  inputs:\n    - item: raw_fish\n      count: 1\n  outputs:\n    - item: cooked_fish\n      count: 1\n  requires:\n    - item: campfire\n      count: 1\ncrafting_station: campfire\neffect:\n  type: food\n  hunger: 6\n```",
+  "tokens_input": 769,
+  "tokens_output": 117,
+  "tool_steps": 0,
+  "wall_clock_seconds": 1.8597729759931099,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

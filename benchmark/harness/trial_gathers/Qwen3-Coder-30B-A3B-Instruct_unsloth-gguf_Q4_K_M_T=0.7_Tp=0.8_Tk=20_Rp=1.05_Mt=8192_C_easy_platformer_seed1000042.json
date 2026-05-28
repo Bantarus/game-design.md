@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000042,
+  "timestamp_iso": "2026-05-28T01:23:40Z",
+  "order_index": 231,
+  "instance_id": "easy_platformer_002",
+  "unit_id": "easy_platformer_002_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "```yaml\n# Level: fault_lines_07_the_chasm\n# Region: fault_lines\n# Tier: 3\n# Description: A vertical descent through a fault line shaft with narrow ledges and platforms\n\nname: \"The Chasm\"\nregion: fault_lines\ntier: 3\ndescription: \"Descend through the fault lines, navigating narrow ledges and platforms. The ember dims when you hesitate - keep moving to see clearly.\"\n\n# Player start position\nstart:\n  x: 100\n  y: 50\n\n# Checkpoints (natural descent path)\ncheckpoints:\n  - x: 100\n    y: 200\n  - x: 100\n    y: 400\n\n# Platforms and obstacles\nplatforms:\n  # Initial platform at start\n  - type: static\n    x: 90\n    y: 80\n    width: 20\n    height: 10\n  \n  # First descent platform\n  - type: static\n    x: 120\n    y: 150\n    width: 30\n    height: 10\n    rotation: 0\n  \n  # Narrow ledge\n  - type: static\n    x: 85\n    y: 220\n    width: 15\n    height: 10\n    rotation: 0\n  \n  # Second descent platform\n  - type: static\n    x: 130\n    y: 280\n    width: 25\n    height: 10\n    rotation: 0\n  \n  # Narrow ledge\n  - type: static\n    x: 90\n    y: 340\n    width: 10\n    height: 10\n    rotation: 0\n  \n  # Third descent platform\n  - type: static\n    x: 125\n    y: 420\n    width: 30\n    height: 10\n    rotation: 0\n  \n  # Final platform before exit\n  - type: static\n    x: 100\n    y: 480\n    width: 20\n    height: 10\n    rotation: 0\n\n# Ember pickups (total value: ~8 ember)\nember_pickups:\n  - x: 115\n    y: 130\n  - x: 95\n    y: 240\n  - x: 105\n    y: 370\n  - x: 120\n    y: 460\n\n# Exit point\nexit:\n  x: 110\n  y: 520\n\n# Lethal zones (void/lava at bottom)\nlethal_zones:\n  - type: lava\n    x: 0\n    y: 540\n    width: 200\n    height: 60\n\n# Background elements for visual context\nbackground_elements:\n  - type: wall\n    x: 0\n    y: 0\n    width: 10\n    height: 600\n  - type: wall\n    x: 190\n    y: 0\n    width: 10\n    height: 600\n\n# Level boundaries (optional but good for clarity)\nboundaries:\n  left: 0\n  right: 200\n  top: 0\n  bottom: 600\n\n# Metadata\nmetadata:\n  estimated_time: \"3 minutes\"\n  difficulty: \"Medium-High\"\n  commit_message: \"Added fault_lines_07_the_chasm level\"\n```",
+  "tokens_input": 693,
+  "tokens_output": 806,
+  "tool_steps": 0,
+  "wall_clock_seconds": 5.225360428012209,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "C",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000049,
+  "timestamp_iso": "2026-05-28T00:49:57Z",
+  "order_index": 175,
+  "instance_id": "easy_survival_004",
+  "unit_id": "easy_survival_004_C",
+  "pair_role": "unpaired_c",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "dfe8c7b7f701a0af72a488a250ffbfe038171d6abb2c180c900219c0ca9ed670",
+  "subject_output": "```yaml\n# content/recipes/cooked_fish.yaml\nname: cooked_fish\ndescription: A cooked fish, refilling 6 hunger when eaten.\nrecipe:\n  - ingredient: raw_fish\n    count: 1\n  - ingredient: campfire\n    count: 1\ncraft_time: 30\ntool_tier: 2\nresult:\n  item: cooked_fish\n  count: 1\neffects:\n  - type: hunger\n    amount: 6\n```",
+  "tokens_input": 769,
+  "tokens_output": 107,
+  "tool_steps": 0,
+  "wall_clock_seconds": 1.967314979992807,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

@@ -1,0 +1,81 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000003,
+  "timestamp_iso": "2026-05-28T01:08:27Z",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "# Embergrave - New Collectible: \"Echo Shard\"\n\n## Name\n**Echo Shard**\n\n## Effect\nWhen collected, an Echo Shard grants the player a temporary **\"Resonance Boost\"** that:\n1. **Increases ember brightness by 30% for 8 seconds**\n2. **Reduces ember dimming rate by 50% while stationary** (but not during movement)\n3. **Reveals hidden paths or secret areas** in the current level segment (if any exist)\n\nThe Resonance Boost is a **single-use power-up** that must be consumed to activate.\n\n## Placement and Design\n- **Placement**: Each level may contain between 1-3 Echo Shards, placed in locations that are:\n  - Visually distinct but not immediately obvious\n  - Requires some exploration to find (e.g., behind breakable walls, in hidden alcoves)\n  - Positioned to encourage forward movement rather than backtracking\n- **Authoring**: Level designers will place Echo Shards as part of the level's visual storytelling, using them to reward careful observation and exploration.\n- **Constraints**: \n  - Each shard must be placed at least 2 meters from any deadly geometry (lava/spikes)\n  - No two shards can be within 10 meters of each other\n  - Shards cannot be placed in areas where the player is already guaranteed to pass through\n\n## Design Rationale\n\n### Against *Commitment*\nThe Echo Shard reinforces commitment by being a **single-use resource** that players must choose when to activate. Since it provides a temporary boost, players must commit to using it at the right moment \u2014 perhaps during a particularly challenging section where visibility is crucial. This mirrors how players must commit to their jump arcs in Embergrave: timing and decision-making are essential.\n\n### Against *Vision Through Motion*\nThe Echo Shard enhances the core mechanic of \"vision through motion\" by providing a **temporary but significant boost** to ember brightness, rewarding exploration that leads to finding these collectibles. It also reinforces the concept that movement keeps the light bright \u2014 when players activate it during movement, they're rewarded for continuing their momentum.\n\n### Against *Cheap Death, Sticky Progress*\nEcho Shards are **sticky progress** because they provide a meaningful benefit that encourages forward movement and exploration without creating a grind loop. They're rare enough to not be \"grindable\" but frequent enough to feel rewarding. Since they can only be used once per shard, players must make strategic decisions about when to use them \u2014 reinforcing the idea that each choice matters in a way that matches Embergrave's philosophy of making every action meaningful.\n\n### Balance Considerations\n- **Quantity (1-3 per level)**: Matches the game's pacing; players won't feel forced to backtrack for them, but they'll appreciate finding one if they do.\n- **Duration (8 seconds)**: Long enough to be useful in a challenging section, but not so long that it creates an overpowered advantage or changes gameplay dramatically.\n- **Brightness boost (30%)**: Substantial enough to make a difference in visibility without making the game too easy or removing the challenge of navigating by ember light.\n- **Dimming reduction (50%)**: Encourages strategic use during stationary moments, such as when preparing for a jump or waiting for a platform to move \u2014 reinforcing the core gameplay loop.\n\n## Implementation Notes\n\n```python\n# Example implementation structure in pseudo-code\n\nclass EchoShard:\n    def __init__(self):\n        self.active = False\n        self.timer = 0\n        self.brightness_boost = 1.30\n        self.dimming_reduction = 0.50\n    \n    def collect(self, player):\n        # Apply Resonance Boost to player\n        player.apply_resonance_boost(self)\n    \n    def activate_boost(self, player):\n        if not self.active:\n            self.active = True\n            self.timer = 8.0  # seconds\n            player.set_ember_brightness(self.brightness_boost)\n            player.set_dimming_rate(self.dimming_reduction)\n            player.reveal_hidden_paths()\n    \n    def update(self, dt):\n        if self.active:\n            self.timer -= dt\n            if self.timer <= 0:\n                self.deactivate_boost()\n\n# In game state management:\n# - Each level stores a list of available EchoShards\n# - When collected, they're removed from the level\n# - Resonance Boost is a temporary effect applied to the player's ember system\n```\n\nThis collectible fits Embergrave's design language by rewarding exploration without encouraging repetitive grinding, reinforcing core gameplay principles, and maintaining the game's deterministic nature through its single-use, time-limited effects.",
+  "subject_output_sanitized": "# Embergrave - New Collectible: \"Echo Shard\"\n\nName\n**Echo Shard**\n\nEffect\nWhen collected, an Echo Shard grants the player a temporary **\"Resonance Boost\"** that:\n1. **Increases ember brightness by 30% for 8 seconds**\n2. **Reduces ember dimming rate by 50% while stationary** (but not during movement)\n3. **Reveals hidden paths or secret areas** in the current level segment (if any exist)\n\nThe Resonance Boost is a **single-use power-up** that must be consumed to activate.\n\nPlacement and Design\n- **Placement**: Each level may contain between 1-3 Echo Shards, placed in locations that are:\n  - Visually distinct but not immediately obvious\n  - Requires some exploration to find (e.g., behind breakable walls, in hidden alcoves)\n  - Positioned to encourage forward movement rather than backtracking\n- **Authoring**: Level designers will place Echo Shards as part of the level's visual storytelling, using them to reward careful observation and exploration.\n- **Constraints**:\n  - Each shard must be placed at least 2 meters from any deadly geometry (lava/spikes)\n  - No two shards can be within 10 meters of each other\n  - Shards cannot be placed in areas where the player is already guaranteed to pass through\n\nDesign Rationale\n\nAgainst *Commitment*\nThe Echo Shard reinforces commitment by being a **single-use resource** that players must choose when to activate. Since it provides a temporary boost, players must commit to using it at the right moment \u2014 perhaps during a particularly challenging section where visibility is crucial. This mirrors how players must commit to their jump arcs in Embergrave: timing and decision-making are essential.\n\nAgainst *Vision Through Motion*\nThe Echo Shard enhances the core mechanic of \"vision through motion\" by providing a **temporary but significant boost** to ember brightness, rewarding exploration that leads to finding these collectibles. It also reinforces the concept that movement keeps the light bright \u2014 when players activate it during movement, they're rewarded for continuing their momentum.\n\nAgainst *Cheap Death, Sticky Progress*\nEcho Shards are **sticky progress** because they provide a meaningful benefit that encourages forward movement and exploration without creating a grind loop. They're rare enough to not be \"grindable\" but frequent enough to feel rewarding. Since they can only be used once per shard, players must make strategic decisions about when to use them \u2014 reinforcing the idea that each choice matters in a way that matches Embergrave's philosophy of making every action meaningful.\n\nBalance Considerations\n- **Quantity (1-3 per level)**: Matches the game's pacing; players won't feel forced to backtrack for them, but they'll appreciate finding one if they do.\n- **Duration (8 seconds)**: Long enough to be useful in a challenging section, but not so long that it creates an overpowered advantage or changes gameplay dramatically.\n- **Brightness boost (30%)**: Substantial enough to make a difference in visibility without making the game too easy or removing the challenge of navigating by ember light.\n- **Dimming reduction (50%)**: Encourages strategic use during stationary moments, such as when preparing for a jump or waiting for a platform to move \u2014 reinforcing the core gameplay loop.\n\nImplementation Notes\n\n```python\n# Example implementation structure in pseudo-code\n\nclass EchoShard:\n    def __init__(self):\n        self.active = False\n        self.timer = 0\n        self.brightness_boost = 1.30\n        self.dimming_reduction = 0.50\n\n    def collect(self, player):\n        # Apply Resonance Boost to player\n        player.apply_resonance_boost(self)\n\n    def activate_boost(self, player):\n        if not self.active:\n            self.active = True\n            self.timer = 8.0  # seconds\n            player.set_ember_brightness(self.brightness_boost)\n            player.set_dimming_rate(self.dimming_reduction)\n            player.reveal_hidden_paths()\n\n    def update(self, dt):\n        if self.active:\n            self.timer -= dt\n            if self.timer <= 0:\n                self.deactivate_boost()\n\n# In game state management:\n# - Each level stores a list of available EchoShards\n# - When collected, they're removed from the level\n# - Resonance Boost is a temporary effect applied to the player's ember system\n```\n\nThis collectible fits Embergrave's design language by rewarding exploration without encouraging repetitive grinding, reinforcing core gameplay principles, and maintaining the game's deterministic nature through its single-use, time-limited effects.\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 734,
+  "tokens_output": 962,
+  "tool_steps": 0,
+  "wall_clock_seconds": 5.126677730993833,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "ambiguity_platformer",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "collectible_named",
+        "passed": true,
+        "rationale": "The subject output proposes a specific named collectible called the 'Echo Shard' rather than using a placeholder."
+      },
+      {
+        "criterion_id": "effect_defined",
+        "passed": true,
+        "rationale": "The output explicitly defines the observable effects of collecting an Echo Shard, such as increasing ember brightness by 30%, reducing the dimming rate by 50%, and revealing hidden paths."
+      },
+      {
+        "criterion_id": "placement_constraints_articulated",
+        "passed": true,
+        "rationale": "The output explicitly specifies placement locations (visually distinct, hidden alcoves, etc.) and includes constraints such as '1-3 Echo Shards per level', a minimum distance from deadly geometry, and a minimum distance between shards."
+      },
+      {
+        "criterion_id": "rewards_exploration_not_grinding",
+        "passed": true,
+        "rationale": "The design rewards exploration by placing shards in hidden alcoves and behind breakable walls, while preventing grinding by making them single-use, limited in quantity (1-3 per level), and explicitly stating they are not 'grindable'."
+      },
+      {
+        "criterion_id": "pillar_alignment_committed",
+        "passed": true,
+        "rationale": "The design explicitly aligns with the commitment pillar by making the Echo Shard a 'single-use resource' that requires players to make a strategic decision on when to activate it, ensuring they cannot undo the choice once consumed."
+      },
+      {
+        "criterion_id": "pillar_alignment_vision",
+        "passed": true,
+        "rationale": "The design reinforces the 'ember-as-light-and-resource' pillar by using the Echo Shard to modify ember brightness and dimming rates, and it avoids introducing a parallel HUD by applying these effects directly to the existing ember system."
+      },
+      {
+        "criterion_id": "pillar_alignment_cheap_death",
+        "passed": true,
+        "rationale": "The Echo Shard is described as 'sticky progress' because it provides a meaningful benefit that encourages exploration without creating a grind loop or penalizing the player upon death."
+      },
+      {
+        "criterion_id": "forbids_combat_etc",
+        "passed": true,
+        "rationale": "The output focuses on a single collectible item and does not introduce combat, story-driven moments, procedural generation, or persistent meta-progression."
+      },
+      {
+        "criterion_id": "numbers_defended",
+        "passed": true,
+        "rationale": "The subject defends its numbers in the 'Balance Considerations' section, explaining how the quantity, duration, and percentage boosts align with the game's pacing and core gameplay loop."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 2,
+    "rationale": "The output introduces several unsupported additions that contradict the design brief's core pillars and constraints. Specifically, it introduces 'breakable walls' and 'hidden paths,' which imply level geometry or mechanics not present in the brief, and it introduces a 'single-use power-up' that must be manually activated, which contradicts the 'three things and three things only' movement/interaction rule. Furthermore, the 'Resonance Boost' effect of revealing hidden paths introduces a level of complexity/content (secret areas) that the brief's 'no story, no NPCs, the cave is the whole game' philosophy suggests should be avoided in favor of pure traversal.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

@@ -1,0 +1,76 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "A",
+  "task_cell_id": "easy_survival",
+  "game": "survival",
+  "seed": 1000048,
+  "timestamp_iso": "2026-05-28T02:18:59Z",
+  "task_source_sha256": "351cf918c15760426e0ccc694dd4d36923411db0bf74e38ff78493720ed74b5c",
+  "payload_sha256": "f0156ea59df9b3b466c54095d9ba4e1a261a2b6ab38d5449fea5f39640bad8bb",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "",
+  "subject_output": "I'll create a new recipe for `cooked_fish` according to the requirements. Let me analyze what's needed:\n\n1. A recipe file named `cooked_fish.yaml` in the `content/recipes/` directory\n2. The recipe should be tier-2 (requires wooden axe)\n3. It should require 1 raw_fish and produce 1 cooked_fish\n4. cooked_fish should be a food item that restores 6 hunger when eaten\n5. It should take 30 in-game minutes to craft\n6. It should require a campfire station\n\nLet me create this recipe:\n\n```yaml\nspec: game-design.md\nspec_version: 0.2.0-alpha\nfile_type: content-entity\nid: cooked_fish\nstatus: draft\nimplemented_in: [\"src/driftwood/content/recipes/cooked_fish.py\"]\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\nin_game_minutes_to_craft: 30\n```",
+  "subject_output_sanitized": "I'll create a new recipe for `cooked_fish` according to the requirements. Let me analyze what's needed:\n\n1. A recipe file named `cooked_fish.yaml` in the `content/recipes/` directory\n2. The recipe should be tier-2 (requires wooden axe)\n3. It should require 1 raw_fish and produce 1 cooked_fish\n4. cooked_fish should be a food item that restores 6 hunger when eaten\n5. It should take 30 in-game minutes to craft\n6. It should require a campfire station\n\nLet me create this recipe:\n\n```yaml\n\nid: cooked_fish\n\nname: \"Cooked Fish\"\ntier: 2\ninputs:\n  - { item: raw_fish, quantity: 1 }\noutput:\n  item: cooked_fish\n  quantity: 1\n  tag: food\n  hunger_restore_value: 6\nstation_required: campfire\nin_game_minutes_to_craft: 30\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 22185,
+  "tokens_output": 254,
+  "tool_steps": 0,
+  "wall_clock_seconds": 6.897835455980385,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_survival",
+    "passes_checklist": true,
+    "fraction_passing": 1.0,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The subject output includes a YAML recipe definition with the id `cooked_fish` as required."
+      },
+      {
+        "criterion_id": "tier_two",
+        "passed": true,
+        "rationale": "The subject output explicitly sets the recipe's tier to 2 in both the planning text and the YAML code (`tier: 2`)."
+      },
+      {
+        "criterion_id": "input_one_raw_fish",
+        "passed": true,
+        "rationale": "The YAML output explicitly defines the input as `item: raw_fish` with a `quantity: 1`."
+      },
+      {
+        "criterion_id": "output_one_cooked_fish",
+        "passed": true,
+        "rationale": "The YAML output explicitly defines the recipe output as 'item: cooked_fish' with a 'quantity: 1'."
+      },
+      {
+        "criterion_id": "hunger_restore_six",
+        "passed": true,
+        "rationale": "The output explicitly declares `hunger_restore_value: 6` within the YAML recipe block and mentions it in the planning prose."
+      },
+      {
+        "criterion_id": "station_campfire",
+        "passed": true,
+        "rationale": "The subject output explicitly includes 'station_required: campfire' in the YAML recipe definition."
+      },
+      {
+        "criterion_id": "craft_time_thirty_minutes",
+        "passed": true,
+        "rationale": "The subject output explicitly sets the `in_game_minutes_to_craft` field to 30, which meets the requirement."
+      },
+      {
+        "criterion_id": "tagged_food",
+        "passed": true,
+        "rationale": "The output explicitly includes `tag: food` within the YAML recipe definition for the `cooked_fish` item."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 3,
+    "rationale": "The output correctly implements the specific requirements of the task brief, including the inputs, outputs, hunger value, and station. However, it contains a significant design contradiction: the task brief asks for a 30-minute craft time, but the Design Brief states that a full five-day game run is only approximately 30 minutes total. Implementing a single recipe that takes the entire game's duration to craft violates the 'Time pressure, not difficulty pressure' pillar and the 'Day rhythm' section of the design brief.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}

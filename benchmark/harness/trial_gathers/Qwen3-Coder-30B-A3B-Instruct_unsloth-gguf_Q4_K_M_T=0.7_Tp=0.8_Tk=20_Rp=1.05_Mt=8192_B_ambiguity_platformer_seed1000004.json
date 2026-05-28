@@ -1,0 +1,25 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "condition": "B",
+  "task_cell_id": "ambiguity_platformer",
+  "game": "platformer",
+  "seed": 1000004,
+  "timestamp_iso": "2026-05-28T00:12:37Z",
+  "order_index": 106,
+  "instance_id": "ambiguity_platformer_004",
+  "unit_id": "ambiguity_platformer_004_AB",
+  "pair_role": "first_of_pair",
+  "task_source_sha256": "2af9be100a50dc949b3dd00dc725ee1632c820e460542407db16eced64f122cf",
+  "payload_sha256": "7f888bfc71fabb4db02851ddebd323294e90170a5af5d985122800a174ed720a",
+  "flattener_sha256": "54ef5ba3fd083c1c53240b5ed8176e98635d70b0813009134b3bafdec6b500c4",
+  "c_prompt_sha256": "",
+  "subject_output": "# New Collectible: \"Echo Spark\"\n\n## Design Choice\n\nI'll add a new collectible called **\"Echo Spark\"** that rewards exploration without encouraging repetitive grinding.\n\n### What It Does\nWhen collected, an Echo Spark grants the player a temporary \"echo trail\" visual effect that shows their previous path. This reinforces the game's core principle of \"the cave is the puzzle; light is the lens\" by providing additional visual context for navigation while maintaining the precision challenge.\n\n### Placement and Appearance\n- **Type**: Visual collectible (presentation-only)\n- **Appearance**: A small glowing orb that appears in level design\n- **Effect**: Leaves a faint trail behind the moth for 3 seconds after collection\n- **Duration**: 3 seconds of visual trail display\n\n### Design Rationale\n\n**1. Against \"Every jump is a commitment\"**\nThe Echo Spark doesn't provide any mechanical advantage - it's purely visual. This preserves the commitment aspect because:\n- Players must still commit to the path they're exploring \n- The visual trail helps them remember routes, but doesn't change physics or mechanics\n- It reinforces that careful navigation is rewarded through memory and visualization\n\n**2. Against \"The cave is the puzzle; light is the lens\"**\nThe Echo Spark enhances rather than replaces the player's vision:\n- It provides a memory aid that works within the existing ember-light framework\n- The trail fades over time, forcing reliance on the ember for current navigation\n- It emphasizes the \"see the route\" principle by making remembered paths visible\n\n**3. Against \"Death is cheap; progress is sticky\"**\nThe Echo Spark doesn't affect progression or death mechanics:\n- Collecting it has no impact on checkpoint system or respawn behavior\n- It's purely cosmetic, so there's no penalty for dying before collecting\n- Players can collect multiple sparks without penalty, but the visual effect is limited\n\n### Implementation Details\n\n#### Schema Update for Level Files\n```yaml\n# In content/levels schema, add:\necho_sparks: \n  type: array\n  items:\n    type: object\n    required: [x, y]\n    properties:\n      x: {type: integer}\n      y: {type: integer}\n```\n\n#### Entity Definition\n```yaml\n# New entity in mechanics.md\n**Entity `echo_spark`** is of type terrain. Properties: \n  `position_x`={fixed_point=micro_units}, \n  `position_y`={fixed_point=micro_units}, \n  `collected`={type=boolean, default=false}\n```\n\n#### Verb for Collection\n```yaml\n# New verb in mechanics.md\n**Action `collect_echo_spark`** is performed by system. Cost: 0. Targets: type=entities.echo_spark, filter=uncollected_and_overlapping_moth. Effects: resolve rules.echo_spark_collection.\n```\n\n#### Rule for Collection\n```yaml\n# New rule in systems/physics.md\n**Rule `echo_spark_collection`**. Triggered by action verbs.collect_echo_spark. Steps: \n(1) `mark_collected` with target=echo_spark; \n(2) `emit_event` with value=events.echo_spark_collected. \nOutputs: spark_consumed, event_emitted.\n```\n\n#### Event Definition\n```yaml\n# New event in mechanics.md\n**Event `echo_spark_collected`**. Emitted when a player collects an echo spark. \nUsed for presentation layer to trigger visual effects.\n```\n\n### Balance Considerations\n\n#### Quantity Per Level\n- **1 per level, maximum**: This ensures exploration reward without repetitive grinding\n- **Justification**: 1 spark per level provides enough incentive to explore without making it a grind\n- **Consistency with existing balance targets**: Matches the pattern of limited collectibles (ember pickups are also limited)\n\n#### Placement Constraints\n- **Must be in visible area**: Placed where it can be seen and appreciated by the player\n- **Not required for completion**: Sparks are optional exploration rewards\n- **No duplicate placement**: Each level has at most one spark to avoid redundancy\n\nThis design maintains all core pillars while adding a meaningful visual reward that encourages exploration without creating grind or mechanical advantages.",
+  "tokens_input": 18902,
+  "tokens_output": 871,
+  "tool_steps": 0,
+  "wall_clock_seconds": 6.265168990998063,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "sanitization_sha256_at_gather": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df"
+}

@@ -1,0 +1,71 @@
+{
+  "subject_bundle_id": "Qwen3-Coder-30B-A3B-Instruct/unsloth-gguf/Q4_K_M/T=0.7/Tp=0.8/Tk=20/Rp=1.05/Mt=8192",
+  "judge_bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0",
+  "condition": "C",
+  "task_cell_id": "easy_platformer",
+  "game": "platformer",
+  "seed": 1000044,
+  "timestamp_iso": "2026-05-28T02:15:36Z",
+  "task_source_sha256": "c2a7c3157e2ba49f7a521cdc4e93fe0048f066edb290ace72dac0426083892fe",
+  "payload_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "flattener_sha256": "",
+  "c_prompt_sha256": "89c0678b34eee07efb01accdab6ddee1473eef40804bce9b42c71ebd0586b6b5",
+  "subject_output": "```yaml\n# Level: fault_lines_07_the_chasm\n# Tier: 3\n# Region: fault_lines\n\nname: \"The Chasm\"\nauthor: \"Embergrave Team\"\ndescription: |\n  A descent through a vertical fault line shaft. Navigate narrow ledges and\n  precise jumps to collect ember pickups and reach the bottom safely.\n  The chasm below is deadly, so precision is key.\n\n# Level settings\nsettings:\n  # Physics parameters (default values)\n  gravity: 1200\n  jump_force: 400\n  dash_force: 300\n  glide_force: 150\n  ember_dim_rate: 0.1\n  ember_regen_rate: 0.05\n  ember_max: 10\n\n# Player starting position (top of shaft)\nplayer:\n  x: 100\n  y: 20\n\n# Platforms - vertical descent with varying platform shapes and positions\nplatforms:\n  # Platform 1 - Starting platform\n  - id: \"platform_01\"\n    x: 90\n    y: 80\n    width: 20\n    height: 10\n    type: \"solid\"\n\n  # Platform 2 - Narrow ledge\n  - id: \"platform_02\"\n    x: 110\n    y: 130\n    width: 10\n    height: 10\n    type: \"solid\"\n\n  # Platform 3 - Horizontal platform\n  - id: \"platform_03\"\n    x: 70\n    y: 180\n    width: 20\n    height: 10\n    type: \"solid\"\n\n  # Platform 4 - Narrow ledge\n  - id: \"platform_04\"\n    x: 120\n    y: 230\n    width: 10\n    height: 10\n    type: \"solid\"\n\n  # Platform 5 - Diagonal platform\n  - id: \"platform_05\"\n    x: 90\n    y: 280\n    width: 15\n    height: 10\n    angle: 15\n    type: \"solid\"\n\n  # Platform 6 - Horizontal platform with gap\n  - id: \"platform_06\"\n    x: 70\n    y: 330\n    width: 20\n    height: 10\n    type: \"solid\"\n\n# Checkpoints along the natural descent path\ncheckpoints:\n  # Checkpoint 1 - After platform 2\n  - id: \"checkpoint_01\"\n    x: 115\n    y: 140\n    width: 10\n    height: 10\n\n  # Checkpoint 2 - After platform 5\n  - id: \"checkpoint_02\"\n    x: 95\n    y: 290\n    width: 10\n    height: 10\n\n# Ember pickups (4 total, 8 ember capacity)\nember_pickups:\n  # Pickup 1 - Near platform 1\n  - id: \"ember_01\"\n    x: 105\n    y: 70\n    value: 2\n\n  # Pickup 2 - Near platform 3\n  - id: \"ember_02\"\n    x: 90\n    y: 170\n    value: 2\n\n  # Pickup 3 - Near platform 4\n  - id: \"ember_03\"\n    x: 125\n    y: 220\n    value: 2\n\n  # Pickup 4 - Near platform 6\n  - id: \"ember_04\"\n    x: 85\n    y: 320\n    value: 2\n\n# Exit point (bottom of shaft)\nexit:\n  x: 100\n  y: 380\n  width: 10\n  height: 10\n\n# Lethal area below exit\nlethal_areas:\n  # Lava/void region at bottom of shaft\n  - x: 0\n    y: 390\n    width: 200\n    height: 50\n    type: \"lava\"\n\n# Visual elements (optional for level designers)\nvisuals:\n  background_color: \"#1a1a1a\"\n  platform_color: \"#4a4a4a\"\n  exit_color: \"#ffcc00\"\n  lethal_color: \"#ff3300\"\n```",
+  "subject_output_sanitized": "```yaml\n# Level: fault_lines_07_the_chasm\n# Tier: 3\n# Region: fault_lines\n\nname: \"The Chasm\"\nauthor: \"Embergrave Team\"\ndescription: |\n  A descent through a vertical fault line shaft. Navigate narrow ledges and\n  precise jumps to collect ember pickups and reach the bottom safely.\n  The chasm below is deadly, so precision is key.\n\n# Level settings\nsettings:\n  # Physics parameters (default values)\n  gravity: 1200\n  jump_force: 400\n  dash_force: 300\n  glide_force: 150\n  ember_dim_rate: 0.1\n  ember_regen_rate: 0.05\n  ember_max: 10\n\n# Player starting position (top of shaft)\nplayer:\n  x: 100\n  y: 20\n\n# Platforms - vertical descent with varying platform shapes and positions\nplatforms:\n  # Platform 1 - Starting platform\n  - id: \"platform_01\"\n    x: 90\n    y: 80\n    width: 20\n    height: 10\n    type: \"solid\"\n\n  # Platform 2 - Narrow ledge\n  - id: \"platform_02\"\n    x: 110\n    y: 130\n    width: 10\n    height: 10\n    type: \"solid\"\n\n  # Platform 3 - Horizontal platform\n  - id: \"platform_03\"\n    x: 70\n    y: 180\n    width: 20\n    height: 10\n    type: \"solid\"\n\n  # Platform 4 - Narrow ledge\n  - id: \"platform_04\"\n    x: 120\n    y: 230\n    width: 10\n    height: 10\n    type: \"solid\"\n\n  # Platform 5 - Diagonal platform\n  - id: \"platform_05\"\n    x: 90\n    y: 280\n    width: 15\n    height: 10\n    angle: 15\n    type: \"solid\"\n\n  # Platform 6 - Horizontal platform with gap\n  - id: \"platform_06\"\n    x: 70\n    y: 330\n    width: 20\n    height: 10\n    type: \"solid\"\n\n# Checkpoints along the natural descent path\ncheckpoints:\n  # Checkpoint 1 - After platform 2\n  - id: \"checkpoint_01\"\n    x: 115\n    y: 140\n    width: 10\n    height: 10\n\n  # Checkpoint 2 - After platform 5\n  - id: \"checkpoint_02\"\n    x: 95\n    y: 290\n    width: 10\n    height: 10\n\n# Ember pickups (4 total, 8 ember capacity)\nember_pickups:\n  # Pickup 1 - Near platform 1\n  - id: \"ember_01\"\n    x: 105\n    y: 70\n    value: 2\n\n  # Pickup 2 - Near platform 3\n  - id: \"ember_02\"\n    x: 90\n    y: 170\n    value: 2\n\n  # Pickup 3 - Near platform 4\n  - id: \"ember_03\"\n    x: 125\n    y: 220\n    value: 2\n\n  # Pickup 4 - Near platform 6\n  - id: \"ember_04\"\n    x: 85\n    y: 320\n    value: 2\n\n# Exit point (bottom of shaft)\nexit:\n  x: 100\n  y: 380\n  width: 10\n  height: 10\n\n# Lethal area below exit\nlethal_areas:\n  # Lava/void region at bottom of shaft\n  - x: 0\n    y: 390\n    width: 200\n    height: 50\n    type: \"lava\"\n\n# Visual elements (optional for level designers)\nvisuals:\n  background_color: \"#1a1a1a\"\n  platform_color: \"#4a4a4a\"\n  exit_color: \"#ffcc00\"\n  lethal_color: \"#ff3300\"\n```\n",
+  "sanitization_sha256": "e85c123f227d225acc72496f80ad944b20135ad25923ded24f8ce8f15988c4df",
+  "tokens_input": 693,
+  "tokens_output": 1003,
+  "tool_steps": 0,
+  "wall_clock_seconds": 6.4541151270095725,
+  "instrument_extra": {
+    "qwen_finish_reason": "stop"
+  },
+  "checklist_verdict": {
+    "task_cell_id": "easy_platformer",
+    "passes_checklist": false,
+    "fraction_passing": 0.8571428571428571,
+    "criteria": [
+      {
+        "criterion_id": "file_authored",
+        "passed": true,
+        "rationale": "The output provides a level definition file that explicitly identifies the level as 'fault_lines_07_the_chasm' in the header comment and defines the region as 'fault_lines'."
+      },
+      {
+        "criterion_id": "tier_three",
+        "passed": true,
+        "rationale": "The subject output explicitly sets the tier to 3 in the YAML header (`# Tier: 3`)."
+      },
+      {
+        "criterion_id": "six_platforms",
+        "passed": true,
+        "rationale": "The 'platforms' section contains exactly six platform entries, ranging from 'platform_01' to 'platform_06'."
+      },
+      {
+        "criterion_id": "two_checkpoints",
+        "passed": true,
+        "rationale": "The output contains a 'checkpoints' section with exactly two entries: 'checkpoint_01' and 'checkpoint_02'."
+      },
+      {
+        "criterion_id": "four_ember_pickups_sum_eight",
+        "passed": true,
+        "rationale": "The output contains exactly 4 ember pickups (ember_01 through ember_04), each with a value of 2, resulting in a total sum of 8."
+      },
+      {
+        "criterion_id": "entry_above_exit",
+        "passed": false,
+        "rationale": "The player starting position is at y: 20, while the exit point is at y: 380. Since the Y-coordinate increases from entry to exit, it is an ascent rather than a descent."
+      },
+      {
+        "criterion_id": "lethal_below_exit",
+        "passed": true,
+        "rationale": "The output includes a 'lethal_areas' section defining a 'lava' type region at y: 390, which is below the exit point located at y: 380."
+      }
+    ]
+  },
+  "intent_score": {
+    "score": 3,
+    "rationale": "The output meets most of the task brief's structural requirements, including the platform count, checkpoint count, and ember pickup count/value. However, it contains significant unsupported additions that contradict the design brief's core mechanics, specifically adding 'ember_regen_rate' and 'ember_dim_rate' to the settings, whereas the brief states ember is only refilled by pickups and dims based on movement/hesitation. Additionally, the 'ember_max' of 10 contradicts the design brief's 'Numbers worth knowing' section which specifies a capacity of about 12.",
+    "bundle_id": "gemma/gemma-4-26B-A4B-it/unsloth-gguf/UD-Q4_K_M/sha256:34c746b1d50ab813e29cd46c4796e3f43c741901a582f93a67b55b9fc9687b35/llama.cpp-b9306-5d246a7/temp=0.0"
+  },
+  "passes_overall": false
+}
