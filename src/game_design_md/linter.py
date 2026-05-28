@@ -32,6 +32,12 @@ CANONICAL_SECTIONS: dict[str, list[str]] = {
 STATUS_LEVELS = {
     "draft": 0, "prototyped": 1, "implemented": 2, "balanced": 3,
     "shipped": 4, "cut": -1,
+    # D-020 v0.3: lateral states. `experimental` is treated as level 1
+    # (prototyped-equivalent) for implementation_pointers checks — code exists
+    # but design is under evaluation. `deferred` is level -1 (cut-equivalent) —
+    # code may not exist or may be stale; pointer staleness is not enforced
+    # while progression is paused.
+    "experimental": 1, "deferred": -1,
 }
 
 

@@ -980,8 +980,11 @@ Sections beyond these are accepted but must come after `Change Log`.
 Every section and content entity declares a `status:` from this lifecycle:
 
 ```
-draft → prototyped → implemented → balanced → shipped
-                                              ↘ cut
+                            ┌──── experimental (lateral, v0.3) ────┐
+                            │                                       ↓
+draft → prototyped → implemented → balanced → shipped              cut
+            ↑                                          ↘            ↑
+            └──── deferred (lateral, v0.3) ────────────────────────┘
 ```
 
 | Value | Meaning |
@@ -992,8 +995,18 @@ draft → prototyped → implemented → balanced → shipped
 | `balanced` | Code matches spec AND any referenced `balance_targets` measure within tolerance. |
 | `shipped` | Released to players. Implies `balanced`. |
 | `cut` | Removed from the design. The entity is retained in the doc for historical reference but excluded from `lint`'s normal rules; instead, `lint` errors if anything else still references it (rule: `broken-ref` against a cut target). |
+| `experimental` | (added v0.3 per D-020) Code exists but the design itself is under evaluation; may revert to a prior state or transition to `cut`. Distinct from `prototyped`: `prototyped` is "first-pass code on track to ship"; `experimental` is "code exists, but the design is being actively reconsidered." Use during active iteration; promote to `prototyped` once the design is committed, or transition to `cut` if rejected. Treated as level 1 (= prototyped) for `implemented_in:` staleness checks — implementation must exist. |
+| `deferred` | (added v0.3 per D-020) Postponed to a future milestone. Lifecycle progression is paused; the entity remains reference-able. Implementation may or may not exist depending on the deferred-FROM state. Treated as level -1 (= cut) for `implemented_in:` staleness checks — code is not required while deferred. Distinct from `cut`: `cut` is "no longer planning this"; `deferred` is "still planning, but not now." Resume by transitioning back to the prior state. |
 
-**Allowed transitions:** strictly left-to-right along the arrows above, plus any node may transition to `cut`. Backward transitions are permitted in the same commit (the spec is a living document and walking a status back is sometimes correct), but `gdmd diff` (§9.2) emits a `status-regression` finding for `balanced → implemented`, `shipped → balanced`, or any other backward step, so the author has a chance to confirm it is intentional. `lint` does not check status regression because it has no baseline to compare against — the check belongs to `diff`.
+**Allowed transitions.** Forward along the canonical path (`draft → prototyped → implemented → balanced → shipped`) is always legal. Lateral states `experimental` and `deferred` may be entered from any non-terminal state and exited back to the prior state or to `cut`. `cut` is the only terminal exit; re-entry after `cut` is via a new `draft` (re-author from scratch).
+
+**Backward transitions.** Adjacent backward steps along the canonical path (`shipped → balanced`, `balanced → implemented`, `implemented → prototyped`, `prototyped → draft`) are permitted but `gdmd diff` (§9.2) emits a `status-regression` finding so the author can confirm intent. Non-adjacent backward jumps (`shipped → prototyped`, `balanced → draft`, etc.) require an explicit intermediate — either route through `cut` and re-`draft` (signals "the prior design is abandoned, starting over"), or route through `experimental` (signals "the work exists but is under re-evaluation"). `lint` does not check transitions within a tree (no baseline); the regression check belongs to `diff`. Anti-staleness checks that build on these states (e.g., a `deferred` section deferred for more than 90 days; a `shipped` section with `last_verified` more than 6 months old) are anti-drift concerns (§8.2 + Task 6 of the v0.3 docket).
+
+**Discipline for choosing among `experimental`, `deferred`, `cut`.** All three are off-canonical paths; the distinctions matter:
+
+- `experimental` — *I'm building this and might keep it.* Code exists, design under evaluation. Use when you're actively iterating on a feature whose end-shape isn't settled. Exit: promote to `prototyped` (committed) or `cut` (rejected).
+- `deferred` — *I want this but not now.* Lifecycle paused; we're returning to it. Code may or may not exist. Exit: resume to prior state.
+- `cut` — *I no longer want this.* Removed from design intent. Entity stays in the doc for archaeology so future agents don't re-propose it, but it's excluded from normal lint rules.
 
 ### 8.2 Anti-drift mechanisms
 

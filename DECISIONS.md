@@ -363,3 +363,59 @@ The non-pow-of-two entry is what makes the vector load-bearing.
 **Migration (tick-combat).** `examples/tick-combat/gdd/systems/distributions.md::prng` gains a `uniform_int_reference_vector:` block with two entries at `canonical_seed: 0`: `range: [0, 7]` (pow-of-two, outputs `[2, 0, 1, 1, 7, 2, 5, 6]`) and `range: [0, 6]` (non-pow-of-two, outputs `[1, 1, 5, 6, 1, 5, 0, 3]`). Both engines compile the table into a static const + a self-check function called from `Simulation::new()` immediately after `reference_vector_self_check()`. The golden trajectory does NOT change (both engines were already producing correct reductions — D-018 codifies what was correct, not what was broken).
 
 **No further ratchet planned.** D-018 is closed. The reduction-layer field is structurally required on every `prng:` declaration at v0.2.0-alpha; a future `Distribution.reduction:` opt-out for unbiased reductions would be a new D-NNN, not a backwards step here.
+
+---
+
+## D-019 — Per-instance addressing DSL (F-008 v0.3 binding semantics)
+
+- **Status:** shipped at v0.3 (2026-05-28).
+- **Decided:** 2026-05-28.
+- **Spec:** §3 (context-local prefix binding for instance_container); §4.1 (instance_container entity type); §4.5 (per-instance addressing for rules); §9.1 lint rule `write-to-template-field`.
+- **Implementation:** schema additions for `instance_container` + `per_instance_state`; linter rule `rule_write_to_template_field` in `src/game_design_md/linter.py`.
+- **Tests:** `tests/test_lint.py::test_write_to_per_instance_state_is_silent`, `::test_write_to_template_field_fires_on_undeclared_field`, `::test_write_to_template_field_silent_without_instance_containers`.
+- **Commits:** `f2572cc` (DSL lock) + `8eee42b` (lint addendum) + `c13bc59` (tick-combat retro-touch + verify-adapter PASS).
+
+D-019 specifies the binding semantics of existing context-local refs (`{actor.<field>}` / `{target.<field>}`, D-012) against the new `instance_container` entity type. The addressing "DSL" required NO new syntax — only normative lookup order and write restriction on existing vocabulary. Closes F-008.
+
+**Read lookup order:** `per_instance_state` → template (via `holds_template_from`) → container properties, first-match. Reading template-layer fields is normal (e.g., reading `actor.attack` from the template's immutable schema).
+
+**Write restriction:** writes mutate `per_instance_state` fields ONLY. A do[] step declaring `field: <name>` where `<name>` is not declared in any instance_container's `per_instance_state` is a spec violation: templates (content_collection entries) are immutable per §6, container properties are likewise read-only. State-machine transitions on the instance fire via the same per_instance_state binding (e.g., `{target.lifecycle}` transitions via the `unit_lifecycle` machine — `lifecycle` MUST be in per_instance_state for the transition to be a legal write).
+
+**Lint:** `write-to-template-field` (severity error) fires on do[] steps declaring `field: <name>` outside per_instance_state. Opt-in (only fires when the step declares `field:`); declared-`field:` becomes required on mutation steps in a v0.4 ratchet.
+
+**Validated against verify-adapter on tick-combat (step 4 commit c13bc59):** trajectory byte-identical to golden seed=12345, negative_control seed=99999 diverges, build_health green. The cross-engine determinism gate confirms F-008's full closure (base shape + addressing DSL + write restriction) preserves the cross-engine trajectory contract.
+
+**Descriptive-not-prescriptive (see memory `descriptive-not-prescriptive-vocabulary-extensions`).** The verify-adapter PASS was expected because the new vocab DESCRIBES existing engine reality (xtreme's ECS components already carry per-instance `hp` / `lifecycle`; the spec just hadn't had words for what was there). No engine refactor required.
+
+**No further ratchet at v0.3.** Required-`field:` on mutation steps is a v0.4 concern.
+
+---
+
+## D-020 — Status lifecycle vocabulary expansion: `experimental` + `deferred` (v0.3)
+
+- **Status:** shipped at v0.3 (2026-05-28).
+- **Decided:** 2026-05-28.
+- **Spec:** §8.1 (Status values + transition graph); `$defs.Status` in `schema/game-design.schema.json`.
+- **Implementation:** schema enum extension; `STATUS_LEVELS` in `src/game_design_md/linter.py` extended (`experimental`: 1 = prototyped-equivalent for staleness; `deferred`: -1 = cut-equivalent).
+
+**Evidence base (in-repo observed use).** A scan of `status:` declarations + prose markers across the 6 trees (4 canonical examples + 2 benchmark games) found:
+
+- `experimental` declared in PROSE across 4 trees' `verification.md` files (`examples/deckbuilder`, `examples/tcg`, `examples/party-rpg`, `examples/tick-combat`). Each says **"Status: experimental"** because the canonical 5-state forward vocab (draft / prototyped / implemented / balanced / shipped) couldn't express "code or contract exists, design under evaluation, may revert."
+- `deferred` used in PROSE for time-deferral in 2 places (`examples/deckbuilder/gdd/glossary.md` "Ascension ... deferred to v0.5", `examples/deckbuilder/gdd/systems/progression.md` "Difficulty ascensions ... deferred to v0.5").
+- 240 declarations at `draft`, 7 at `prototyped` (all `tick-combat` with real impl), 0 at higher states or at `cut`. Most canonical examples haven't reached impl yet — the lifecycle is mostly aspirational for them.
+- `blocked` and other candidate vocabulary terms NOT observed in any tree.
+
+**Decision-of-record.** Add `experimental` and `deferred` to the canonical status vocab in v0.3; defer `blocked` until observed-use surfaces it. The closed-vocabulary-by-observed-need discipline (D-015 PRNG enum, D-017 weighted selection_rule, F-010 clocks mode, D-019 addressing DSL) applies: in-repo evidence is sufficient observed use to justify expansion in v0.3 — the canonical examples already need vocabulary the v0.2 surface couldn't express. Deployment-sweep evidence (live projects) would extend the evidence base; in-repo evidence is already clear enough to ship.
+
+**Lifecycle additions:**
+
+- `experimental` (lateral): entered from any non-terminal state; exits back to prior state OR to `cut`. Treated as level 1 (prototyped-equivalent) for `implemented_in:` staleness — implementation must exist.
+- `deferred` (lateral): entered from any state; lifecycle paused; exits back to prior state. Treated as level -1 (cut-equivalent) for `implemented_in:` staleness — code is not required while deferred.
+
+**Transition graph refinement.** Non-adjacent backward jumps along the canonical path (e.g., `shipped → prototyped`) now require an explicit intermediate: either route through `cut` and re-`draft` (the prior design is abandoned, starting over) OR route through `experimental` (the work exists but is under re-evaluation). `gdmd diff` catches the multi-step backward case via the existing `status-regression` finding; the new intermediate options give the author a semantically richer way to communicate intent.
+
+**No new lint rule at v0.3.** Lifecycle transitions are a `gdmd diff` concern (it has a baseline; `lint` doesn't). Anti-staleness lint that builds on the new states (e.g., a `deferred` section deferred for more than 90 days; an `experimental` section whose status hasn't advanced in 60 days) is a Task 6 concern in the v0.3 docket.
+
+**In-repo retro-touch (this commit):** the 3 verification.md files whose prose says the WHOLE file is experimental (`deckbuilder`, `tcg`, `party-rpg`) have their frontmatter `status:` updated from `draft` to `experimental`. The `tick-combat` verification.md is NOT updated (its prose flags specific verify_targets as experimental, not the whole file). The "deferred to v0.5" prose mentions in deckbuilder reference design features (ascensions) that don't have token entries; no frontmatter to update.
+
+**Deferred to deployment sweep:** the `blocked` vocabulary addition pending observed use in live projects. If a Xenogrid / Mirrorbind / Rêverie surfaces a "waiting on a dependency" marking need the current vocab can't express, add it via a future ratchet decision.

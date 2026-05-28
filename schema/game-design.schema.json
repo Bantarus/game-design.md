@@ -31,7 +31,8 @@
     },
 
     "Status": {
-      "enum": ["draft", "prototyped", "implemented", "balanced", "shipped", "cut"]
+      "enum": ["draft", "prototyped", "implemented", "balanced", "shipped", "cut", "experimental", "deferred"],
+      "description": "Section lifecycle state. Canonical forward path: draft → prototyped → implemented → balanced → shipped. Plus three lateral/exit states: `cut` (terminal exit; entity retained for archaeology but excluded from lint), `experimental` (added v0.3; code exists but design under evaluation, may revert to prior or → cut), `deferred` (added v0.3; postponed to future milestone, lifecycle progression paused). See spec §8.1."
     },
 
     "TokenRef": {

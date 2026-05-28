@@ -2,8 +2,8 @@
 spec: game-design.md
 spec_version: 0.2.0-alpha
 file_type: subfile
-status: draft
-last_verified: "2026-05-22"
+status: experimental
+last_verified: "2026-05-28"
 verify_targets:
   - axis: behavioral_alignment
     target: "{balance_targets.win_rate_ascension_0}"
