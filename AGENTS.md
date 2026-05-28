@@ -33,12 +33,13 @@ This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`sch
 
 When you modify a design or its implementation:
 
-1. Update the affected entity's `status:` (`draft | prototyped | implemented | balanced | shipped | cut`).
+1. Update the affected entity's `status:` (`draft | prototyped | implemented | balanced | shipped | cut | experimental | deferred` — see spec §8.1; the lateral `experimental` + `deferred` states landed v0.3 per D-020).
 2. Update `implemented_in:` if source locations changed.
 3. Touch `last_verified:` on any section whose referenced code you changed.
 4. Bump `version:` in the root `game-design.md` and update `last_updated:`.
 5. Run `game-design.md lint <example-dir>` and fix all findings.
 6. Run `game-design.md diff` if comparing against a release; treat a balance-target regression (exit code 1) as a blocker, not a warning.
+7. Optionally run `gdmd status <example-dir>` to surface aggregate state (status counts, staleness flags, pointer health) — useful when picking up a tree cold or before a milestone commit.
 
 Only `pillars`, `non_goals`, and `player_experience_goals` are stable for the life of a project. Everything else may drift — but must be re-validated when it does.
 

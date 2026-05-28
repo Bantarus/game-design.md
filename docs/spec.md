@@ -1283,6 +1283,48 @@ The discipline belongs in the spec, not in each adapter: an adapter that doesn't
 
 **Why byte-identity.** Same reason as cross-engine: structural-vs-byte equivalence is exactly the failure mode the trajectory format exists to eliminate. If two seeds produce structurally-equivalent-but-byte-different trajectories, the trajectory serialization is non-canonical — fix that.
 
+### 9.6 `status`
+
+```
+gdmd status <path> [--json] [--stale-days N] [--shipped-stale-days N]
+```
+
+**Status: shipped at v0.3 (Task 3 of the v0.3 docket).** `status` is the project-dashboard view — surfaces aggregate state implicit in `status:` + `last_verified:` + `implemented_in:` markers across all subfiles. v0.2 had the markers; v0.3 projects them.
+
+`status` always exits **0** — it is informational, not a gate. (The actionable gates live in `lint` and `diff`.)
+
+**Output sections:**
+
+- **Status counts** — tally of `status:` values across every subfile/content-schema/content-entity file AND every per-namespace token (entities/verbs/rules/etc.). Sorted in canonical lifecycle order (`draft → prototyped → implemented → balanced → shipped`, then lateral `experimental → deferred`, then `cut`).
+- **Stale sections** — files whose `last_verified:` is more than `--stale-days` (default 90) older than the current date. Distinct from the linter's `stale-section` rule (which compares `last_verified` to impl mtime); the status view checks "the doc itself hasn't been touched recently."
+- **Shipped stale** — `status: shipped` files specifically, with `last_verified:` more than `--shipped-stale-days` (default 180) old. Highest-priority drift signal.
+- **Active without impl** — per-token findings: tokens at `prototyped` | `implemented` | `balanced` | `shipped` | `experimental` whose `implemented_in:` is empty or absent. `draft` / `deferred` / `cut` tokens are exempt.
+
+**Output modes:**
+
+- Default — human-readable text with status-bar visualizations + collapsed lists.
+- `--json` — machine-readable JSON for tooling integration. Result shape (stable for v0.3):
+
+```json
+{
+  "tree_root": "examples/tick-combat",
+  "files_scanned": 17,
+  "status_counts": { "draft": 32, "prototyped": 11, "implemented": 1 },
+  "stale_sections": [...],
+  "shipped_stale": [...],
+  "active_without_impl": [...],
+  "thresholds": { "stale_days": 90, "shipped_stale_days": 180 }
+}
+```
+
+**Use cases:**
+
+- A new agent session or new developer runs `gdmd status` to understand where a project is without reading the whole spec.
+- Tooling (CI dashboards, editor integrations) consumes `--json` output to surface project health.
+- Anti-drift discovery: stale-sections + shipped-stale highlight where the doc has fallen behind code.
+
+The view is intentionally non-exhaustive at v0.3 — it surfaces the markers v0.2 already declared. Richer aggregations (a "what's next" view for sections at `draft` referenced by sections at `prototyped+`; per-namespace drill-downs; cross-tree comparison) are candidates for v0.4 based on observed use.
+
 ---
 
 ## 10. JSON Schema

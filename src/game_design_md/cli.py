@@ -1,9 +1,10 @@
-"""game-design.md CLI: lint | diff | export | spec | verify.
+"""game-design.md CLI: lint | diff | export | spec | verify | status.
 
 Exit-code contract (spec §9):
   lint    : 0 if no errors, 1 otherwise.
   diff    : 0 if no balance_regressions or status_regressions, 1 otherwise.
   verify  : 0 if every non-presentation_usability target passed, 1 otherwise.
+  status  : always 0 (informational; not a gate). See spec §9.6.
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ from pathlib import Path
 import click
 
 from game_design_md import __spec_version__, __version__
-from game_design_md import diff_cmd, export_cmd, linter, spec_cmd, verify_cmd
+from game_design_md import diff_cmd, export_cmd, linter, spec_cmd, status_cmd, verify_cmd
 from game_design_md.tree import Tree
 
 
@@ -99,6 +100,30 @@ def verify_cmd_entry(path: Path, adapter_name: str) -> None:
         raise click.ClickException(str(e)) from e
     click.echo(json.dumps(result, indent=2))
     sys.exit(verify_cmd.evaluate(result))
+
+
+@main.command("status",
+              help="Project dashboard: status counts, staleness flags, "
+                   "pointer health. Always exits 0 (informational). "
+                   "See spec §9.6.")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
+                                        path_type=Path))
+@click.option("--json", "as_json", is_flag=True, default=False,
+              help="Emit machine-readable JSON instead of human-readable text.")
+@click.option("--stale-days", type=int, default=90, show_default=True,
+              help="Days threshold for `last_verified` staleness flag.")
+@click.option("--shipped-stale-days", type=int, default=180, show_default=True,
+              help="Days threshold for `status: shipped` staleness flag.")
+def status_cmd_entry(path: Path, as_json: bool, stale_days: int,
+                     shipped_stale_days: int) -> None:
+    tree = Tree.load(path)
+    report = status_cmd.status_report(
+        tree, stale_days=stale_days, shipped_stale_days=shipped_stale_days,
+    )
+    if as_json:
+        click.echo(json.dumps(report, indent=2, default=str))
+    else:
+        click.echo(status_cmd.render_human(report))
 
 
 if __name__ == "__main__":
