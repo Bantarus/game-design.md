@@ -418,4 +418,43 @@ D-019 specifies the binding semantics of existing context-local refs (`{actor.<f
 
 **In-repo retro-touch (this commit):** the 3 verification.md files whose prose says the WHOLE file is experimental (`deckbuilder`, `tcg`, `party-rpg`) have their frontmatter `status:` updated from `draft` to `experimental`. The `tick-combat` verification.md is NOT updated (its prose flags specific verify_targets as experimental, not the whole file). The "deferred to v0.5" prose mentions in deckbuilder reference design features (ascensions) that don't have token entries; no frontmatter to update.
 
-**Deferred to deployment sweep:** the `blocked` vocabulary addition pending observed use in live projects. If a Xenogrid / Mirrorbind / Rêverie surfaces a "waiting on a dependency" marking need the current vocab can't express, add it via a future ratchet decision.
+**Deferred to deployment sweep:** the `blocked` vocabulary addition pending observed use in live projects. If a future live adoption surfaces a "waiting on a dependency" marking need the current vocab can't express, add it via a future ratchet decision. (D-020 references to "Xenogrid / Mirrorbind / Rêverie" predated D-021's premise correction — those names were placeholders for live projects that don't have spec trees yet. The principle stands; the namelist doesn't.)
+
+---
+
+## D-021 — v0.3 deployment-surface reframe: premise-correction, not gate-loosening
+
+- **Status:** shipped at v0.3 (2026-05-28).
+- **Decided:** 2026-05-28.
+- **Spec:** §11.2 (v0.3 scope and validation surface).
+- **Implementation:** scoping text in §11.2 names the three v0.3-validated claims and the one v0.4+-queued claim; D-020 amended with a forward-pointer to this decision noting the deployment-sweep namelist was a placeholder.
+
+The v0.3 kickoff set "at least one live project" as the validation bar — the working assumption being that Xenogrid / Mirrorbind / Rêverie had spec trees the v0.3 vocabulary would be deployed into. Mid-development, the user clarified those projects don't have spec trees: they were placeholder names for future live adoption, not extant validation targets. The bar was set against a factual premise that wasn't true.
+
+**Decision-of-record.** Correcting the premise necessarily changes what the bar can mean. The restatement is **gate correction, not gate loosening**: the same discipline-pattern as D-016's constraint-driven scope reduction (Phase 5 v12-D), with a different cause shape — there a logistical/feasibility constraint fired AS DESIGNED on a working gate; here a factual claim about project state turned out to be false and the bar simply couldn't be operationalized as written. Both are legitimate scope-reductions distinct from result-driven gate loosening (D-016's counterfactual-adoption test).
+
+The corrected scoping (§11.2):
+
+**Validated at v0.3 from in-repo evidence:**
+1. **Vocabulary closure** — the closed-vocabulary additions (`{clocks.<id>}`, `instance_container`, addressing DSL, status lifecycle additions) are expressible on real spec content across the 6 in-repo trees without local invention.
+2. **Cross-engine determinism preserved** — tick-combat's `gdmd verify` adapter gate stays byte-identical to v0.2 golden after F-008 + F-010 land.
+3. **Session-level maintenance** — the agent performs the anti-drift ritual end-to-end on the in-repo trees when actively prompted.
+
+**Queued for v0.4+ pending live adoption:**
+- **Longitudinal living-doc property** — the doc stays current across weeks/months of game development without continuous human review. The 6 in-repo trees can't validate this claim; they are spec-illustrations and benchmark targets (mostly `draft`, see `gdmd status`), not games-in-development. This is a *scope statement*, not a failure: v0.3 ships the vocabulary and apparatus the longitudinal property would test; the test itself awaits the first live adopter.
+
+**Why the distinction matters.** A future reader seeing "v0.3 validated on 6 in-repo trees" should be able to trace WHY that's the validation surface rather than wondering if the bar was quietly lowered. The premise-correction discipline:
+
+- **Premise-genuine** — is the factual correction objectively verifiable? Yes here: the named projects don't have spec trees in this repo (or anywhere we can see).
+- **Re-scoping-honest** — does the restatement carry the original ambition forward AS A NAMED LIMITATION, not silently swapped for weaker evidence? Yes: longitudinal claim is explicitly queued for v0.4+, named in §11.2 and in this decision, distinguished at the integrity bar from the three claims the in-repo surface does carry.
+- **Audit lineage preserved** — the premise correction is recorded in DECISIONS.md (this entry) and surfaced in the spec text (§11.2). The lineage from the kickoff's bar through the corrected bar is reconstructible.
+
+D-020's reference to specific deployment-sweep project names is now read as a placeholder list, not an extant validation target. The minimum-vocab discipline that governed `blocked`'s deferral (vocabulary grows by observed use) is unchanged; the trigger condition (a live project surfaces a need the current vocab can't express) is unchanged; only the assumed-imminence of that trigger is corrected.
+
+**Related disciplines.**
+
+- [[gate-correction-vs-gate-loosening]] (memory): the counterfactual-adoption test for result-driven gate widening. Doesn't fire here — there was no result this premise-correction is dodging; the bar simply couldn't be operationalized as written.
+- [[constraint-driven-scope-reduction-vs-result-driven-gate-loosening]] (memory): the sister discipline for logistical constraints. Same family as D-021, different cause shape.
+- [[premise-correction-reframe-is-gate-correction]] (memory, this session): the discipline named.
+
+**No vocabulary changes at v0.3.** D-021 is a scoping decision that records the validation-surface reframe; it adds no schema, no lint rule, no spec syntax. The associated spec-text change (§11.2) is documentation of what v0.3 ships under, not a vocabulary extension. A future v0.4+ validation surface will be governed by what the first live adopter actually surfaces.

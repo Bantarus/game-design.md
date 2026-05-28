@@ -1363,6 +1363,24 @@ A `game-design.md` tree is **conformant at v0.2.0-alpha** if:
 
 The schema is working if, from a cold context, an AI coding agent can implement a correct new content entity (e.g. a new card) from `gdd/content/<kind>.md`'s schema + one representative `*.yaml` example in a single session, ≥80% of the time. The `examples/deckbuilder/` tree is designed to be testable against this benchmark. If success drops below 80%, the schema is over- or under-specified for the type — surface the gap rather than working around it.
 
+### 11.2 v0.3 scope and validation surface
+
+v0.3 ships under three validation claims, with one ambition explicitly **queued for v0.4+ pending live adoption**. The distinction is load-bearing: future readers seeing "v0.3 validated on 6 in-repo trees" should be able to trace *why* that's the validation surface rather than wondering if the bar was quietly lowered.
+
+**Validated at v0.3 from in-repo evidence (the 6 trees: 4 canonical examples + 2 benchmark games):**
+
+1. **Vocabulary closure.** The closed-vocabulary additions — `{clocks.<id>}` namespace with `mode: continuous | per_verb_delta` (§4.7); `instance_container` entity type + `per_instance_state:` sub-schema (§4.1); the addressing DSL pinning binding semantics over existing context-local refs (§3, §4.5, D-019); status lifecycle additions `experimental` + `deferred` (§8.1, D-020) — are *expressible on real spec content* across the 6 trees without local invention. F-008 (instance modeling) and F-010 (time-passage) are closed.
+
+2. **Cross-engine determinism preserved through the additions.** `tick-combat`'s `gdmd verify` adapter gate (§9.5) clears byte-identical to the v0.2 golden trajectory at `seed=12345`, with negative-control divergence at `seed=99999`, after both F-010 (step 1 retro-touch) and F-008 (step 4 retro-touch with the addressing DSL fully spec'd) land. The hardest gate the spec has runs green across the v0.3 additions. **The PASS is descriptive-not-prescriptive evidence** that the new vocabulary *names* observable shape engines already have (xtreme's ECS components carried per-instance `hp` / `lifecycle` before F-008; the retro-touch was structural, not behavioral), rather than imposing new shape engines must conform to.
+
+3. **Session-level maintenance.** The agent performs the anti-drift ritual (§8.2) end-to-end on the in-repo trees when actively prompted. Every v0.3 retro-touch through F-008 / F-010 / Task 2 (lifecycle) / Task 3 (`gdmd status`) has exercised the authoring → operating → maintenance modes against the canonical examples and benchmark games, and the `gdmd status` view (§9.6) projects the staleness / pointer-health markers the maintenance ritual produces.
+
+**Queued for v0.4+ pending live adoption:**
+
+- **Longitudinal living-doc property.** The claim that "the doc stays current across weeks/months of game development, where the spec is one tool among many and the human isn't continuously reviewing it." The 6 in-repo trees cannot validate this claim because they are *spec-illustrations and benchmark targets, not games-in-development*. The `gdmd status` snapshot shows the shape: most files at `status: draft`, a handful at `prototyped`, exactly one tree with `implemented` entries (tick-combat's reference impl). That distribution is consistent with their role as spec evidence; it is not the population that would validate longitudinal maintenance. The vocabulary and apparatus v0.4+ would test against (anti-staleness lint rules, status lifecycle states, transition graph, `gdmd status` thresholds) all land at v0.3 — the test itself awaits the first live adopter.
+
+**The deployment-surface reframe is gate correction, not gate loosening** (D-021). The kickoff's "at least one live project" validation bar was set against the factual premise that named live projects had spec trees the v0.3 vocabulary would be deployed into; that premise was incorrect. Restating the bar under the corrected premise is the same discipline as a constraint-driven scope reduction firing AS DESIGNED — different from a result-driven gate widening (which would face the counterfactual-adoption test). The in-repo surface carries the three validation claims above; the longitudinal claim is queued, not silently dropped. See `DECISIONS.md` D-021 for the full lineage.
+
 ---
 
 ## Appendix A — Worked Examples
