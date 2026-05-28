@@ -1,0 +1,98 @@
+# Changelog
+
+All notable changes to `game-design.md` are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+> **Pre-1.0.** Every `v0.x` release is pre-stable — substantial vocabulary changes are still in scope across minor versions. `v1.0` is the planned stable lock. Tree authors should expect to ratchet `spec_version:` declarations as vocabulary grows; the linter and the schema track the current minor.
+
+## [Unreleased]
+
+Nothing yet. v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/release-notes/v0.3.md](docs/release-notes/v0.3.md) "Queued for v0.4+").
+
+## [0.3.0] — 2026-05-29
+
+The **living development surface** release. v0.3 closes the two F-008 / F-010 expressiveness gaps that surfaced during v0.2 Phase 5; ships the lifecycle-state expansion, anti-staleness lint rules, pre-commit hook + atomic `touch`, project dashboard view, six per-genre starter templates, and the three-mode agent companion; records the validation-bar reframe (premise-correction discipline) as decision-of-record D-021.
+
+See [docs/release-notes/v0.3.md](docs/release-notes/v0.3.md) for the narrative summary and the three-claim validation surface.
+
+### Added
+
+- **`{clocks.<id>}` namespace** (§4.7) — first-class time-passage primitive distinct from player verbs. Two modes at v0.3: `continuous` (fixed-rate, e.g. 60 Hz physics) and `per_verb_delta` (advances after each verb by a context-local delta). Closed enum; future modes (`scheduled` for wave timers / day-night cycles) ratchet by observed use. Resolves F-010. (`84c3fba`)
+- **`instance_container` entity type** (§4.1) — N owned instances each carrying per-instance runtime state, with `capacity:`, `holds_template_from:`, and `per_instance_state:` sub-schema. Completes entity-cardinality coverage (one / many-templated / many-instanced). Resolves F-008. (`60fe7dd`)
+- **Addressing DSL for instance_container** (§3, §4.5, D-019) — binding semantics over existing `{actor.<field>}` / `{target.<field>}` refs through a documented lookup order (`per_instance_state` → template → container properties). Zero new syntax; spec-level normative declaration of binding semantics. Writes restricted to per_instance_state fields; `write-to-template-field` lint rule (`8eee42b`) enforces. (`f2572cc`)
+- **`experimental` and `deferred` lifecycle states** (§8.1, D-020) — lateral non-canonical-path states. `experimental`: code exists, design under active evaluation. `deferred`: lifecycle progression paused, returning later. Spec lifecycle vocabulary closes for v0.3 around observed need; `blocked` deferred until live adoption surfaces it. (`9b8ee70`)
+- **`gdmd status` CLI verb** (§9.6) — project dashboard projecting status counts, stale-sections, shipped-stale, active-without-impl per tree. Always exits 0 (informational, not a gate). `--json` for tooling. (`ae14877`)
+- **`gdmd hook install` + `gdmd hook check` + `gdmd touch` CLI verbs** (§9.7) — commit-side of the bidirectional `implementation_pointers` anti-drift contract. `hook install` registers a pre-commit-framework entry; `hook check` surfaces affected spec sections on each commit (informational); `touch` atomically bumps `last_verified:` while preserving author quoting/formatting (regex-on-frontmatter, not pyyaml round-trip). Composes with `stale-section` lint to close the anti-drift ritual at every change point. (`2be0824`)
+- **`gdmd init` CLI verb** (§9.8) — scaffolds new trees from per-genre starter templates. `--list`, `--genre <name> [<dest>]`, interactive prompt. Refuses non-empty destinations. (`efc8614`)
+- **Six per-genre starter templates** under `templates/starters/`: deckbuilder, party-rpg, tcg, tick-combat, platformer, survival. All lint-clean (0 errors, 0 warnings) under default thresholds. Each is a *descriptive scaffold extracted from the corresponding canonical example*, not a *prescriptive contract* — v0.3 vocab inherited where the canonical example demonstrated closure. (`efc8614`)
+- **Anti-staleness lint rule family** (§9.1) — `stale-section` extended with status-aware skip (`draft / cut / deferred` are exempt) and configurable `--stale-days` (default 30). Two new rules: `prototyped-without-pointer` (warning; active-status token with empty `implemented_in:` past `--prototyped-stale-days`, default 30) and `shipped-stale-doc` (warning; `status: shipped` file with `last_verified:` past `--shipped-stale-days`, default 180). Defaults grounded in reasonable maintenance-cadence assumptions, NOT in-repo `last_verified` distribution. (`3ba84b9`)
+- **D-021 + spec §11.2** — deployment-surface reframe recorded as decision-of-record. Triangulates with D-016 (constraint-driven scope reduction) and gate-correction-vs-loosening as the three legitimate-cause-for-bar-movement disciplines, each with its own diagnostic test. (`37fd1fd`)
+- **`docs/case-studies/F-009.md`** — worked example: hypothesis → methodology → supersession chain → null+cost-fail result → reframe. (this release)
+- **`docs/methodology/README.md`** — framing layer pointing to spec §11.2, D-021, AGENTS.md three-mode lens, F-009 case study; the discipline framework as transferable artifact. (this release)
+- **`docs/release-notes/v0.3.md`** — three-claim validation surface, queued-for-v0.4 list, reframe lineage. (this release)
+- **`CHANGELOG.md`** — this file. (this release)
+- **AGENTS.md three-mode operating lens** — authoring / operating / maintenance with mode-signal + forbidden-actions + CLI per mode. Adversarial 12-probe survey at authoring time: 10 caught, 2 documented as legitimate template edges (not defects). (`a88d490`)
+
+### Changed
+
+- `spec_version:` bumped from `0.2.0-alpha` to `0.3.0` across the spec, schema `$id`, and all 12 in-repo tree frontmatter declarations (166 files). `pyproject.toml` bumped to `0.3.0a1`. Schema title and `$id` URL updated; the schema accepts any semver for `spec_version:`, so trees declaring earlier versions remain readable but should ratchet to `0.3.0` when adopting v0.3 vocabulary.
+- `examples/tick-combat/` retro-touched to use `{clocks.tick}` (F-010) and `instance_container` for deployed units (F-008); cross-engine verify-adapter gate (`gdmd verify`) clears byte-identical to the v0.2 golden trajectory at `seed=12345` after both retro-touches land. (`c13bc59`)
+- Three other in-repo trees retro-touched to use v0.3 vocabulary where the canonical example demonstrated need: party-rpg + tcg + benchmark/games/survival for `instance_container`; benchmark/games/platformer + benchmark/games/survival for `{clocks.<id>}`. (`60fe7dd`, `84c3fba`)
+- AGENTS.md restructured around the three-mode operating lens; the anti-drift ritual now references the v0.3 commit-side `gdmd hook` workflow. (`a88d490`, `2be0824`)
+- README rewritten to lead with the **living-doc proposition** (closer analog: CLAUDE.md / AGENTS.md) — temporal axis as the differentiator. (this release)
+
+### Validated (in-repo)
+
+- **Vocabulary closure** — v0.3 vocabulary additions are expressible on real spec content across the 6 in-repo trees without local invention.
+- **Cross-engine determinism preserved** — tick-combat's `gdmd verify` adapter gate clears byte-identical (xtreme/Bevy ECS + Godot/GDScript, same `seed=12345`) after F-008 + F-010 land; negative control diverges at `seed=99999` per §9.5.7.
+- **Session-level maintenance** — the agent performs the anti-drift ritual end-to-end on the in-repo trees when actively prompted; `gdmd status` projects the staleness / pointer-health markers the ritual produces.
+
+### Queued for v0.4+ (gated on observed need from live adoption)
+
+- **Longitudinal living-doc property** — the doc stays current across weeks/months without continuous human review. The 6 in-repo trees can't validate this claim; they are spec-illustrations and benchmark targets, not games-in-development.
+- **Cross-agent transfer of the three-mode operating lens** — AGENTS.md's adversarial probe was authored under Claude Code. Whether the discipline transfers to other agents is an empirical question awaiting cross-agent runs.
+- **M1 / M2 watch-items** — two adversarial probes from the AGENTS.md Task 5 survey documented as legitimate template edges; promote or close based on live evidence.
+- **Spec → code anti-drift direction** — Task 4 ships code → spec via pre-commit. The inverse (spec edit implies impl may need updating) is a different workflow shape, deferred until adoption surfaces a need.
+- **Status vocabulary expansion (`blocked`, others)** — D-020 closed the v0.3 vocabulary around observed need from 4 trees. Future states ratchet by the same discipline.
+- **`scheduled` clock mode** — F-010 closed at two modes (`continuous`, `per_verb_delta`). Wave-timer / day-night / scripted-event use cases are the watch-for-v0.4 candidates.
+
+## [0.2.0-alpha] — 2026-05-22 → 2026-05-28
+
+The **demonstration** release. v0.2 closed the gap between "is the spec well-formed" (v0.1.1, yes) and "does the spec drive working game code in any engine" (v0.2, demonstrated via reference implementations + cross-engine determinism + help-benchmark).
+
+### Phase 1 — Decision-debt cleared
+
+- D-003 (typed balance-target vocabulary), D-005 (events as first-class tokens), D-006 (packaging — `importlib.resources` for spec/schema export). All four canonical examples re-migrated. (`5f87cc3`)
+
+### Phase 2 + 2.5 — First reference implementation (tick-combat / xtreme / Bevy ECS)
+
+- xtreme reference implementation (Rust + Bevy ECS), drives behavior entirely from the spec tree.
+- Phase 2 surfaced ten spec ambiguities; Phase 2.5 resolved 9 of 10 (the 10th deferred to v0.3 as D-005); locked golden trajectory at `seed=12345`. (`bc2250f`, `319dfac`, `9ef8831`)
+
+### Phase 3 — `verify` adapter contract
+
+- §9.5 contract authored: engine-neutral adapter invocation, `VerifyResult` JSON schema, canonical JSONL trajectory format.
+- Trajectory-format hardening at Phase 3+ (array-ordering total-order requirement, integer-width declaration, ASCII-only locale handling); D-002 (`broken-implementation-pointer` warning → error) ratcheted. (`36e4ff5`, `497b43b`)
+
+### Phase 4 + 4+ — Cross-engine determinism CLOSED
+
+- Engine-B reference impl in Godot 4 / GDScript (substituted for Unreal Blueprints after the addendum's scope assessment).
+- Cross-engine bar surfaces spec gaps #12–#15 (PRNG pin, uniform-int reduction normative form, weighted selection rule, threshold comparison direction) as designed.
+- Both engines byte-identical at `seed=12345`. D-015 (PRNG pin: xoshiro256** + splitmix64 + reference vector), D-016 (`discrete_sum` integer-native distribution superseding `gaussian` for state-affecting use), D-017 (weighted selection rule normative), D-018 (uniform-int reduction reference vector). (`3f568e9`, `a9d23ad`, `cfbeb53`)
+
+### Phase 5 — Help-benchmark (single-subject Qwen-Coder, scope reduced under v12-D)
+
+- Pre-registration v1 → v14-D with full supersession chain recorded.
+- F-009 reported by the locked rule: **NULL on success-lift** (−5.8pp, McNemar p=0.42, N=120 paired); **FAIL on cost-lift** (37.1%, lower-bounded by cap-truncation); apparatus limitations stated (post-hoc sanitizer leak ~19pp, cap-truncation on hard tasks, bounded-blinding ceiling, single-subject scope).
+- See [docs/case-studies/F-009.md](docs/case-studies/F-009.md) for the worked example.
+- F-010 (verb-centric friction surfaces in 2 fresh games) discovered; queued for v0.3. F-008 (per-instance owned-item state gap) discovered; queued for v0.3. (`37c004d` and the supersession chain commits before it)
+
+## [0.1.1] — initial
+
+The bootstrap release. Spec (911 lines), JSON Schema (31 `$defs`), CLI (`gdmd lint | diff | export | spec | verify` — `verify` contract-only at v0.1.1), four lint-clean canonical examples (deckbuilder, tick-combat, party-rpg, tcg), DECISIONS.md D-001 through D-006, benchmark harness scaffolding. (`0562909`)
+
+---
+
+[Unreleased]: https://github.com/bantarus/game-design.md/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bantarus/game-design.md/releases/tag/v0.3.0
+[0.2.0-alpha]: https://github.com/bantarus/game-design.md/compare/v0.1.1...v0.2.0-alpha
+[0.1.1]: https://github.com/bantarus/game-design.md/releases/tag/v0.1.1
