@@ -336,3 +336,113 @@ def test_broken_implementation_pointer_is_error_at_prototyped(make_tree):
     )
     # Errors must affect exit code.
     assert res.exit_code == 1
+
+
+# ---- write-to-template-field (D-019, F-008 v0.3 addressing DSL) --------------
+
+_INSTANCE_CONTAINER_MECHANICS_TEMPLATE = """\
+---
+spec: game-design.md
+spec_version: 0.2.0-alpha
+file_type: subfile
+status: prototyped
+last_verified: "2026-05-22"
+entities:
+  player:
+    type: actor
+    properties: {{ hp: 10 }}
+    status: prototyped
+    implemented_in: []
+  cards:
+    type: content_collection
+    data_source: ../../content/cards
+    count_target: 25
+    status: prototyped
+  units:
+    type: instance_container
+    capacity: 10
+    holds_template_from: "{{entities.cards}}"
+    per_instance_state:
+      hp:        {{ type: integer, minimum: 0 }}
+      lifecycle: {{ enum: [alive, dead] }}
+    status: prototyped
+    implemented_in: []
+verbs:
+  do_thing:
+    actor: "{{entities.player}}"
+    cost: 0
+    target_schema: {{ type: system }}
+    effects:
+      - {{ resolve: "{{rules.do_thing_rule}}" }}
+    status: prototyped
+    implemented_in: []
+resources:
+  energy:
+    scope: per_turn
+    min: 0
+    max: 1
+    velocity_target: "{{balance_targets.energy_target}}"
+    visibility: hud
+    status: prototyped
+    implemented_in: []
+states:
+  thing_state:
+    initial: a
+    nodes:
+      - {{ id: a }}
+      - {{ id: b, terminal: true }}
+    transitions:
+      - {{ from: a, event: "{{events.go}}", to: b }}
+events:
+  go:
+    status: prototyped
+    description: "Baseline test event used by thing_state's a → b transition."
+rules:
+  do_thing_rule:
+    given:
+      verb: "{{verbs.do_thing}}"
+    do:
+      - sample: "{{distributions.test_dist}}"
+      - {{ kind: apply_damage, target: target, field: {field_name}, amount: 1 }}
+    outputs: []
+    status: prototyped
+    implemented_in: []
+---
+
+## Tokens
+"""
+
+
+def test_write_to_per_instance_state_is_silent(make_tree):
+    """A do[] step writing to a per_instance_state field (`hp`) is legal — no finding."""
+    mech = _INSTANCE_CONTAINER_MECHANICS_TEMPLATE.format(field_name="hp")
+    root = make_tree({"gdd/mechanics.md": mech})
+    res = _lint(root)
+    findings = [f for f in res.findings if f.rule == "write-to-template-field"]
+    assert findings == [], (
+        "write-to-template-field should not fire on a field declared in "
+        f"per_instance_state. Got: {[f.message for f in findings]}"
+    )
+
+
+def test_write_to_template_field_fires_on_undeclared_field(make_tree):
+    """A do[] step writing to `max_hp` (NOT in per_instance_state) fires the
+    D-019 error — D-019 restricts writes to per_instance_state only."""
+    mech = _INSTANCE_CONTAINER_MECHANICS_TEMPLATE.format(field_name="max_hp")
+    root = make_tree({"gdd/mechanics.md": mech})
+    res = _lint(root)
+    findings = [f for f in res.findings if f.rule == "write-to-template-field"]
+    assert findings, "expected write-to-template-field on a non-per_instance_state field"
+    assert all(f.severity == "error" for f in findings)
+    assert any("max_hp" in f.message for f in findings)
+    # Error must affect exit code.
+    assert res.exit_code == 1
+
+
+def test_write_to_template_field_silent_without_instance_containers(make_tree):
+    """The baseline has no instance_container. The rule is a no-op even if a
+    do[] step happens to declare `field:` (the rule is opt-in on instance
+    containers; if none exist, there's no writable set to validate against)."""
+    res = _lint(make_tree())  # baseline tree, no instance_container
+    findings = [f for f in res.findings if f.rule == "write-to-template-field"]
+    assert findings == []

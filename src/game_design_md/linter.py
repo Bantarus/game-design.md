@@ -627,6 +627,85 @@ def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
     return findings
 
 
+def rule_write_to_template_field(tree: Tree) -> list[Finding]:
+    """D-019 (F-008 v0.3 addressing DSL): writes to instance_container fields
+    are restricted to per_instance_state fields.
+
+    A do[] step declaring `field: <name>` where <name> is not present in any
+    instance_container's per_instance_state schema indicates either:
+      (a) a write to a template field — templates are immutable per §6, the
+          content_collection / instance_container separation is what makes the
+          per_instance_state declaration load-bearing; mutating template state
+          at runtime defeats it.
+      (b) a write to an undeclared field — author probably typo or genuine
+          omission; either way, the runtime-state shape must live in the
+          per_instance_state schema or it's not contracted.
+
+    The check is opt-in (fires only when `field:` is declared on a do[] step).
+    Authors not declaring `field:` on mutation steps escape the check; that's
+    the v0.3 / v0.4 ratchet path — declared-field becomes required in v0.4 once
+    the discipline settles.
+    """
+    # Collect all writable per_instance_state field names across all
+    # instance_containers in the tree.
+    writable_fields: set[str] = set()
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        entities = pf.frontmatter.get("entities")
+        if not isinstance(entities, dict):
+            continue
+        for entity in entities.values():
+            if not isinstance(entity, dict):
+                continue
+            if entity.get("type") != "instance_container":
+                continue
+            pis = entity.get("per_instance_state")
+            if isinstance(pis, dict):
+                writable_fields.update(pis.keys())
+
+    # If no instance_containers exist in the tree, the rule is a no-op.
+    if not writable_fields:
+        return []
+
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type != "subfile":
+            continue
+        rules = pf.frontmatter.get("rules")
+        if not isinstance(rules, dict):
+            continue
+        for rname, rule in rules.items():
+            if not isinstance(rule, dict):
+                continue
+            do = rule.get("do") or []
+            if not isinstance(do, list):
+                continue
+            for i, step in enumerate(do):
+                if not isinstance(step, dict):
+                    continue
+                field = step.get("field")
+                if not isinstance(field, str):
+                    continue
+                if field not in writable_fields:
+                    findings.append(Finding(
+                        rule="write-to-template-field", severity="error",
+                        file=pf.rel_str,
+                        location=f"rules.{rname}.do[{i}].field",
+                        message=(
+                            f"do[] step writes to field {field!r}, which is "
+                            f"not declared in any instance_container's "
+                            f"per_instance_state schema. Writes are restricted "
+                            f"to per_instance_state fields (D-019); templates "
+                            f"are immutable and container properties are "
+                            f"likewise read-only. Add {field!r} to the target "
+                            f"container's per_instance_state, or correct the "
+                            f"field name."
+                        ),
+                    ))
+    return findings
+
+
 def rule_invariant_violation(tree: Tree) -> list[Finding]:
     findings: list[Finding] = []
     for pf in tree.files:
@@ -772,6 +851,7 @@ ALL_RULES: list[Callable[[Tree], list[Finding]]] = [
     rule_stale_section,
     rule_balance_target_untyped,
     rule_determinism_undetermined_rule,
+    rule_write_to_template_field,
     rule_invariant_violation,
 ]
 
