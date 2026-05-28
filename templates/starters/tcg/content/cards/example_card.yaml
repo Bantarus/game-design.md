@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: example_card
+status: draft
+implemented_in: ["src/cards/example_card.py"]
+name: "Example Creature"
+cost: 2
+type: creature
+rarity: common
+power: 2
+toughness: 2
+abilities: []

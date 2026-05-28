@@ -6,7 +6,7 @@
 
 `game-design.md` is a specification + tooling project for an LLM-first, engine-neutral, genre-agnostic game design document standard. It is modeled on Google Labs' `DESIGN.md`. The primary consumer of a `game-design.md` file is a coding agent; a human is the second reader.
 
-This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`schema/`), a CLI (`game-design.md`), and one example per genre (`examples/`).
+This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`schema/`), a CLI (`game-design.md`), one canonical example per genre (`examples/` + `benchmark/games/`), and six per-genre starter templates (`templates/starters/`) surfaced via `gdmd init`.
 
 ## Read order when you start a task
 

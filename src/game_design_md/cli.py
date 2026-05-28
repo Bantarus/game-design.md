@@ -1,4 +1,4 @@
-"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch.
+"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch | init.
 
 Exit-code contract (spec §9):
   lint    : 0 if no errors, 1 otherwise.
@@ -7,6 +7,7 @@ Exit-code contract (spec §9):
   status  : always 0 (informational; not a gate). See spec §9.6.
   hook    : always 0 (informational; not a gate). See spec §9.7 (Task 4 v0.3).
   touch   : always 0 (idempotent — no-op if last_verified already today).
+  init    : 0 on success, 1 on usage/IO error. See spec §9.8 (Task 7 v0.3).
 """
 from __future__ import annotations
 
@@ -18,7 +19,8 @@ import click
 
 from game_design_md import __spec_version__, __version__
 from game_design_md import (
-    diff_cmd, export_cmd, hook_cmd, linter, spec_cmd, status_cmd, verify_cmd,
+    diff_cmd, export_cmd, hook_cmd, init_cmd, linter, spec_cmd, status_cmd,
+    verify_cmd,
 )
 from game_design_md.tree import Tree
 
@@ -204,6 +206,48 @@ def touch_cmd(paths: tuple[Path, ...]) -> None:
             click.echo(f"bumped {p}")
         else:
             click.echo(f"no change: {p}")
+    sys.exit(0)
+
+
+@main.command("init",
+              help="Scaffold a new game-design.md tree from a per-genre "
+                   "starter (Task 7 v0.3). Use --list to see available "
+                   "genres. See spec §9.8.")
+@click.argument("dest", type=click.Path(file_okay=False, dir_okay=True,
+                                         path_type=Path), required=False)
+@click.option("--genre", "genre",
+              help="Genre name (deckbuilder | party-rpg | tcg | tick-combat "
+                   "| platformer | survival). If omitted, prompts.")
+@click.option("--list", "list_only", is_flag=True, default=False,
+              help="List available genres and exit.")
+def init_cmd_entry(dest: Path | None, genre: str | None,
+                   list_only: bool) -> None:
+    if list_only:
+        click.echo(init_cmd.render_genre_list())
+        sys.exit(0)
+    if genre is None:
+        available = init_cmd.list_genres()
+        click.echo(init_cmd.render_genre_list())
+        click.echo("")
+        genre = click.prompt(
+            "Genre", type=click.Choice(available, case_sensitive=False),
+            show_choices=False,
+        )
+    if dest is None:
+        dest = Path(".")
+    try:
+        out_path, n = init_cmd.copy_starter(genre, dest)
+    except FileNotFoundError as e:
+        raise click.UsageError(str(e)) from e
+    except FileExistsError as e:
+        raise click.ClickException(str(e)) from e
+    click.echo(f"scaffolded {genre} starter ({n} files) at {out_path}")
+    click.echo("")
+    click.echo("Next steps:")
+    click.echo(f"  cd {out_path}")
+    click.echo("  gdmd lint .          # confirm the tree is green")
+    click.echo("  # then make the tree your own — see the STARTER NOTE")
+    click.echo("  # comment block in game-design.md for what to delete.")
     sys.exit(0)
 
 

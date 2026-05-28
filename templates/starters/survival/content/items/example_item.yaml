@@ -1,0 +1,9 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: example_item
+status: draft
+implemented_in: ["src/items/example_item.py"]
+name: "Example Item"
+kind: material
+max_stack: 8

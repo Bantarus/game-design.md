@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: example_card
+status: draft
+implemented_in: ["src/cards/example_card.py"]
+name: "Example Card"
+cost: 1
+type: attack
+rarity: common
+effects:
+  - { kind: damage, amount: 6, distribution: "{distributions.damage_roll}" }

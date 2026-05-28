@@ -1,0 +1,10 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: example_level
+status: draft
+implemented_in: ["src/levels/example_level.py"]
+name: "Example Level"
+spawn_point: { x: 64, y: 256 }
+exit_point: { x: 1920, y: 256 }
+hazards: []

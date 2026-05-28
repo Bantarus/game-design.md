@@ -1371,6 +1371,35 @@ gdmd touch        <subfile> [<subfile>...]
 
 **Spec → code direction deferred to v0.4+.** The inverse direction — *spec edit implies impl may need updating* — is a different workflow shape (closer to design-doc-driven-development than to anti-drift) and adds significant complexity. v0.3 ships what's demanded by the observed problem (code→spec via pre-commit hook + verify-mtime); spec→code is naturally a v0.4 follow-on if real adoption surfaces a need for it. Same minimum-extension discipline that closed F-010's mode enum and D-019's addressing DSL.
 
+### 9.8 `init` — per-genre starter scaffolding (v0.3)
+
+```
+gdmd init --list
+gdmd init --genre <name> [<dest>]
+gdmd init [<dest>]                 # interactive prompt
+```
+
+**Status: shipped at v0.3 (Task 7 of the v0.3 docket).** Scaffolds a new `game-design.md` tree from one of six bundled per-genre starters. Each starter is a *descriptive scaffold extracted from the corresponding canonical example*, NOT a *prescriptive contract for what the genre must contain*. The distinction matters: starters declare the shape that the canonical example demonstrated, generalized so designers can delete what doesn't fit and add what's missing. Each starter's root file includes a STARTER NOTE comment block restating this framing so users encounter it on first open.
+
+**Six starters at v0.3** (each mapping to a canonical example):
+
+| Genre name (CLI arg) | Source | v0.3 vocab carried forward |
+| --- | --- | --- |
+| `deckbuilder` | `examples/deckbuilder/` | (none — deckbuilder was the F-008/F-010 no-op) |
+| `party-rpg` | `examples/party-rpg/` | `instance_container` (party members) |
+| `tcg` | `examples/tcg/` | `instance_container` (battlefield) |
+| `tick-combat` | `examples/tick-combat/` | `{clocks.tick}` (continuous) + `instance_container` (deployed units) — the cross-engine-determinism canonical case |
+| `platformer` | `benchmark/games/platformer/` | `{clocks.physics}` (continuous, 60 Hz fixed timestep) |
+| `survival` | `benchmark/games/survival/` | `{clocks.world_time}` (per_verb_delta) + `instance_container` (inventory) |
+
+**Descriptive-not-prescriptive applied at the starter layer.** A v0.3 vocab item appears in a starter ONLY where the canonical example demonstrated the closure — `clocks:` in tick-combat / platformer / survival because those trees needed it; `instance_container:` in party-rpg / tcg / tick-combat / survival because those trees needed it; neither in deckbuilder because deckbuilder was the F-008/F-010 no-op call. Carrying vocab forward where it's earned is the same closed-vocabulary-grows-by-observed-use principle that closed F-010's mode enum and D-020's `blocked` deferral — applied at the starter-content layer (see memory `discipline-applies-to-its-own-artifacts`).
+
+**Floor: every starter lints clean as-is** under default `--stale-days` / `--prototyped-stale-days` / `--shipped-stale-days` thresholds (no errors AND no warnings). This is the calibration baseline a scaffolded tree starts at; the parametrized `test_starter_copies_and_lints_clean` test (`tests/test_init_cmd.py`) enforces the floor.
+
+**Quality check at v0.3.** Two starters (deckbuilder + survival, spanning v0.3-vocab usage) were populated with toy content in 10-15 minutes each (rename + short pitch + 1-2 added content entities) and re-linted clean — confirming the starters are usable as starting points, not just artifacts that lint clean by coincidence. The other four starters share the same structural pattern; lint-clean across all six is the floor.
+
+**Refusal of non-empty destinations.** `gdmd init` refuses to copy into a directory that contains existing files; either pass a fresh path or clear the destination first. This is the equivalent of `mkdir` refusing to clobber — `init` is destructive in the sense that it lays down a tree, so we explicitly avoid the silent-overwrite failure mode.
+
 ---
 
 ## 10. JSON Schema
