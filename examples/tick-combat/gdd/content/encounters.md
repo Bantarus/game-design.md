@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-22"
@@ -53,7 +53,7 @@ The canonical first encounter is `content/encounters/shock_canyon_01.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-entity
 id: shock_canyon_01
 status: draft

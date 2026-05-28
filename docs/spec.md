@@ -1,14 +1,14 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 status: draft
-last_updated: 2026-05-22
+last_updated: 2026-05-29
 license: Apache-2.0
 ---
 
 # The `game-design.md` Specification
 
-> **Status: draft / alpha (v0.2.0-alpha).** Expect the format to change as it matures. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **Status: pre-stable (v0.3.0).** Expect the format to change as it matures. v0.x is pre-stable; v1.0 is the stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is a plain-text, LLM-first, engine-neutral, genre-agnostic standard for describing a video game to an AI coding agent as a living source of truth. A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). The primary reader is an AI coding agent; a human is the second reader.
 

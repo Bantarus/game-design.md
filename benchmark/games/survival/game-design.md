@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: core
 name: "Driftwood"
 short_pitch: "A 30-minute survival game about shipwreck on a small island: gather, craft, build the signal pyre, get rescued."

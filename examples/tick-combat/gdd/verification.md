@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: subfile
 status: implemented
 last_verified: "2026-05-22"

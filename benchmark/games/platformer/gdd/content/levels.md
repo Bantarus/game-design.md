@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-23"
@@ -94,7 +94,7 @@ The canonical level is `content/levels/caverns_01_first_breath.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-entity
 id: caverns_01_first_breath
 status: draft

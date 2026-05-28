@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: core
 name: "Embergrave"
 short_pitch: "A precision platformer where you pilot a moth through dark vertical caves, navigating by your own dimming ember."

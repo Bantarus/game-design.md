@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://game-design.md/schema/v0.2.0-alpha/game-design.schema.json",
-  "title": "game-design.md frontmatter (v0.2.0-alpha)",
+  "$id": "https://game-design.md/schema/v0.3.0/game-design.schema.json",
+  "title": "game-design.md frontmatter (v0.3.0)",
   "description": "Discriminated union over file_type. See docs/spec.md for normative semantics.",
   "type": "object",
   "required": ["spec", "spec_version", "file_type"],

@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-22"
@@ -45,7 +45,7 @@ The canonical card is `content/cards/circuit_strike.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-entity
 id: circuit_strike
 status: draft

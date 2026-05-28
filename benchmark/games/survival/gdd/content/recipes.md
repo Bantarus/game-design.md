@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-23"
@@ -58,7 +58,7 @@ The wooden axe is the canonical tier-1 tool — it appears early in every run an
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.3.0
 file_type: content-entity
 id: wooden_axe
 status: draft
