@@ -178,6 +178,16 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 The linter's `broken-ref` rule skips refs starting with these prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Adding new context-local prefixes is a spec-level event (a v0.3 ratchet may close the set or extend it). Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
 
+**Binding to `instance_container` per-instance state (D-019, F-008 v0.3 addressing DSL).** When the actor or target is an instance from an `instance_container` (§4.1), `{actor.<field>}` / `{target.<field>}` resolve `<field>` through a documented lookup order:
+
+1. The container's `per_instance_state:` schema — runtime fields declared per instance (durability, charges, counters, etc.). This is the F-008 v0.3 binding.
+2. The template's fields — properties declared in the `holds_template_from:` content-collection's schema (the immutable template data).
+3. The container's own properties — rare; for genuinely container-level state.
+
+The lookup is *first-match*: a field declared in both `per_instance_state:` and the template's schema resolves to the per_instance_state value (the runtime-mutable layer overrides the template). Engines MUST honor this order — divergence between engines on which layer a field comes from desyncs the cross-engine trajectory at the first mutation.
+
+Reads and writes both go through this binding. `{target.hp}` in a do[] step reads target's `per_instance_state.hp` at apply-time per spec §3 binding semantics; `kind: apply_damage target: target` mutates the same field. State-machine transitions on the instance fire on the same binding (`{target.lifecycle}` transitions via the state machine's events; the per_instance_state declaration is what tells the engine which field to bind to which machine).
+
 **Binding moment (D-012, normative at v0.2.0-alpha).** Both prefixes are bound at **apply-time** — at each `do:` step that references `{actor.<field>}` or `{target.<field>}`, the value is read live from the world at that step. Two rules follow:
 
 1. **Symmetry.** `{actor.<field>}` and `{target.<field>}` resolve the same way. Neither is snapshotted at action-start or tick-start. The intuitive "target HP is live so accumulated damage kills" semantics extends to actor fields too.
@@ -339,9 +349,36 @@ rules:
     implemented_in: ["src/rules/card_draw.py"]
 ```
 
-**Required keys per rule:** `given` (object with at least `verb`), `do` (array of operations), `outputs` (array), `status`, `implemented_in`. Any `do:` step whose semantics include randomness must reference a `{distributions.<id>}` — otherwise rule `undefined-distribution` fires at severity **error** (v0.1 design decision).
+**Required keys per rule:** `given` (object with `verb` or `driver` — see §4.7 for clock-driven rules), `do` (array of operations), `outputs` (array), `status`, `implemented_in`. Any `do:` step whose semantics include randomness must reference a `{distributions.<id>}` — otherwise rule `undefined-distribution` fires at severity **error** (v0.1 design decision).
 
 **Optional at v0.2.0-alpha: `target_selection:` (D-013).** When a rule applies effects to a target (e.g. damage), the rule must declare *how* the target is chosen. The field's value is drawn from a closed vocabulary: `none | first_alive_opposite | lowest_hp_opposite | highest_hp_opposite | random_alive_opposite | self | explicit`. `none` means the rule has no target (it affects global state or the actor itself implicitly). `explicit` defers selection to a `do:` step's `target:` field. Cross-engine rule: two engines that pick different targets for the same seed produce different integer trajectories — make this selection deterministic by declaring it in the spec, not in each implementation. See `DECISIONS.md` D-013 and the v0.2 Phase-2 ambiguity #5.
+
+**Per-instance addressing (D-019, F-008 v0.3 addressing DSL).** When the rule's actor or target is an instance from an `instance_container` (§4.1), the existing context-local refs `{actor.<field>}` / `{target.<field>}` resolve through the container's `per_instance_state` schema per §3 (the "Binding to instance_container per-instance state" paragraph). The rule body uses no new vocabulary — reads via context-local refs, mutations via existing `kind:` steps (`apply_damage`, `transition_state`, `add_counter`, etc.). State-machine transitions on the instance fire via the same per_instance_state binding (e.g., `{target.lifecycle}` transitions via the `unit_lifecycle` machine whose `nodes:` and `transitions:` are declared in `states`).
+
+**Actor selection for clock-driven rules.** A verb-driven rule's actor is implicit — it's the verb's `actor:` (e.g., `{entities.player}`). A clock-driven rule (`given.driver: {clocks.<id>}`) has no implicit actor; the rule must resolve it in its `do[]` body via a structured step. Tick-combat's canonical pattern (the observed need at v0.3):
+
+```yaml
+tick_resolution:
+  given:
+    driver: "{clocks.tick}"
+  target_selection: first_alive_opposite
+  do:
+    - kind: select_actor                        # resolves {actor.*} for the rest of the rule
+      from_container: "{entities.deployed_units}"
+      using: "{distributions.action_order}"
+      index_by: tick_number                     # rotation: actor = order[tick mod len(order)]
+    - kind: sample
+      from: "{distributions.damage_roll}"
+      params_from: { mean: "{actor.attack}" }
+      into: damage
+    - kind: apply_damage
+      target: target                            # resolved via target_selection on actor's container
+      amount: damage
+```
+
+The `kind: select_actor` step is the engine-neutral way to bind `{actor.<field>}` for clock-driven rules; subsequent steps reference the resolved actor. `target_selection:` (when paired with a containered actor) iterates the actor's container by default; explicit `target_container:` declaration is reserved for the rare case where target lives in a different container (not yet observed in v0.3; deferred until surfaced).
+
+The `kind:` value vocabulary inside `do[]` remains project-defined at v0.2.0-alpha + v0.3 (per-game vocabulary; engine-neutral as long as `kind:` semantics are documented in the project's design); a normative closed-set ratchet is a v0.4+ concern. The discipline: closed enums grow by observed cross-engine need, not anticipation.
 
 **Computable form on deterministic loop paths (D-011, advisory at v0.2.0-alpha; ratchets to error in v0.3).** Every item in a `do:` array SHOULD be a structured object (a YAML map), not a bare string. Bare-string steps like `resolve_unit_action` or `award_gold_to_winner` are *prose labels*, not computable procedures — two engines may interpret them differently, defeating the cross-engine determinism bar. The linter emits the advisory finding `determinism-undetermined-rule` for every bare-string item in a rule's `do:` whose enclosing rule is reachable from a deterministic loop (any `{loops.<id>}` whose `timescale: moment`). The intent is to catch the failure mode where spec authors leave resolution as prose — the "Phase-2 archaeology" pattern. See `DECISIONS.md` D-011.
 
