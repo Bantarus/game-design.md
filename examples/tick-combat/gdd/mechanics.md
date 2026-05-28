@@ -22,6 +22,18 @@ entities:
     data_source: ../../content/units
     count_target: 24
     status: draft
+  deployed_units:
+    type: instance_container
+    capacity: 10
+    holds_template_from: "{entities.units}"
+    per_instance_state:
+      side:           { enum: [player, enemy] }
+      deploy_order:   { type: integer, minimum: 0, maximum: 4 }
+      hp:             { type: integer, minimum: 0 }
+      lifecycle:      { enum: [alive, stunned, dead], default: alive }
+      stun_remaining: { type: integer, minimum: 0, default: 0 }
+    status: draft
+    implemented_in: ["impl/xtreme/src/components.rs"]
 verbs:
   deploy_unit:
     actor: "{entities.player}"
@@ -116,14 +128,16 @@ rules:
     given:
       driver: "{clocks.tick}"
     # D-013: target is the first alive unit on the opposite side, in
-    # deployment order. Closed vocabulary, normative across engines.
+    # deployment order. target_selection iterates the actor's container
+    # ({entities.deployed_units}) by default per spec §4.5.
     target_selection: first_alive_opposite
     do:
       # D-011: every step is a structured object (no bare prose strings).
-      # Each `kind:` value is a project-defined verb in tick-combat's local
-      # vocabulary; v0.3 ratchets a normative closed set.
+      # D-019: actor is selected from the deployed_units instance_container
+      # via the canonical clock-driven pattern (spec §4.5).
       - kind: select_actor
-        from: "{distributions.action_order}"
+        from_container: "{entities.deployed_units}"
+        using: "{distributions.action_order}"
         index_by: tick_number     # rotation: actor = order[tick mod len(order)]
       - kind: sample
         from: "{distributions.damage_roll}"
@@ -131,8 +145,12 @@ rules:
       - kind: sample
         from: "{distributions.critical_hit}"
         into: crit
+      # D-019: `field: hp` declares the per_instance_state write; the lint
+      # rule `write-to-template-field` validates hp lives in the target
+      # container's per_instance_state schema.
       - kind: apply_damage
         target: target            # resolved via target_selection
+        field: hp
         amount:
           base: damage
           multiplier_if: { crit: 2 }
@@ -169,3 +187,5 @@ This file owns `entities`, `verbs`, `resources`, `states`, and `rules` for Locks
 **The tick is one rule.** `{rules.tick_resolution}` walks the deterministic action order and applies a single unit's action. Repeating it ~120 times *is* an encounter. The simplicity is deliberate: replay determinism depends on the rule being a single function, not a tangle of sub-rules.
 
 **State machines.** `{states.unit_lifecycle}` has a recoverable `stunned` node — units can return to `alive` via the `recover` event before `hp_zero` kills them. `{states.combat_phase}` is a strict three-step machine ending at the absorbing `resolved` node.
+
+**Deployed units carry per-instance state via `instance_container` (F-008 v0.3 resolution).** `{entities.units}` is the content_collection of unit templates (24 designed units, each in `content/units/*.yaml` carrying immutable template fields like `attack`, `max_hp`, `abilities`). `{entities.deployed_units}` is the `instance_container` (spec §4.1) that holds the up-to-10 deployed runtime instances (5 per side) with per_instance_state for `side`, `deploy_order`, `hp` (current, distinct from template `max_hp`), `lifecycle` (alive / stunned / dead, the state machine's runtime node), and `stun_remaining` (ticks of stun left). Tick resolution writes to `hp` (per D-019 spec §3 + §4.5; the `field: hp` declaration on the apply_damage step is validated by the `write-to-template-field` lint rule, which would catch a typo like `field: attack` since attack lives on the template, not per_instance_state). State-machine transitions on `lifecycle` fire through the same per_instance_state binding: a unit hitting `hp == 0` emits `{events.hp_zero}` which the `unit_lifecycle` machine consumes to transition the instance to the `dead` node.

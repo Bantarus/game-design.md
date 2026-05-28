@@ -6,7 +6,7 @@ name: "Lockstep"
 short_pitch: "A fixed-seed auto-battler: assemble a 5-unit squad, lock the formation, watch the tick."
 genre_tags: [auto-battler, tactics, single-player]
 status: prototyped
-version: 0.3.0-alpha
+version: 0.3.1-alpha
 last_updated: "2026-05-28"
 target_platforms_neutral: [desktop, web]
 pillars:
