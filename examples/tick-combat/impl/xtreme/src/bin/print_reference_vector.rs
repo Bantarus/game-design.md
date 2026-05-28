@@ -1,7 +1,7 @@
 //! Tiny utility: print the first N raw xoshiro256** outputs at canonical_seed,
 //! plus the first N `uniform_int_inclusive` outputs for the two adversarial
 //! reduction-layer ranges (D-018). Used to compute the spec's reference vectors
-//! for §4.7 and the per-tree `prng:` declaration. Not part of the simulation;
+//! for §4.8 and the per-tree `prng:` declaration. Not part of the simulation;
 //! lives here purely so the numbers that end up in the spec were computed by
 //! the same code the engine runs at adapter startup for self-validation.
 

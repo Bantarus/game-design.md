@@ -5,8 +5,10 @@
 //! `tick` and `encounter` — `campaign` is a meta-loop over encounters and is
 //! the harness's responsibility, not this crate's.
 //!
-//! The tick loop's `sequence:` in the spec is `[{verbs.advance_tick}]` — a
-//! single verb. We realize that verb by calling `rules::tick_resolution`.
+//! The tick loop is clock-driven (`{loops.tick}.clock: {clocks.tick}`,
+//! F-010 v0.3 resolution; spec §4.7). The clock's `drives:` list names
+//! `{rules.tick_resolution}` — we realize that by calling `rules::tick_resolution`
+//! once per simulation tick.
 
 use crate::resources::TickCounter;
 use crate::rules::{combat_resolution, tick_resolution};

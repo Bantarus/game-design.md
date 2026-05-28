@@ -6,8 +6,8 @@ name: "Lockstep"
 short_pitch: "A fixed-seed auto-battler: assemble a 5-unit squad, lock the formation, watch the tick."
 genre_tags: [auto-battler, tactics, single-player]
 status: prototyped
-version: 0.2.0-alpha
-last_updated: "2026-05-22"
+version: 0.3.0-alpha
+last_updated: "2026-05-28"
 target_platforms_neutral: [desktop, web]
 pillars:
   - "Every replay is byte-identical given the seed"
@@ -25,6 +25,7 @@ core_loop_ref: "{loops.tick}"
 files:
   pillars:                 gdd/pillars.md
   loops:                   gdd/loops.md
+  clocks:                  gdd/clocks.md
   mechanics:               gdd/mechanics.md
   architecture_invariants: gdd/architecture-invariants.md
   distributions:           gdd/systems/distributions.md
@@ -56,7 +57,7 @@ Three pillars (frontmatter) lock the design's character: deterministic replays, 
 
 ## Core Gameplay Loop
 
-The core loop is `{loops.tick}` — a ~0.1-second moment loop driven by `{verbs.advance_tick}`. Three loops nest: `{loops.tick}` inside `{loops.encounter}` inside `{loops.campaign}`. See `gdd/loops.md`.
+The core loop is `{loops.tick}` — a ~0.1-second moment loop driven by `{clocks.tick}` (a continuous 10 Hz clock, F-010 v0.3 resolution; see `gdd/clocks.md` + spec §4.7). Three loops nest: `{loops.tick}` inside `{loops.encounter}` inside `{loops.campaign}`. See `gdd/loops.md`.
 
 ## Universal Surface
 

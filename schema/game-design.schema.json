@@ -279,11 +279,16 @@
       "required": ["given", "do", "outputs", "status", "implemented_in"],
       "properties": {
         "given": {
+          "description": "Trigger condition. A rule fires because a verb is issued (`verb:`) OR because a clock advances (`driver:`). Exactly one of `verb:` or `driver:` is the firing source; the other should be absent. `state:` optionally narrows the firing precondition.",
           "type": "object",
-          "required": ["verb"],
+          "anyOf": [
+            { "required": ["verb"] },
+            { "required": ["driver"] }
+          ],
           "properties": {
-            "verb":  { "$ref": "#/$defs/TokenRef" },
-            "state": { "$ref": "#/$defs/TokenRef" }
+            "verb":   { "$ref": "#/$defs/TokenRef" },
+            "driver": { "$ref": "#/$defs/TokenRef" },
+            "state":  { "$ref": "#/$defs/TokenRef" }
           },
           "additionalProperties": true
         },
@@ -313,7 +318,11 @@
       "properties": {
         "timescale":           { "$ref": "#/$defs/Timescale" },
         "duration":            { "type": "string" },
-        "sequence":            { "type": "array", "minItems": 1 },
+        "sequence":            { "type": "array" },
+        "clock": {
+          "$ref": "#/$defs/TokenRef",
+          "description": "F-010 / v0.3: optional reference to a {clocks.<id>} that drives this loop's iteration. When present, `sequence:` may be empty (the loop is purely clock-driven — e.g., tick-combat's tick loop). When absent, `sequence:` must be non-empty (the loop iterates through player verbs)."
+        },
         "intended_dynamics":   { "type": "array", "items": { "type": "string" }, "minItems": 1 },
         "intended_aesthetics": { "type": "array", "items": { "$ref": "#/$defs/MDAAesthetic" }, "minItems": 1 },
         "feel_priority":       { "enum": ["low", "medium", "high"] },
@@ -321,6 +330,10 @@
         "status":              { "$ref": "#/$defs/Status" },
         "implemented_in":      { "$ref": "#/$defs/ImplementedIn" }
       },
+      "anyOf": [
+        { "properties": { "sequence": { "minItems": 1 } } },
+        { "required": ["clock"] }
+      ],
       "additionalProperties": false
     },
 
@@ -487,6 +500,50 @@
       "additionalProperties": false
     },
 
+    "Clock": {
+      "description": "F-010 / v0.3: first-class time-passage primitive distinct from player verbs. A clock drives one or more rules to fire on time advancement rather than on verb issuance. Two modes at v0.2.0-alpha: `continuous` (periodic, e.g., 60Hz physics) and `per_verb_delta` (advances after each player verb by an explicit delta read from the verb's properties). Closed enum; future modes (`scheduled` for wave-timers / day-night, etc.) ratchet by observed use, not anticipation.",
+      "type": "object",
+      "required": ["mode", "drives", "status", "implemented_in"],
+      "properties": {
+        "mode": {
+          "enum": ["continuous", "per_verb_delta"],
+          "description": "`continuous`: the clock advances on its own at a fixed rate (requires `rate:`). `per_verb_delta`: the clock advances after each player verb fires, by an amount read from a context-local source (requires `delta_source:`)."
+        },
+        "drives": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/TokenRef" },
+          "description": "Token refs to {rules.<id>} the clock fires on each advancement."
+        },
+        "rate": {
+          "type": "object",
+          "description": "Required when mode=continuous. Declare exactly one of `hz:` (frequency) or `period_ms:` (interval).",
+          "properties": {
+            "hz": { "type": "number", "exclusiveMinimum": 0 },
+            "period_ms": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "delta_source": {
+          "type": "string",
+          "description": "Required when mode=per_verb_delta. Dotted context-local path read at apply-time (per spec §3) — e.g., 'verb.time_cost.in_game_minutes' resolves to the firing verb's time_cost.in_game_minutes value. The clock advances by that delta after each verb fires."
+        },
+        "status":         { "$ref": "#/$defs/Status" },
+        "implemented_in": { "$ref": "#/$defs/ImplementedIn" }
+      },
+      "allOf": [
+        {
+          "if":   { "properties": { "mode": { "const": "continuous" } }, "required": ["mode"] },
+          "then": { "required": ["rate"] }
+        },
+        {
+          "if":   { "properties": { "mode": { "const": "per_verb_delta" } }, "required": ["mode"] },
+          "then": { "required": ["delta_source"] }
+        }
+      ],
+      "additionalProperties": false
+    },
+
     "Feel": {
       "type": "object",
       "required": ["input", "response", "context", "polish", "metaphor", "rules", "status", "implemented_in"],
@@ -624,6 +681,7 @@
         "balance_targets": { "type": "object", "additionalProperties": { "$ref": "#/$defs/BalanceTarget" } },
         "invariants":      { "type": "object", "additionalProperties": { "$ref": "#/$defs/Invariant" } },
         "events":          { "type": "object", "additionalProperties": { "$ref": "#/$defs/Event" } },
+        "clocks":          { "type": "object", "additionalProperties": { "$ref": "#/$defs/Clock" } },
 
         "verify_targets": { "type": "array", "items": { "$ref": "#/$defs/VerifyTarget" } },
         "adapters": {

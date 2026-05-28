@@ -17,9 +17,12 @@ from . import loader
 # The value-bearing namespaces a subfile may declare in its frontmatter.
 # `events` (D-005) joined the surface at v0.2.0-alpha: every state-machine
 # transition's `event:` value resolves to a {events.<id>} token.
+# `clocks` (F-010 resolution) joined at v0.3: first-class time-passage
+# primitive distinct from player verbs.
 SUBFILE_NAMESPACES = (
     "entities", "verbs", "resources", "states", "rules", "loops",
     "distributions", "feel", "balance_targets", "invariants", "events",
+    "clocks",
 )
 
 

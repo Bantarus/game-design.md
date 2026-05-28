@@ -11,8 +11,8 @@ loops:
   tick:
     timescale: moment
     duration: "~100ms"
-    sequence:
-      - advance: "{verbs.advance_tick}"
+    sequence: []                     # pure clock-driven loop; no player verbs
+    clock: "{clocks.tick}"           # F-010 v0.3 resolution: time-passage is first-class
     intended_dynamics:
       - "one unit acts per tick; action order is deterministic given seed"
     intended_aesthetics: [challenge]

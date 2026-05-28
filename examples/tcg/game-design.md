@@ -66,7 +66,7 @@ The full surface lives in subfiles linked via the `files:` map. Agent reading or
 
 ## How to Use This Document (for the Agent)
 
-- `{distributions.card_draw}` is `shuffle_bag` per spec §4.7 — every card appears exactly its deck-quantity times before reshuffling.
+- `{distributions.card_draw}` is `shuffle_bag` per spec §4.8 — every card appears exactly its deck-quantity times before reshuffling.
 - Damage and life are integers per `{invariants.damage_is_integer}`.
 - `{states.phase_state}` is **cyclic** — there is no terminal phase, the cycle runs until the game ends via the separate `{states.card_state}` `exiled` terminal or via life reaching zero.
 

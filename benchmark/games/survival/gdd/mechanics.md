@@ -161,17 +161,6 @@ verbs:
       - { resolve: "{rules.start_day_resolution}" }
     status: draft
     implemented_in: ["src/driftwood/mechanics/verbs/start_day.py"]
-  advance_world_time:
-    actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 0 }
-    target_schema:
-      type: world_clock
-      filter: "always"
-    effects:
-      - { resolve: "{rules.advance_world_time}" }
-    status: draft
-    implemented_in: ["src/driftwood/mechanics/verbs/advance_world_time.py"]
 resources:
   hp:
     scope: per_run
@@ -240,7 +229,7 @@ states:
 events:
   day_part_elapsed:
     status: draft
-    description: "World time has advanced through the end of a day-part (morning/afternoon/evening); emitted by {verbs.advance_world_time} when the cumulative in-game minutes cross a day-part boundary."
+    description: "World time has advanced through the end of a day-part (morning/afternoon/evening); emitted by {rules.advance_world_time} (driven by {clocks.world_time}) when the cumulative in-game minutes cross a day-part boundary."
     implemented_in: ["src/driftwood/mechanics/events/day_part_elapsed.py"]
   dawn_after_sleep:
     status: draft
@@ -256,7 +245,7 @@ events:
     implemented_in: ["src/driftwood/mechanics/events/pyre_lit_at_dawn.py"]
   day_5_passed:
     status: draft
-    description: "World time has reached the end of Day 5's night without the pyre being lit; emitted by {verbs.advance_world_time} when the cumulative-day counter reaches 5 in the night day-part with pyre.lit == false."
+    description: "World time has reached the end of Day 5's night without the pyre being lit; emitted by {rules.advance_world_time} (driven by {clocks.world_time}) when the cumulative-day counter reaches 5 in the night day-part with pyre.lit == false."
     implemented_in: ["src/driftwood/mechanics/events/day_5_passed.py"]
   hp_reached_zero:
     status: draft
@@ -445,7 +434,7 @@ rules:
     implemented_in: ["src/driftwood/mechanics/rules/start_day.py"]
   advance_world_time:
     given:
-      verb: "{verbs.advance_world_time}"
+      driver: "{clocks.world_time}"
       state: "{states.world_clock}"
     target_selection: none
     do:
@@ -460,7 +449,7 @@ rules:
     implemented_in: ["src/driftwood/mechanics/rules/advance_world_time.py"]
   tick_meters:
     given:
-      verb: "{verbs.advance_world_time}"
+      driver: "{clocks.world_time}"
     target_selection: self
     do:
       - kind: sample
@@ -514,9 +503,9 @@ The five entities partition the world into the things-that-act, the things-that-
 
 ### Verbs
 
-The four verbs the brief names — gather / craft / eat-drink-sleep / build-the-pyre — expand here into 11 verbs because eating and drinking decompose differently from each other (different cooldown, different resources), and the pyre's "assemble" and "light" are separate actions on separate days. The auxiliary verbs `start_day` and `advance_world_time` are infrastructure — see the friction-artifact note below.
+The four verbs the brief names — gather / craft / eat-drink-sleep / build-the-pyre — expand here into 10 verbs because eating and drinking decompose differently from each other (different cooldown, different resources), and the pyre's "assemble" and "light" are separate actions on separate days. The auxiliary verb `start_day` is infrastructure (system-actor, system-issued). Per-action world-time advancement is driven by `{clocks.world_time}` (spec §4.7, F-010 v0.3 resolution) — see `gdd/clocks.md`.
 
-**`verbs.advance_world_time` is a friction-artifact / v0.3 candidate finding.** The spec's verb-triggers-rule pattern requires every rule to be invoked by *some* verb. In Driftwood the in-game clock advances every time the player acts (each verb declares its `time_cost.in_game_minutes`); the natural model is "world time ticks per action." Under the spec, this requires a synthetic verb `advance_world_time` that fires after each player verb and triggers the `tick_meters` rule. A first-class "clock event" concept distinct from player verbs would let this be expressed cleanly. Driftwood's `advance_world_time` is the same friction-artifact pattern as Embergrave's `advance_tick` (commit `dc12419`); two independent games (one real-time platformer, one action-economy survival) surfacing the same spec gap is a stronger signal than one. **Flagged as a v0.3 candidate finding: the spec may benefit from a first-class tick/clock/world-event concept distinct from player verbs.**
+**Per-action time-passage is modeled as a first-class clock at v0.3.** Driftwood's in-game clock advances every time the player acts (each player verb declares its `time_cost.in_game_minutes`); the natural model is "world time ticks per action." In the original v0.1 / v0.2.0-alpha authoring this required a synthetic `verbs.advance_world_time` whose sole purpose was to satisfy the spec's verb-triggers-rule pattern; the friction was logged as a v0.3 candidate finding (F-010), and was the same pattern surfaced by Embergrave's `advance_tick` (the convergence across two genres was what motivated the resolution). F-010's resolution at v0.3 adds the first-class `clocks` namespace (spec §4.7), and Driftwood's per-action driver is now `{clocks.world_time}` (per_verb_delta mode, drives `{rules.advance_world_time}` then `{rules.tick_meters}`). See `gdd/clocks.md`.
 
 ### Resources
 
@@ -537,7 +526,7 @@ Six events, each emitted by exactly one verb or rule (see `description:` per eve
 
 ### Rules
 
-Eleven rules cover the eleven verbs (most rules are 1:1 with verbs; `tick_meters` is invoked from `advance_world_time` rather than directly by a player verb, and `start_day_resolution` shares its dawn-emission with `sleep_resolution`).
+Eleven rules cover the ten verbs plus the world-time driver (most rules are 1:1 with verbs; `advance_world_time` and `tick_meters` are both driven by `{clocks.world_time}` rather than directly by a player verb; `start_day_resolution` shares its dawn-emission with `sleep_resolution`).
 
 Every `do:` step is a typed object with a `kind:` field per D-011 (no bare-string steps). Context-local refs `{actor.<field>}` and `{target.<field>}` follow spec §3 — `{actor.inventory}`, `{actor.position}`, `{target.kind}`, `{target.station_required}`, `{target.output_item}`, etc. — resolved at rule-evaluation time against the live world. Internal step-to-step captures use bare variable names (`gathered_qty`, `tool_present`, `shelter_present`, `hunger_decay`, etc.); these are not curly-brace references in the spec's sense and are intentionally local to the rule. Distributions are referenced through `{distributions.<id>}` (deterministic-by-design for Driftwood; see `gdd/systems/distributions.md`).
 

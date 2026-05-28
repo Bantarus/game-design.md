@@ -20,11 +20,12 @@ invariants:
     severity: error
   world_time_decoupled_from_wall_clock:
     kind: architectural_pattern
-    rule: "The in-game world clock (minutes / hours / day-parts / days) is advanced exclusively by `{verbs.advance_world_time}` and the `{rules.advance_world_time}` rule, in response to verb-driven `time_cost.in_game_minutes` values. No wall-clock timer (system tick, frame counter, real-time elapsed) feeds the world clock. The same player-action sequence produces the same world-clock progression regardless of how long the player took in wall-clock time to issue the actions."
+    rule: "The in-game world clock (minutes / hours / day-parts / days) is advanced exclusively by `{clocks.world_time}` (mode: per_verb_delta, spec §4.7) and the `{rules.advance_world_time}` rule it drives, in response to verb-issued `time_cost.in_game_minutes` deltas. No wall-clock timer (system tick, frame counter, real-time elapsed) feeds the world clock. The same player-action sequence produces the same world-clock progression regardless of how long the player took in wall-clock time to issue the actions."
     applies_to:
       - "{loops.action}"
       - "{loops.day}"
       - "{states.world_clock}"
+      - "{clocks.world_time}"
     enforcement: lint
     severity: error
   recipe_data_immutable_at_runtime:
@@ -81,7 +82,7 @@ Per-invariant prose follows. Each `###` heading matches an invariant id in the f
 
 The brief's commitment that "the in-game clock pauses during deliberation but the day's action budget is still 24 hours regardless of how long the player took to issue them" is the engineering posture. The world clock is action-driven; wall-clock is presentation-only.
 
-**Statically checkable:** scan the world-time advancement code path. The only call site that mutates the world clock minutes/hours/day-part state is `rules.advance_world_time`; any other writer to that state is a violation. The linter can verify this once a project's `implementation_pointers` declare the world-time module.
+**Statically checkable:** scan the world-time advancement code path. The only call site that mutates the world clock minutes/hours/day-part state is `rules.advance_world_time` (which is driven by `{clocks.world_time}`); any other writer to that state is a violation. The linter can verify this once a project's `implementation_pointers` declare the world-time module.
 
 ### recipe_data_immutable_at_runtime
 

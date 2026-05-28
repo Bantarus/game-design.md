@@ -27,7 +27,7 @@ impl Gold {
 pub struct TickCounter(pub u64);
 
 /// The shared deterministic PRNG state. Wraps a single `Xoshiro256StarStar`
-/// seeded via `splitmix64` from the encounter seed per spec §4.7 / D-015.
+/// seeded via `splitmix64` from the encounter seed per spec §4.8 / D-015.
 /// Every distribution sample pulls from this — there is only one stream of
 /// random bits per encounter, which is what makes the Phase-3 byte-identical
 /// replay bar reachable. Phase 4+ rewrite: the PRNG is hand-rolled in

@@ -1,4 +1,4 @@
-//! D-015 / spec §4.7 PRNG pin: `xoshiro256_starstar + splitmix64`.
+//! D-015 / spec §4.8 PRNG pin: `xoshiro256_starstar + splitmix64`.
 //!
 //! Hand-implemented (no `rand` crate dependency) so the algorithm is
 //! exactly the spec's algorithm, not whichever variant the crate ships

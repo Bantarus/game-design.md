@@ -5,7 +5,7 @@
 //! Resolved spec shape (mechanics.md):
 //!
 //!   tick_resolution:
-//!     given.verb: {verbs.advance_tick}
+//!     given.driver: {clocks.tick}                # F-010 v0.3 resolution
 //!     target_selection: first_alive_opposite     # D-013
 //!     do:
 //!       - kind: select_actor

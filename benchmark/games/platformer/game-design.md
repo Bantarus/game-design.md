@@ -6,8 +6,8 @@ name: "Embergrave"
 short_pitch: "A precision platformer where you pilot a moth through dark vertical caves, navigating by your own dimming ember."
 genre_tags: [platformer, precision, single-player]
 status: draft
-version: 0.1.0
-last_updated: 2026-05-23
+version: 0.2.0
+last_updated: 2026-05-28
 target_platforms_neutral: [desktop, handheld]
 pillars:
   - "Every jump is a commitment; hesitation dims the ember"
@@ -26,6 +26,7 @@ core_loop_ref: "{loops.flight}"
 files:
   pillars: gdd/pillars.md
   loops: gdd/loops.md
+  clocks: gdd/clocks.md
   mechanics: gdd/mechanics.md
   architecture_invariants: gdd/architecture-invariants.md
   economy_balance: gdd/economy-balance.md

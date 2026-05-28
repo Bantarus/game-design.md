@@ -16,7 +16,7 @@ loops:
       - choose: "{verbs.drink}"
       - choose: "{verbs.place_station}"
       - choose: "{verbs.sleep_through_night}"
-      - tick:   "{verbs.advance_world_time}"
+    clock: "{clocks.world_time}"      # F-010 v0.3: per_verb_delta advances world clock after each verb
     intended_dynamics:
       - "each action costs in-game time; the budget across a day is finite"
       - "tool durability rewards batched gathering at the right tier of tool"
@@ -75,7 +75,7 @@ Three loops at three nested timescales. Reading order when reasoning about the g
 
 ## Rationale
 
-**Action is the moment loop, not "tick" or "frame."** In-game time advances per-action (each verb declares its `time_cost` — see `gdd/mechanics.md`); there is no continuous-time simulation in the gameplay layer. A real-time-feeling day is achieved by mapping each in-game hour to ~15 seconds wall-clock, but the underlying model is action-driven, not clock-driven. The `tick:` step in `sequence:` is the friction artifact of the spec's verb-triggers-rule pattern applied to a time-advancing game — see the prose note in `gdd/mechanics.md` under `verbs.advance_world_time` for the v0.3 candidate finding about this.
+**Action is the moment loop, not "tick" or "frame."** In-game time advances per-action (each verb declares its `time_cost` — see `gdd/mechanics.md`); there is no continuous-time simulation in the gameplay layer. A real-time-feeling day is achieved by mapping each in-game hour to ~15 seconds wall-clock, but the underlying model is action-driven, not clock-driven. The loop's `clock: "{clocks.world_time}"` field (F-010 v0.3 resolution; spec §4.7) declares this explicitly: the world clock advances `per_verb_delta` after each player verb fires, reading the verb's `time_cost.in_game_minutes` as the delta. See `gdd/clocks.md`.
 
 **Day is a session, not a "stage."** The day is the planning unit. The four day-parts (morning, afternoon, evening, night) gate certain verbs: tidepool fishing only works at morning (low tide); sleep only at night; crafting at the sawhorse needs daylight or the campfire. A typical day is ~24 in-game hours = ~24 actions worth = 6 wall-clock minutes if the player is decisive. A first-time player spends extra wall-clock minutes per day deliberating; the in-game clock pauses during deliberation but the day's action budget is still 24 hours regardless of how long the player took to issue them.
 

@@ -1,4 +1,4 @@
-# D-015 / spec §4.7 PRNG pin: xoshiro256_starstar + splitmix64.
+# D-015 / spec §4.8 PRNG pin: xoshiro256_starstar + splitmix64.
 #
 # Hand-implemented in pure GDScript so the algorithm IS the spec's algorithm,
 # not Godot's built-in RandomNumberGenerator (which uses a different family

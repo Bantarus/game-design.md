@@ -49,14 +49,6 @@ verbs:
       - { kind: transition_combat_phase, to: ticking }
     status: draft
     implemented_in: []
-  advance_tick:
-    actor: system
-    cost: 0
-    target_schema: { type: system }
-    effects:
-      - { resolve: "{rules.tick_resolution}" }
-    status: draft
-    implemented_in: []
   resolve_combat:
     actor: system
     cost: 0
@@ -122,7 +114,7 @@ events:
 rules:
   tick_resolution:
     given:
-      verb: "{verbs.advance_tick}"
+      driver: "{clocks.tick}"
     # D-013: target is the first alive unit on the opposite side, in
     # deployment order. Closed vocabulary, normative across engines.
     target_selection: first_alive_opposite
@@ -172,7 +164,7 @@ This file owns `entities`, `verbs`, `resources`, `states`, and `rules` for Locks
 
 ## Rationale
 
-**Verbs are roles, not buttons.** Three verbs are player-issued (`deploy_unit`, `set_formation`, `start_combat`); three are system-issued (`advance_tick`, `resolve_combat`, `collect_reward`). The `actor:` field distinguishes them — `actor: "{entities.player}"` vs. `actor: system`.
+**Verbs are roles, not buttons.** Three verbs are player-issued (`deploy_unit`, `set_formation`, `start_combat`); two are system-issued (`resolve_combat`, `collect_reward`). The `actor:` field distinguishes them — `actor: "{entities.player}"` vs. `actor: system`. The per-tick simulation is fired by `{clocks.tick}` (spec §4.7, F-010 v0.3 resolution) rather than by a synthetic verb — see `gdd/clocks.md`.
 
 **The tick is one rule.** `{rules.tick_resolution}` walks the deterministic action order and applies a single unit's action. Repeating it ~120 times *is* an encounter. The simplicity is deliberate: replay determinism depends on the rule being a single function, not a tangle of sub-rules.
 

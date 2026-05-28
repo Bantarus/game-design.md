@@ -8,7 +8,7 @@ implemented_in: ["src/embergrave/rules/**/*"]
 rules:
   physics_tick:
     given:
-      verb: "{verbs.advance_tick}"
+      driver: "{clocks.physics}"
     do:
       - { kind: advance_positions, by: "velocity * dt", dt_ticks: 1 }
       - { kind: apply_gravity, magnitude: "gravity_constant", to: "{entities.player_moth}" }

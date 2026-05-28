@@ -18,7 +18,7 @@ path = "src/main.rs"
 # ECS only — no rendering. xtreme's headless-deterministic stance starts here.
 bevy_ecs = "0.18"
 # PRNG is hand-rolled in crate::prng — xoshiro256** + splitmix64 per spec
-# §4.7 / D-015. No `rand` crate dependency: the algorithm is small enough
+# §4.8 / D-015. No `rand` crate dependency: the algorithm is small enough
 # (~50 LoC) to author from scratch, and the reference vector pinned in the
 # spec lets every engine self-validate against the same bytes — using a
 # crate would risk pulling in a version whose constants drift from the spec.

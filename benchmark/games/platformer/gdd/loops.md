@@ -13,10 +13,11 @@ loops:
       - input:        "{verbs.jump}"
       - input:        "{verbs.dash}"
       - input:        "{verbs.glide}"
-      - tick:         "{verbs.advance_tick}"
       - on_overlap:   "{verbs.refuel_ember}"
       - on_overlap:   "{verbs.touch_checkpoint}"
       - on_death:     "{verbs.restart_at_checkpoint}"
+    clock: "{clocks.physics}"        # F-010 v0.3: 60 Hz fixed-timestep simulation
+
     intended_dynamics:
       - "ember scarcity forces commitment to a route; dash and glide are budgeted"
       - "the moth's six-frame jump arc is the entire vocabulary; mastery is timing, not options"

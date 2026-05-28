@@ -346,8 +346,10 @@ def rule_orphaned_entity(tree: Tree) -> list[Finding]:
     findings: list[Finding] = []
     # Verbs are covered by unreferenced-verb (stricter check); invariants and
     # pillars are not value-referenced by design. Everything else gets checked.
+    # `clocks` joins at v0.3: a clock declared but unreferenced (no loop's
+    # `clock:` field, no rule's `given.driver:`, no other consumer) is orphaned.
     checked = ("entities", "resources", "states", "rules", "loops",
-               "distributions", "feel", "balance_targets", "events")
+               "distributions", "feel", "balance_targets", "events", "clocks")
     for ns in checked:
         for token, (pf, value) in tree.tokens.get(ns, {}).items():
             if ns == "entities" and token.count(".") > 1:
@@ -529,29 +531,57 @@ def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
     deterministic loop is a *prose label*, not a computable procedure. Two
     engines may interpret it differently, breaking the cross-engine bar.
 
-    Reachability heuristic (v0.2.0-alpha):
+    Reachability heuristic (v0.2.0-alpha + F-010 v0.3 extension for clocks):
       1. Collect verbs invoked from any loop with `timescale: moment`.
-      2. Collect rules whose `given.verb:` is one of those verbs.
-      3. For each such rule, flag every `do[]` item that is a string (not a dict).
+      2. Collect clocks referenced (via the loop's `clock:` field) from any
+         moment loop, and then the rules each clock drives (via the clock's
+         `drives:` list).
+      3. Collect rules whose `given.verb:` matches a moment verb OR whose
+         `given.driver:` matches a moment clock OR which appear in any moment
+         clock's `drives:` list.
+      4. For each such rule, flag every `do[]` item that is a string (not a dict).
 
     Severity is `info` (advisory) at v0.2.0-alpha — visibility, not gate.
     Ratchets to `warning` in v0.3, `error` in v0.4 (per D-011).
     """
     # (1) Verbs referenced from moment loops.
     moment_verbs: set[str] = set()
+    # (2a) Clocks referenced via the loop's `clock:` field on a moment loop.
+    moment_clocks: set[str] = set()
     for loop_path, (_pf, loop) in tree.tokens.get("loops", {}).items():
         if not isinstance(loop, dict):
             continue
         if loop.get("timescale") != "moment":
             continue
         sequence = loop.get("sequence")
-        if not isinstance(sequence, list):
-            continue
-        for ref, _ in walk_refs(sequence):
-            if ref.startswith("verbs."):
-                moment_verbs.add(ref)
+        if isinstance(sequence, list):
+            for ref, _ in walk_refs(sequence):
+                if ref.startswith("verbs."):
+                    moment_verbs.add(ref)
+        clock_ref = loop.get("clock")
+        if isinstance(clock_ref, str):
+            m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", clock_ref)
+            if m and m.group(1).startswith("clocks."):
+                moment_clocks.add(m.group(1))
 
-    # (2) Rules whose given.verb is one of those verbs.
+    # (2b) Rules listed in any moment clock's `drives:` array.
+    moment_driver_rules: set[str] = set()
+    for clock_path in moment_clocks:
+        info = tree.tokens.get("clocks", {}).get(clock_path)
+        if not info:
+            continue
+        _pf, clock = info
+        if not isinstance(clock, dict):
+            continue
+        for drive_ref in clock.get("drives") or []:
+            if not isinstance(drive_ref, str):
+                continue
+            m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", drive_ref)
+            if m and m.group(1).startswith("rules."):
+                moment_driver_rules.add(m.group(1))
+
+    # (3) Rules whose given.verb is in moment_verbs, OR given.driver is in
+    # moment_clocks, OR which appear in a moment clock's drives: list.
     deterministic_rules: dict[str, tuple] = {}
     for rule_path, (pf, rule) in tree.tokens.get("rules", {}).items():
         if not isinstance(rule, dict):
@@ -560,15 +590,21 @@ def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
         if not isinstance(given, dict):
             continue
         verb_ref = given.get("verb")
-        if not isinstance(verb_ref, str):
-            continue
-        m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", verb_ref)
-        if not m:
-            continue
-        if m.group(1) in moment_verbs:
+        if isinstance(verb_ref, str):
+            m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", verb_ref)
+            if m and m.group(1) in moment_verbs:
+                deterministic_rules[rule_path] = (pf, rule)
+                continue
+        driver_ref = given.get("driver")
+        if isinstance(driver_ref, str):
+            m = re.match(r"^\{([a-z_][a-z0-9_.\-]+)\}$", driver_ref)
+            if m and m.group(1) in moment_clocks:
+                deterministic_rules[rule_path] = (pf, rule)
+                continue
+        if rule_path in moment_driver_rules:
             deterministic_rules[rule_path] = (pf, rule)
 
-    # (3) Scan each deterministic rule's do[] for bare-string items.
+    # (4) Scan each deterministic rule's do[] for bare-string items.
     findings: list[Finding] = []
     for rule_path, (pf, rule) in deterministic_rules.items():
         do = rule.get("do")

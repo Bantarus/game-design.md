@@ -34,7 +34,7 @@ These seven principles are non-negotiable. The linter exists to enforce them; th
 
 7. **Living, status-tracked, anti-drift.** Every section and content entity carries a `status:` field, an `implemented_in:` source pointer, and a `last_verified:` date. The linter detects drift (`stale-section`, `broken-ref`, `orphaned-entity`); the workflow (§8.2) re-validates on every change. The traditional GDD failure mode — write once, never update, drift from the implementation — is what this standard exists to prevent.
 
-> **Design lineage.** The standard borrows from five canonical frames in game design: **MDA** (Hunicke/LeBlanc/Zubek, 2004) supplies the mechanics → dynamics → aesthetics decomposition and the canonical aesthetic vocabulary (sensation, fantasy, narrative, challenge, fellowship, discovery, expression, submission); the **Elemental Tetrad** (Schell, *The Art of Game Design*) supplies the mechanics/story/aesthetics/technology division that motivates subfile decomposition; **Formal Elements** (Fullerton, *Game Design Workshop*) supplies the genre-agnostic enumeration that maps almost 1:1 to the seven core namespaces; **Theory of Fun** (Koster) supplies the framing of learning curve as design surface; **Game Feel** (Swink) supplies the six-dimension vocabulary for the `feel` cross-cutting namespace (§4.8). Citations belong in `gdd/glossary.md` of any example; they are not required in the root file.
+> **Design lineage.** The standard borrows from five canonical frames in game design: **MDA** (Hunicke/LeBlanc/Zubek, 2004) supplies the mechanics → dynamics → aesthetics decomposition and the canonical aesthetic vocabulary (sensation, fantasy, narrative, challenge, fellowship, discovery, expression, submission); the **Elemental Tetrad** (Schell, *The Art of Game Design*) supplies the mechanics/story/aesthetics/technology division that motivates subfile decomposition; **Formal Elements** (Fullerton, *Game Design Workshop*) supplies the genre-agnostic enumeration that maps almost 1:1 to the seven core namespaces; **Theory of Fun** (Koster) supplies the framing of learning curve as design surface; **Game Feel** (Swink) supplies the six-dimension vocabulary for the `feel` cross-cutting namespace (§4.9). Citations belong in `gdd/glossary.md` of any example; they are not required in the root file.
 
 ---
 
@@ -66,6 +66,7 @@ Canonical layout for any conformant example:
   gdd/
     pillars.md              # required
     loops.md                # required
+    clocks.md               # required iff any clock is declared (F-010 resolution at v0.3)
     mechanics.md            # required (entities, verbs, resources, states)
     architecture-invariants.md  # required (invariants — codebase contract)
     systems/
@@ -97,7 +98,7 @@ Canonical layout for any conformant example:
     levels/*.yaml
 ```
 
-**Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The four conditionally-required files (`distributions.md`, `economy-balance.md`, `feel.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold.
+**Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The five conditionally-required files (`distributions.md`, `economy-balance.md`, `feel.md`, `clocks.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold.
 
 **The `files:` map contract.** The root `game-design.md` frontmatter declares a `files:` map whose keys are stable logical names (e.g. `loops`, `mechanics`, `cards`) and whose values are workspace-relative paths to subfiles. The linter validates that every value resolves to a real file. Any subfile not listed in `files:` is *orphaned* (rule `orphaned-entity`, severity warning). The map is the agent's navigation index — if it's not in `files:`, the agent will not find it.
 
@@ -151,6 +152,7 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 | `events` | `gdd/mechanics.md` |
 | `rules` | `gdd/mechanics.md` or a `gdd/systems/*.md` |
 | `loops` | `gdd/loops.md` |
+| `clocks` | `gdd/clocks.md` |
 | `distributions` | `gdd/systems/distributions.md` |
 | `feel` | `gdd/feel.md` |
 | `balance_targets` | `gdd/economy-balance.md` |
@@ -187,7 +189,7 @@ Engines MAY internally snapshot when they can prove no in-firing mutations affec
 
 ## 4. The Universal Probabilistic Surface
 
-The seven core namespaces, plus two cross-cutting namespaces, plus a tenth architecture-level namespace (`invariants`, §4.10). This is the heart of the spec. Every game, any genre, instantiates these.
+The seven core namespaces (v0.2.0-alpha), plus `clocks` added at v0.3 as the F-010 resolution (§4.7), plus two cross-cutting namespaces, plus an architecture-level namespace (`invariants`, §4.11). This is the heart of the spec. Every game, any genre, instantiates these.
 
 ### 4.1 `entities`
 
@@ -351,11 +353,53 @@ loops:
     implemented_in: ["src/combat_loop.py"]
 ```
 
-**Required keys per loop:** `timescale` (`moment | session | meta`), `duration` (string, prose-readable), `sequence` (array of verb refs), `intended_dynamics` (array of strings), `intended_aesthetics` (array drawn from the eight MDA aesthetics), `status`, `implemented_in`. `feel_priority` is optional (`low | medium | high`); `balance_targets` is optional but strongly recommended.
+**Required keys per loop:** `timescale` (`moment | session | meta`), `duration` (string, prose-readable), `intended_dynamics` (array of strings), `intended_aesthetics` (array drawn from the eight MDA aesthetics), `status`, `implemented_in`. **Plus at least one of `sequence:` (non-empty array of verb refs) or `clock:` (a `{clocks.<id>}` reference, F-010 / v0.3 — see §4.7).** When `clock:` is present the loop's iteration is clock-driven and `sequence:` may be empty (tick-combat's tick loop is pure-clock; Embergrave's flight loop has both a clock and player input verbs). When `clock:` is absent `sequence:` must be non-empty (turn/phase-based loops where iteration advances on a player verb). `feel_priority` is optional (`low | medium | high`); `balance_targets` is optional but strongly recommended.
 
 The root `game-design.md` must reference exactly one loop as `core_loop_ref:`. If absent, rule `missing-core-loop` fires at severity error.
 
-### 4.7 `distributions`
+### 4.7 `clocks`
+
+First-class time-passage primitive. A clock is distinct from `verbs` (player-issued actions) and `events` (state-machine transitions): it advances over wall-clock time, frames, or per-player-verb, and drives one or more rules to fire on each advancement. Introduced at v0.3 as the resolution of F-010, after three independent trees (tick-combat, Embergrave, Driftwood) — three distinct genre families (auto-battler, precision platformer, action-economy survival) — surfaced the same friction: modeling time-passage as a synthetic verb that exists only to trigger a rule.
+
+**Closed `mode:` enum at v0.3 (two values).**
+
+- **`continuous`** — the clock advances on its own at a fixed rate. Requires `rate:` (exactly one of `hz:` for frequency or `period_ms:` for interval). Use for: fixed-timestep physics (e.g., Embergrave 60Hz), auto-battler ticks (e.g., tick-combat), any simulation where time passes regardless of input.
+- **`per_verb_delta`** — the clock advances after each player verb fires, by a delta read from a context-local source. Requires `delta_source:` (a dotted-string path resolved at apply-time per §3 — e.g., `"verb.time_cost.in_game_minutes"` reads the firing verb's declared time cost). Use for: action-economy games where in-game time accumulates per action (e.g., Driftwood's survival clock).
+
+```yaml
+clocks:
+  # Continuous clock (Embergrave's fixed-timestep physics):
+  physics:
+    mode: continuous
+    rate: { hz: 60 }
+    drives: ["{rules.physics_tick}"]
+    status: prototyped
+    implemented_in: ["src/embergrave/clocks/physics.py"]
+
+  # Per-verb-delta clock (Driftwood's action-coupled world clock):
+  world_time:
+    mode: per_verb_delta
+    delta_source: "verb.time_cost.in_game_minutes"   # resolved at apply-time per §3
+    drives: ["{rules.tick_meters}"]
+    status: prototyped
+    implemented_in: ["src/driftwood/clocks/world_time.py"]
+```
+
+**Required keys per clock:** `mode`, `drives` (array of `{rules.<id>}` refs, ≥1 item), `status`, `implemented_in`. `rate:` required when `mode: continuous`; `delta_source:` required when `mode: per_verb_delta`.
+
+**How rules attach to clocks.** A rule fired by a clock declares `given: { driver: "{clocks.<id>}" }` instead of `given: { verb: "{verbs.<id>}" }` (§4.5). The clock and the rule are linked bidirectionally: the clock's `drives:` list names the rules it triggers, and each driven rule's `given.driver:` points back at the clock. Both directions are validated — `broken-ref` fires if `drives:` names a non-existent rule; `orphaned-entity` fires on a clock no rule's `given.driver:` references.
+
+**Loops and clocks.** A loop declares `clock: "{clocks.<id>}"` to indicate that the clock drives its iteration; when present, the loop's `sequence:` may be empty (tick-combat's tick loop has no player verbs — it IS the clock advancing). When `clock:` is absent, `sequence:` must be non-empty (turn-based or input-driven loops where iteration advances on a player verb).
+
+**`mode:` is a closed enum that grows by observed use, not anticipation.** Two modes at v0.3: `continuous` and `per_verb_delta`. The discipline is the same one Rule 9's closed-enumeration sanitization earned in Phase 5 — extend by observed need, not by anticipation. Likely v0.4 surfacing:
+
+- **`scheduled` (watch-for v0.4)** — a clock that fires at declared in-game-time points or intervals (day/night cycles, wave timers, scripted-event clocks). Likely to surface in strategy or survival games with explicit waves or daily cadence. Adding it now without an observed surfacing would be the symmetric form of the gate-loosening trap.
+
+If a tree needs a mode not in the closed enum, that's a v0.4 spec-ratchet event: add the mode when observed use demands it, not when anticipated use could imagine it.
+
+**Determinism.** Clock-driven rules participate in the same deterministic-loop reachability the linter applies to verb-driven rules (`determinism-undetermined-rule`, §9.1). For a moment-timescale loop with a `clock:` field, the linter traces `loop → clock.drives → rules` and checks every rule's `do[]` for bare-string steps. The semantic contract is identical to verb-driven rules: every step must be a structured object that resolves identically across engines that share the pinned PRNG.
+
+### 4.8 `distributions`
 
 First-class randomness. **Every random outcome anywhere in a `game-design.md` tree must reference a named distribution.** Naming randomness is the difference between a game whose balance is auditable and a game whose balance is hidden in source code.
 
@@ -526,7 +570,7 @@ distributions:
 
 **Required keys per distribution:** `type` (one of the eight above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
 
-**`discrete_sum` (D-016).** The integer-native alternative to `gaussian` for cross-engine state-affecting randomness. Result = `(params_from.mean or 0) + sum(uniform_int(range[0], range[1]) for _ in 0..samples)`, then `clamp`. Required: `samples` (positive integer), `range` (`[lo, hi]` integer pair, inclusive on both ends), and either `params_from.mean` or a fixed `mean:` field. Optional: `clamp: [min, max]`. Pure integer arithmetic; no `log`, `exp`, `sin`, `cos`, `sqrt`, or `pow` involved — bit-identical by construction on any engine that agrees on the pinned PRNG (§4.7 PRNG pin). The variance of the resulting distribution is `samples × (range[1] − range[0] + 1)² − 1) / 12` for integer uniforms; pick `samples` and `range` to land in the gameplay-feel band you want. (For tick-combat: `samples: 3, range: [-1, 1]` → stddev ≈ √2 ≈ 1.41, a close-enough discretization of the previous continuous `gaussian(stddev=1)`.)
+**`discrete_sum` (D-016).** The integer-native alternative to `gaussian` for cross-engine state-affecting randomness. Result = `(params_from.mean or 0) + sum(uniform_int(range[0], range[1]) for _ in 0..samples)`, then `clamp`. Required: `samples` (positive integer), `range` (`[lo, hi]` integer pair, inclusive on both ends), and either `params_from.mean` or a fixed `mean:` field. Optional: `clamp: [min, max]`. Pure integer arithmetic; no `log`, `exp`, `sin`, `cos`, `sqrt`, or `pow` involved — bit-identical by construction on any engine that agrees on the pinned PRNG (§4.8 PRNG pin). The variance of the resulting distribution is `samples × (range[1] − range[0] + 1)² − 1) / 12` for integer uniforms; pick `samples` and `range` to land in the gameplay-feel band you want. (For tick-combat: `samples: 3, range: [-1, 1]` → stddev ≈ √2 ≈ 1.41, a close-enough discretization of the previous continuous `gaussian(stddev=1)`.)
 
 **Output domain & rounding (D-010, deprecated for state-affecting use at v0.2.0-alpha Phase 4+; superseded by D-016).** The original D-010 contract — sample a continuous distribution at full float precision, clamp in real space, round to integer with `round_mode: half_to_even` — was correct in its ordering but incomplete in its determinism contract. Every continuous-then-rounded path depends on `log` / `exp` / `sin` / `cos` somewhere in the sampling code, and IEEE-754 does NOT mandate correctly-rounded transcendentals — real libm implementations (Rust's, Godot's, MSVC's under Unreal) differ in the last ULP. The integer rounding occasionally flips when a sample lands within ULP-distance of an x.5 boundary. Rare, unpredictable, and exactly the "almost always deterministic" posture this project refuses.
 
@@ -538,7 +582,7 @@ distributions:
 2. Sum the draws and add `params_from.mean` (or the fixed `mean`) if present.
 3. Apply integer `clamp` to the result.
 
-No floating-point arithmetic at any step. No transcendentals. Bit-identical across every engine that agrees on the PRNG (§4.7 PRNG pin) and applies these three steps. The "clamp first then round" question of D-010 no longer applies because there is nothing to round.
+No floating-point arithmetic at any step. No transcendentals. Bit-identical across every engine that agrees on the PRNG (§4.8 PRNG pin) and applies these three steps. The "clamp first then round" question of D-010 no longer applies because there is nothing to round.
 
 **Threshold comparison direction (uniform-with-threshold idiom, Phase 4+).** When a `uniform` distribution carries a `threshold:` field used to derive a boolean (the Bernoulli-via-uniform idiom — e.g. `critical_hit: { range: [0, 9], threshold: 1, selection_rule: less_than }`), the boolean output is the result of comparing the integer sample to the integer threshold via `selection_rule:` — `less_than` (`sample < threshold`) is the recommended default. Per-distribution `selection_rule:` MAY also take `less_than_or_equal`, `greater_than`, `greater_than_or_equal`, `equal`. The legacy float form (`range: [0.0, 1.0], threshold: 0.10`) is reserved for non-cross-engine use; for the cross-engine bar, integer uniforms with explicit `selection_rule:` are normative. Two engines that interpret `<` vs `<=` differently desync at exactly the threshold sample — the convention is now structurally declared, not implicit.
 
@@ -586,7 +630,7 @@ Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev
 
 **Binding moment for `params_from:` reads.** Each parameter sourced via `params_from:` is read at **apply-time** — at the `do:` step that calls `sample:` on this distribution, the context refs are resolved live against the world. This is the same rule as for context-local refs anywhere else (see §3). Two engines that read `{actor.attack}` at different moments (e.g. one at action-start, one at the sample step) produce different integer trajectories the moment any mid-firing mutation is added — the canonical timing must live in the spec, not in each engine. Tick-combat's xtreme reads `actor.attack` from a tick-start snapshot, which is provably equivalent under tick-combat's no-mid-tick-mutation invariant; this is permitted as an optimization, not a different semantics.
 
-### 4.8 Cross-cutting: `feel`
+### 4.9 Cross-cutting: `feel`
 
 Game feel per Steve Swink's six dimensions: input, response, context, polish, metaphor, rules. Authored per verb.
 
@@ -605,7 +649,7 @@ feel:
 
 **Required keys per feel entry:** all six dimensions as strings, plus `status` and `implemented_in`. Empty-string is permitted for dimensions that genuinely do not apply (e.g. `metaphor: ""` for a UI verb) — but every key must be present.
 
-### 4.9 Cross-cutting: `balance_targets`
+### 4.10 Cross-cutting: `balance_targets`
 
 Designer-intended outcomes the game must satisfy at ship. Loops and content reference these so that balance lives in one place and the `diff` regression check (§9.2) can detect when they shift.
 
@@ -653,7 +697,7 @@ A `diff` between two trees emits an entry for any target whose `target` value ch
 
 If the example tree contains no `balance_targets`, rule `missing-balance-targets` fires at severity error.
 
-### 4.10 Architecture invariants
+### 4.11 Architecture invariants
 
 A tenth namespace, `invariants`, owned by `gdd/architecture-invariants.md`. Each invariant declares a verifiable property of the *generated codebase* — a numeric domain, a structural pattern, a layer boundary, an inter-layer communication rule, or a determinism guarantee. **Invariants are how the design document tells the agent which assumptions the code must satisfy.** They are deliberately *engine-neutral*: an invariant declares a rule, never a tool.
 
@@ -952,7 +996,7 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | `inline-content-over-threshold` | error | A content-schema file with `count_target >= 20` does not declare `data_dir:` (i.e. entries are inlined). |
 | `stale-section` | warning | A subfile's `last_verified:` is more than 30 days older than the mtime of any file in its `implemented_in:`. |
 | `balance-target-untyped` | warning (v0.2.0-alpha), error (v0.3+) | A `balance_targets.<id>` lacks the `target_kind:` discriminator (v0.1.1 legacy shape). See `DECISIONS.md` D-003. |
-| `determinism-undetermined-rule` | info (advisory) at v0.2.0-alpha; warning in v0.3; error in v0.4 | A `do:` step inside a `{rules.<id>}` reachable from a deterministic loop (`{loops.<id>}` with `timescale: moment`) is a bare string instead of a structured object. Surfaces the "Phase-2 archaeology" pattern — prose labels for resolution procedures don't constrain implementations. See `DECISIONS.md` D-011. |
+| `determinism-undetermined-rule` | info (advisory) at v0.2.0-alpha; warning in v0.3; error in v0.4 | A `do:` step inside a `{rules.<id>}` reachable from a deterministic loop (`{loops.<id>}` with `timescale: moment`) is a bare string instead of a structured object. Reachability follows two chains: (a) `loop.sequence → verbs → rules.given.verb`, and (b) `loop.clock → clocks.drives → rules` (F-010 / v0.3) — also rules whose `given.driver:` matches a moment-loop clock. Surfaces the "Phase-2 archaeology" pattern — prose labels for resolution procedures don't constrain implementations. See `DECISIONS.md` D-011. |
 | `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
 | `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
 | `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning at v0.2.0-alpha, error in v0.3 — transition `event:` is a bare string instead of a `{events.<id>}` token). |
@@ -1171,7 +1215,7 @@ The discipline belongs in the spec, not in each adapter: an adapter that doesn't
 
 The normative frontmatter schema lives at `schema/game-design.schema.json`. It is the machine-readable companion to §4–§6 and is what editors validate against live.
 
-The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
+The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `Clock`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
 
 VS Code's YAML extension picks up the schema via the YAML language server's standard mapping. Add this to a workspace `.vscode/settings.json`:
 
@@ -1227,9 +1271,10 @@ The schema is working if, from a cold context, an AI coding agent can implement 
 | Modular tree + `files:` map | | **new** (§2.2, §5.1) |
 | `status:` + `implemented_in:` + `last_verified:` | | **new** (§8) |
 | Seven core namespaces + `feel` + `balance_targets` | | **new** (§4) — the entire surface |
-| Named distributions for all randomness | | **new** (§4.7) — strict at v0.1 |
+| Named distributions for all randomness | | **new** (§4.8) — strict at v0.1 |
+| First-class clocks (`{clocks.<id>}` namespace) | | **new** (§4.7) — F-010 resolution at v0.3 |
 | Content-heavy data pattern (`data_source:`) | | **new** (§6) |
-| Architecture invariants, state-machine totality, `verify` adapter contract | | **new** (§4.10, §4.4, §9.5) — adapted from a parallel research effort and re-grounded engine-neutral (the source assumed a web engine; we express codebase properties and a pluggable adapter contract instead). |
+| Architecture invariants, state-machine totality, `verify` adapter contract | | **new** (§4.11, §4.4, §9.5) — adapted from a parallel research effort and re-grounded engine-neutral (the source assumed a web engine; we express codebase properties and a pluggable adapter contract instead). |
 
 ## Appendix C — Glossary of Spec Terms
 

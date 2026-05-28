@@ -37,9 +37,9 @@ Emits a `VerifyResult` JSON object to stdout; writes canonical JSONL trajectory 
 
 - **Within-engine determinism:** PASS. Two runs at seed 12345 → byte-identical.
 - **Seed responsiveness (negative control):** PASS. Seed 99999 produces a different trajectory than seed 12345.
-- **Cross-engine trajectory match against xtreme:** **FAIL — diverges at tick 1.** Root cause: spec §4.7 doesn't pin the PRNG algorithm (#12) or the gaussian sampling algorithm (#13). xtreme uses ChaCha20 + Marsaglia polar via Rust's `rand_distr`; Godot uses PCG-family + Box-Muller via core `randfn()`. **Both engines are spec-compliant; the spec under-constrains randomness.**
+- **Cross-engine trajectory match against xtreme:** **FAIL — diverges at tick 1.** Root cause: spec §4.8 doesn't pin the PRNG algorithm (#12) or the gaussian sampling algorithm (#13). xtreme uses ChaCha20 + Marsaglia polar via Rust's `rand_distr`; Godot uses PCG-family + Box-Muller via core `randfn()`. **Both engines are spec-compliant; the spec under-constrains randomness.**
 
-Per the Phase-4 discipline (spec is the judge, golden is the goal): **Godot is NOT patched to match xtreme**. The resolution is to pin the PRNG + sampling algorithm in §4.7 and re-lock both engines' goldens (Phase-4+ commit, deferred for the closed-vocabulary decision).
+Per the Phase-4 discipline (spec is the judge, golden is the goal): **Godot is NOT patched to match xtreme**. The resolution is to pin the PRNG + sampling algorithm in §4.8 and re-lock both engines' goldens (Phase-4+ commit, deferred for the closed-vocabulary decision).
 
 ## D-008 §6 audit (adapted)
 

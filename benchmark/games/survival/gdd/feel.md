@@ -82,7 +82,7 @@ feel:
 
 ## Tokens
 
-Eight feel blocks covering the player-actor verbs. Two verbs (`start_day`, `advance_world_time`) are infrastructure — they don't have player-facing feel, because the player doesn't issue them directly; they're the engine of time advancement under the hood. The eight player verbs each declare their six Swink dimensions per spec §4.8.
+Eight feel blocks covering the player-actor verbs. One verb (`start_day`) is infrastructure — it doesn't have player-facing feel, because the player doesn't issue it directly; it's part of the day-cycle engine under the hood. Per-action world-time advancement is no longer a verb (F-010 v0.3 resolution lifted it to `{clocks.world_time}` — see `gdd/clocks.md`). The eight player verbs each declare their six Swink dimensions per spec §4.9.
 
 ## Rationale
 

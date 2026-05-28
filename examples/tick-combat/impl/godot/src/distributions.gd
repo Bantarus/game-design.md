@@ -26,7 +26,7 @@ var rng
 func _init(seed_val: int) -> void:
 	rng = PRNG.new(seed_val)
 
-# {distributions.action_order} — ordering_rule (D-013 / spec §4.7).
+# {distributions.action_order} — ordering_rule (D-013 / spec §4.8).
 # Sort alive units by speed DESC, deploy_order ASC, side ASC tie-break.
 # Pure deterministic — no PRNG involvement.
 func action_order(units: Array) -> Array:
