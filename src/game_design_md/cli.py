@@ -1,10 +1,12 @@
-"""game-design.md CLI: lint | diff | export | spec | verify | status.
+"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch.
 
 Exit-code contract (spec §9):
   lint    : 0 if no errors, 1 otherwise.
   diff    : 0 if no balance_regressions or status_regressions, 1 otherwise.
   verify  : 0 if every non-presentation_usability target passed, 1 otherwise.
   status  : always 0 (informational; not a gate). See spec §9.6.
+  hook    : always 0 (informational; not a gate). See spec §9.7 (Task 4 v0.3).
+  touch   : always 0 (idempotent — no-op if last_verified already today).
 """
 from __future__ import annotations
 
@@ -15,7 +17,9 @@ from pathlib import Path
 import click
 
 from game_design_md import __spec_version__, __version__
-from game_design_md import diff_cmd, export_cmd, linter, spec_cmd, status_cmd, verify_cmd
+from game_design_md import (
+    diff_cmd, export_cmd, hook_cmd, linter, spec_cmd, status_cmd, verify_cmd,
+)
 from game_design_md.tree import Tree
 
 
@@ -140,6 +144,67 @@ def status_cmd_entry(path: Path, as_json: bool, stale_days: int,
         click.echo(json.dumps(report, indent=2, default=str))
     else:
         click.echo(status_cmd.render_human(report))
+
+
+@main.group("hook",
+            help="Anti-drift pre-commit hook commands (Task 4 v0.3). "
+                 "Composes with the pre-commit framework via "
+                 ".pre-commit-config.yaml. See spec §9.7.")
+def hook_group() -> None:
+    pass
+
+
+@hook_group.command("check",
+                    help="Pre-commit-invoked check: surface spec sections "
+                         "that reference any staged code paths. Always "
+                         "exits 0 (informational, not a gate).")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
+                                        path_type=Path))
+@click.argument("staged_files", nargs=-1, required=False)
+def hook_check_cmd(path: Path, staged_files: tuple[str, ...]) -> None:
+    tree = Tree.load(path)
+    matches = hook_cmd.check_staged(tree, list(staged_files))
+    output = hook_cmd.render_hook_output(matches, tree_path=path)
+    if output:
+        click.echo(output)
+    sys.exit(0)
+
+
+@hook_group.command("install",
+                    help="Install the gdmd anti-drift hook into "
+                         ".pre-commit-config.yaml at the repo root. "
+                         "Idempotent.")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
+                                        path_type=Path))
+@click.option("--repo-root", type=click.Path(exists=True, file_okay=False,
+                                              dir_okay=True, path_type=Path),
+              default=None,
+              help="Repo root where .pre-commit-config.yaml lives. Defaults "
+                   "to the tree path (typical when the spec tree is the repo).")
+def hook_install_cmd(path: Path, repo_root: Path | None) -> None:
+    config_path, status = hook_cmd.install_hook(path, repo_root=repo_root)
+    click.echo(f"{status} {config_path}")
+
+
+@main.command("touch",
+              help="Bump `last_verified:` of one or more subfiles to today's "
+                   "date. Idempotent — no-op if already today. The bump "
+                   "command paired with `gdmd hook check` forms the commit-"
+                   "side of the bidirectional contract.")
+@click.argument("paths", nargs=-1, required=True,
+                type=click.Path(exists=True, file_okay=True, dir_okay=False,
+                                path_type=Path))
+def touch_cmd(paths: tuple[Path, ...]) -> None:
+    for p in paths:
+        try:
+            bumped = hook_cmd.bump_last_verified(p)
+        except ValueError as e:
+            raise click.ClickException(str(e)) from e
+        if bumped:
+            click.echo(f"bumped {p}")
+        else:
+            click.echo(f"no change: {p}")
+    sys.exit(0)
 
 
 if __name__ == "__main__":

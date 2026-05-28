@@ -1342,6 +1342,35 @@ gdmd status <path> [--json] [--stale-days N] [--shipped-stale-days N]
 
 The view is intentionally non-exhaustive at v0.3 — it surfaces the markers v0.2 already declared. Richer aggregations (a "what's next" view for sections at `draft` referenced by sections at `prototyped+`; per-namespace drill-downs; cross-tree comparison) are candidates for v0.4 based on observed use.
 
+### 9.7 `hook` and `touch` — the bidirectional anti-drift workflow (v0.3)
+
+```
+gdmd hook install <path> [--repo-root <dir>]
+gdmd hook check   <path> [<staged_files>...]
+gdmd touch        <subfile> [<subfile>...]
+```
+
+**Status: shipped at v0.3 (Task 4 of the v0.3 docket).** The three commands implement the *commit-side* of the bidirectional contract on `implementation_pointers:` and `implemented_in:`. They compose with the existing *verify-side* (`stale-section` lint rule, §9.1) to form a workflow where the anti-drift markers (`status:` + `implemented_in:` + `last_verified:`) carry real teeth at every change point.
+
+**The two sides of the contract.**
+
+- **verify-side (existing, since v0.1; extended in Task 6):** `gdmd lint` rule `stale-section` walks every `implemented_in:` glob, resolves it to source files, and warns when any source file's mtime is more than `--stale-days` (default 30) newer than the doc's `last_verified:`. This catches the *code drifted ahead of spec verification* direction — at any `gdmd lint` invocation, sections that have fallen behind their impl are surfaced. Task 6 added configurable threshold + status-aware skip (`draft / cut / deferred` are exempt).
+- **commit-side (NEW at v0.3, Task 4):** `gdmd hook check`, invoked by the pre-commit framework on staged filenames, intersects the staged file list against an inverted index built from every `implemented_in:` glob + the root file's `implementation_pointers:` map. Each staged code path that's referenced by at least one spec section surfaces the affected sections + a ready-to-run `gdmd touch <sections>` invocation to bump `last_verified:` once the dev has re-verified. The hook is informational (exit 0 always) so it doesn't block commits; its job is to make the affected sections *visible at commit time* rather than letting them rot until the next lint.
+
+**`gdmd hook install <path> [--repo-root <dir>]`.** Writes or updates `.pre-commit-config.yaml` at the repo root to register a `local` hook entry that invokes `gdmd hook check <path> $staged_files`. `language: system` so it dispatches to the `gdmd` binary on PATH (no separate pre-commit-managed venv). `pass_filenames: true` is the pre-commit-framework default; staged filenames arrive as positional args. `--repo-root` defaults to CWD — the typical place the user runs `gdmd hook install` from, and the root where pre-commit looks for `.pre-commit-config.yaml`. The command is idempotent: a second invocation against a config that already contains the gdmd hook leaves the file completely untouched (mtime unchanged), and prints `unchanged` instead of `updated`. Composes cleanly with other hooks already declared in the same `.pre-commit-config.yaml`.
+
+**`gdmd hook check <path> [<staged_files>...]`.** The pre-commit-invoked check. Builds an inverted index `{tree_relative_code_path: [Reference, ...]}` over the spec tree at `<path>` once, then walks `staged_files` (resolved against CWD per the pre-commit convention — staged paths arrive repo-root-relative when pre-commit invokes from the repo root) intersecting against the index. Empty intersection → empty stdout (hook stays silent on commits that don't touch spec-referenced code paths). Non-empty intersection → a human-readable report listing each affected spec file, the affected `<ns>.<token>` locations, the triggering code paths, and a single-line `gdmd touch` suggestion to bump `last_verified:` after re-verifying. Always exits 0 (informational, not a gate).
+
+**`gdmd touch <subfile> [<subfile>...]`.** Atomically bumps each subfile's `last_verified:` to today's date. Idempotent: if the field is already today's date the file is untouched and the command reports `no change:`. Preserves the author's quoting choice (`"2026-05-28"` stays quoted; `2026-05-28` stays unquoted) and frontmatter formatting — the implementation is regex-based on the frontmatter slab to avoid pyyaml's round-trip normalization. Errors (no frontmatter, frontmatter not closed) raise a clear `ClickException` rather than silently no-op'ing. Always exits 0.
+
+**Why the hook is informational, not a gate.** Pre-commit hooks that take >1s or that block on non-actionable signals get disabled by developers — the discipline only sticks if the friction is low. The hook's job is to make affected sections *visible*; the developer judges whether their change actually altered the design intent, then runs `gdmd touch <section>` if it did and proceeds with the commit either way. The interactive verification is up to the developer; the hook only surfaces the *what's affected* question. This is the pattern the user named: "non-interactive hook + interactive follow-up command."
+
+**Performance budget.** Pre-commit hooks that take >1s get disabled. The inverted index is O(N) over spec files at build time; staged-file lookup is O(1) per file post-index. For the 6 in-repo trees (each ~15-20 subfiles, each declaring ~5-10 globs), index build + lookup is <100ms easily. If a future tree is large enough that the lookup gets slow, the inverted index probably wants caching with invalidation by spec mtime — a v0.4+ concern, not v0.3.
+
+**Why pre-commit framework (vs direct `.git/hooks/pre-commit` write).** Three options were considered at v0.3 design time: (a) direct `.git/hooks/pre-commit` write, (b) pre-commit framework via `.pre-commit-config.yaml`, (c) custom Python runner the user invokes themselves. (b) is the dominant convention in the Python ecosystem the tool already targets; it composes with other hooks the user already runs; and `gdmd hook install` writing to `.pre-commit-config.yaml` is non-destructive (idempotent, additive). (a) doesn't compose. (c) requires user effort. (b) was the deliberate choice.
+
+**Spec → code direction deferred to v0.4+.** The inverse direction — *spec edit implies impl may need updating* — is a different workflow shape (closer to design-doc-driven-development than to anti-drift) and adds significant complexity. v0.3 ships what's demanded by the observed problem (code→spec via pre-commit hook + verify-mtime); spec→code is naturally a v0.4 follow-on if real adoption surfaces a need for it. Same minimum-extension discipline that closed F-010's mode enum and D-019's addressing DSL.
+
 ---
 
 ## 10. JSON Schema
