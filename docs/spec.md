@@ -73,7 +73,7 @@ Canonical layout for any conformant example:
       _index.md             # optional
       combat.md             # optional (genre may not need it)
       progression.md        # optional
-      distributions.md      # required
+      distributions.md      # required iff any random outcome is declared (every roll needs a named distribution)
       ai-behavior.md        # optional
     content/
       _index.md             # required iff any content-schema file exists
@@ -82,7 +82,7 @@ Canonical layout for any conformant example:
       items.md              # content-schema file (genre-dependent)
       levels.md             # content-schema file (genre-dependent)
     narrative.md            # optional
-    economy-balance.md      # required (balance_targets)
+    economy-balance.md      # required (owns balance_targets; missing-balance-targets is an error)
     ux.md                   # optional
     art-direction.md        # optional
     audio.md                # optional
@@ -98,7 +98,7 @@ Canonical layout for any conformant example:
     levels/*.yaml
 ```
 
-**Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The five conditionally-required files (`distributions.md`, `economy-balance.md`, `feel.md`, `clocks.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold.
+**Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The four conditionally-required files (`distributions.md`, `feel.md`, `clocks.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold. `economy-balance.md` is effectively unconditional: `missing-balance-targets` (§9.1) fires at error when no `balance_targets` exist anywhere in the tree, and the namespace is owned by that file.
 
 **The `files:` map contract.** The root `game-design.md` frontmatter declares a `files:` map whose keys are stable logical names (e.g. `loops`, `mechanics`, `cards`) and whose values are workspace-relative paths to subfiles. The linter validates that every value resolves to a real file. Any subfile not listed in `files:` is *orphaned* (rule `orphaned-entity`, severity warning). The map is the agent's navigation index — if it's not in `files:`, the agent will not find it.
 
@@ -203,7 +203,7 @@ Engines MAY internally snapshot when they can prove no in-firing mutations affec
 
 ## 4. The Universal Probabilistic Surface
 
-The seven core namespaces (v0.2.0-alpha), plus `clocks` added at v0.3 as the F-010 resolution (§4.7), plus two cross-cutting namespaces, plus an architecture-level namespace (`invariants`, §4.11). This is the heart of the spec. Every game, any genre, instantiates these.
+The seven core namespaces (v0.2.0-alpha), plus `events` (promoted to first-class tokens at v0.2, §4.4), plus `clocks` added at v0.3 as the F-010 resolution (§4.7), plus two cross-cutting namespaces (`feel`, `balance_targets`), plus an architecture-level namespace (`invariants`, §4.11). This is the heart of the spec. Every game, any genre, instantiates these.
 
 ### 4.1 `entities`
 
@@ -630,7 +630,7 @@ distributions:
 
 **Required keys per distribution:** `type` (one of the eight above), plus type-specific keys as shown, plus `status` and `implemented_in`. The `seed:` key is optional and defaults to `deterministic_per_run`; a value of `nondeterministic` requires prose justification.
 
-**`discrete_sum` (D-016).** The integer-native alternative to `gaussian` for cross-engine state-affecting randomness. Result = `(params_from.mean or 0) + sum(uniform_int(range[0], range[1]) for _ in 0..samples)`, then `clamp`. Required: `samples` (positive integer), `range` (`[lo, hi]` integer pair, inclusive on both ends), and either `params_from.mean` or a fixed `mean:` field. Optional: `clamp: [min, max]`. Pure integer arithmetic; no `log`, `exp`, `sin`, `cos`, `sqrt`, or `pow` involved — bit-identical by construction on any engine that agrees on the pinned PRNG (§4.8 PRNG pin). The variance of the resulting distribution is `samples × (range[1] − range[0] + 1)² − 1) / 12` for integer uniforms; pick `samples` and `range` to land in the gameplay-feel band you want. (For tick-combat: `samples: 3, range: [-1, 1]` → stddev ≈ √2 ≈ 1.41, a close-enough discretization of the previous continuous `gaussian(stddev=1)`.)
+**`discrete_sum` (D-016).** The integer-native alternative to `gaussian` for cross-engine state-affecting randomness. Result = `(params_from.mean or 0) + sum(uniform_int(range[0], range[1]) for _ in 0..samples)`, then `clamp`. Required: `samples` (positive integer), `range` (`[lo, hi]` integer pair, inclusive on both ends), and either `params_from.mean` or a fixed `mean:` field. Optional: `clamp: [min, max]`. Pure integer arithmetic; no `log`, `exp`, `sin`, `cos`, `sqrt`, or `pow` involved — bit-identical by construction on any engine that agrees on the pinned PRNG (§4.8 PRNG pin). The variance of the resulting distribution is `samples × ((range[1] − range[0] + 1)² − 1) / 12` for integer uniforms; pick `samples` and `range` to land in the gameplay-feel band you want. (For tick-combat: `samples: 3, range: [-1, 1]` → stddev ≈ √2 ≈ 1.41, a close-enough discretization of the previous continuous `gaussian(stddev=1)`.)
 
 **Output domain & rounding (D-010, deprecated for state-affecting use at v0.2.0-alpha Phase 4+; superseded by D-016).** The original D-010 contract — sample a continuous distribution at full float precision, clamp in real space, round to integer with `round_mode: half_to_even` — was correct in its ordering but incomplete in its determinism contract. Every continuous-then-rounded path depends on `log` / `exp` / `sin` / `cos` somewhere in the sampling code, and IEEE-754 does NOT mandate correctly-rounded transcendentals — real libm implementations (Rust's, Godot's, MSVC's under Unreal) differ in the last ULP. The integer rounding occasionally flips when a sample lands within ULP-distance of an x.5 boundary. Rare, unpredictable, and exactly the "almost always deterministic" posture this project refuses.
 
@@ -1026,7 +1026,7 @@ The standard exists because GDDs drift. These four mechanisms keep the doc and t
 
 ## 9. The CLI
 
-Verbs: `lint | diff | export | spec`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
+Verbs: `lint | diff | export | spec | verify | status | hook | touch | init`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
 
 ### 9.1 `lint`
 
@@ -1452,6 +1452,8 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 
 **Queued for v0.4+ pending live adoption:**
 
+- **Cost amortization.** F-009's cost-lift gate FAILED: the spec format costs 37% more tokens per session than flattened prose (lower-bounded due to cap-truncation), and that cost is real and paid up-front. The framing that the per-session cost amortizes against anti-drift value across a multi-session project is a *hypothesis generated by the failure, not a clarification that unfails it* — by the counterfactual-adoption test, it would not have been written had the gate passed. It is queued for the same v0.4+ longitudinal validation as the living-doc property below.
+
 - **Longitudinal living-doc property.** The claim that "the doc stays current across weeks/months of game development, where the spec is one tool among many and the human isn't continuously reviewing it." The 6 in-repo trees cannot validate this claim because they are *spec-illustrations and benchmark targets, not games-in-development*. The `gdmd status` snapshot shows the shape: most files at `status: draft`, a handful at `prototyped`, exactly one tree with `implemented` entries (tick-combat's reference impl). That distribution is consistent with their role as spec evidence; it is not the population that would validate longitudinal maintenance. The vocabulary and apparatus v0.4+ would test against (anti-staleness lint rules, status lifecycle states, transition graph, `gdmd status` thresholds) all land at v0.3 — the test itself awaits the first live adopter.
 
 **The deployment-surface reframe is gate correction, not gate loosening** (D-021). The kickoff's "at least one live project" validation bar was set against the factual premise that named live projects had spec trees the v0.3 vocabulary would be deployed into; that premise was incorrect. Restating the bar under the corrected premise is the same discipline as a constraint-driven scope reduction firing AS DESIGNED — different from a result-driven gate widening (which would face the counterfactual-adoption test). The in-repo surface carries the three validation claims above; the longitudinal claim is queued, not silently dropped. See `DECISIONS.md` D-021 for the full lineage.
@@ -1491,10 +1493,10 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 - **Token** — a value in YAML frontmatter. Normative.
 - **Namespace** — a top-level key in frontmatter that owns a category of tokens (e.g. `loops`, `verbs`, `distributions`).
 - **Reference** — `{namespace.id}` syntax pointing from one token (or prose) to another.
-- **Surface** — the seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`) plus the two cross-cutting namespaces (`feel`, `balance_targets`). The universal probabilistic surface.
+- **Surface** — the seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`), plus `events` (first-class at v0.2) and `clocks` (v0.3), plus the cross-cutting namespaces (`feel`, `balance_targets`) and the architecture-level `invariants`. The universal probabilistic surface.
 - **Primitive** (in a reference) — a scalar resolution (number/string/boolean).
 - **Composite** (in a reference) — an object or array resolution.
 - **Content-heavy type** — an `entities` kind with `count_target >= 20`, which MUST live in `content/<kind>/*.yaml`.
 - **Drift** — divergence between what the doc says and what the code does. The anti-drift mechanisms (§8.2) exist to detect and prevent it.
-- **The seven primitives** — `entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`. Plus `feel` and `balance_targets` as cross-cutting concerns, the universal surface is nine total.
+- **The seven primitives** — `entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions` — the original v0.1 core, and what "seven" refers to wherever the spec says it. The full universal surface additionally counts `events` (v0.2), `clocks` (v0.3), the cross-cutting `feel` / `balance_targets`, and the architecture-level `invariants` — twelve namespaces total; prefer "the universal surface" over a number when citing it.
 - **Stability guarantee** — `pillars`, `non_goals`, `player_experience_goals`, `core_loop_ref` are the only fields agreed to remain stable for the life of a project.

@@ -1,5 +1,7 @@
 # `game-design.md`
 
+[![CI](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml/badge.svg)](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml)
+
 > **A living game design document that stays current with the code, maintained by an AI coding agent over the lifetime of a project.** Pre-stable (v0.3.0); v1.0 is the planned stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is what `CLAUDE.md` or `AGENTS.md` is for a software project, applied to a video game: a structured plain-text artifact the AI agent reads first, writes back to, and keeps coherent over weeks and months of development. The format is **LLM-first, engine-neutral, genre-agnostic**: the primary consumer is a coding agent; a human is the second reader; no engine, framework, or genre is privileged at the schema level.
@@ -50,7 +52,7 @@ gdmd lint my-game && gdmd status my-game     # close the loop
 
 ## The idea in one paragraph
 
-A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). Every game — any genre — reduces to seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`), plus two cross-cutting (`feel`, `balance_targets`), plus a tenth architecture-level namespace (`invariants` — engine-neutral contracts on the codebase), plus a v0.3 time-passage namespace (`clocks`, the first-class primitive distinct from player verbs). Tokens cross-reference each other as `{namespace.id}`. Content-heavy data (cards, enemies, items, levels) lives in sibling `content/*/*.yaml` files referenced by `data_source`, so the agent's context stays lean at 200+ entities. A CLI (`lint | diff | export | spec | verify | status | hook | touch | init`) enforces structure, detects drift, supports dynamic verification through project-supplied adapters, and automates the maintenance ritual.
+A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). Every game — any genre — reduces to seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`), plus `events` (first-class since v0.2) and `clocks` (the v0.3 time-passage primitive distinct from player verbs), plus two cross-cutting (`feel`, `balance_targets`), plus an architecture-level namespace (`invariants` — engine-neutral contracts on the codebase). Tokens cross-reference each other as `{namespace.id}`. Content-heavy data (cards, enemies, items, levels) lives in sibling `content/*/*.yaml` files referenced by `data_source`, so the agent's context stays lean at 200+ entities. A CLI (`lint | diff | export | spec | verify | status | hook | touch | init`) enforces structure, detects drift, supports dynamic verification through project-supplied adapters, and automates the maintenance ritual.
 
 ## What's been demonstrated
 

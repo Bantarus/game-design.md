@@ -467,12 +467,16 @@ def _lint_with_config(root, **config_kw):
 # ---- prototyped-without-pointer (NEW) -----------------------------------------
 
 def test_prototyped_without_pointer_silent_on_fresh_baseline(make_tree):
-    """Baseline subfiles all have last_verified ~7 days before today; the
-    default threshold is 30 days, so the new rule emits zero findings on a
-    fresh tree. (Also the baseline test_baseline_lints_clean test would
-    catch any regression here at exit-code 0; warnings would still slip
-    through.) Calibration anchor: baselines pass under defaults."""
-    res = _lint(make_tree())
+    """Baseline subfiles all have last_verified ~7 days before the injected
+    `now`; the default threshold is 30 days, so the new rule emits zero
+    findings on a fresh tree. (Also the baseline test_baseline_lints_clean
+    test would catch any regression here at exit-code 0; warnings would
+    still slip through.) Calibration anchor: baselines pass under defaults.
+    `now` is injected rather than wall-clock so the baseline's baked
+    last_verified dates stay "fresh" forever — with real today() this test
+    became a time-bomb 30 days after the dates were written."""
+    now = _dt(2026, 5, 29)  # 7-8 days after last_verified=2026-05-21/22
+    res = _lint_with_config(make_tree(), now=now)
     findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"]
     assert findings == [], (
         "prototyped-without-pointer must not fire on fresh baselines:\n"
