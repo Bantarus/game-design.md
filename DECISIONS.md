@@ -53,6 +53,24 @@ Migration: the four examples are migrated; the deckbuilder demonstrates all thre
 
 ---
 
+## D-004 — Strict YAML loader is shared across all CLI verbs
+
+- **Status:** locked.
+- **Decided:** 2026-05-21.
+- **Implementation:** `src/game_design_md/loader.py`.
+
+`lint`, `diff`, `export`, and `verify` all use the same `GdmdLoader` (subclass of `yaml.SafeLoader`) which strips YAML 1.1's implicit boolean-alias and timestamp resolvers and re-adds only the YAML 1.2 boolean tag (`true|false`). Effect:
+
+- `last_verified: 2026-05-21` parses as the ISO string `"2026-05-21"`, matching the schema's `ISODate` pattern.
+- `event: on` parses as the string `"on"`, not `True`.
+- `disabled: yes` parses as the string `"yes"`, not `True`.
+
+This makes `event:` (D-001) belt-and-suspenders instead of load-bearing: even if a future author writes `on:`, the loader keeps it as a string. We still recommend `event:` for clarity, and the schema still rejects `on:` to keep authors honest.
+
+**No ratchet needed.** This is the long-term loader.
+
+---
+
 ## D-005 — Events promoted to first-class tokens at v0.2.0-alpha
 
 - **Status:** shipped at v0.2.0-alpha. `undefined-event` sub-finding is **warning** through v0.2; **ratchets to error in v0.3**.
@@ -80,24 +98,6 @@ The deeper cross-check the v0.1.1 deferral worried about — "every event a stat
 - **Smoke test:** `tests/test_packaging.py::test_wheel_install_bundles_spec_and_schema` builds a wheel, installs it in a fresh venv, runs `gdmd spec` and `gdmd export ... --format schema` from a directory outside the source tree (so the dev-tree fallback cannot match), and asserts both produce content matching the canonical files. Skipped if `build` isn't installed.
 
 **No further ratchet planned.** This is the long-term packaging story.
-
----
-
-## D-004 — Strict YAML loader is shared across all CLI verbs
-
-- **Status:** locked.
-- **Decided:** 2026-05-21.
-- **Implementation:** `src/game_design_md/loader.py`.
-
-`lint`, `diff`, `export`, and `verify` all use the same `GdmdLoader` (subclass of `yaml.SafeLoader`) which strips YAML 1.1's implicit boolean-alias and timestamp resolvers and re-adds only the YAML 1.2 boolean tag (`true|false`). Effect:
-
-- `last_verified: 2026-05-21` parses as the ISO string `"2026-05-21"`, matching the schema's `ISODate` pattern.
-- `event: on` parses as the string `"on"`, not `True`.
-- `disabled: yes` parses as the string `"yes"`, not `True`.
-
-This makes `event:` (D-001) belt-and-suspenders instead of load-bearing: even if a future author writes `on:`, the loader keeps it as a string. We still recommend `event:` for clarity, and the schema still rejects `on:` to keep authors honest.
-
-**No ratchet needed.** This is the long-term loader.
 
 ---
 

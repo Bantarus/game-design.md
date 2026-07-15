@@ -19,13 +19,13 @@ This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`sch
 
 - **YAML frontmatter is normative.** Token values are the truth you compile against.
 - **Markdown prose is rationale.** It explains *why* and is your fallback when no token covers a case — extrapolate from intent, do not invent.
-- **Resolve `{namespace.id}` references by namespace.** Example: `{loop.combat_turn}` lives in `gdd/loops.md` frontmatter; `{resources.energy}` in `gdd/mechanics.md`; `{distributions.card_draw}` in `gdd/systems/distributions.md`.
+- **Resolve `{namespace.id}` references by namespace.** Example: `{loops.combat_turn}` lives in `gdd/loops.md` frontmatter; `{resources.energy}` in `gdd/mechanics.md`; `{distributions.card_draw}` in `gdd/systems/distributions.md`.
 - **Content-heavy types are external.** A `data_source:` field points to a directory of `*.yaml` files (e.g. `content/cards/`). Read individual entity files on demand; never assume the `gdd/content/*.md` subfile contains the full set.
 
 ## Hard rules (never violate)
 
 1. **Engine-neutral.** Never assume Unity / Godot / Unreal / Bevy / Tauri / Flutter or any engine. Platforms are abstract (`desktop`, `handheld`, ...).
-2. **Genre-neutral core.** Never add genre-specific tokens to `docs/spec.md` or `schema/`. Genre-specific concepts belong in an example's own subfiles as prose conventions. The universal surface (entities, verbs, resources, states, rules, loops, distributions + feel, balance_targets) is the whole value proposition — guard it.
+2. **Genre-neutral core.** Never add genre-specific tokens to `docs/spec.md` or `schema/`. Genre-specific concepts belong in an example's own subfiles as prose conventions. The universal surface (entities, verbs, resources, states, events, rules, loops, clocks, distributions + feel, balance_targets, invariants) is the whole value proposition — guard it.
 3. **Tokens normative, prose rationale.** Do not encode authoritative numbers in prose, and do not encode rationale in tokens.
 4. **Short core file.** The root `game-design.md` stays under ~200 lines. Push detail into subfiles.
 
@@ -91,7 +91,7 @@ When you modify a design or its implementation:
 
 **The pre-commit hook (Task 4 v0.3) automates the commit-side of this ritual.** Run `gdmd hook install <tree>` once per repo to register a `local` hook in `.pre-commit-config.yaml`. On every commit, `gdmd hook check` surfaces any spec sections whose `implemented_in:` / `implementation_pointers:` reference your staged files, with a copy-paste `gdmd touch <sections>` suggestion. The hook is informational (always exits 0); the agent or developer judges whether the change altered design intent and either runs `gdmd touch` or proceeds. See spec §9.7.
 
-Only `pillars`, `non_goals`, and `player_experience_goals` are stable for the life of a project. Everything else may drift — but must be re-validated when it does.
+Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are stable for the life of a project (spec §5.1 / §8.2). Everything else may drift — but must be re-validated when it does.
 
 ## Building & testing the CLI
 
@@ -100,6 +100,7 @@ Only `pillars`, `non_goals`, and `player_experience_goals` are stable for the li
 - Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`.
 - `lint` must emit structured JSON (`{ findings: [...], summary: {...} }`) so an agent can self-correct.
 - Before committing CLI changes, run `gdmd lint examples/deckbuilder` and confirm it passes clean.
+- Before committing changes to README.md, AGENTS.md, docs/spec.md, or the CLI verb set, run `python scripts/docs_lint.py` — it drift-lints the docs themselves (version agreement, §9 verb list vs the click registry, the four-field stability guarantee, namespace validity of taught refs). CI runs it on every push.
 
 ## Universal practice (across all three modes)
 
