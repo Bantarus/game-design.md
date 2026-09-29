@@ -1,0 +1,29 @@
+# Dogfood task registry (D-023). Excluded from every subject copy, like the
+# rest of benchmark/dogfood/. `prompt` files are given to the subject verbatim.
+#
+# fields:
+#   mode           AGENTS.md operating mode the task exercises
+#   tree           the design tree the task works on (preflight-linted 0/0)
+#   fixture_patch  optional git-format-patch applied (as a teammate commit)
+#                  after the pristine copy is committed and before the base tag
+tasks:
+  authoring_new_card:
+    mode: authoring
+    tree: examples/deckbuilder
+    fixture_patch: null
+  lookup_refs:
+    mode: lookup
+    tree: examples/deckbuilder
+    fixture_patch: null
+  operating_energy_budget:
+    mode: operating
+    tree: examples/deckbuilder
+    fixture_patch: null
+  maintenance_drift:
+    mode: maintenance
+    tree: examples/tick-combat
+    fixture_patch: maintenance_drift.fixture.patch
+  negative_control_no_drift:
+    mode: negative_control
+    tree: examples/tick-combat
+    fixture_patch: negative_control_no_drift.fixture.patch

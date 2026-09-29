@@ -1,0 +1,24 @@
+From 7a43ce8edd829d9c3a9ada8d466887371d53858d Mon Sep 17 00:00:00 2001
+From: Sam Teammate <sam@example.invalid>
+Date: Wed, 30 Sep 2026 01:27:16 +0200
+Subject: [PATCH] xtreme tests: note how to run the golden trajectory test
+
+---
+ examples/tick-combat/impl/xtreme/tests/golden_trajectory.rs | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/examples/tick-combat/impl/xtreme/tests/golden_trajectory.rs b/examples/tick-combat/impl/xtreme/tests/golden_trajectory.rs
+index d7dae85..83c6515 100644
+--- a/examples/tick-combat/impl/xtreme/tests/golden_trajectory.rs
++++ b/examples/tick-combat/impl/xtreme/tests/golden_trajectory.rs
+@@ -1,5 +1,7 @@
+ //! Golden trajectory test — the Phase-3 in-engine determinism floor.
+ //!
++//! Run it with `cargo test --test golden_trajectory`.
++//!
+ //! Locks the seed-12345 demo encounter's per-tick trajectory as a canonical
+ //! JSONL fixture per spec §9.5.5. Each tick is one JSON object on one line;
+ //! keys are sorted alphabetically; values are integers; enum strings are
+-- 
+2.43.0
+
