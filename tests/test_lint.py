@@ -471,8 +471,11 @@ def test_prototyped_without_pointer_silent_on_fresh_baseline(make_tree):
     default threshold is 30 days, so the new rule emits zero findings on a
     fresh tree. (Also the baseline test_baseline_lints_clean test would
     catch any regression here at exit-code 0; warnings would still slip
-    through.) Calibration anchor: baselines pass under defaults."""
-    res = _lint(make_tree())
+    through.) Calibration anchor: baselines pass under defaults.
+
+    `now` is injected (7 days after the baseline's last_verified=2026-05-21)
+    so the "fresh" premise doesn't decay with the wall clock."""
+    res = _lint_with_config(make_tree(), now=_dt(2026, 5, 28))
     findings = [f for f in res.findings if f.rule == "prototyped-without-pointer"]
     assert findings == [], (
         "prototyped-without-pointer must not fire on fresh baselines:\n"
