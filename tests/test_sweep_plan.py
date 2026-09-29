@@ -1,4 +1,4 @@
-"""Tests for benchmark.harness.sweep_plan.
+"""Tests for benchmark.archived.phase5_qwen.harness.sweep_plan.
 
 The planner enforces the pairing-integrity discipline for the help-
 benchmark sweep. These tests verify the discipline is structurally
@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import pytest
 
-from benchmark.harness.sweep_plan import (
+from benchmark.archived.phase5_qwen.harness.sweep_plan import (
     INSTANCE_SEED_BASE_BY_SUBJECT,
     TrialCell,
     plan_sweep,
@@ -51,7 +51,7 @@ def test_total_cells_per_subject(qwen_plan):
       easy C:       1 task type × 2 games × 5 N × 1 condition    =  10
                                                             total = 330
 
-    v12-D: Claude arm deferred (archived under benchmark/harness/archived/);
+    v12-D: Claude arm deferred (archived under benchmark/archived/phase5_qwen/harness/archived/);
     single-subject (Qwen) total is 330 by construction.
     """
     assert len(qwen_plan) == 330
@@ -261,7 +261,7 @@ def test_unknown_subject_raises():
 
 def test_cli_emits_jsonl(tmp_path, capsys):
     """The CLI emits one JSON object per line, in execution order."""
-    from benchmark.harness.sweep_plan import main as cli_main
+    from benchmark.archived.phase5_qwen.harness.sweep_plan import main as cli_main
     rc = cli_main(["--subject", "qwen", "--shuffle-seed", "0"])
     assert rc == 0
     captured = capsys.readouterr()

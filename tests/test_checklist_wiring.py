@@ -7,11 +7,11 @@ v14-D — these tests prevent a silent regression to the stub.
 """
 from __future__ import annotations
 
-from benchmark.harness.checklist import (
+from benchmark.archived.phase5_qwen.harness.checklist import (
     ChecklistGrader,
     CriterionVerdict,
 )
-from benchmark.harness.judge import (
+from benchmark.archived.phase5_qwen.harness.judge import (
     ConditionPrediction,
     FairnessScore,
     IntentScore,
@@ -19,7 +19,7 @@ from benchmark.harness.judge import (
     JudgeBundle,
     MockJudge,
 )
-from benchmark.harness.tasks import ChecklistCriterion, Task
+from benchmark.archived.phase5_qwen.harness.tasks import ChecklistCriterion, Task
 
 
 class _RecordingJudge(Judge):
