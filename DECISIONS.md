@@ -516,6 +516,55 @@ A deterministic token-accounting analysis was offered and declined. It would hav
 
 ---
 
+## D-023 — Dogfood harness replaces the Qwen help-benchmark as the routine evidence surface; the Qwen harness is archived
+
+- **Status:** locked (2026-09-30).
+- **Decided:** 2026-09-30, v0.4 Annex A.0, written before any dogfood harness code existed.
+- **Spec:** §11.3 (new).
+- **Implementation:**
+  - Qwen harness moved to `benchmark/archived/phase5_qwen/`; provenance in `benchmark/archived/README.md`.
+  - Dogfood harness at `benchmark/dogfood/` (subsequent commits).
+
+**Why the protocol changes.**
+
+1. **Cost and repeatability.**
+   - *Phase 5 protocol:* a local 30B subject server, a separate judge model, a sanitizer with its own calibration chain, 330 trials, and a 16-version pre-registration supersession chain. A single cell could not be re-run cheaply.
+   - *Dogfood:* 4–6 fixed tasks with deterministic checkers (no LLM judge), a small number of repeats per cell, and a CLI (`--task`, `--arm`, `--repeats`) to re-run one cell. It never runs in CI.
+2. **The right trace shape for the open question.** D-022 moved the consultation question ("where do an agent's tokens go?") off F-009 because single-shot records cannot answer it. Headless Claude Code sessions produce session JSONL with every tool call, which VCC compiles natively into full / adaptive / transposed views. No adapter is needed.
+3. **It exercises the operating reality.** The subject works on this repo's trees through the tool loop a real agent uses (reads, greps, `gdmd` commands) instead of receiving a harness-built payload.
+
+**Subject.**
+- `claude-sonnet-5-5` (Claude Sonnet 5.5), run headless (`claude -p`), is the subject under test only. Orchestration, checking and analysis subagents use Opus.
+- The session that wrote this entry could not see the model id; the user confirmed that it exists. Per the recency-facts discipline, the id is still gated: the pilot's first real call is a one-call model-id probe that stops on failure.
+
+**What dogfood does NOT claim.**
+- **Not comparable to F-009.** The model (Sonnet 5.5 vs Qwen3-Coder-30B-A3B), harness (agentic tool loop vs single chat completion), tasks (in-repo authoring/lookup/operating/maintenance vs fresh-game implementation) and primary metrics all differ. No dogfood number is to be placed beside an F-009 number as a comparison, and no dogfood run is an "F-009 re-run".
+- **F-009 stays on record as reported,** not reinterpreted. D-022 corrects only the v0.4 kickoff's downstream reading of it.
+- **Its limits are named in every report:**
+  - small n (the default is 3 repeats per cell);
+  - a single model;
+  - tasks designed by the format's author on the format's own trees.
+- **Not longitudinal.** It does not test the longitudinal living-doc property, which stays queued (§11.2).
+
+**What happens to the Qwen harness: archived, not deleted** (the archive-not-delete discipline).
+- **Move:** `benchmark/{harness,tools,tasks,c-prompts,README.md}` moved byte-preserving to `benchmark/archived/phase5_qwen/`.
+- **SHAs verified:** the pinned sanitizer (`e85c123f227d225a…`) and flattener (`54ef5ba3…`) hash identically at the new paths and at trial zero (`37c004d`).
+- **Pre-registration left unedited:** `docs/v0.2-phase5-pre-registration.md` is locked, so its path citations stay as-is. The archive README maps old paths to new ones. `docs/v0.2-findings.md` received path-only link fixes.
+- **Not runnable in place; fails loudly:** the drivers fail at import and `conditions.build_a` raises "Game tree not found". Faithful re-execution needs a `37c004d` checkout, with the original layout and original game trees.
+- **Never re-run Qwen** (Annex A).
+- **Tests keep running:** the three pure-logic test modules (sweep planning, checklist wiring, instrument/judge wiring with mocks) still run from the new import path, to guard against import rot. They make no model calls.
+- **Games stay:** `benchmark/games/{platformer,survival}` are live lint trees and `gdmd init` starter sources.
+
+**Methodology carried over from Phase 5** (made concrete in D-024 and D-025):
+- A **locked rule** is written before the first real run. It states primaries per comparison, verdict mapping (PASS / NULL / FAIL) and stopping and reporting rules, and results are reported by the rule. No post-hoc metric switching.
+- **Pilot first.** One baseline-arm run per task validates checkers, isolation and metric extraction, and estimates the full-matrix cost. Pilot results are not evidence and are never reported as such; there is a stop for approval before the full matrix.
+- **Checkers are deterministic.** Each has a test showing it fails on a known-bad fixture. The lookup-task oracle is a frozen, hand-verified fixture, not computed at check time by code the views arm is built on.
+- **Arms are isolated and identical except for the arm file.** Each run gets a fresh isolated copy, with the same `CLAUDE.md`, fixture and task text across arms. The spec import is held constant in the views-vs-baseline comparison.
+
+**Counterfactual-adoption test.** Would the Qwen protocol be retired if F-009 had PASSED? **Yes.** The switch is driven by the question and not by the result: consultation cost cannot be observed in tool-less single completions whatever they score, and the cost and repeatability problem is independent of F-009's verdict. The switch leaves F-009's verdict and numbers untouched.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.

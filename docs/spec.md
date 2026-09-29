@@ -1456,6 +1456,21 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 
 **The deployment-surface reframe is gate correction, not gate loosening** (D-021). The kickoff's "at least one live project" validation bar was set against the factual premise that named live projects had spec trees the v0.3 vocabulary would be deployed into; that premise was incorrect. Restating the bar under the corrected premise is the same discipline as a constraint-driven scope reduction firing AS DESIGNED — different from a result-driven gate widening (which would face the counterfactual-adoption test). The in-repo surface carries the three validation claims above; the longitudinal claim is queued, not silently dropped. See `DECISIONS.md` D-021 for the full lineage.
 
+### 11.3 Routine evidence surface (v0.4+)
+
+From v0.4, the routine evidence surface for claims about how agents *work with* a tree is the **dogfood harness** (`benchmark/dogfood/`, `DECISIONS.md` D-023). Such claims include consultation cost, lookup accuracy, and session-level maintenance (claim 3 of §11.2). The harness runs:
+- headless coding-agent sessions on this repository's own trees;
+- a small fixed task set covering the three agent modes (authoring, operating, maintenance) plus a negative control;
+- deterministic checkers, with no LLM judge;
+- a locked rule, pre-registered before the first real run.
+
+Rules for claims:
+
+1. **No unmeasured claims.** No statement that a tool or format change reduces session cost or improves success appears in this spec, the README or release notes unless a dogfood locked rule has produced it. Results are reported by the rule, including NULL and FAIL.
+2. **Not comparable to F-009.** F-009 (v0.2 Phase 5) used a different model, harness, task set and metric. F-009 stands as recorded; its records do not speak to consultation cost (D-022).
+3. **Stated limits.** Dogfood is small-n and single-model, and its tasks are authored by the format's own authors on the format's own trees. Every dogfood report states these limits.
+4. **Longitudinal stays queued.** Dogfood does not test the longitudinal living-doc property; that claim (§11.2) awaits live adoption.
+
 ---
 
 ## Appendix A — Worked Examples

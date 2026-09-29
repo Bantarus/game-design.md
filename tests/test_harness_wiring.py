@@ -18,7 +18,7 @@ import pytest
 # _extract_json_object — tolerant JSON parser
 # ---------------------------------------------------------------------------
 
-from benchmark.harness.judge import _extract_json_object
+from benchmark.archived.phase5_qwen.harness.judge import _extract_json_object
 
 
 def test_extract_clean_json():
@@ -66,8 +66,8 @@ def test_extract_raises_when_no_json():
 # LlamaServer lifecycle (mocked subprocess + httpx)
 # ---------------------------------------------------------------------------
 
-from benchmark.harness import llama_server as ls_mod
-from benchmark.harness.llama_server import LlamaServer, ChatResponse
+from benchmark.archived.phase5_qwen.harness import llama_server as ls_mod
+from benchmark.archived.phase5_qwen.harness.llama_server import LlamaServer, ChatResponse
 
 
 @dataclass
@@ -257,7 +257,7 @@ def test_llama_server_health_timeout(fake_gguf, fake_binary):
 # QwenInstrument wiring (uses an injected LlamaServer mock)
 # ---------------------------------------------------------------------------
 
-from benchmark.harness.instrument import QwenInstrument, QWEN_HEADLINE_BUNDLE
+from benchmark.archived.phase5_qwen.harness.instrument import QwenInstrument, QWEN_HEADLINE_BUNDLE
 
 
 def test_qwen_instrument_uses_injected_server():
@@ -330,7 +330,7 @@ def test_qwen_instrument_requires_gguf_path():
 # GemmaJudge wiring (uses an injected LlamaServer mock)
 # ---------------------------------------------------------------------------
 
-from benchmark.harness.judge import GemmaJudge, GEMMA_JUDGE_BUNDLE
+from benchmark.archived.phase5_qwen.harness.judge import GemmaJudge, GEMMA_JUDGE_BUNDLE
 
 
 def _fake_chat_response(text: str) -> ChatResponse:
