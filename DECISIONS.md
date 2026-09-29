@@ -458,3 +458,58 @@ D-020's reference to specific deployment-sweep project names is now read as a pl
 - [[premise-correction-reframe-is-gate-correction]] (memory, this session): the discipline named.
 
 **No vocabulary changes at v0.3.** D-021 is a scoping decision that records the validation-surface reframe; it adds no schema, no lint rule, no spec syntax. The associated spec-text change (§11.2) is documentation of what v0.3 ships under, not a vocabulary extension. A future v0.4+ validation surface will be governed by what the first live adopter actually surfaces.
+
+---
+
+## D-022 — F-009 is not analyzable for consultation cost; the v0.4 kickoff's reading of F-009 is corrected
+
+- **Status:** locked (2026-09-30).
+- **Decided:** 2026-09-30, at v0.4 Checkpoint 1 (WS1 of the v0.4 kickoff).
+- **Spec:** no change. **Code:** no change.
+- **Evidence:** harness source at trial-zero commit `37c004d`: `benchmark/harness/instrument.py` (`QwenInstrument.complete`), `benchmark/harness/conditions.py` (`build_a` / `build_b`), and the pre-registration's §"Cost metric". It is **not** based on trace values; see "Provenance" below.
+
+The v0.4 kickoff motivated a consultation-layer fix (`gdmd view`) with the reading "agents open whole files, and F-009 measured roughly +37% tokens per session against flattened prose". WS1 was to find where the +37% went, testing four hypotheses:
+- full `gdmd spec` injection;
+- whole-file reads;
+- re-reads;
+- reads of task-irrelevant files.
+
+The method was to compile F-009's traces into VCC views.
+
+**What the F-009 apparatus actually was.** Each fact below comes from the harness code at `37c004d`:
+
+1. **Single-turn chat completion, no tools.** `QwenInstrument.complete()` sends one system and one user message to `llama-server` and sets `tool_steps=0` by construction ("llama.cpp serves chat-completions; no tool round-trips"). The subject never read a file: there were no reads, no re-reads, and no consultation choices.
+2. **Fixed whole-tree payload.** The payloads were:
+   - **Condition A:** `AGENTS.md` + `CLAUDE.md` + every file of the game tree, concatenated with file markers, regardless of task.
+   - **Condition B:** the flattener's prose over the game tree only.
+
+   `docs/spec.md` was never in any payload. `CLAUDE.md`'s `@docs/spec.md` line reached the subject as literal text, because `@`-import expansion is a Claude Code feature and the harness does not perform it.
+3. **Prompt text is not stored.** Gather records hold `subject_output`, `tokens_input`, `tokens_output`, `payload_sha256` and pairing ids, but not the prompt.
+4. **Cost-lift is total tokens.** It is `mean(tokens_in + tokens_out | A) / mean(… | B) − 1`.
+
+**Consequences.**
+
+- F-009's 37.1% cost-lift is payload size plus response length under a fixed, harness-built payload. It is **not** a measurement of consultation behavior.
+- Of the four kickoff hypotheses:
+  - spec injection is zero by construction;
+  - whole-file reads and re-reads cannot occur without tools;
+  - "task-irrelevant files" has only a structural analog. The harness shipped the whole tree for every task, which is a property of payload construction, not of an agent's choices.
+- VCC cannot help. Upstream VCC compiles Claude Code JSONL; a one-prompt, one-response record has no block structure to project; and the prompt isn't stored.
+
+**Decision-of-record (user, Checkpoint 1).** F-009 is recorded as **not analyzable under current tooling** for consultation questions. There is no pre-registration, no trace analysis, no VCC adapter, and no re-run; D-023 retires the Qwen protocol and forbids re-running it.
+
+A deterministic token-accounting analysis was offered and declined. It would have rebuilt the payloads from git at `37c004d`, verified them against `payload_sha256`, and attributed A−B tokens to segments. It needs no model inference and remains available if a future question needs it.
+
+**What this does NOT change.** F-009's finding, numbers, caveats and D-021 reframe stand exactly as recorded in [`docs/case-studies/F-009.md`](docs/case-studies/F-009.md) and [`docs/v0.2-findings.md`](docs/v0.2-findings.md). This entry corrects a *downstream reading* of F-009 (the v0.4 kickoff's). It does not reinterpret F-009.
+
+**Consequences for v0.4.**
+- F-009 neither motivates nor evaluates `gdmd view`. The consultation question ("where do an agent's tokens go when it works on a tree?") is carried forward to the dogfood harness (D-023), which produces agentic Claude Code traces VCC compiles natively.
+- Any claim that views reduce session cost needs a new pre-registered rule on that harness (D-025) before it is stated anywhere.
+- The WS4 trigger depended on WS1 and can no longer be satisfied as written. It is corrected separately in D-024.
+
+**Premise-correction diagnostic** (D-021 family):
+- **Premise-genuine:** yes. The facts are checkable in the harness source at the trial-zero commit.
+- **Re-scoping-honest:** yes. The original question is re-homed on an apparatus that can answer it, not dropped.
+- **Audit lineage preserved:** this entry plus [`docs/case-studies/F-009-trace-analysis.md`](docs/case-studies/F-009-trace-analysis.md).
+
+**Provenance.** The correction was made before any dogfood evidence existed, and without computing anything on F-009 trace values. During orientation only field names and string lengths of one gather record were inspected. The two aggregates cited in the note, the 37.1% cost-lift and the 1.88× output ratio, were already published in the F-009 case study.

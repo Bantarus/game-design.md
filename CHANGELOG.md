@@ -8,6 +8,10 @@ All notable changes to `game-design.md` are recorded here. Format follows [Keep 
 
 v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/release-notes/v0.3.md](docs/release-notes/v0.3.md) "Queued for v0.4+"). v0.4 work in progress is tooling and evidence, not format.
 
+### Added
+
+- **D-022 + [`docs/case-studies/F-009-trace-analysis.md`](docs/case-studies/F-009-trace-analysis.md):** F-009 is recorded as not analyzable for consultation cost. It was single-turn and tool-less, stored no prompt text, and never had the spec in its payload. The v0.4 kickoff's reading of the 37.1% cost-lift as "agents opening whole files" is corrected; F-009 itself is unchanged.
+
 ### Fixed
 
 - `tests/test_lint.py::test_prototyped_without_pointer_silent_on_fresh_baseline` injected no `now` and read the wall clock against a fixture dated 2026-05-21, so it began failing once that date was more than 30 days old. It now injects `now` like its sibling anti-staleness tests. Test-only; no rule change.
