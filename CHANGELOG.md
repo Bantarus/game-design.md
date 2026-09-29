@@ -17,6 +17,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
 - **D-022 + [`docs/case-studies/F-009-trace-analysis.md`](docs/case-studies/F-009-trace-analysis.md):** F-009 is recorded as not analyzable for consultation cost. It was single-turn and tool-less, stored no prompt text, and never had the spec in its payload. The v0.4 kickoff's reading of the 37.1% cost-lift as "agents opening whole files" is corrected; F-009 itself is unchanged.
 - **D-023 + spec §11.3:** the dogfood harness (`benchmark/dogfood/`: headless coding-agent sessions on in-repo trees, deterministic checkers, a pre-registered locked rule) becomes the routine evidence surface. §11.3 forbids unmeasured cost or success claims, and states that dogfood results are not comparable to F-009.
+- **D-024:** the WS4 compact-agent-card gate is corrected. Its original trigger (F-009 spec injection) was unsatisfiable; the gate now separates an ungated build (`gdmd spec --card` / `--section`, generated from the spec's structure) from an evidence-gated adoption (a dogfood ablation swapping only the `spec.md` import; primary = per-turn context occupancy). The precondition threshold (≥ 20% of median per-turn occupancy) is locked before any pilot.
 - **`DECISIONS.md` Open items** (OI-001…OI-004): logged spec↔code drifts and a lint-rule vs schema mismatch, each to be resolved in its own D-entry.
 
 ### Changed

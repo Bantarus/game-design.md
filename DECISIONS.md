@@ -565,6 +565,48 @@ A deterministic token-accounting analysis was offered and declined. It would hav
 
 ---
 
+## D-024 — WS4 (compact agent card) gate: premise correction; build separated from adoption
+
+- **Status:** locked (2026-09-30). Written before any dogfood run exists.
+- **Decided:** 2026-09-30, v0.4 Checkpoint 1. The user's revised WS4 text, amended at plan approval.
+- **Spec:** none yet. `gdmd spec --card` / `--section` get spec text when they are built (§9.4).
+- **Related:** D-022 (why the original trigger is unsatisfiable), D-023 (dogfood protocol), D-025 (locked rules, including this ablation's numeric bounds).
+
+**Premise correction.**
+- The kickoff's WS4 trigger read "WS1 shows spec injection is a major cost driver". It cannot fire: F-009 never injected the spec (D-022).
+- The concern is real but lives elsewhere. This repo's `CLAUDE.md` `@`-imports `docs/spec.md` (~121 KB, roughly 30k tokens) into every Claude Code session, and so into every dogfood run.
+- The gate is re-pointed to dogfood evidence **before any dogfood evidence exists**. Premise-genuine (checkable in harness source and in `CLAUDE.md`), re-scoping-honest (the question is kept and moved to an apparatus that can see it), lineage preserved (this entry). It is not a loosening: no result exists to dodge.
+
+**1. Build (ungated, cheap).** Building is not the decision that needs evidence; adoption is.
+- `gdmd spec --card` emits a short agent-facing digest **generated from the spec's own structure**, never hand-written. It covers the namespace → owning-file table (§3), reference syntax (§3), the status lifecycle (§8.1), the maintenance ritual (§8.2 mechanism 4), and pointers to `gdmd view` and `gdmd graph` (WS2).
+- `gdmd spec --section <§id>` returns the full normative text of one numbered section on demand.
+- **Completeness test.** Every sentence in `docs/spec.md` carrying an uppercase RFC-2119 keyword (`MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, `SHALL NOT`) is either in the card or inside a section the card lists a `--section` pointer to.
+- **Stated limitation.** Lowercase normative "must" / "required" (common in the spec's tables) is not machine-identifiable, so the test does not cover it.
+- **Timing.** Built after WS2, because the card points at `view` / `graph`.
+
+**2. Precondition (a go/no-go pre-flight read on the pilot, not evidence).**
+- **Measurand:** the share of per-turn context occupancy attributable to the `spec.md` import, in the baseline-arm pilot traces.
+- **Threshold, locked here:** the share is ≥ **20%** of the median per-turn occupancy. Below that, record NULL and do not run the ablation.
+- **Per-turn context occupancy** = `input_tokens + cache_creation_input_tokens + cache_read_input_tokens` of one API call. A "turn" is one assistant `message.id`; records sharing an id are deduplicated.
+  - This refines the user's "input + cache_read". Without `cache_creation`, the first turn and every cache-miss turn undercount the prompt the model actually sees.
+  - The import mostly lands in the cached prefix, which is why occupancy (the context burden) and not dollars is the right primary here.
+- **Import size** comes from a **2-call differential probe that isolates `spec.md` alone**. Two isolated copies are identical except that one drops only the `@docs/spec.md` line from `CLAUDE.md`; the schema, `AGENTS.md` and deckbuilder-root imports stay in both. Each gets one trivial single-turn prompt, and import tokens = occupancy(with) − occupancy(without).
+  - The probe is needed because imported `CLAUDE.md` content is injected context and is not reliably present as text in session JSONL.
+- **Status of the read.** Annex A.5 says pilot results are not evidence. The precondition does not contradict that: it is a **pre-registered pre-flight read** deciding whether to spend on the ablation (the Phase 5 step 11b precedent). It is reported as a gating read, never as evidence for a claim.
+
+**3. Adoption gate (a dogfood ablation under a locked rule).**
+- **Cells:** `import-full` (status quo) vs `import-card`. The swap replaces **only** the `@docs/spec.md` line with an `@`-import of the generated card, and `--section` is available on demand. Schema, `AGENTS.md` and deckbuilder-root imports stay identical in both cells, so the ablation is not confounded. The swap happens inside each isolated copy, never in the repo.
+- **Task set:** the Annex A.2 set, including the negative-control task, on the **baseline tool arm only**. The ablation is not crossed with `view` (a factorial crossing only if the pilot budget allows it, decided at the pilot-cost checkpoint).
+- **Primary:** median per-turn context occupancy (definition above).
+- **Secondaries:** estimated USD cost, and the `--section` call rate (a high rate means the card is missing things).
+- **Non-inferiority:** the success rate may not drop by more than Y points overall, and there may be **no** drop on the maintenance and negative-control tasks, which are the tasks where a missing normative rule would show. X/Y and the verdict mapping are locked in D-025.
+- **PASS:** switch the repo's `CLAUDE.md` from `@docs/spec.md` to the card. **NULL or FAIL:** keep the full import and record the result.
+- **Starters:** `templates/starters/*` carry no `CLAUDE.md`, `AGENTS.md` or spec import today, so the adoption has nothing to switch there. Whether `gdmd init` should scaffold an agent file importing the card is a separate question that needs observed need; it is not part of this gate.
+
+**4. Amendment to Annex A.2 / A.4 (views vs baseline).** The views comparison holds the spec import constant, with the full import in both arms. Otherwise the view effect and the import effect are confounded. Its primary is consultation tokens (tool-result tokens/bytes), not occupancy; D-025 states the two primaries separately and neither definition carries over into the other lock.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
