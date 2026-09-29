@@ -645,3 +645,12 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Code does:** `SUBFILE_NAMESPACES` omits all of these, and the core file's frontmatter is not tokenized. A ref such as `{pillars.<id>}` would fire `broken-ref`.
 - **Impact today:** none. No in-repo tree references these namespaces.
 - **Constraint for v0.4:** views do not index them either (same single-definition constraint as OI-001). The resolution is either to index them or to trim the table. The observed-need discipline applies.
+
+## OI-005 — Lint does not validate content entities against their content-schema (spec §6.2, §11 item 4)
+
+- **Logged:** 2026-09-30 (v0.4, found while designing the dogfood authoring checker).
+- **Spec says:** §6.2: "The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`." §11 conformance item 4 repeats (a).
+- **Code does:** `linter.ALL_RULES` has no such rule. `jsonschema` is a declared runtime dependency (`pyproject.toml`) that nothing in `src/` imports. A card that violates its schema (a wrong `kind`, a missing `rarity`, a mismatched `id`) lints clean unless another rule happens to trip on it.
+- **Impact today:** none observed on the 12 in-repo trees. It does matter as a false sense of safety: "lint clean" is weaker than the spec claims.
+- **Consequence for v0.4:** the dogfood authoring checker validates new entities against the content-schema itself (jsonschema, id == stem, required keys) instead of trusting lint.
+- **Resolution:** a new lint rule. It changes lint behavior, so it needs its own D-entry and commit, with proof-of-fire on real trees (the AGENTS.md maintenance-mode rule). Scheduled after v0.4 Checkpoint 3, alongside OI-003.
