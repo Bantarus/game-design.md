@@ -513,3 +513,44 @@ A deterministic token-accounting analysis was offered and declined. It would hav
 - **Audit lineage preserved:** this entry plus [`docs/case-studies/F-009-trace-analysis.md`](docs/case-studies/F-009-trace-analysis.md).
 
 **Provenance.** The correction was made before any dogfood evidence existed, and without computing anything on F-009 trace values. During orientation only field names and string lengths of one gather record were inspected. The two aggregates cited in the note, the 37.1% cost-lift and the 1.88× output ratio, were already published in the F-009 case study.
+
+---
+
+# Open items
+
+Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
+
+## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
+
+- **Logged:** 2026-09-30 (v0.4 WS0).
+- **Spec says** (§3 "References into `content/*/*.yaml`"): `{entities.<kind>.<id>}` resolves through the `data_source:` of the matching content-schema file.
+- **Code does:** `Tree.load` registers each content-entity file under `p.parent.name` (`src/game_design_md/tree.py`), and `_index_tokens` keys it `entities.<parent-dir>.<id>`. Neither `data_source` nor `data_dir` is consulted.
+- **The spec names the field inconsistently:** `data_source` (§3, §4.1, §6 prose, Appendix B) vs `data_dir` (§2.3 table, §6.1 example, the schema's `ContentSchemaFile`, and every in-repo tree).
+- **Impact today:** none. In all 12 trees each `data_dir` basename equals the directory name.
+- **Constraint for v0.4:** `gdmd view` / `gdmd graph` reuse `Tree` resolution exactly, so the backlink oracle stays one definition. The fix is a separate commit (either the spec text or the code), not part of WS2.
+
+## OI-002 — `implemented_in` globs: the spec says workspace-relative, the code resolves them against the tree root
+
+- **Logged:** 2026-09-30 (v0.4 WS0).
+- **Spec says:** "workspace-relative path globs" (§2.3, schema `$defs.ImplementedIn`).
+- **Code does:** `rule_broken_implementation_pointer`, `rule_stale_section` and `hook_cmd.build_inverted_index` all expand with `tree.root.glob(pattern)`. They agree with each other, not with the spec. The in-repo trees depend on tree-root semantics, e.g. tick-combat points at `impl/xtreme/...` inside its tree.
+- **Constraint for v0.4:** same as OI-001. WS3's `hook check --show-tokens` inherits the current semantics unchanged.
+
+## OI-003 — `prototyped-without-pointer` fires on `balance_targets`, whose schema forbids `implemented_in`
+
+- **Logged:** 2026-09-30 (v0.4 WS0), found while fixing the time-dependent test (commit `f43d357`).
+- **Symptom:**
+  - The rule iterates every `SUBFILE_NAMESPACES` block and flags active-status tokens with no `implemented_in` on stale files.
+  - `$defs.BalanceTarget` has `additionalProperties: false` and no `implemented_in`.
+  - So a `balanced` target on a stale file can only be silenced by `gdmd touch`; the §9.1 remedy of a placeholder `implemented_in` is schema-illegal.
+  - `invariants` are unaffected: they have no `status`.
+- **Impact today:** none in the 12 trees, whose balance targets are all `draft`. It will fire once a tree's targets advance.
+- **Proposed fix:** exempt namespaces whose schema forbids `implemented_in` (today, `balance_targets`), plus a test. It changes lint-rule behavior, so it needs its own D-entry. It is scheduled after v0.4 Checkpoint 3.
+
+## OI-004 — Namespaces in the §3 ownership table that `Tree` does not index
+
+- **Logged:** 2026-09-30 (v0.4 WS0).
+- **Spec says:** §3's namespace table lists `pillars` and `player_experience_goals` as namespaces (owned by the root / `gdd/pillars.md`), plus `verify_targets` / `adapters`. The §4.1 example uses `schema_ref: "{content_schema.cards}"`.
+- **Code does:** `SUBFILE_NAMESPACES` omits all of these, and the core file's frontmatter is not tokenized. A ref such as `{pillars.<id>}` would fire `broken-ref`.
+- **Impact today:** none. No in-repo tree references these namespaces.
+- **Constraint for v0.4:** views do not index them either (same single-definition constraint as OI-001). The resolution is either to index them or to trim the table. The observed-need discipline applies.
