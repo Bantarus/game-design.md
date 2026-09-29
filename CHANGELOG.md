@@ -13,6 +13,10 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 - **`scripts/docs_lint.py`** — docs-consistency lint that drift-lints the project's own documentation: pyproject/README/spec version agreement, spec §9 + README CLI verb lists vs the registered click commands, the four-field stability guarantee in both AGENTS.md and the spec, and namespace validity of every `{ns.…}` reference AGENTS.md teaches. Each check exists because the corresponding drift actually happened once.
 - **GitHub Actions CI** (`.github/workflows/ci.yml`) — pytest + `gdmd lint` over all six in-repo trees + `scripts/docs_lint.py` on push/PR, Python 3.10 and 3.12. CI badge added to the README.
 
+### Added
+
+- **D-022 + [`docs/case-studies/F-009-trace-analysis.md`](docs/case-studies/F-009-trace-analysis.md):** F-009 is recorded as not analyzable for consultation cost. It was single-turn and tool-less, stored no prompt text, and never had the spec in its payload. The v0.4 kickoff's reading of the 37.1% cost-lift as "agents opening whole files" is corrected; F-009 itself is unchanged.
+
 ### Fixed
 
 - **AGENTS.md drift from the spec** (external review): stability guarantee restated as the spec's four fields (`core_loop_ref` was missing — an agent taught the three-field version would mutate it without a major bump); `{loop.combat_turn}` corrected to `{loops.combat_turn}` (the taught example would not resolve under our own linter); Hard Rule 2's universal-surface list updated to include `events`, `clocks`, `invariants`.
