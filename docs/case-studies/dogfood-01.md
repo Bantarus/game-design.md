@@ -17,7 +17,16 @@
 
 `0 < R < 30%` with no FAIL condition is **NULL** in the verdict table. The verdict was computed by `benchmark/dogfood/analyze.py rule-v`, which was committed and tested before any matrix data (amendment 5).
 
-**What NULL means here.** The pre-registered rule does not support the claim that the v0.4 world with the views arm reduces consultation cost by the 30% the rule required. It does not show an increase either. Under §11.3, no cost claim for `gdmd view` / `gdmd graph` enters the spec, the README or release notes from this result. The per-task numbers below are descriptive and gate nothing.
+**What NULL means here: inconclusive, not evidence of no effect.**
+- The pre-registered rule does not support the claim that the v0.4 world with the views arm reduces consultation cost by the 30% it required. It does not show an increase either.
+- With 3 repeats per cell and per-task `r_t` spanning −63% to +55%, this study cannot distinguish no effect from an effect smaller than 30%, or from one hidden by run-to-run variance. NULL is the absence of a supported claim in either direction.
+- Under §11.3, no cost claim for `gdmd view` / `gdmd graph` enters the spec, the README or release notes from this result. The per-task numbers below are descriptive and gate nothing.
+
+**What was tested: availability plus neutral documentation.**
+- The views arm had the commands available, described neutrally in the pinned arm text and in AGENTS.md's command list, with no guidance on when to use them.
+- Subjects used them sparingly (see Adoption below). So the result is about making views available, not about directing agents to use them.
+
+**A confound Rule V cannot separate.** The v0.4 world's `spec.md` import is 5,837 tokens larger (the import probe). Every turn carries it, so per-turn occupancy and USD differ between the arms for a reason unrelated to consultation. The primary (consultation bytes) excludes it by construction. The occupancy and USD secondaries do not, and this study cannot split the two. Rule C measures the import directly.
 
 ### What was compared
 
@@ -66,6 +75,26 @@ Three tasks moved one way and two the other; none gates anything individually.
   - Two runs made no view or graph call, both on `negative_control_no_drift`.
   - No run called `gdmd graph`.
 - **Baseline arm:** 0 attempts to call `view` or `graph`. The README's verb list names them in both arms (amendment 4); no baseline subject tried them.
+
+### Adoption (descriptive)
+
+Tool use per arm, summed over the 15 runs. A call is counted under a category when it contains that command, so one Bash call can count under several.
+
+| | `baseline` | `views` |
+| --- | ---: | ---: |
+| `gdmd view` / `gdmd graph` calls | 0 | 18 |
+| Runs with at least one `view` / `graph` call | 0 of 15 | 13 of 15 |
+| Bash calls containing `cat` | 12 | 14 |
+| Bash calls containing `grep` (the shell's) | 21 | 15 |
+| `Read` tool calls | 14 | 2 |
+| `Grep` tool calls | 9 | 2 |
+| Bash file-read calls (amendment 3 definition) | 30 | 26 |
+| Distinct files read, summed over runs | 68 | 41 |
+| All tool calls | 98 | 93 |
+
+- Views did not replace plain reads. The views arm still issued 26 Bash file reads and 14 `cat` calls.
+- `Read` and `Grep` tool calls fell from 23 to 4, and distinct files read fell from 68 to 41.
+- The views arm's 18 view calls averaged 1.2 per run.
 
 ### Secondaries (descriptive, not gating)
 
