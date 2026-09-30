@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: grave_sear
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Grave Sear
+school: brine
+focus_cost: 1
+roll: "{distributions.candlegrit_roll}"
+description: "A brine sear; the flame gutters as it lands."

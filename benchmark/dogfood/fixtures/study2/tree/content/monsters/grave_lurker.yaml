@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: grave_lurker
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Grave Lurker
+tier: brute
+max_vigor: 31
+skills:
+  - "{entities.skills.yew_ward}"
+drops:
+  - "{entities.items.barrow_charm}"
+  - "{entities.items.umber_phial}"
+description: A brute that hunts by the sound of a trimmed wick.

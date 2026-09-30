@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_charm
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot Charm
+rarity: sound
+slot: weapon
+weight: 6
+value: 20
+description: A sound weapon scorched black on the rim.

@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: murk_censer
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Murk Censer
+rarity: gleaming
+slot: lantern
+weight: 7
+value: 75
+description: A gleaming lantern stitched from moth-silk.

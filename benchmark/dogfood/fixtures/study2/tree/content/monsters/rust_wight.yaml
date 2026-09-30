@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: rust_wight
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Rust Wight
+tier: minion
+max_vigor: 9
+skills:
+  - "{entities.skills.fen_chant}"
+drops:
+  - "{entities.items.moth_ring}"
+  - "{entities.items.soot_mantle}"
+  - "{entities.items.vesper_ring}"
+description: A minion that follows the smell of lamp oil.

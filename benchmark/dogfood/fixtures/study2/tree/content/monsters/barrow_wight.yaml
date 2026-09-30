@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: barrow_wight
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Barrow Wight
+tier: minion
+max_vigor: 18
+skills:
+  - "{entities.skills.briny_cleave}"
+  - "{entities.skills.pale_pulse}"
+drops:
+  - "{entities.items.moth_flask}"
+description: A minion that wears the rags of lamplighters.

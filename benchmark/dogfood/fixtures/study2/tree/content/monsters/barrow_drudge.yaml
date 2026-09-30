@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: barrow_drudge
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Barrow Drudge
+tier: brute
+max_vigor: 24
+skills:
+  - "{entities.skills.gloam_cleave}"
+drops:
+  - "{entities.items.murk_lens}"
+  - "{entities.items.tallow_sigil}"
+  - "{entities.items.vesper_ring}"
+description: A brute that avoids direct light.

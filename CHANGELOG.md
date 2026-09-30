@@ -44,6 +44,15 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - **Card adoption:** a study-1 card PASS is re-tested; a C2 FAIL reverts it.
   - **Freeze:** fixtures are built and frozen before study 2's own pilot.
 - **Dogfood copies in the matrix world force `CLAUDE.md`'s `@docs/spec.md` import** (`fixture.force_spec_import`), as D-026 requires for V2 and D-024 §4 for the views comparison. This keeps every locked cell's import intact after the repo adopts the card. `import-card` swaps to the card as before.
+- **Dogfood study 2 fixture: the generated "Lanternfall" tree** (D-026 §§1–9; `benchmark/dogfood/fixtures/study2/`). `generate.py` (seed 20260930, fixed word lists, no wall-clock input) writes:
+  - a dungeon-crawler tree with 320 content entities (140 items, 90 skills, 60 monsters, 30 encounters), 94 non-content tokens in 12 namespaces and 15 subfiles, a prototyped subset over a stub `impl/`;
+  - the planted reference graph (`edges.json`), six task prompts, the two guarded tasks' teammate patches, and frozen answers computed from the planted edges only.
+
+  `tests/test_dogfood_study2.py`:
+  - the generator reproduces its output byte for byte;
+  - the tree lints 0/0, identically, under the matrix and v0.3 `gdmd`; all 340 frontmatter blocks are schema-valid, and all 320 entities validate;
+  - no tree token id occurs in what `CLAUDE.md` imports, except the exempt collection token `{entities.items}`;
+  - the one-time oracle cross-check: planted edges equal the linter's value edges, and every answer matches `gdmd view` / `gdmd graph --impact`.
 - **D-026 amendment 4: dogfood copies carry the card file only where their cell imports it** (`fixture.remove_unimported_card`). Since the card adoption the repo commits `docs/spec-card.md`, so every copy carried it, unimported, including the v0.3-world baseline. Study 2's `baseline`, `views` and `import-full` copies now drop it, as study 1's copies never had it. `import-card` copies still generate it in-copy.
 - **Rule C addendum: the card import's own size** (descriptive, non-gating). A new two-call `run.py --card-probe` (with a probe-only `--ref`) measured the card's `@`-import at the adoption commit: 3,978 tokens, 68% of the 5,882-token gap between the full import (Δ) and the realized reduction (D). The rest follows the card cell's extra reading. The verdict is unchanged.
 - **Dogfood study 1, Rule C result: PASS** ([`docs/case-studies/dogfood-01.md`](docs/case-studies/dogfood-01.md)). 30 runs at `b4b1596`: importing the generated agent card instead of the full spec cut median per-turn context occupancy by D = 46,769 tokens, against a pass threshold of 26,326 (half the 52,651-token spec import). Non-inferiority holds (15/15 successes in both cells), and no `--section` call was needed. Under D-024 the repository's `CLAUDE.md` switches to the card; study 2 re-tests it (C2).

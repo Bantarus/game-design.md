@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: wick_dirk
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Wick Dirk
+rarity: relic
+slot: lantern
+weight: 2
+value: 162
+description: A relic lantern wrapped in grave-linen.

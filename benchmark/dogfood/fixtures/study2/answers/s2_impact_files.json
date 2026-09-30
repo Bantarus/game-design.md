@@ -1,0 +1,43 @@
+{
+  "_provenance": "Frozen answers for dogfood study 2 (D-026). Computed by generate.py from its planted edge list (edges.json), never by parsing the tree with gdmd code. tests/test_dogfood_study2.py cross-checks them once against gdmd graph / gdmd view and refs.walk_refs; a disagreement is fixed at its source, never by editing these files. Checkers compare against this file only.",
+  "questions": {
+    "Q1": {
+      "answer": [
+        "gdd/loops.md",
+        "gdd/mechanics.md",
+        "gdd/systems/bosses.md",
+        "gdd/systems/spawning.md"
+      ],
+      "candidates": 10,
+      "closure": [
+        "entities.encounters.candle_den",
+        "entities.encounters.knell_vault",
+        "entities.encounters.soot_sanctum",
+        "entities.encounters.yew_alcove",
+        "entities.monsters.briny_wisp",
+        "entities.monsters.tallow_drudge",
+        "loops.expedition",
+        "loops.floor_sweep",
+        "rules.sanctum_trial",
+        "rules.spawn_encounter",
+        "verbs.breach_sanctum",
+        "verbs.descend_stair"
+      ],
+      "evidence_files": [
+        "content/encounters/candle_den.yaml",
+        "content/encounters/knell_vault.yaml",
+        "content/encounters/soot_sanctum.yaml",
+        "content/encounters/yew_alcove.yaml",
+        "content/monsters/briny_wisp.yaml",
+        "content/monsters/tallow_drudge.yaml",
+        "gdd/loops.md",
+        "gdd/mechanics.md",
+        "gdd/systems/bosses.md",
+        "gdd/systems/spawning.md"
+      ],
+      "relation": "subfiles_of_value_reverse_closure",
+      "start": "entities.items.iron_buckler"
+    }
+  },
+  "task": "s2_impact_files"
+}

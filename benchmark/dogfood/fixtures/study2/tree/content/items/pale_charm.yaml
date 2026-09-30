@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: pale_charm
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Pale Charm
+rarity: sound
+slot: tonic
+weight: 1
+value: 32
+grants: "{entities.skills.yew_wail}"
+description: A sound tonic that hums near open flame.

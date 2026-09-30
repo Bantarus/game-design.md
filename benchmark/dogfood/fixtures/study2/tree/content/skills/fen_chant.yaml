@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_chant
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Chant
+school: umbral
+focus_cost: 2
+roll: "{distributions.ossuary_dust_roll}"
+description: "An umbral chant; it is learned from a knell-bell's crack."

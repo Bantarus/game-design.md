@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: ashen_censer
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Ashen Censer
+rarity: relic
+slot: tonic
+weight: 7
+value: 167
+grants: "{entities.skills.wick_cleave}"
+description: A relic tonic stitched from moth-silk.

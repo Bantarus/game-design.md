@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_stalker
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot Stalker
+tier: minion
+max_vigor: 18
+skills:
+  - "{entities.skills.gloam_cleave}"
+  - "{entities.skills.soot_lash}"
+drops:
+  - "{entities.items.hollow_mantle}"
+  - "{entities.items.soot_ring}"
+  - "{entities.items.umber_ring}"
+description: A minion that wears the rags of lamplighters.

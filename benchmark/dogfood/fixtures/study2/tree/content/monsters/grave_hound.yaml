@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: grave_hound
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Grave Hound
+tier: elite
+max_vigor: 44
+skills:
+  - "{entities.skills.rust_rite}"
+drops:
+  - "{entities.items.murk_gauntlet}"
+  - "{entities.items.tallow_dirk}"
+description: An elite that sleeps in cold ash.

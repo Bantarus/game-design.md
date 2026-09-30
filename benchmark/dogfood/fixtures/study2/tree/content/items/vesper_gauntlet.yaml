@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: vesper_gauntlet
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Vesper Gauntlet
+rarity: worn
+slot: trinket
+weight: 6
+value: 10
+description: A worn trinket stitched from moth-silk.

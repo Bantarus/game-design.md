@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: candle_wail
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Candle Wail
+school: lumen
+focus_cost: 6
+roll: "{distributions.rustmire_roll}"
+description: "A lumen wail; it is learned from a knell-bell's crack."

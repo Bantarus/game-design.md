@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: yew_ward
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Yew Ward
+school: brine
+focus_cost: 4
+roll: "{distributions.nightbrine_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "A brine ward; the dark leans away from it."

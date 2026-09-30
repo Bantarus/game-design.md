@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: ochre_bolt
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Ochre Bolt
+school: brine
+focus_cost: 2
+roll: "{distributions.sablegleam_roll}"
+description: "A brine bolt; it is learned from a knell-bell's crack."

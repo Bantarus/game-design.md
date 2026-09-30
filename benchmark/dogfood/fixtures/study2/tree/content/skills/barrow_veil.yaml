@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: barrow_veil
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Barrow Veil
+school: lumen
+focus_cost: 4
+roll: "{distributions.sablegleam_roll}"
+description: "A lumen veil; it costs a breath of lamp-smoke."

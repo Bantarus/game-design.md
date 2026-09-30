@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: dusk_pulse
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Dusk Pulse
+school: lumen
+focus_cost: 5
+roll: "{distributions.gravetide_roll}"
+inflicts: "{states.affliction.chilled}"
+description: "A lumen pulse; the flame gutters as it lands."

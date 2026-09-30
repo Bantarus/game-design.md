@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: candle_hound
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Candle Hound
+tier: minion
+max_vigor: 14
+skills:
+  - "{entities.skills.gloam_cleave}"
+drops:
+  - "{entities.items.lich_phial}"
+  - "{entities.items.soot_charm}"
+  - "{entities.items.vesper_gauntlet}"
+description: A minion that gathers where the stairs turn.

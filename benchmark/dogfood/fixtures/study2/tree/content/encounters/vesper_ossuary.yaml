@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: vesper_ossuary
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Vesper Ossuary
+depth: 4
+monsters:
+  - "{entities.monsters.briny_ghoul}"
+  - "{entities.monsters.moth_wight}"
+spawn_roll: "{distributions.deepvault_pack}"
+description: "Vesper Ossuary: a warren of burrows in the soot."

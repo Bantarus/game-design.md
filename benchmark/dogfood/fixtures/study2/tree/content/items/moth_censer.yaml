@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: moth_censer
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Moth Censer
+rarity: gleaming
+slot: weapon
+weight: 5
+value: 74
+grants: "{entities.skills.ashen_wail}"
+description: A gleaming weapon etched with a drowned saint's mark.

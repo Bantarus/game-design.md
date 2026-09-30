@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: tallow_wail
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Tallow Wail
+school: iron
+focus_cost: 1
+roll: "{distributions.ashveil_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "An iron wail; the dark leans away from it."

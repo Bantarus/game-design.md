@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: umber_wisp
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Umber Wisp
+tier: minion
+max_vigor: 16
+skills:
+  - "{entities.skills.lich_chant}"
+  - "{entities.skills.tallow_pulse}"
+drops:
+  - "{entities.items.briny_charm}"
+description: A minion that avoids direct light.

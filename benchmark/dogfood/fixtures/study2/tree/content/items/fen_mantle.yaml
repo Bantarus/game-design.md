@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_mantle
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Mantle
+rarity: gleaming
+slot: ward
+weight: 7
+value: 72
+grants: "{entities.skills.ashen_ward}"
+description: A gleaming ward with a wick-cut groove along one edge.

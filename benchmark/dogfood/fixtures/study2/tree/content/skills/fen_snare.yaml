@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_snare
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Snare
+school: brine
+focus_cost: 2
+roll: "{distributions.hollowknell_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "A brine snare; it costs a breath of lamp-smoke."

@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: tallow_stalker
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Tallow Stalker
+tier: elite
+max_vigor: 38
+skills:
+  - "{entities.skills.briny_snare}"
+  - "{entities.skills.fen_wail}"
+drops:
+  - "{entities.items.ashen_censer}"
+  - "{entities.items.umber_phial}"
+  - "{entities.items.yew_ring}"
+description: An elite that wears the rags of lamplighters.

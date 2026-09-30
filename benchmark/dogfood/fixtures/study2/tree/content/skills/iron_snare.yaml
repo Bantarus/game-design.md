@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: iron_snare
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Iron Snare
+school: lumen
+focus_cost: 5
+roll: "{distributions.palecoil_roll}"
+inflicts: "{states.affliction.chilled}"
+description: "A lumen snare; it leaves frost on the caster's teeth."

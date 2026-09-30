@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: sable_snare
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Sable Snare
+school: brine
+focus_cost: 3
+roll: "{distributions.rustmire_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "A brine snare; it is learned from a knell-bell's crack."

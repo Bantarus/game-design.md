@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: moth_buckler
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Moth Buckler
+rarity: worn
+slot: lantern
+weight: 4
+value: 6
+description: A worn lantern etched with a drowned saint's mark.

@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: yew_hound
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Yew Hound
+tier: elite
+max_vigor: 44
+skills:
+  - "{entities.skills.dusk_rite}"
+  - "{entities.skills.pale_veil}"
+drops:
+  - "{entities.items.fen_torc}"
+  - "{entities.items.soot_censer}"
+description: An elite that hunts by the sound of a trimmed wick.

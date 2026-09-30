@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: wick_brand
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Wick Brand
+rarity: relic
+slot: trinket
+weight: 1
+value: 168
+description: A relic trinket that smells of old tallow.

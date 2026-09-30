@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: dusk_ring
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Dusk Ring
+rarity: worn
+slot: tonic
+weight: 1
+value: 12
+description: A worn tonic pitted by the brine seeps.

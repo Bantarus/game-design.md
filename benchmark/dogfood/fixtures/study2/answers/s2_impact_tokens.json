@@ -1,0 +1,37 @@
+{
+  "_provenance": "Frozen answers for dogfood study 2 (D-026). Computed by generate.py from its planted edge list (edges.json), never by parsing the tree with gdmd code. tests/test_dogfood_study2.py cross-checks them once against gdmd graph / gdmd view and refs.walk_refs; a disagreement is fixed at its source, never by editing these files. Checkers compare against this file only.",
+  "questions": {
+    "Q1": {
+      "answer": [
+        "entities.encounters.knell_vault",
+        "entities.encounters.soot_sanctum",
+        "entities.items.fen_mantle",
+        "entities.monsters.briny_wisp",
+        "entities.skills.ashen_ward",
+        "entities.skills.ochre_sear",
+        "loops.expedition",
+        "loops.floor_sweep",
+        "rules.sanctum_trial",
+        "rules.spawn_encounter",
+        "verbs.breach_sanctum",
+        "verbs.descend_stair"
+      ],
+      "candidates": 9,
+      "evidence_files": [
+        "content/encounters/knell_vault.yaml",
+        "content/encounters/soot_sanctum.yaml",
+        "content/items/fen_mantle.yaml",
+        "content/monsters/briny_wisp.yaml",
+        "content/skills/ashen_ward.yaml",
+        "content/skills/ochre_sear.yaml",
+        "gdd/loops.md",
+        "gdd/mechanics.md",
+        "gdd/systems/bosses.md",
+        "gdd/systems/spawning.md"
+      ],
+      "relation": "value_reverse_closure",
+      "start": "distributions.barrowchill_roll"
+    }
+  },
+  "task": "s2_impact_tokens"
+}

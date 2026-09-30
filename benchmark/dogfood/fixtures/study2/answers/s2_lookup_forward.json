@@ -1,0 +1,47 @@
+{
+  "_provenance": "Frozen answers for dogfood study 2 (D-026). Computed by generate.py from its planted edge list (edges.json), never by parsing the tree with gdmd code. tests/test_dogfood_study2.py cross-checks them once against gdmd graph / gdmd view and refs.walk_refs; a disagreement is fixed at its source, never by editing these files. Checkers compare against this file only.",
+  "questions": {
+    "Q1": {
+      "answer": [
+        "entities.items.dusk_dirk",
+        "entities.items.iron_sigil",
+        "entities.items.sable_sigil",
+        "entities.items.umber_ring"
+      ],
+      "candidates": 29,
+      "evidence_files": [
+        "content/encounters/lich_hollow.yaml",
+        "content/monsters/lich_lurker.yaml",
+        "content/monsters/tallow_shade.yaml"
+      ],
+      "k": 2,
+      "kind": "entities.items",
+      "relation": "forward_exactly",
+      "start": "entities.encounters.lich_hollow"
+    },
+    "Q2": {
+      "answer": [
+        "distributions.candlegrit_roll",
+        "distributions.ossuary_dust_roll",
+        "distributions.rustmire_roll",
+        "distributions.tallowgrin_roll"
+      ],
+      "candidates": 24,
+      "evidence_files": [
+        "content/encounters/pale_den.yaml",
+        "content/monsters/gloam_revenant.yaml",
+        "content/monsters/rust_wight.yaml",
+        "content/monsters/umber_lurker.yaml",
+        "content/skills/fen_chant.yaml",
+        "content/skills/grave_sear.yaml",
+        "content/skills/grave_veil.yaml",
+        "content/skills/soot_bolt.yaml"
+      ],
+      "k": 3,
+      "kind": "distributions",
+      "relation": "forward_exactly",
+      "start": "entities.encounters.pale_den"
+    }
+  },
+  "task": "s2_lookup_forward"
+}

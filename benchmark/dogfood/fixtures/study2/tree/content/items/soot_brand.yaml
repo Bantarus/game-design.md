@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_brand
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot Brand
+rarity: worn
+slot: lantern
+weight: 3
+value: 20
+grants: "{entities.skills.wick_cleave}"
+description: A worn lantern that remembers its last owner.

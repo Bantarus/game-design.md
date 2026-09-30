@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: iron_sigil
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Iron Sigil
+rarity: worn
+slot: tonic
+weight: 8
+value: 25
+description: A worn tonic that smells of old tallow.

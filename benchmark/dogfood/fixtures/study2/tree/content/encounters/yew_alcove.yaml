@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: yew_alcove
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Yew Alcove
+depth: 4
+monsters:
+  - "{entities.monsters.tallow_drudge}"
+  - "{entities.monsters.vesper_ghoul}"
+spawn_roll: "{distributions.deepvault_pack}"
+description: "Yew Alcove: a low room where the lantern throws long shadows."

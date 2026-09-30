@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: vesper_ghoul
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Vesper Ghoul
+tier: minion
+max_vigor: 8
+skills:
+  - "{entities.skills.sable_bolt}"
+  - "{entities.skills.wick_veil}"
+drops:
+  - "{entities.items.hollow_sigil}"
+  - "{entities.items.umber_phial}"
+description: A minion that follows the smell of lamp oil.

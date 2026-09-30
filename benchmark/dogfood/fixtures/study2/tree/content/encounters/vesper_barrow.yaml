@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: vesper_barrow
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Vesper Barrow
+depth: 1
+monsters:
+  - "{entities.monsters.ochre_drudge}"
+  - "{entities.monsters.sable_crawler}"
+  - "{entities.monsters.umber_wisp}"
+spawn_roll: "{distributions.shallows_pack}"
+description: "Vesper Barrow: a warren of burrows in the soot."

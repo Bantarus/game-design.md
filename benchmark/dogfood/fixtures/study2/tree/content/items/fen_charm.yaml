@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_charm
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Charm
+rarity: relic
+slot: lantern
+weight: 4
+value: 157
+description: A relic lantern that remembers its last owner.

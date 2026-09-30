@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: gloam_revenant
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Gloam Revenant
+tier: minion
+max_vigor: 16
+skills:
+  - "{entities.skills.grave_sear}"
+  - "{entities.skills.grave_veil}"
+drops:
+  - "{entities.items.candle_flask}"
+  - "{entities.items.ochre_censer}"
+  - "{entities.items.soot_ring}"
+description: A minion that follows the smell of lamp oil.
