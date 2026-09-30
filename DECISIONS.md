@@ -568,6 +568,11 @@ A deterministic token-accounting analysis was offered and declined. It would hav
 ## D-024 — WS4 (compact agent card) gate: premise correction; build separated from adoption
 
 - **Status:** locked (2026-09-30). Written before any dogfood run exists.
+- **Adopted (2026-09-30), on D-025 Rule C PASS** (`rulec-20260930`: D = 46,769 ≥ 0.5 × Δ = 26,326, non-inferiority held).
+  - The repository's `CLAUDE.md` now imports `@docs/spec-card.md` in place of `@docs/spec.md`, the exact one-line swap the ablation tested.
+  - `docs/spec-card.md` is committed byte-identical to the tested card (SHA-256 `7c280fa1…a99f`). A pytest drift test and an AGENTS.md step keep it equal to `gdmd spec --card` after spec edits.
+  - `docs/spec.md` remains the authoritative text, reachable through `gdmd spec --section`.
+  - Reversible: D-026's C2 re-tests it, and a C2 FAIL reverts it. Study 2's copies force the full import where their cells need it (`fixture.force_spec_import`).
 - **Decided:** 2026-09-30, v0.4 Checkpoint 1. The user's revised WS4 text, amended at plan approval.
 - **Spec:** none yet. `gdmd spec --card` / `--section` get spec text when they are built (§9.4).
 - **Related:** D-022 (why the original trigger is unsatisfiable), D-023 (dogfood protocol), D-025 (locked rules, including this ablation's numeric bounds).

@@ -7,7 +7,7 @@ This file adds only Claude Code-specific notes that don't belong in the shared a
 ## Quick orientation
 
 - This is a spec + CLI project for `game-design.md`, an LLM-first, engine-neutral, genre-agnostic game design document standard modeled on Google Labs' `DESIGN.md`.
-- Format definition: @docs/spec.md
+- Format definition: @docs/spec-card.md
 - Frontmatter schema: @schema/game-design.schema.json
 - Reference example to study: @examples/deckbuilder/game-design.md
 

@@ -116,3 +116,13 @@ def test_cli():
     assert bad.exit_code == 2 and "no section '99'" in bad.output
     assert r.invoke(main, ["spec", "--card", "--section", "3"]).exit_code == 2
     assert r.invoke(main, ["spec"]).output == TEXT
+
+
+def test_committed_card_matches_the_spec():
+    """D-024 adoption (D-025 Rule C PASS): CLAUDE.md imports docs/spec-card.md,
+    so the committed card must be exactly `gdmd spec --card` of the current
+    spec. Regenerate with `gdmd spec --card > docs/spec-card.md`."""
+    from tests.conftest import REPO_ROOT
+    assert (REPO_ROOT / "docs/spec-card.md").read_text(encoding="utf-8") == CARD
+    claude = (REPO_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    assert "- Format definition: @docs/spec-card.md" in claude
