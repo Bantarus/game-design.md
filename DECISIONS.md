@@ -1974,6 +1974,34 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **AGENTS.md:** the rule joins the "keep green" list.
 - The card is regenerated.
 
+## D-036 — `prototyped-without-pointer` exempts namespaces whose schema forbids `implemented_in` (OI-003)
+
+- **Status:** decided (2026-09-30), step (d) of the user's post-study-2 order ("OI-003: exempt namespaces whose schema forbids `implemented_in`").
+- **Related:** OI-003, D-034 (lint enforces the schema), spec §9.1.
+
+### The defect
+
+- The rule flags a token past `draft` that has no `implemented_in:`, on a stale file.
+- `$defs.BalanceTarget` has a `status` but closes its properties without `implemented_in` (`additionalProperties: false`).
+- So a `balanced` target on a stale file drew a warning whose §9.1 remedy, a placeholder pointer, is schema-illegal. Since D-034 that pointer would also be a `schema-violation` error. The only way out was `gdmd touch`.
+
+### Decision
+
+- **Namespaces whose token `$def` closes its properties without `implemented_in` are exempt.**
+- **The set is read from the §10 schema** (`linter.namespaces_forbidding_impl`), not hard-coded, so the rule follows the schema that lint now enforces.
+- **Today the set is `balance_targets`, `invariants` and `states`.** Only `BalanceTarget` has a `status`, so only `balance_targets` changes behavior. The rule could never fire on the other two. A test pins both facts.
+
+### Tests and proof of fire
+
+- **The test baseline:** its `prototyped` balance target on a stale file no longer fires. Resources, verbs and loops on the same file still do.
+- **Real content, OI-003's own scenario:** a copy of the deckbuilder with one balance target advanced to `balanced` and linted as stale. It fired before this change; now it doesn't, with no `schema-violation` either.
+- Both tests fail on the pre-D-036 code.
+
+### Effect
+
+- The 12 trees are unchanged at 0/0: their balance targets are all `draft`, and none of their files is stale by default.
+- The spec's §9.1 row names the exemption.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2000,6 +2028,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - `invariants` are unaffected: they have no `status`.
 - **Impact today:** none in the 12 trees, whose balance targets are all `draft`. It will fire once a tree's targets advance.
 - **Proposed fix:** exempt namespaces whose schema forbids `implemented_in` (today, `balance_targets`), plus a test. It changes lint-rule behavior, so it needs its own D-entry. It is scheduled after v0.4 Checkpoint 3.
+- **Resolved (2026-09-30):** D-036 derives the exempt set from the schema. OI-003 is closed.
 
 ## OI-004 — Namespaces in the §3 ownership table that `Tree` does not index
 

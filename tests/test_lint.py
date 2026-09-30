@@ -689,6 +689,49 @@ def test_prototyped_without_pointer_fires_on_stale_file(make_tree):
     assert res.exit_code == 0
 
 
+def test_prototyped_without_pointer_exempts_namespaces_whose_schema_forbids_impl(make_tree):
+    """D-036 (OI-003): the baseline's balance target (status prototyped, no
+    implemented_in, which $defs.BalanceTarget forbids) no longer fires on a stale
+    file; every namespace that admits implemented_in still does."""
+    res = _lint_with_config(make_tree(), now=_dt(2026, 7, 30))
+    locs = {f.location for f in res.findings if f.rule == "prototyped-without-pointer"}
+    assert "balance_targets.energy_target" not in locs
+    assert {"resources.energy", "verbs.do_thing", "loops.main"} <= locs
+
+
+def test_the_exempt_namespaces_come_from_the_schema():
+    """Exactly the $defs that close their properties without implemented_in;
+    of those, only BalanceTarget carries a status, so only balance_targets
+    changes behavior."""
+    import json
+    from game_design_md.export_cmd import export_schema
+    assert linter.namespaces_forbidding_impl() == {"balance_targets", "invariants", "states"}
+    defs = json.loads(export_schema())["$defs"]
+    with_status = {n for n in ("BalanceTarget", "Invariant", "StateMachine")
+                   if "status" in defs[n]["properties"]}
+    assert with_status == {"BalanceTarget"}
+
+
+def test_prototyped_without_pointer_balanced_target_on_the_deckbuilder(tmp_path):
+    """Real content (OI-003's scenario): a deckbuilder balance target advanced to
+    `balanced` on a stale file used to fire, with no schema-legal remedy but
+    `gdmd touch`; it no longer does."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    econ = root / "gdd/economy-balance.md"
+    text = econ.read_text()
+    new = re.sub(r"(\n  [a-z_]+:\n(?:    .*\n)*?    status: )draft", r"\g<1>balanced", text, count=1)
+    assert new != text
+    econ.write_text(new)
+    res = _lint_with_config(root, now=_dt(2027, 1, 1))
+    assert not [f for f in res.findings if f.rule == "prototyped-without-pointer"
+                and f.location.startswith("balance_targets.")]
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
+
+
 def test_prototyped_without_pointer_silent_when_impl_populated(make_tree):
     """A subfile that's stale BUT whose tokens declare implemented_in: paths
     doesn't fire the rule. (The rule is about missing pointers, not

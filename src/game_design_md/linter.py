@@ -571,6 +571,25 @@ _ACTIVE_STATUSES_FOR_POINTER = frozenset(
 )
 
 
+@functools.lru_cache(maxsize=1)
+def namespaces_forbidding_impl() -> frozenset[str]:
+    """D-036 (OI-003): the subfile namespaces whose token $def closes its
+    properties without `implemented_in` (today `balance_targets`). A pointer
+    there is schema-illegal, so `prototyped-without-pointer` cannot ask for one.
+    Read from the §10 schema, the single source of truth lint now enforces."""
+    from .export_cmd import export_schema
+    schema = json.loads(export_schema())
+    defs, subfile = schema["$defs"], schema["$defs"]["Subfile"]["properties"]
+    out = set()
+    for ns in SUBFILE_NAMESPACES:
+        ref = ((subfile.get(ns) or {}).get("additionalProperties") or {}).get("$ref", "")
+        d = defs.get(ref.rsplit("/", 1)[-1], {})
+        if d.get("additionalProperties") is False and \
+                "implemented_in" not in (d.get("properties") or {}):
+            out.add(ns)
+    return frozenset(out)
+
+
 def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
     """Per-token rule: tokens at `status` ≥ prototyped (i.e. prototyped /
     implemented / balanced / shipped / experimental) with empty `implemented_in:`,
@@ -599,9 +618,11 @@ def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None
         silence).
 
     Tokens at status `draft | cut | deferred` are exempt (code may
-    legitimately not exist at those states per STATUS_LEVELS).
+    legitimately not exist at those states per STATUS_LEVELS), and so are
+    namespaces whose schema forbids `implemented_in` (D-036).
     """
     config = config or LintConfig()
+    exempt = namespaces_forbidding_impl()
     now = config.now or datetime.now()
     findings: list[Finding] = []
 
@@ -619,6 +640,8 @@ def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None
         if days_old <= config.prototyped_stale_days:
             continue  # file recently verified; rule's premise (stale doc) doesn't hold
         for ns in SUBFILE_NAMESPACES:
+            if ns in exempt:
+                continue
             block = pf.frontmatter.get(ns)
             if not isinstance(block, dict):
                 continue
