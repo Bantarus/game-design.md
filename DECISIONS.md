@@ -1361,6 +1361,18 @@ The pilot is run `pilot-s2-20260930`: the baseline arm (v0.3 world), one run per
 - **Not changed:**
   - the tree (manifest `718e52d2…`), tasks, prompts, answers, cells, primaries, thresholds and verdict mapping;
   - Δ: `DECISIONS.md` is not imported, and the import layer (`CLAUDE.md`, `AGENTS.md`, the spec, the schema, the deckbuilder root, `src/`) is unchanged.
+- **Approved retroactively** by the user at the study-2 review (2026-09-30), after both matrices.
+- **Process note (every future dogfood or benchmark run).** An apparatus problem found between a run's approval and the run means **stop and ask**, unless the fix is purely mechanical.
+  - **Purely mechanical** means the fix changes none of these:
+    - what a copy contains;
+    - what a cell, arm or task is;
+    - what a rule, metric, threshold or classification computes;
+    - what a subject can see or do.
+
+    A crash fix, a path typo in the harness, or a log-format fix qualifies.
+  - **Anything else is an apparatus decision** and goes back to the person who approved the run, even when the fix seems obvious.
+  - **Amendment 6 was not mechanical.** It removed a file from every copy. It should have been asked about before the matrices, not reported after them.
+  - Why: an approval covers the apparatus as it stood when it was given, and a pre-registered design is only as good as the approvals behind its changes.
 
 ### Amendment 7 (2026-09-30, before any study-2 matrix data): another session's scratchpad is contamination
 
