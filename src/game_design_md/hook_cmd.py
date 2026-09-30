@@ -150,8 +150,39 @@ def check_staged(tree: Tree, staged_files: list[str],
     return result
 
 
+def affected_blocks(model, refs: list[Reference]) -> list:
+    """The view-engine blocks for a spec file's matched references (WS3,
+    spec §9.7 `--show-tokens`), deduplicated, in source order:
+
+    - `<ns>.<token>` → that token's block;
+    - `(file-level)` → the content-entity block for an entity file, else the
+      file's top-level `implemented_in` block;
+    - `implementation_pointers.<key>` → the core's `implementation_pointers`
+      block.
+    """
+    out: dict[int, object] = {}
+    for r in refs:
+        idx = None
+        if r.location == "(file-level)":
+            want = [b for b in model.blocks if b.path == r.file and (
+                b.role == "content-entity"
+                or (b.parent is None and b.primary == f"{r.file}#implemented_in"))]
+            idx = want[0].index if want else None
+        elif r.location.startswith("implementation_pointers."):
+            want = [b for b in model.blocks
+                    if b.primary == f"{r.file}#implementation_pointers"]
+            idx = want[0].index if want else None
+        else:
+            idx = model.by_id.get(r.location)
+            if idx is not None and model.blocks[idx].path != r.file:
+                idx = None
+        if idx is not None:
+            out[idx] = model.blocks[idx]
+    return sorted(out.values(), key=lambda b: (b.start, b.index))
+
+
 def render_hook_output(matches: dict[str, list[Reference]],
-                        tree_path: str | Path = ".") -> str:
+                        tree_path: str | Path = ".", model=None) -> str:
     """Format the hook output for human reading.
 
     Empty matches → empty string (hook stays silent — most commits don't
@@ -164,6 +195,11 @@ def render_hook_output(matches: dict[str, list[Reference]],
     The rendered `gdmd touch` command prefixes spec file paths with this
     so the suggestion is invocable from the user's CWD (typically the
     repo root) without rewriting.
+
+    With `model` (the compiled view IR; `--show-tokens`, WS3), each spec
+    file's entry is followed by the matched blocks, verbatim, each under its
+    `[role] <primary> <path>:<start>-<end>` header (spec §9.9.2's lowering
+    rule: lines are never re-indented or re-serialized).
     """
     if not matches:
         return ""
@@ -190,6 +226,12 @@ def render_hook_output(matches: dict[str, list[Reference]],
         lines.append(f"  {_for_cmd(sf)}")
         lines.append(f"    locations:    {', '.join(locations)}")
         lines.append(f"    triggered by: {', '.join(codes)}")
+        if model is not None:
+            from .view_cmd import verbatim_block  # the view engine (D-027)
+            refs = [Reference(file=sf, location=loc) for loc in locations]
+            for blk in affected_blocks(model, refs):
+                lines.append(blk.header())
+                lines.extend(verbatim_block(model, blk))
     lines.append("")
     lines.append("If your code changes affect the design intent of these sections, re-verify")
     lines.append("and bump `last_verified:` via:")

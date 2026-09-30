@@ -1346,7 +1346,7 @@ The view is intentionally non-exhaustive at v0.3 — it surfaces the markers v0.
 
 ```
 gdmd hook install <path> [--repo-root <dir>]
-gdmd hook check   <path> [<staged_files>...]
+gdmd hook check   <path> [<staged_files>...] [--show-tokens]
 gdmd touch        <subfile> [<subfile>...]
 ```
 
@@ -1360,6 +1360,8 @@ gdmd touch        <subfile> [<subfile>...]
 **`gdmd hook install <path> [--repo-root <dir>]`.** Writes or updates `.pre-commit-config.yaml` at the repo root to register a `local` hook entry that invokes `gdmd hook check <path> $staged_files`. `language: system` so it dispatches to the `gdmd` binary on PATH (no separate pre-commit-managed venv). `pass_filenames: true` is the pre-commit-framework default; staged filenames arrive as positional args. `--repo-root` defaults to CWD — the typical place the user runs `gdmd hook install` from, and the root where pre-commit looks for `.pre-commit-config.yaml`. The command is idempotent: a second invocation against a config that already contains the gdmd hook leaves the file completely untouched (mtime unchanged), and prints `unchanged` instead of `updated`. Composes cleanly with other hooks already declared in the same `.pre-commit-config.yaml`.
 
 **`gdmd hook check <path> [<staged_files>...]`.** The pre-commit-invoked check. Builds an inverted index `{tree_relative_code_path: [Reference, ...]}` over the spec tree at `<path>` once, then walks `staged_files` (resolved against CWD per the pre-commit convention — staged paths arrive repo-root-relative when pre-commit invokes from the repo root) intersecting against the index. Empty intersection → empty stdout (hook stays silent on commits that don't touch spec-referenced code paths). Non-empty intersection → a human-readable report listing each affected spec file, the affected `<ns>.<token>` locations, the triggering code paths, and a single-line `gdmd touch` suggestion to bump `last_verified:` after re-verifying. Always exits 0 (informational, not a gate).
+
+**`--show-tokens` (v0.4).** Each affected spec file's entry is followed by the YAML the staged change may have made stale, taken from the compiled model of §9.9.1 and printed under the §9.9.2 lowering rule: verbatim lines, each block under its `[role] <primary> <path>:<start>-<end>` header. A token-level reference prints its token block. A file-level reference prints the file's `implemented_in:` declaration; for a content-entity file, it prints the whole entity. An `implementation_pointers.<key>` reference prints the core file's `implementation_pointers:` block. The hook stays informational: exit 0, and the flag is off by default, so `gdmd hook install` does not add it.
 
 **`gdmd touch <subfile> [<subfile>...]`.** Atomically bumps each subfile's `last_verified:` to today's date. Idempotent: if the field is already today's date the file is untouched and the command reports `no change:`. Preserves the author's quoting choice (`"2026-05-28"` stays quoted; `2026-05-28` stays unquoted) and frontmatter formatting — the implementation is regex-based on the frontmatter slab to avoid pyyaml's round-trip normalization. Errors (no frontmatter, frontmatter not closed) raise a clear `ClickException` rather than silently no-op'ing. Always exits 0.
 

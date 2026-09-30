@@ -168,10 +168,14 @@ def hook_group() -> None:
 @click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
                                         path_type=Path))
 @click.argument("staged_files", nargs=-1, required=False)
-def hook_check_cmd(path: Path, staged_files: tuple[str, ...]) -> None:
-    tree = Tree.load(path)
+@click.option("--show-tokens", is_flag=True, default=False,
+              help="Also print each affected token's YAML, verbatim with its "
+                   "<path>:<start>-<end> pointer, via the view engine (§9.9).")
+def hook_check_cmd(path: Path, staged_files: tuple[str, ...], show_tokens: bool) -> None:
+    model = ir.compile_tree(path) if show_tokens else None
+    tree = model.tree if model is not None else Tree.load(path)
     matches = hook_cmd.check_staged(tree, list(staged_files))
-    output = hook_cmd.render_hook_output(matches, tree_path=path)
+    output = hook_cmd.render_hook_output(matches, tree_path=path, model=model)
     if output:
         click.echo(output)
     sys.exit(0)

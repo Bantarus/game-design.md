@@ -1272,6 +1272,35 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
 
 ---
 
+## D-028 — `gdmd hook check --show-tokens` (WS3)
+
+- **Status:** decided and implemented (2026-09-30).
+- **Spec:** §9.7 ("`--show-tokens` (v0.4)").
+- **Related:** kickoff WS3 ("print the affected tokens' YAML via the view engine, next to the staged paths; the hook must stay informational: exit 0, under 1 s"); D-027 decision 2 (one compiler for view, graph, the hook and the card); OI-001 / OI-002 (resolution semantics inherited unchanged).
+
+### Decisions
+
+1. **The view engine, not a second renderer.** With the flag, `hook check` compiles the tree once (`ir.compile_tree`) and matches staged paths against that model's `Tree`. It prints blocks with `view_cmd.verbatim_block` under their §9.9 headers. The §9.9.2 lowering rule therefore applies: verbatim lines, and every block carries its pointer. Without the flag, the hook loads the tree as before and its output is byte-identical to v0.3's (tested).
+2. **What each reference kind prints:**
+   - A token-level `<ns>.<token>` reference prints that token's block, including its nested `impl` header.
+   - A file-level reference in a subfile prints that file's `implemented_in:` declaration. Every token in the file may be affected, and printing them all would turn the hook into a `--full` of the file; `gdmd view <tree> --grep` or `--ref` is the follow-up.
+   - A file-level reference on a content-entity file prints the whole entity, which is its own token.
+   - `implementation_pointers.<key>` prints the core file's `implementation_pointers:` block.
+3. **Placement.** Blocks follow each spec file's `locations` / `triggered by` lines, deduplicated and in source order, so the report keeps its v0.3 shape with blocks inserted.
+4. **Informational and opt-in.** The command always exits 0, and `gdmd hook install` does not add the flag to the pre-commit entry. Adoption stays the user's choice, and the default hook output does not grow.
+5. **Budget.** Under 1 s on every in-repo tree (tested), with the stated 1 s limit as the bound. It takes about 0.16 s wall-clock on tick-combat's real engine paths.
+
+### Tests
+
+`tests/test_hook_show_tokens.py`:
+- **Proof of fire on a real tree:** tick-combat's `impl/xtreme/src/rules.rs` prints the core pointer block, the file-level declaration and the `rules.tick_resolution` / `rules.combat_resolution` token blocks, every line verbatim at its number.
+- **Default output unchanged:** with the blocks removed, `--show-tokens` output equals the flagless output.
+- **All three reference kinds** on the views fixture tree.
+- **No match:** silent, exit 0.
+- **Under 1 s** on all 12 trees.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
