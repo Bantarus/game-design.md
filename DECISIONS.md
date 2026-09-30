@@ -1190,6 +1190,123 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - a v0.3-world copy has no card file.
 - **Not changed:** the cells, primaries, thresholds and verdict mapping. The Δ re-probe (C2) now runs on copies without the card file, like probe4.
 
+### Amendment 5 (2026-09-30): the freeze, before study 2's pilot
+
+- **Decided:** under D-026 §10, after the build and the one-time cross-check and before any study-2 run. The user's Rule C review ordered it: generator → build → oracle cross-check → freeze amendment → dry run → import probe → pilot, then stop.
+- **Commits:**
+  - generator and frozen output: `e851a4d`;
+  - harness (placement, tasks, checkers, `--study` caps): `4e2f498`;
+  - the V2/C2 verdict code: `048fc32`;
+  - the freeze: this amendment's commit, which also pins the tree in `fixture.FIXTURE_TREE_SHA256` and the other frozen files in a test.
+
+#### What was frozen
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `fixtures/study2/tree/`: the sorted-path manifest of its 351 files (151,138 bytes); one `<sha256>  <path>` line per file | `718e52d2dcacd8834ae3458ce53353f6e1881049af7e7eb22a7394f9357b0f47` |
+| `answers/s2_lookup_forward.json` | `1691637f…d399d` |
+| `answers/s2_lookup_backward.json` | `66c4bea7…65942` |
+| `answers/s2_impact_tokens.json` | `2f69fe27…1cf63` |
+| `answers/s2_impact_files.json` | `b631b174…21fc61` |
+| `answers/s2_maintenance.json` | `3dfc8b51…403b9` |
+| `answers/s2_negative_control.json` | `b1cb282a…883aa` |
+| `edges.json` (669 planted edges, 414 nodes) | `e46319f0…f2f9b` |
+| `generate.py` | `16a4b17e…379ec` |
+
+The full hashes of the answers, prompts, patches and `edges.json` are pinned in `tests/test_dogfood_study2.py`. `fixture.prepare_copy` refuses a placed tree whose manifest differs.
+
+#### The build, against the locked parameters
+
+- **§3 size:** 140 items, 90 skills, 60 monsters, 30 encounters, each kind with `count_target ≥ 20` and a `data_dir`. 94 non-content tokens in 12 namespaces. 15 subfiles.
+- **§4 graph:** the locked edge types and degrees are asserted at build. The deepest reverse closure is ≥ 4.
+- **§5 determinism:** `generate.py --check` and a pytest reproduce the output byte for byte.
+- **§6 lint:** 0 errors and 0 warnings under both the matrix `gdmd` and the v0.3 `gdmd`, with identical JSON output (2 info findings, both advisory invariants).
+  - The judge agrees on every study-2 copy, in both worlds, before and after both patches.
+  - Beyond the lock: all 340 frontmatter blocks validate against the JSON Schema, and all 320 entities validate against their content-schemas.
+- **§9 statuses:** 7 prototyped tokens in 5 prototyped subfiles, each with `implemented_in` pointing at an existing stub under `impl/lanternfall/`:
+  - `clocks.lantern_burn`, `rules.gutter_check`, `rules.resolve_strike`, `rules.roll_drops`, `rules.resolve_salvage`, `distributions.drop_quality`, `distributions.strike_roll`;
+  - every other token and all 320 entities are `draft`.
+- **§8 cross-check:** it ran once and agreed on the first run, so nothing was fixed.
+  - Planted edges equal the linter's value edges (`walk_refs` + `Tree` resolution).
+  - The lookups match `gdmd view`'s BFS; the impact answers match `gdmd graph --impact`.
+
+#### The questions
+
+Each question was chosen deterministically, by the seeded RNG, among the candidates meeting the locked ranges.
+
+| Task | Question | Answer | Candidates | Evidence files |
+| --- | --- | ---: | ---: | ---: |
+| `s2_lookup_forward` | Q1: items exactly 2 from `{entities.encounters.lich_hollow}` | 4 | 29 | 3 |
+| | Q2: distributions exactly 3 from `{entities.encounters.pale_den}` | 4 | 24 | 8 |
+| `s2_lookup_backward` | Q1: content entities within 2 of `{distributions.candlegrit_roll}` | 6 | 9 | 6 |
+| | Q2: content entities within 3 of `{entities.skills.fen_wail}` | 6 | 53 | 6 |
+| `s2_impact_tokens` | value-edge reverse closure of `{distributions.barrowchill_roll}` | 12, 4 content kinds | 9 | 10 |
+| `s2_impact_files` | subfiles of the closure of `{entities.items.iron_buckler}` | 4 | 10 | 10 |
+| `s2_maintenance` | the refactored `impl/lanternfall/loot/drop_tables.py`; touch `gdd/systems/loot.md` and `gdd/systems/distributions.md` | 2 | | |
+| `s2_negative_control` | a docstring in `impl/lanternfall/tests/test_drop_tables.py`; touch nothing | 0 | | |
+
+#### Hand traces (one question per task, read from the frozen files with `cat` and `grep`; no generator or `gdmd` code)
+
+1. **`s2_lookup_forward` Q1.**
+   - `content/encounters/lich_hollow.yaml:11-12` lists `lich_lurker` and `tallow_shade`, and `:13` names `shallows_pack`, whose definition carries no references.
+   - `lich_lurker.yaml:14` drops `umber_ring`.
+   - `tallow_shade.yaml:14-16` drops `dusk_dirk`, `iron_sigil` and `sable_sigil`.
+   - Items at exactly 2: those 4. Equal to the frozen answer.
+2. **`s2_lookup_backward` Q1.**
+   - Hop 1: `grave_sear` and `sable_bolt` are the only files whose values name `{distributions.candlegrit_roll}`; no subfile value does.
+   - Hop 2: `grave_sear` is used by `gloam_revenant`, `moth_hound` and `wick_shade`; `sable_bolt` by `vesper_ghoul`. No item grants either skill.
+   - 2 skills + 4 monsters. Equal.
+3. **`s2_impact_tokens`.** The reverse closure, hop by hop, excluding prose:
+   - `ochre_sear` and `ashen_ward` (their `roll:`);
+   - `fen_mantle` (grants `ashen_ward`, and is dropped by nothing) and `briny_wisp` (uses `ochre_sear`);
+   - encounters `knell_vault` and `soot_sanctum`;
+   - `rules.spawn_encounter` (`spawning.md:34`), `verbs.breach_sanctum` (`mechanics.md:130`) and `rules.sanctum_trial` (`bosses.md:24`);
+   - `verbs.descend_stair` (`mechanics.md:57`) and `loops.expedition` (`loops.md:51`);
+   - `loops.floor_sweep` (`loops.md:30`).
+
+   `loops.expedition` has only prose referrers. 12 tokens. Equal.
+4. **`s2_impact_files`.**
+   - `iron_buckler` is dropped by `briny_wisp` and `tallow_drudge`.
+   - Their encounters are `knell_vault`, `soot_sanctum`, `yew_alcove` and `candle_den` (`spawning.md:52`, `:29`).
+   - The closure's tokens sit in exactly `gdd/systems/spawning.md`, `gdd/mechanics.md`, `gdd/systems/bosses.md` and `gdd/loops.md`. Equal.
+5. **`s2_maintenance`.** Every `implemented_in` and pointer naming `loot/` or `drop_tables`:
+   - `loot.md:7` (file glob `impl/lanternfall/loot/**/*.py`) and `:20` (`rules.roll_drops`);
+   - `distributions.md:7` (file entry) and `:225` (`distributions.drop_quality`);
+   - the root pointer `game-design.md:46`, where the root has no `last_verified`.
+
+   No other file-level glob matches. Equal.
+6. **`s2_negative_control`.**
+   - The 12 file-level entries (in 11 subfiles) and 4 root pointers name `wick.py`, `spawning/`, `balance/`, `feel/`, `core/loops/`, `core/`, `combat/`, `lantern/`, `bosses/`, `rng/`, `loot/drop_tables.py` and `loot/`.
+   - Token-level entries are all explicit files.
+   - Nothing covers `impl/lanternfall/tests/`.
+
+#### Construction decisions and one exception, recorded before the pilot
+
+1. **§7 leak rule: an exception for the collection tokens.**
+   - **What hit:** the check finds one tree token id in what `CLAUDE.md` imports, `{entities.items}`. It is in spec §4.1's `instance_container` example (`docs/spec.md:231`), in both worlds.
+   - **Why it is exempted:** `entities.items` is the collection token whose name §3 fixes. It is never a question's start or answer, and no answer depends on it:
+     - collection tokens carry no references, so no reverse closure passes through them;
+     - the test asserts it is in no start and no answer.
+   - **Scope:** the exemption covers the four collection tokens only; every other id, full or bare (compound), is checked in both worlds.
+   - **Counterfactual adoption:** it is decided before any study-2 data, and renaming a locked kind to avoid it would itself be a change to §3. It would be adopted whatever the results.
+2. **Construction choices within §4 and the task table (not changes to locked parameters):**
+   - Forward "exactly k" questions also require the walk set to equal the BFS layer, so the literal and shortest-path readings agree.
+   - Verb↔rule pairs are 1:1. Clock-driven rules reference the monster collection, not individual monsters, so no content closure runs through the clock↔rule cycle.
+   - The four answer tasks use distinct start tokens.
+   - Answer parsing tolerates braces, backticks, bullets, one-line comma lists and repo-relative paths, as study 1's `lookup_refs` did.
+   - Content entities carry `last_verified` (§2.3).
+
+#### The worlds at the freeze
+
+- **V2 `views`, C2 `import-full`:** the matrix-world `CLAUDE.md` is forced to `@docs/spec.md`.
+- **C2 `import-card`:** swaps in the in-copy card. Only its copies carry `docs/spec-card.md` (amendment 4).
+- **Matrix-world `AGENTS.md`:** carries the view/graph line and the spec-editing rule (`4905b97`).
+- **V2 `baseline`:** runs on the `v0.3.0` layer.
+- **Caps:** 80 turns, 1800 s and $5.00 per run (`run.py --study 2`).
+- **Δ:** re-probed at this commit, before the pilot.
+
+**Not changed:** the hypotheses, cells, primaries, thresholds and verdict mapping.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)

@@ -533,3 +533,37 @@ def test_each_rule_refuses_the_other_studys_lines():
         analyze.rule_v2(no_field, metrics_loader=lambda ln: None)   # pre-study-2 lines
     with pytest.raises(SystemExit):
         analyze.only_study(s2, 1)
+
+
+# ---- the freeze (D-026 amendment 5) --------------------------------------------------------
+
+FROZEN_SHA256 = {
+    "answers/s2_impact_files.json": "b631b17472115fcaf590207b15d205358c3892e202349f66258abddd8421fc61",
+    "answers/s2_impact_tokens.json": "2f69fe27fb18e8585d511e89ccfe64a65a2a4488cead8404eb7433edebf1cf63",
+    "answers/s2_lookup_backward.json": "66c4bea72e4b64400c61f94865cc01c4143edc96e1480dd8c4a3c0b9e7365942",
+    "answers/s2_lookup_forward.json": "1691637f0de8f979087f5335a8d60a6c70f7396b163f444d755533dd543d399d",
+    "answers/s2_maintenance.json": "3dfc8b51987646ebcfc44e81a851b33ce887d7a6013d31071fdd429cb34403b9",
+    "answers/s2_negative_control.json": "b1cb282ada17090b544f329668027454cf4751b9e9ee077b4bf9e7b1d44883aa",
+    "prompts/s2_impact_files.md": "9b9d6805f2a39a389de72b6ef0ccc731f19a4ea98894cd7cf0443a64da25487f",
+    "prompts/s2_impact_tokens.md": "ae710b40dd32c80f2e1371b77935ebc5ba8da648feeda7c70e8de827cd137112",
+    "prompts/s2_lookup_backward.md": "2f2a8298e1f9b9df1c5876f47f2c6308a51f77bfae8fc0acfb3d0a69b2b8359a",
+    "prompts/s2_lookup_forward.md": "5c416d6166062732caba7c35a1c3c37876bea694d453379597d77076ca13b436",
+    "prompts/s2_maintenance.md": "57edae8e80924c9df4d4ed71ef03a7024a668ed7798809c939a63dccf998591d",
+    "prompts/s2_negative_control.md": "57edae8e80924c9df4d4ed71ef03a7024a668ed7798809c939a63dccf998591d",
+    "patches/s2_maintenance.patch": "c8b9e6f9f4399b342dd2d05ca4abfe0018f437184573c438a0fbab059f2f60e9",
+    "patches/s2_negative_control.patch": "9f782c497a115528db3817166f04f873a9a61b2766b78bfded4d577ac734abfb",
+    "edges.json": "e46319f0824bbdb5efdd921dcb094a36de11a39485679a6149fb1c112fcb2f9b",
+}
+
+
+def test_frozen_files_match_the_freeze_amendment():
+    import hashlib
+    for rel, want in FROZEN_SHA256.items():
+        assert hashlib.sha256((STUDY2 / rel).read_bytes()).hexdigest() == want, rel
+    assert fixture.tree_manifest_sha256(TREE) == fixture.FIXTURE_TREE_SHA256["study2"]
+
+
+def test_a_changed_tree_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setitem(fixture.FIXTURE_TREE_SHA256, "study2", "0" * 64)
+    with pytest.raises(fixture.FixtureError, match="pinned manifest"):
+        _copy("s2_lookup_forward", tmp_path)

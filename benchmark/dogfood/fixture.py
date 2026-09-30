@@ -172,6 +172,21 @@ def make_judge(dest: Path, ref: str) -> Path:
     return write_gdmd_shim(dest / "bin", dest)
 
 
+# D-026 amendment 5 (the freeze): SHA-256 of each frozen tree's manifest (one
+# "<sha256>  <tree-relative path>" line per file, sorted by path). A placed
+# tree that differs is refused; a changed tree needs a new amendment.
+FIXTURE_TREE_SHA256 = {
+    "study2": "718e52d2dcacd8834ae3458ce53353f6e1881049af7e7eb22a7394f9357b0f47",
+}
+
+
+def tree_manifest_sha256(tree: Path) -> str:
+    files = sorted(p for p in tree.rglob("*") if p.is_file() and "__pycache__" not in p.parts)
+    manifest = "".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  "
+                       f"{p.relative_to(tree).as_posix()}\n" for p in files)
+    return hashlib.sha256(manifest.encode("utf-8")).hexdigest()
+
+
 def place_fixture_tree(root: Path, sha: str, name: str, dest: str, scratch: Path) -> None:
     """D-026 §1: put the frozen tree `fixtures/<name>/tree` of commit `sha` at
     `dest` inside the copy, before its baseline commit, so it looks native.
@@ -187,6 +202,11 @@ def place_fixture_tree(root: Path, sha: str, name: str, dest: str, scratch: Path
         export_ref(tmp, sha, paths=(src_rel,))
     except subprocess.CalledProcessError as e:
         raise FixtureError(f"{src_rel} is not in commit {sha[:12]}") from e
+    got = tree_manifest_sha256(tmp / src_rel)
+    pinned = FIXTURE_TREE_SHA256.get(name)
+    if pinned is not None and got != pinned:
+        raise FixtureError(f"fixtures/{name}/tree at {sha[:12]} does not match its pinned "
+                           f"manifest SHA-256 (got {got[:12]}); a changed tree needs an amendment")
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(str(tmp / src_rel), str(target))
     shutil.rmtree(tmp)

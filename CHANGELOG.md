@@ -44,6 +44,10 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - **Card adoption:** a study-1 card PASS is re-tested; a C2 FAIL reverts it.
   - **Freeze:** fixtures are built and frozen before study 2's own pilot.
 - **Dogfood copies in the matrix world force `CLAUDE.md`'s `@docs/spec.md` import** (`fixture.force_spec_import`), as D-026 requires for V2 and D-024 §4 for the views comparison. This keeps every locked cell's import intact after the repo adopts the card. `import-card` swaps to the card as before.
+- **D-026 amendment 5: study 2's fixture is frozen** before its pilot.
+  - Pinned: the tree's manifest SHA-256 (`718e52d2…`), plus the answers, prompts, patches and planted edges. `prepare_copy` refuses a changed tree, and a test pins the rest.
+  - One hand trace per task, read from the files.
+  - One exception to the leak rule: the collection token `{entities.items}`, which spec §4.1's example names.
 - **`analyze.py rule-v2` / `rule-c2`: study 2's verdicts as code, before any study-2 data** (D-026). They run D-025's Rule V and Rule C computations unchanged, with study 2's guarded tasks (`s2_maintenance`, `s2_negative_control`). Each command refuses the other study's result lines. Study 1's verdicts reproduce unchanged: NULL (R = 15.6%) and PASS (D = 46,769). Tests cover the thresholds, non-inferiority at 18 runs per arm (one fewer success holds, two fail), and the guarded extension.
 - **Dogfood study 2 tasks in the harness** (D-026).
   - Copies place the frozen Lanternfall tree at `examples/lanternfall/`, read from the run's commit (`fixture.place_fixture_tree`).
