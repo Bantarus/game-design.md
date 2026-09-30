@@ -952,3 +952,8 @@ def test_matrix_copies_import_the_full_spec(tmp_path):
     for task in ("lookup_refs", "maintenance_drift"):
         c = fixture.prepare_copy(TASKS[task], tmp_path / task)
         assert (c.root / "CLAUDE.md").read_text().count(fixture.SPEC_IMPORT_LINE) == 1
+
+
+def test_ref_is_for_probes_only():
+    with pytest.raises(SystemExit):
+        dogfood_run.main(["--ref", "HEAD", "--dry-run"])

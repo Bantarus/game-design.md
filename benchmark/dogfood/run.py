@@ -4,6 +4,7 @@
     python run.py --dry-run [--task T ...] [--arm A ...]   # no model calls
     python run.py --probe                                  # 1 call: model-id gate
     python run.py --import-probe                           # 4 calls: D-024 import size
+    python run.py --card-probe [--ref R]                   # 2 calls: the card import's size
     python run.py --pilot                                  # baseline x each task x 1
     python run.py --task T --arm A --repeats N [--repeat-start K]   # any cell(s)
 
@@ -403,6 +404,62 @@ def model_probe(model: str) -> int:
 SPEC_IMPORT_LINE = "- Format definition: @docs/spec.md"
 
 
+def _probe_turn1(cfg: argparse.Namespace, copy: fixture.PreparedCopy, arm_text: str,
+                 work: Path, name: str) -> dict:
+    """One single-turn, tool-free session in `copy`; its turn-1 occupancy."""
+    sid = str(uuid.uuid4())
+    argv = session_argv(cfg.model, cfg.effort, sid, arm_text, 0.50)
+    sess = run_session(argv, "Reply with exactly: ok. Do not use any tools.", copy.root,
+                       session_env(copy.env()), turn_cap=1, timeout_s=300,
+                       stderr_path=work / f"{name}.stderr.txt")
+    jsonl = find_session_jsonl(sid)
+    m = extract(jsonl, load_vcc(cfg.vcc), copy.root, work / "views") if jsonl else {}
+    occ = m.get("per_turn_occupancy") or []
+    if not m.get("claude_md_loaded") or m.get("auto_memory_prompt"):
+        raise SystemExit(f"probe {name}: context check failed "
+                         f"(claude_md_loaded={m.get('claude_md_loaded')}, "
+                         f"auto_memory_prompt={m.get('auto_memory_prompt')})")
+    return {"turn1_occupancy": occ[0] if occ else None, "session_id": sid,
+            "assistant_models": m.get("assistant_models"),
+            "stop_reason": sess["stop_reason"],
+            "model_reported": sorted((sess["result_event"].get("modelUsage") or {}).keys()),
+            "cost_usd": sess["result_event"].get("total_cost_usd")}
+
+
+def card_probe(cfg: argparse.Namespace, run: dict, work: Path) -> int:
+    """D-025 Rule C descriptive addendum (non-gating): the card import's own
+    size. Turn-1 occupancy with vs without ONLY the `@docs/spec-card.md`
+    import, in the matrix world. Both copies are built exactly like a Rule C
+    `import-card` cell (`fixture.swap_in_card`); the "without" copy keeps the
+    card file and drops only the `@`, as `import_probe` does for the spec.
+    Two single-turn calls."""
+    task = fixture.Task("card_probe", "probe", "examples/deckbuilder", None)
+    arm_text = (fixture.ARMS_DIR / "baseline.md").read_text(encoding="utf-8")
+    out: dict = {"source_sha": run["source_sha"], "harness_sha": run["harness_sha"],
+                 "cli_version": run["cli_version"], "model_requested": cfg.model,
+                 "effort": cfg.effort, "world": "matrix"}
+    for label in ("with_card_import", "without_card_import"):
+        copy = fixture.prepare_copy(task, work / f"matrix-{label}", ref=run["source_sha"],
+                                    world="matrix", judge=run["judge"], card=True)
+        out["card_md_bytes"] = (copy.root / "docs/spec-card.md").stat().st_size
+        out["card_sha256"] = copy.card_sha
+        if label == "without_card_import":
+            cm = copy.root / "CLAUDE.md"
+            text = cm.read_text(encoding="utf-8")
+            if text.count(fixture.CARD_IMPORT_LINE) != 1:
+                raise SystemExit(f"CLAUDE.md lacks exactly one {fixture.CARD_IMPORT_LINE!r}")
+            cm.write_text(text.replace(fixture.CARD_IMPORT_LINE,
+                                       "- Format definition: docs/spec-card.md"))
+        out[label] = _probe_turn1(cfg, copy, arm_text, work, f"matrix-{label}")
+    w, wo = (out[k]["turn1_occupancy"] for k in ("with_card_import", "without_card_import"))
+    out["card_import_tokens"] = (w - wo) if None not in (w, wo) else None
+    RESULTS_DIR.mkdir(exist_ok=True)
+    path = RESULTS_DIR / f"card-probe-{run['run_id']}.json"
+    path.write_text(json.dumps(out, indent=2, sort_keys=True))
+    print(json.dumps(out, indent=2))
+    return 0 if out["card_import_tokens"] is not None else 1
+
+
 def import_probe(cfg: argparse.Namespace, run: dict, work: Path) -> int:
     """D-024 differential, in both worlds: turn-1 occupancy with vs without ONLY
     the `@docs/spec.md` import (schema, AGENTS.md, deckbuilder-root imports
@@ -473,6 +530,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="validate flags, prepare fixtures, print argv; no model calls")
     ap.add_argument("--probe", action="store_true", help="model-id probe (1 call)")
     ap.add_argument("--import-probe", action="store_true", help="D-024 import-size probe")
+    ap.add_argument("--card-probe", action="store_true",
+                    help="card import-size probe (2 calls; Rule C descriptive addendum)")
+    ap.add_argument("--ref", default=None,
+                    help="probes only: export copies (and the judge) at REF instead of HEAD")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--effort", default=DEFAULT_EFFORT)
     ap.add_argument("--turn-cap", type=int, default=60)
@@ -486,6 +547,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--supersedes", default=None, metavar="RUN_ID/CELL_ID",
                     help="D-025 error re-run: the errored cell this run replaces")
     cfg = ap.parse_args(argv)
+    if cfg.ref and not (cfg.import_probe or cfg.card_probe):
+        ap.error("--ref applies to the probes only; a matrix run pins HEAD")
     if cfg.supersedes and (cfg.pilot or len(cfg.task or []) != 1 or len(cfg.arm or []) != 1
                            or cfg.repeats != 1):
         ap.error("--supersedes re-runs exactly one cell: one --task, one --arm, --repeats 1")
@@ -500,12 +563,16 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("--workdir must be outside the repository (CLAUDE.md discovery)")
     if work.exists():
         raise SystemExit(f"{work} exists; run ids are single-use")
-    source_sha = pin_source_sha(require_clean=not cfg.dry_run)
+    harness_sha = pin_source_sha(require_clean=not cfg.dry_run)
+    source_sha = (fixture.git(fixture.REPO_ROOT, "rev-parse", f"{cfg.ref}^{{commit}}")
+                  if cfg.ref else harness_sha)
     fixture.verify_v03_venv()
-    run = {"run_id": run_id, "source_sha": source_sha, "cli_version": cli_version,
-           "judge": fixture.make_judge(work / "judge", source_sha)}
+    run = {"run_id": run_id, "source_sha": source_sha, "harness_sha": harness_sha,
+           "cli_version": cli_version, "judge": fixture.make_judge(work / "judge", source_sha)}
     if cfg.import_probe:
         return import_probe(cfg, run, work)
+    if cfg.card_probe:
+        return card_probe(cfg, run, work)
 
     if cfg.pilot:
         task_ids, arms, repeats = sorted(tasks), ["baseline"], range(1, 2)

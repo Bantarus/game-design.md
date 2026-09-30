@@ -22,6 +22,7 @@ results/<run_id>.jsonl        one line per run (committed)
 results/<run_id>/metrics/     per-cell extraction output (committed)
 results/<run_id>/archive.json where the session logs were archived, with per-file SHA-256 (committed)
 results/import-probe-*.json   import-size probe results (committed)
+results/card-probe-*.json     card import-size probe results (committed)
 results/sessions/             session JSONLs, stderr, VCC views (gitignored; compressed into
                               ~/.local/share/gdmd-dogfood/archive/<run_id>.tar.xz after each run)
 ```
@@ -115,6 +116,7 @@ These are the two pre-registered primaries: consultation bytes for views vs base
 python run.py --dry-run                    # validate flags + build every fixture; no model calls
 python run.py --probe                      # 1 call: is the pinned model id served?
 python run.py --import-probe               # 4 calls: spec.md @-import size in both worlds (D-024)
+python run.py --card-probe --ref <sha>     # 2 calls: the card @-import's own size, matrix world (Rule C addendum)
 python run.py --pilot                      # baseline x every task x 1 (not evidence)
 python run.py --task lookup_refs --arm views --repeats 3
 python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
