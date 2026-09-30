@@ -59,8 +59,8 @@ entities:
 verbs:
   gather:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 30, condition: tool_present, else_in_game_minutes: 60 }
+    cost: 0
+    time_cost: { in_game_minutes: 30, condition: tool_present, else_in_game_minutes: 60 }
     target_schema:
       type: "{entities.resource_node}"
       filter: "adjacent_to_actor_and_has_remaining_harvests"
@@ -71,9 +71,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/gather.py"]
   craft:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 60 }
-      consumes: target_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 60 }
+    consumes: target_recipe_inputs
     target_schema:
       type: "{entities.recipes}"
       filter: "recipe_station_required_or_adjacent_to_station"
@@ -84,9 +84,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/craft.py"]
   eat:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 15 }
-      consumes: target_food_item
+    cost: 0
+    time_cost: { in_game_minutes: 15 }
+    consumes: target_food_item
     target_schema:
       type: "{entities.player_inventory}"
       filter: "tag_equals_food"
@@ -97,8 +97,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/eat.py"]
   drink:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 15 }
+    cost: 0
+    time_cost: { in_game_minutes: 15 }
     target_schema:
       type: "{entities.resource_node}"
       filter: "node_kind_in_spring_or_still_and_adjacent_to_actor"
@@ -109,9 +109,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/drink.py"]
   place_station:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 60 }
-      consumes: station_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 60 }
+    consumes: station_recipe_inputs
     target_schema:
       type: "{entities.crafting_station}"
       filter: "actor_in_camp_region_OR_station_kind_is_pyre_layer_at_high_point"
@@ -122,8 +122,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/place_station.py"]
   sleep_through_night:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_hours: hours_until_dawn }
+    cost: 0
+    time_cost: { in_game_hours: hours_until_dawn }
     target_schema:
       type: world_coordinate
       filter: "adjacent_to_shelter_or_open_air_at_camp"
@@ -134,9 +134,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/sleep.py"]
   assemble_pyre:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 90 }
-      consumes: pyre_layer_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 90 }
+    consumes: pyre_layer_recipe_inputs
     target_schema:
       type: "{entities.pyre}"
       filter: "actor_at_high_point_AND_pyre_assembled_layers_lt_4"
@@ -147,9 +147,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/assemble_pyre.py"]
   light_pyre:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 5 }
-      consumes: one_flint_shard
+    cost: 0
+    time_cost: { in_game_minutes: 5 }
+    consumes: one_flint_shard
     target_schema:
       type: "{entities.pyre}"
       filter: "pyre_assembled_layers_eq_4_AND_day_eq_5_AND_part_eq_evening"
@@ -160,8 +160,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/light_pyre.py"]
   start_day:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 0 }
+    cost: 0
+    time_cost: { in_game_minutes: 0 }
     target_schema:
       type: world_clock
       filter: "world_clock_part_is_night_AND_dawn_due"

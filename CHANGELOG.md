@@ -91,6 +91,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
 ### Fixed
 
+- **OI-006 class B (D-030): the survival benchmark's verbs are schema-valid.** In `benchmark/games/survival`, `time_cost` and `consumes` move out of `cost:` to the verb level, with `cost: 0`, as the survival starter already does. `$defs.Cost` admits only an integer, a string or `{resource, amount}`. All 9 player verbs were affected (OI-006 said 8). The move also makes the tree's prose path for the clock's delta (`time_cost.in_game_minutes`) exist, on 8 of the 9 verbs; the ninth, `sleep_through_night`, declares hours and is left as is. Root version 0.2.1.
 - **AGENTS.md drift from the spec** (external review): stability guarantee restated as the spec's four fields (`core_loop_ref` was missing — an agent taught the three-field version would mutate it without a major bump); `{loop.combat_turn}` corrected to `{loops.combat_turn}` (the taught example would not resolve under our own linter); Hard Rule 2's universal-surface list updated to include `events`, `clocks`, `invariants`.
 - **Spec §9 opening verb list** updated from the four v0.1 verbs to all nine shipped verbs (`lint | diff | export | spec | verify | status | hook | touch | init`).
 - **Spec §2.2 required-vs-optional reconciliation** — "five conditionally-required files" corrected to four; `economy-balance.md` documented as effectively unconditional (`missing-balance-targets` is an unconditional error); `distributions.md` comment now states its condition.

@@ -1419,6 +1419,44 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
 
+## D-030 — OI-006 class B: the survival benchmark's verbs declare `time_cost` and `consumes` at the verb level
+
+- **Status:** decided (2026-09-30). A tree-only fix, which D-026 amendment 3 lets land before study 2.
+- **Decided:** by the user at the Rule C review: "tree fix in `benchmark/games/survival`, matching the survival starter's schema-valid placement of `time_cost`/`consumes`".
+- **Related:** OI-006 (class B), spec §4.2, §4.7 and §10; `$defs.Cost` and `$defs.Verb`; D-012.
+
+### The defect
+
+- **What failed:** the player verbs of `benchmark/games/survival/gdd/mechanics.md` nested `time_cost` (and, on five of them, `consumes`) inside `cost:`.
+- **Why it fails:** `$defs.Cost` admits only an integer, a string, or `{resource, amount}`.
+- **Count correction:** all **9** player verbs failed, not 8 as OI-006 and the v0.3 correction note said. A recount of the schema errors at `19f6e59` finds the error on every verb, `start_day` included. Both texts are corrected when OI-006 is updated.
+
+### The fix
+
+- **The change:** every verb now has `cost: 0`, with `time_cost:` and `consumes:` as verb-level keys, which `$defs.Verb` admits (`additionalProperties: true`).
+  - This is where `templates/starters/survival` puts `time_cost`, also with `cost: 0`.
+  - The starter has no `consumes`; it follows `time_cost` to the verb level.
+- **Unchanged:** values, token names and references.
+- **Why the tree and not the schema:**
+  - The starter for the same genre already has the schema-valid shape for the same concept.
+  - `cost` is a resource cost. Time and consumed recipe inputs are not `resources` tokens in this tree.
+  - Widening `$defs.Cost` to admit arbitrary objects would loosen the schema for one tree.
+- **Ritual:** root `version` 0.2.0 → 0.2.1 and `last_updated` 2026-09-30. `last_verified` is not touched, because no referenced code changed (the tree has no implementation).
+- **Verification:**
+  - The file's schema errors go from 1 (spanning the 9 verbs) to 0.
+  - Lint stays 0/0.
+  - The all-trees schema pass is re-run after OI-006 class C (see OI-006).
+
+### The clock check (asked at review)
+
+`{clocks.world_time}` declares `delta_source: "actor.last_action_time_cost"`. That is a value captured on the actor, not a verb path. The tree's prose defines it as the fired verb's `time_cost.in_game_minutes`, in five places: `clocks.md`, `loops.md`, `mechanics.md`, `systems/world_time.md`, and the `architecture-invariants.md` rule text.
+
+- **The old nesting disagreed with it.** The value sat at `cost.time_cost.in_game_minutes`, so the path the prose names existed on no verb.
+- **After the fix it exists on 8 of the 9 verbs.** `sleep_through_night` declares `time_cost: { in_game_hours: hours_until_dawn }`, a different unit with a symbolic value, so it still has no `time_cost.in_game_minutes`. How the clock reads a sleep is a content question, not a placement one, and it is not changed here.
+- **The capture itself is only in prose.** The starter reads the verb directly (`delta_source: "verb.time_cost.in_game_minutes"`); the benchmark reads through the actor, whose entity does not declare `last_action_time_cost`. Context-local references are bound at apply time (D-012) and lint does not resolve them. Not changed.
+
+**Observed, not changed:** the file's `## Tokens` counts are stale. For example, it says "11 verbs", and the file declares 9.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
