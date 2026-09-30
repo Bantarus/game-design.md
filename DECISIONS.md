@@ -809,6 +809,21 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - Rule C: the same.
   - About 15 minutes of wall-clock per matrix.
 
+### Amendment 2 (2026-09-30, after the pilot, before any matrix): Rule C runs on v0.4 tooling, recorded explicitly
+
+- **Decided:** approved by the user at the post-pilot review. The Rule C "World" bullet above already said this at the lock commit `79a1827`, as an inference. This amendment records it as an explicit decision with its rationale, before any Rule C cell exists.
+- **Decision:** both Rule C cells (`import-full` and `import-card`) run in the **matrix world** (the v0.4 tooling layer at the Rule C commit) with `arms/baseline.md`. They do not run in the v0.3 world that Rule V's `baseline` arm uses.
+- **Rationale:**
+  1. **D-024 (locked) fixes the tool arm, not the world.** It puts the ablation "on the baseline tool arm only", which means the arm text without view instructions. The v0.3 world is Rule V's device for keeping the baseline from discovering v0.4 views (review item 1). It answers a different question.
+  2. **The card cannot exist in the v0.3 world.** `gdmd spec --card` and `--section` are v0.4 commands. The card is generated from the v0.4 spec's structure and points at `gdmd view` / `gdmd graph`. An `import-card` subject must be able to call `--section`, so the copy's `gdmd` must be v0.4.
+  3. **The comparison needs one world across both cells.** With the world held fixed, the `@`-import line is the only difference between cells, as D-024 §3 requires.
+  4. **The adoption question lives in v0.4.** A PASS switches the repo's `CLAUDE.md` in v0.4, so the ablation measures the card where it would be used.
+- **Consequences:**
+  - Rule C's `import-full` cells differ from Rule V's `baseline` cells (world) and from Rule V's `views` cells (arm text). None are reused, as already locked.
+  - The precondition read used the v0.3-world import (45,975 tokens). The matrix world's import is 46,475, 1.1% larger, which cannot flip a 59.3%-vs-20% gate.
+  - Δ for the PASS threshold is re-probed in the matrix world at the Rule C commit, as already locked.
+- **Not changed:** thresholds, metrics, cells, aggregation, non-inferiority and verdict mapping.
+
 ---
 
 # Open items
