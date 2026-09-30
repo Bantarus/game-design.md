@@ -954,6 +954,20 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 - **Order from here:** full sweep → `git push origin v0.4-views` (plain) → the import probe at this amendment's commit → the Rule V matrix, 30 runs, once, plus the guarded extension only if `analyze.py` reports it pending → report by the rule in `docs/case-studies/dogfood-01.md` → stop.
 - **Not changed:** thresholds, primary metrics, cells, aggregation, non-inferiority and verdict mapping.
 
+### Rule V result (2026-09-30): **NULL**
+
+- **Run** `rulev-20260930` at the matrix commit `e693f2a`: 30 runs, CLI 2.1.285, `claude-sonnet-5-5`. The report is [`docs/case-studies/dogfood-01.md`](docs/case-studies/dogfood-01.md) (Rule V section), and the data is in `benchmark/dogfood/results/rulev-20260930*`.
+- **Verdict:** R = 15.6%, with 0 < R < X = 30%, so **NULL**.
+  - Non-inferiority holds: 15/15 successes in each arm, and guarded `e_t` = 0 for both tasks, so the extension did not run.
+  - No apparatus NULL: 0 errors, 0 contaminated runs, and the manipulation-check median is 1.
+  - Computed by `analyze.py` as committed before the data (`234d618`). Nothing was re-run, added or dropped.
+- **Consequence:** under §11.3, no claim that views reduce session cost enters the spec, the README or release notes.
+- **Descriptive only (gates nothing):**
+  - Per-task `r_t` ranges from −62.9% to +54.9%.
+  - `--full` was never used; `--grep` produced 42.6% of the views arm's consultation bytes.
+  - The views arm's per-turn occupancy and USD are higher, by about the world difference in spec-import size (5,837 tokens).
+- **From this run on, `v0.4-views` moves forward only** (lineage addendum).
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design
