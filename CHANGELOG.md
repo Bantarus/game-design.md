@@ -20,6 +20,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - An orchestrator whose `--dry-run` validates every CLI flag against `claude --help`, plus a model-id probe and the D-024 import-size probe.
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
+- **D-025 amendments 2 and 3.** Amendment 2 records explicitly that the card ablation runs on v0.4 tooling with the baseline arm text. Amendment 3 adds non-gating Bash-read secondaries (`bash_read_*`, `all_files_read`, `all_re_reads`), because pilot subjects read through `cat`/`head`/`sed`, not `Read`. The primaries are unchanged; re-extracting the pilot sessions leaves them byte-identical.
 - **D-025 amendment 1 (before the pilot):** the locked session flags never loaded `CLAUDE.md`. `--restricted` drops project memory too, so the `spec.md` import that D-025 and D-024 assume was absent in every arm.
   - The import probe caught it: turn-1 occupancy was about 6.9k tokens with or without the ~30k-token spec import.
   - Sessions now use `--setting-sources project,local` (no user settings), with auto-memory off.

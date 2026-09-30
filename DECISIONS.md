@@ -824,6 +824,37 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - Δ for the PASS threshold is re-probed in the matrix world at the Rule C commit, as already locked.
 - **Not changed:** thresholds, metrics, cells, aggregation, non-inferiority and verdict mapping.
 
+### Amendment 3 (2026-09-30, before any matrix data): Bash-read secondaries (definitions; non-gating)
+
+- **Decided:** approved by the user at the post-pilot review. It adds secondary metrics only. No primary, threshold, cell or verdict mapping changes, and the new metrics gate nothing.
+- **Why:** the pilot (not evidence) showed that subjects read files mostly through Bash (`cat`, `head`, `sed -n`, `grep`), not the `Read` tool. The locked `Read`-based secondaries (`files_read`, `bytes_read`, `re_reads`) therefore under-report reading. They stay, unchanged, and the metrics below are added beside them.
+- **Definitions** (`extract.bash_reads`, `extract.extract`):
+  - A Bash command is split into simple commands, quote-aware: a `|` inside a quoted pattern is not a pipe, and unquoted newlines separate commands.
+  - A simple command is a **file read** if its program is one of `cat`, `head`, `tail`, `sed`, `grep`, `nl`, `less`, `more`, `awk` **and** it names at least one file operand.
+    - Options are skipped, including their values for options that take one.
+    - The first operand of `grep`/`awk`/`sed` is the pattern or script, not a file.
+    - `sed -i` and any segment with an output redirection are writes.
+    - A pipe-fed `head`/`grep` names no file, so it is not a read.
+  - `git show` counts as a read call with no file operands.
+  - `cd` updates the working directory for later commands **and later calls**, as Claude Code's Bash tool does. Operands resolve against it.
+  - Calls whose result is an error (including permission denials) read nothing.
+- **The new secondaries, per run:**
+
+  | Metric | Definition |
+  | --- | --- |
+  | `bash_read_calls` | Non-errored Bash calls with at least one read. |
+  | `bash_read_bytes` | Their tool-result bytes. This is a subset of consultation bytes, not an addition to it. |
+  | `bash_files_read` | Distinct operand paths read through Bash. |
+  | `all_files_read` | Distinct copy-relative paths read through `Read` or Bash. A directory operand (`grep -r dir`) counts as one path. |
+  | `all_re_reads` | Reads, by either tool, of a path already read earlier in the run (counted once per call). |
+  | `all_files_read_paths` | The path list itself; in the metrics file only. |
+
+- **Validation:**
+  - Parser cases and a cross-call integration test are in `tests/test_dogfood.py`.
+  - Re-extracting the five pilot sessions leaves consultation bytes and per-turn occupancy byte-identical (asserted).
+  - The pilot sessions go from `files_read` of 0–3 to `all_files_read` of 0–7. Example: authoring reads 0 files through `Read` and 5 through Bash, with 1 re-read.
+  - Known limits: shell globs are not expanded, and a directory operand counts as one path.
+
 ---
 
 # Open items
