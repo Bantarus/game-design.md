@@ -792,6 +792,23 @@ Here "treatment" means `views` in Rule V and `import-card` in Rule C; "control" 
   - No pilot or matrix run existed. The only runs before it were the model-id probe and the import probe, whose job is exactly this read.
   - Premise-genuine (the transcripts and the table above), re-scoping-honest (the rule is unchanged; the harness now does what the rule said), lineage preserved (this amendment, and the unedited locked bullet it supersedes).
 
+### Pilot reads (2026-09-30), not evidence
+
+The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, at `337a72b`, CLI 2.1.285. Results are in `benchmark/dogfood/results/pilot-20260930*`; the import probe is `import-probe-probe2-20260930.json`. Per stopping rule 1, these are reported only as apparatus validation, a cost estimate and the Rule C precondition read.
+
+- **Apparatus:**
+  - 5 of 5 runs completed and passed the context check (`CLAUDE.md` injected, no auto-memory); every checker emitted a report.
+  - The judge preflight passed on every copy, and the logs were archived outside the repo (20 files).
+  - One `out_of_copy_access` entry is a detector false positive: a denied `cd ../..` from inside the copy's tree. It is in the listed-not-penalized category.
+  - Subjects read files mostly through Bash (`cat`, `head`, `sed -n`), not `Read`. The `Read`-based secondaries (`files_read`, `bytes_read`, `re_reads`) therefore under-report; the primary (all tool results) is unaffected.
+- **Caps:** none bound. The maxima were 8 of 60 turns, 26 of 1200 s and $0.46 of $3.00. **No cap is raised.**
+- **Rule C precondition:** v0.3-world `spec_import_tokens` = 45,975. M = the median over all 28 pilot turns = 77,484. The share is **59.3% ≥ 20%, so the precondition is met.** The ablation may run after the WS4 build.
+- **World difference (review item 1):** `spec.md` is 121,539 bytes (v0.3) vs 122,948 (matrix at `337a72b`), and the spec import is 45,975 vs 46,475 tokens.
+- **Cost estimate** (each task's pilot cost standing in for every cell of that task):
+  - Rule V: ≈ $11.6 for 30 runs, plus ≈ $2.7 if the extension triggers.
+  - Rule C: the same.
+  - About 15 minutes of wall-clock per matrix.
+
 ---
 
 # Open items

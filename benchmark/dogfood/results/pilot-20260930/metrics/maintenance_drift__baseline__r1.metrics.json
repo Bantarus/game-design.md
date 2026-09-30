@@ -1,0 +1,70 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1378,
+  "cache_read_tokens": 312892,
+  "cache_creation_tokens": 74454,
+  "tool_calls": 5,
+  "files_read": 1,
+  "bytes_read": 4296,
+  "re_reads": 0,
+  "consultation_bytes": 15631,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 79309,
+  "per_turn_occupancy": [
+    72378,
+    75457,
+    79309,
+    79895,
+    80317
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "Hf4Zri",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:20-65"
+    },
+    {
+      "tool": "Read",
+      "id": "n5v4ko",
+      "result_bytes": 4296,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:77-159"
+    },
+    {
+      "tool": "Bash",
+      "id": "dDhrZK",
+      "result_bytes": 8507,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:171-238"
+    },
+    {
+      "tool": "Bash",
+      "id": "DvAdga",
+      "result_bytes": 658,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:250-271"
+    },
+    {
+      "tool": "Bash",
+      "id": "51WQhc",
+      "result_bytes": 178,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:283-292"
+    }
+  ]
+}
