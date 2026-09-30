@@ -2002,6 +2002,42 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - The 12 trees are unchanged at 0/0: their balance targets are all `draft`, and none of their files is stale by default.
 - The spec's §9.1 row names the exemption.
 
+## D-037 — Content resolution: the spec follows the code, `data_dir` names the entity, `data_source` is deprecated (OI-001)
+
+- **Status:** decided (2026-09-30) by the user on OI-001's three proposals (step (e) of the post-study-2 order).
+- **Related:** OI-001, D-035 (validation links entities through `data_dir`), D-027 (one resolution definition for lint and views), D-026 (the frozen study-2 tree), spec §2.2, §3, §4.1, §6, §6.1, §9.1, Appendix B.
+
+### Decisions
+
+1. **Field name: `data_dir` everywhere in the spec** (text only).
+   - The five places that named the content-schema's field `data_source` now say `data_dir`: the §2.2 tree comment, §3, §6's rule paragraph, and two Appendix B rows.
+   - §3's example also had the wrong value, `../content/cards` (one `../`, which from `gdd/content/` is not the content directory). It now reads `data_dir: ../../content/cards`.
+2. **Resolution: the spec follows the code.**
+   - `{entities.<kind>.<id>}` resolves to the content-entity file whose `id:` is `<id>`, in a directory named `<kind>` (§3). This is what `Tree` has always done, so `Tree`, the views and the graph are unchanged, with one definition (D-027).
+   - **New check** (§6.1): a content-schema's `data_dir:` must name a directory called its `entity:`. It is reported by `content-entity-invalid` at `data_dir`, severity error.
+   - Why: D-035 validates entities through `data_dir`, and resolution goes by directory name. The check keeps both on the same files. Without it, a collection whose `data_dir` names another directory has every entity validated while `{entities.<kind>.<id>}` reaches none of them, and the tree lints clean.
+3. **The entity's `data_source:` is deprecated**, to be removed before v1.0.
+   - **Schema:** no longer required on a `content_collection` (its `allOf` branch is gone), and annotated `"deprecated": true` with a description.
+   - **When present,** it must be the same string as the `data_dir:` of the content-schema whose `entity:` is the collection's key. It is reported by `content-entity-invalid` at `entities.<key>.data_source`, severity error.
+   - **Not reported:**
+     - a `data_source` whose key has no content-schema, since there is nothing to compare it with (entity files in such a directory are already reported as covered by no `data_dir`);
+     - a content-schema without `data_dir`, which is `schema-violation`'s.
+   - **No warning on presence:** it would fire on all 19 values in the 13 trees, and the user ruled no tree changes. The deprecation is stated in the spec (§4.1), the schema and the CHANGELOG.
+   - **§4.1:** the example drops `data_source`, so the spec no longer teaches it. Its old "must point to an existing directory" was never checked, and it goes with the requirement.
+
+### Proof of fire (`tests/test_lint.py`, on copies of the deckbuilder)
+
+- **Directory renamed:** the cards moved to `content/card_pool/`, with `data_dir` and `data_source` following. Every card still validates, but `{entities.cards.ember_strike}` no longer resolves. It linted clean before; now it gives exactly one error, at `gdd/content/cards.md` `data_dir`.
+- **`data_source` mismatch:** set to §3's old example value, `../content/cards`. One finding, at `gdd/mechanics.md` `entities.cards.data_source`, naming `gdd/content/cards.md`'s `data_dir`.
+- **`data_source` removed** from both collections: 0 errors. It was a `schema-violation` before.
+- Both tests fail on the pre-D-037 code.
+
+### Effect
+
+- **No tree changes.** All 19 `data_source` values equal their content-schema's `data_dir`, and all 20 content-schemas' `data_dir` names their `entity:` (16 in the 12 trees, 4 in the study-2 tree).
+- The 12 trees stay 0/0. The study-2 tree's lint output is byte-identical, and its pin holds.
+- README and AGENTS.md said a `data_source:` field points to the content directory. They now name the content-schema's `data_dir:`.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2033,6 +2069,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
        | b | `data_source` becomes tree-root-relative (`content/<kind>`). | Churn in 13 trees, and the frozen study-2 tree breaks its manifest pin. |
        | c | `data_source` is deprecated (no longer required), with `data_dir` as the one source. | A schema change for a field every tree carries. |
   - Each part gets its own D-entry and commit once decided.
+- **Resolved (2026-09-30):** the user decided parts 1 and 2 as proposed (option A), and part 3 as c with a's equality check: `data_source` is optional and deprecated, removed before v1.0, and lint checks it equals `data_dir` when present. D-037. OI-001 is closed.
 
 ## OI-002 — `implemented_in` globs: the spec says workspace-relative, the code resolves them against the tree root
 

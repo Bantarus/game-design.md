@@ -1140,15 +1140,47 @@ def rule_content_entity_invalid(tree: Tree) -> list[Finding]:
           validated against nothing, which §11 item 4 does not allow;
       (b) its `id` equals its file name's stem.
     §6.2 (c), `status` and `implemented_in` present, is the §10 schema's
-    ContentEntityFile branch, so `schema-violation` reports it (D-034)."""
+    ContentEntityFile branch, so `schema-violation` reports it (D-034).
+
+    And the two links between a collection and its content (D-037, OI-001):
+      - a content-schema's `data_dir:` names a directory called its `entity:`,
+        since `{entities.<kind>.<id>}` resolves by directory name (§3), so
+        validation and resolution reach the same files;
+      - an entity's deprecated `data_source:`, when present, repeats the
+        `data_dir:` of the content-schema whose `entity:` is its key."""
     rule = "content-entity-invalid"
     by_dir: dict[Path, list[ParsedFile]] = defaultdict(list)
+    by_entity: dict[str, list[ParsedFile]] = defaultdict(list)
+    findings: list[Finding] = []
     for pf in tree.files:
         if pf.file_type == "content-schema":
             d = _content_dir(pf)
-            if d is not None:
-                by_dir[d].append(pf)
-    findings: list[Finding] = []
+            ent = pf.frontmatter.get("entity")
+            if isinstance(ent, str):
+                by_entity[ent].append(pf)
+            if d is None:
+                continue
+            by_dir[d].append(pf)
+            if isinstance(ent, str) and d.name != ent:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str, location="data_dir",
+                    message=(f"data_dir names a directory '{d.name}', not '{ent}' (its "
+                             f"entity:); {{entities.{ent}.<id>}} resolves by directory "
+                             f"name (§3), so it would not reach these entities")))
+    for pf in tree.files:
+        if pf.file_type != "subfile" or not isinstance(pf.frontmatter.get("entities"), dict):
+            continue
+        for key, ent in pf.frontmatter["entities"].items():
+            ds = ent.get("data_source") if isinstance(ent, dict) else None
+            dirs = [(d, s.rel_str) for s in by_entity.get(key, [])
+                    if isinstance(d := s.frontmatter.get("data_dir"), str)]
+            if isinstance(ds, str) and dirs and ds not in {d for d, _ in dirs}:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str,
+                    location=f"entities.{key}.data_source",
+                    message=(f"data_source '{ds}' differs from the data_dir '{dirs[0][0]}' of "
+                             f"{dirs[0][1]} (entity: {key}); data_source is deprecated and, "
+                             f"when present, repeats that data_dir (D-037)")))
     validators: dict[str, Any] = {}
     bad_schema: set[str] = set()
     cls = jsonschema.Draft202012Validator

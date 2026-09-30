@@ -92,10 +92,14 @@
       "properties": {
         "type": {
           "enum": ["actor", "content_collection", "terrain", "currency", "system_object", "instance_container"],
-          "description": "Entity cardinality. `actor`: a single instance (the player, a boss). `content_collection`: many templates from `data_source/*.yaml`. `instance_container` (F-008 v0.3): N owned instances each carrying per-instance runtime state — closes the gap the three-layer (actor / content_collection / scalar-resource) vocabulary couldn't express."
+          "description": "Entity cardinality. `actor`: a single instance (the player, a boss). `content_collection`: many templates, one `*.yaml` file each, in the directory named by the `data_dir` of the content-schema whose `entity` is this entity's key (spec §6.1). `instance_container` (F-008 v0.3): N owned instances each carrying per-instance runtime state — closes the gap the three-layer (actor / content_collection / scalar-resource) vocabulary couldn't express."
         },
         "properties": { "type": "object" },
-        "data_source": { "type": "string" },
+        "data_source": {
+          "type": "string",
+          "deprecated": true,
+          "description": "Deprecated (D-037, v0.4); to be removed before v1.0. Optional. When present it repeats, as the same string, the `data_dir` of the content-schema whose `entity` is this entity's key; lint (`content-entity-invalid`) checks the two are equal."
+        },
         "schema_ref": { "$ref": "#/$defs/TokenRef" },
         "count_target": { "type": "integer", "minimum": 0 },
         "capacity": {
@@ -115,10 +119,6 @@
         "implemented_in": { "$ref": "#/$defs/ImplementedIn" }
       },
       "allOf": [
-        {
-          "if":   { "properties": { "type": { "const": "content_collection" } }, "required": ["type"] },
-          "then": { "required": ["data_source"] }
-        },
         {
           "if":   { "properties": { "type": { "const": "instance_container" } }, "required": ["type"] },
           "then": { "required": ["capacity", "holds_template_from", "per_instance_state", "implemented_in"] }

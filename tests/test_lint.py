@@ -327,6 +327,53 @@ def test_content_entity_invalid_proof_of_fire_on_the_deckbuilder(tmp_path):
                                              ("gdd/content/enemies.md", "schema")]
 
 
+def _deckbuilder_copy(tmp_path):
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    return root
+
+
+def test_content_schema_data_dir_must_name_its_entity(tmp_path):
+    """D-037 (OI-001): the deckbuilder's cards moved to content/card_pool/, with
+    data_dir and data_source following. Every card still validates, but
+    {entities.cards.<id>} resolves by directory name (§3) and reaches none of
+    them. Before D-037 this linted clean; now the content-schema is reported."""
+    root = _deckbuilder_copy(tmp_path)
+    (root / "content/cards").rename(root / "content/card_pool")
+    for rel in ("gdd/content/cards.md", "gdd/mechanics.md"):
+        f = root / rel
+        f.write_text(f.read_text().replace("../../content/cards", "../../content/card_pool"))
+    tree = Tree.load(root)
+    assert not tree.has_token("entities.cards.ember_strike")
+    assert tree.has_token("entities.card_pool.ember_strike")
+    res = linter.run_all(tree)
+    assert [(f.rule, f.file, f.location) for f in res.findings if f.severity == "error"] == [
+        ("content-entity-invalid", "gdd/content/cards.md", "data_dir")]
+    assert "not 'cards'" in next(f.message for f in res.findings if f.location == "data_dir")
+
+
+def test_data_source_when_present_repeats_the_content_schema_data_dir(tmp_path):
+    """D-037 (OI-001): data_source is deprecated and optional. When present it
+    must equal the data_dir of the content-schema whose entity: is its key.
+    The mismatch here is the value spec §3's example carried until D-037."""
+    root = _deckbuilder_copy(tmp_path)
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    mech.write_text(text.replace("data_source: ../../content/cards", "data_source: ../content/cards"))
+    res = _lint(root)
+    assert _entity_findings(res) == [("gdd/mechanics.md", "entities.cards.data_source")]
+    msg = next(f.message for f in res.findings if f.rule == "content-entity-invalid")
+    assert "'../../content/cards' of gdd/content/cards.md" in msg
+
+    # Absent is valid: no longer required by the schema, and not reported.
+    mech.write_text(text.replace("    data_source: ../../content/cards\n", "")
+                        .replace("    data_source: ../../content/enemies\n", ""))
+    res = _lint(root)
+    assert res.errors == 0 and "data_source" not in mech.read_text()
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):

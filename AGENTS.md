@@ -20,7 +20,7 @@ This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`sch
 - **YAML frontmatter is normative.** Token values are the truth you compile against.
 - **Markdown prose is rationale.** It explains *why* and is your fallback when no token covers a case — extrapolate from intent, do not invent.
 - **Resolve `{namespace.id}` references by namespace.** Example: `{loops.combat_turn}` lives in `gdd/loops.md` frontmatter; `{resources.energy}` in `gdd/mechanics.md`; `{distributions.card_draw}` in `gdd/systems/distributions.md`.
-- **Content-heavy types are external.** A `data_source:` field points to a directory of `*.yaml` files (e.g. `content/cards/`). Read individual entity files on demand; never assume the `gdd/content/*.md` subfile contains the full set.
+- **Content-heavy types are external.** A content-schema file's `data_dir:` (in `gdd/content/<kind>.md`, relative to that file) points to a directory of `*.yaml` files (e.g. `content/cards/`). Read individual entity files on demand; never assume the `gdd/content/*.md` subfile contains the full set.
 
 ## Hard rules (never violate)
 
