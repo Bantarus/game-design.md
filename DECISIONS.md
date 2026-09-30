@@ -51,6 +51,8 @@ Migration: the four examples are migrated; the deckbuilder demonstrates all thre
 
 **v0.3 ratchet:** `balance-target-untyped` becomes `error`; `target_kind` becomes structurally required by the loader (a tree without it fails to load instead of merely linting at warning). Schema is already strict — only the lint rule's severity is the soft path.
 
+**v0.4 (D-040):** the v0.3 ratchet was never applied (OI-009). The rule is retired, subsumed by `schema-violation` (D-034), which reports a missing `target_kind` as an error. The loader clause was never implemented either; it is listed in the ratchet audit (OI-010) for the user's decision.
+
 ---
 
 ## D-004 — Strict YAML loader is shared across all CLI verbs
@@ -2123,6 +2125,38 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - No code under `src/` changes.
 - The 12 trees stay 0/0, and the study-2 tree is unaffected.
 
+## D-040 — `balance-target-untyped` is retired, subsumed by `schema-violation` (OI-009)
+
+- **Status:** decided (2026-09-30) by the user on OI-009 (option 3).
+- **Related:** OI-009, D-003 (which scheduled the v0.3 ratchet), D-034 (`schema-violation`), spec §4.10 and §9.1.
+
+### Decision
+
+- **The rule `balance-target-untyped` is removed from lint.**
+- **Why it is subsumed:** since D-034, a balance target without `target_kind` is already a `schema-violation` error at that target ("'target_kind' is a required property"), because `$defs.BalanceTarget` has required it since D-003. Ratcheting the old rule to error, as D-003 scheduled, would have reported one defect twice.
+- **What is lost:** the warning's hint text, which listed the three kinds. §4.10's table, one section away, lists them.
+- **Spec:**
+  - §4.10's legacy paragraph now says what happens: a `schema-violation` error, the rule's history, and its retirement.
+  - The §9.1 row stays, marked **retired (v0.4)**, so the name keeps its lineage.
+  - D-003 gets a pointer here.
+
+### Not decided here: D-003's loader clause
+
+- D-003's v0.3 ratchet also said `target_kind` "becomes structurally required by the loader (a tree without it fails to load)". It was never implemented: `Tree.load` validates nothing.
+- §4.10 claimed it. It now states the code instead: the loader does not reject such a tree, which fails lint.
+- Whether a loader should ever reject is left to the ratchet audit (OI-010), with the other scheduled ratchets.
+
+### Tests and proof of fire (`tests/test_lint.py`)
+
+- **The baseline** with its target's `target_kind` removed has exactly one error: `schema-violation` at `balance_targets.<id>`, with the required-property message. No `balance-target-untyped` finding.
+- **Real content:** a deckbuilder copy with one target's `target_kind: scalar` removed has one error-or-warning finding in all, the `schema-violation` on `gdd/economy-balance.md`, and exit 1. Before D-040 it also drew the retired rule's warning.
+- Both tests fail on the pre-D-040 code. They replace the rule's two tests.
+
+### Effect
+
+- The 12 trees stay 0/0: every target in them declares `target_kind`.
+- The study-2 tree is unaffected.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2290,4 +2324,5 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   1. Ratchet it to error, as D-003 said. The tree then gets two errors for one defect.
   2. Keep it a warning as the migration hint (with its suggestion), and fix the spec table and the message.
   3. Retire it in favour of `schema-violation`.
+- **Resolved (2026-09-30):** the user chose option 3. D-040 retires the rule and updates §4.10 and the §9.1 row. D-003's loader clause is left to the ratchet audit (OI-010). OI-009 is closed.
 

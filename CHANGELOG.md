@@ -134,6 +134,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
 ### Removed
 
+- **Lint rule `balance-target-untyped`** (D-040, OI-009). A balance target without `target_kind` is already a `schema-violation` error at that target (D-034), so the retired warning only repeated it. The warning never became the error D-003 scheduled for v0.3. Spec §4.10 and the §9.1 row (now marked retired) say so. OI-009 is closed.
 - **`schema_ref` from the schema's `$defs.Entity`** (D-039), and the line from the spec's §4.1 example. No tree used it, and the example's value, `{content_schema.cards}`, named no namespace. `Entity` admits additional properties, so a tree still carrying the key stays schema-valid; its reference is `broken-ref`, as it always was.
 
 ### Fixed

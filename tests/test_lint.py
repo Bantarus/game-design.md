@@ -529,32 +529,41 @@ def test_invariant_violation_numeric_resource_int_passes(make_tree):
     assert findings == []
 
 
-# ---- balance-target-untyped (D-003) ------------------------------------------
+# ---- untyped balance targets: schema-violation (D-003, D-040) ------------------
 
-def test_balance_target_untyped_warning(make_tree):
-    """A legacy v0.1.1 balance target without target_kind fires the migration warning."""
+def test_untyped_balance_target_is_one_schema_violation(make_tree):
+    """D-040 (OI-009): `balance-target-untyped` is retired. A target without
+    target_kind is exactly one finding: schema-violation, error, at the
+    target, because $defs.BalanceTarget requires the discriminator."""
     bal = (make_tree() / "gdd/economy-balance.md").read_text().replace(
         "target_kind: scalar\n    target: 1",
         "target: 1",
     )
-    root = make_tree({"gdd/economy-balance.md": bal})
+    res = _lint(make_tree({"gdd/economy-balance.md": bal}))
+    errors = [(f.rule, f.location) for f in res.findings if f.severity == "error"]
+    assert len(errors) == 1 and errors[0][0] == "schema-violation"
+    assert errors[0][1].startswith("balance_targets.")
+    assert not [f for f in res.findings if f.rule == "balance-target-untyped"]
+    assert "'target_kind' is a required property" in next(
+        f.message for f in res.findings if f.rule == "schema-violation")
+
+
+def test_untyped_balance_target_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: a deckbuilder balance target stripped of target_kind is
+    one error, and the tree cannot lint clean. Before D-040 it was that error
+    plus the retired rule's warning."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    bal = root / "gdd/economy-balance.md"
+    text = bal.read_text()
+    assert text.count("target_kind: scalar") >= 1
+    bal.write_text(text.replace("    target_kind: scalar\n", "", 1))
     res = _lint(root)
-    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
-    assert findings, "expected balance-target-untyped on the legacy target"
-    assert all(f.severity == "warning" for f in findings)
-    # D-034: the schema has required target_kind since D-003, so the error for
-    # the legacy shape comes from schema-violation; the warning stays the
-    # migration hint (OI-009).
-    schema = [(f.location, f.severity) for f in res.findings if f.rule == "schema-violation"]
-    assert schema == [(findings[0].location, "error")]
-    assert res.errors == 1
-
-
-def test_balance_target_typed_is_silent(make_tree):
-    """A target with target_kind: scalar does NOT fire balance-target-untyped."""
-    res = _lint(make_tree())  # baseline already declares target_kind
-    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
-    assert findings == []
+    assert [(f.rule, f.file) for f in res.findings if f.severity in ("error", "warning")] == [
+        ("schema-violation", "gdd/economy-balance.md")]
+    assert res.exit_code == 1
 
 
 # ---- undefined-event (D-005) -------------------------------------------------

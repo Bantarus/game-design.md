@@ -780,34 +780,6 @@ def rule_shipped_stale_doc(tree: Tree, config: LintConfig | None = None) -> list
     return findings
 
 
-def rule_balance_target_untyped(tree: Tree) -> list[Finding]:
-    """D-003: every `balance_targets.<id>` must declare `target_kind:`.
-
-    Legacy v0.1.1 targets without a `target_kind` field are accepted with a
-    warning. Ratchets to error in v0.3 once the deferral window closes.
-    """
-    findings: list[Finding] = []
-    for pf in tree.files:
-        if pf.file_type != "subfile":
-            continue
-        targets = pf.frontmatter.get("balance_targets")
-        if not isinstance(targets, dict):
-            continue
-        for name, target in targets.items():
-            if not isinstance(target, dict):
-                continue
-            if "target_kind" not in target:
-                findings.append(Finding(
-                    rule="balance-target-untyped", severity="warning",
-                    file=pf.rel_str,
-                    location=f"balance_targets.{name}",
-                    message=(f"balance target '{name}' is missing target_kind: "
-                             f"(one of scalar | range | distribution_over_categories). "
-                             f"Permissive shape deprecated; ratchets to error in v0.3."),
-                ))
-    return findings
-
-
 def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
     """D-011: a `do:` step that's a bare string inside a rule reachable from a
     deterministic loop is a *prose label*, not a computable procedure. Two
@@ -1305,7 +1277,6 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_unreferenced_verb,
     rule_broken_implementation_pointer,
     rule_stale_section,                  # v0.3 Task 6: now config-aware
-    rule_balance_target_untyped,
     rule_determinism_undetermined_rule,
     rule_write_to_template_field,
     rule_invariant_violation,
