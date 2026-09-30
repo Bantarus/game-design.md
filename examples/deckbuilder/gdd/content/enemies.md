@@ -23,7 +23,7 @@ schema:
           kind:        { enum: [attack, defend, buff, debuff, ramp] }
           damage:      { type: integer, minimum: 0 }
           block:       { type: integer, minimum: 0 }
-          targets_burn:{ type: boolean }
+          targets_burn: { type: boolean }
 data_dir: ../../content/enemies
 count_target: 30
 balance_refs:
