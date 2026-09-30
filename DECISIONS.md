@@ -907,6 +907,24 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 - **Forward-only from the first full-matrix run.** From the first Rule V or Rule C full-matrix run onward, `v0.4-views` only moves forward. Changes from `main` come in by merge, never by rebase, so every matrix's `source_sha` stays on the branch's history.
 - **Rule V limits.** The views world now also carries `db1950e`'s docs-drift fixes to `docs/spec.md` and `AGENTS.md` (listed above); the baseline's v0.3 world does not. The Rule V report lists this in its limits (stopping rule 3), alongside the v0.3/v0.4 world difference. It is part of what Rule V compares, not a separate effect it can isolate.
 
+### Amendment 4 (2026-09-30, after WS2, before any matrix): the views arm text is pinned
+
+- **Decided:** as D-027 requires ("Consequences"), approved at Checkpoint 3. The arm text is fixed by hash before any Rule V cell, and the same bytes are reused unchanged for D-026's Rule V2.
+- **The pin:** `benchmark/dogfood/arms/views.md` at commit `85fe4c9`, SHA-256 `1db2d1b83c911857612e7de0f0ba3b9af2d9c6ed66caf045ce23e9cab6eadc98`.
+- **One change before pinning.** Checked against the implementation, the text was accurate but did not say which directory a pointer's path is relative to. A subject running `gdmd view examples/deckbuilder` receives `gdd/mechanics.md:89-96` and could look for it at the repository root. `85fe4c9` adds "the path is relative to the tree root", which is §9.9.1's definition. The arm is still a neutral §9.9 reference: the flag-parity and steering-word tests pass.
+- **Enforced by the harness.** `run.ARM_PIN_SHA256` holds the hash. `run.load_arm` refuses an arm whose bytes differ, and every arm in a run is checked before any cell, including a dry run. Tests: the committed bytes equal the pin, and a changed `views.md` is refused. Changing the arm text again needs a new amendment and a new pin.
+- **Cross-arm facts known before the matrix,** for the Rule V limits (stopping rule 3):
+  - `README.md` is not in the v0.3 overlay (`fixture.V03_OVERLAY`), so baseline copies carry the matrix README. `scripts/docs_lint.py` requires its verb list to equal the registered commands, so it names `view | graph` in both arms, while the baseline's v0.3 `gdmd` has neither. Attempts are the locked covariate (Rule V manipulation check).
+  - `CHANGELOG.md` and `DECISIONS.md` also come from the matrix commit in both arms and describe the views. This is the awareness effect already listed in the limits.
+- **Preconditions for the Rule V matrix, as of this amendment:**
+  - The views are implemented: `041e158` (block model), `18f6084` (`view`), `2f62191` (`graph`) and `da6cb9d` (goldens and budget).
+  - `docs_lint` is green with `view` and `graph` registered.
+  - The arm text is pinned.
+  - A dry run at `85fe4c9` prepared a `baseline` and a `views` cell, and `gdmd view` ran in the views copy.
+
+  The matrix commit is not chosen yet. The import probe is re-run there, as the lineage note requires.
+- **Not changed:** thresholds, metrics, cells, aggregation, non-inferiority and verdict mapping.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design

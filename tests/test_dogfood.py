@@ -97,6 +97,24 @@ def test_views_arm_is_the_spec_9_9_command_reference():
         assert word not in appended.lower(), f"arm text steers: {word!r}"
 
 
+def test_views_arm_bytes_are_the_pinned_bytes():
+    # D-025 amendment 4: editing arms/views.md needs a new amendment and pin.
+    import hashlib
+    data = (DOGFOOD / "arms" / "views.md").read_bytes()
+    assert hashlib.sha256(data).hexdigest() == dogfood_run.ARM_PIN_SHA256["views"]
+    assert dogfood_run.load_arm("views") == data.decode("utf-8")
+
+
+def test_load_arm_refuses_a_changed_pinned_arm(tmp_path, monkeypatch):
+    arms = tmp_path / "arms"
+    shutil.copytree(DOGFOOD / "arms", arms)
+    (arms / "views.md").write_text((arms / "views.md").read_text() + "\nPrefer views.\n")
+    monkeypatch.setattr(fixture, "ARMS_DIR", arms)
+    with pytest.raises(SystemExit, match="pinned SHA-256"):
+        dogfood_run.load_arm("views")
+    assert dogfood_run.load_arm("baseline")   # unpinned arms load as before
+
+
 def test_control_prompt_identical_to_maintenance_prompt():
     assert TASKS["maintenance_drift"].prompt() == TASKS["negative_control_no_drift"].prompt()
 

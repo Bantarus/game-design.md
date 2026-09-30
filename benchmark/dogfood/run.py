@@ -58,6 +58,12 @@ DEFAULT_EFFORT = "high"            # mirrors the maintainer's interactive defaul
 CLAUDE_PIN_VERSION = "2.1.285"
 CLAUDE_PIN_SHA256 = "33dad1ec615a2e08cc78b494f05c110e49916de2c79d78ec8799ebf46b233d29"
 CLAUDE_BIN = Path.home() / ".local/share/gdmd-dogfood/claude" / f"claude-{CLAUDE_PIN_VERSION}"
+
+# D-025 amendment 4 (D-027 consequences): the views arm text is pinned by
+# SHA-256 before the Rule V matrix and reused unchanged for D-026's Rule V2.
+ARM_PIN_SHA256 = {
+    "views": "1db2d1b83c911857612e7de0f0ba3b9af2d9c6ed66caf045ce23e9cab6eadc98",
+}
 TOOLS = "Read,Grep,Glob,Edit,Write,Bash"
 # Bash is limited to read-only inspection plus the gdmd CLI (both arms alike).
 ALLOWED_BASH = [
@@ -99,6 +105,16 @@ def check_pinned_cli() -> str:
     if not version.startswith(CLAUDE_PIN_VERSION + " "):
         raise SystemExit(f"{CLAUDE_BIN} reports {version!r}, pinned {CLAUDE_PIN_VERSION}")
     return version
+
+
+def load_arm(arm: str) -> str:
+    """The arm's appended system prompt; refuse if a pinned arm's bytes changed."""
+    data = (fixture.ARMS_DIR / f"{arm}.md").read_bytes()
+    pinned = ARM_PIN_SHA256.get(arm)
+    if pinned is not None and hashlib.sha256(data).hexdigest() != pinned:
+        raise SystemExit(f"arms/{arm}.md does not match its pinned SHA-256 "
+                         "(D-025 amendment 4); a changed arm needs a new amendment")
+    return data.decode("utf-8")
 
 
 def session_env(base: dict | None = None) -> dict:
@@ -271,8 +287,7 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
     if version != run["cli_version"]:
         raise SystemExit(f"CLI version changed mid-run: {run['cli_version']!r} -> {version!r}")
     session_id = str(uuid.uuid4())
-    arm_text = (fixture.ARMS_DIR / f"{arm}.md").read_text(encoding="utf-8")
-    argv = session_argv(cfg.model, cfg.effort, session_id, arm_text, cfg.budget_usd)
+    argv = session_argv(cfg.model, cfg.effort, session_id, load_arm(arm), cfg.budget_usd)
     started = datetime.now(timezone.utc)
     sess_dir = RESULTS_DIR / "sessions" / run["run_id"]
     metrics_dir = RESULTS_DIR / run["run_id"] / "metrics"
@@ -498,6 +513,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"flag validation failed; not in `claude --help`: {missing}", file=sys.stderr)
         return 2
 
+    for a in {a for _, a, _ in cells}:
+        load_arm(a)   # a pinned arm with changed bytes stops the run before any cell
     if cfg.dry_run:
         for t, a, r in cells:
             cell = work / f"{t}__{a}__r{r}"
