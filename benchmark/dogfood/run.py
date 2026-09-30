@@ -72,7 +72,13 @@ ALLOWED_BASH = [
     "Bash(wc:*)", "Bash(grep:*)", "Bash(sort:*)", "Bash(diff:*)",
 ]
 NO_AUTO_MEMORY = json.dumps({"autoMemoryEnabled": False})
-ARM_WORLD = {"baseline": "v0.3", "views": "matrix"}
+ARM_WORLD = {"baseline": "v0.3", "views": "matrix",
+             # D-025 Rule C (amendment 2): both cells in the matrix world with
+             # the baseline arm text; only the CLAUDE.md spec import differs.
+             "import-full": "matrix", "import-card": "matrix"}
+ARM_TEXT = {"baseline": "baseline", "views": "views",
+            "import-full": "baseline", "import-card": "baseline"}
+CARD_ARMS = {"import-card"}
 ARMS = tuple(ARM_WORLD)
 OUTCOMES = ("success", "fail", "capped", "error")
 HARNESS_PATHS = ["benchmark/dogfood", "tests/test_dogfood.py",
@@ -109,8 +115,9 @@ def check_pinned_cli() -> str:
 
 def load_arm(arm: str) -> str:
     """The arm's appended system prompt; refuse if a pinned arm's bytes changed."""
-    data = (fixture.ARMS_DIR / f"{arm}.md").read_bytes()
-    pinned = ARM_PIN_SHA256.get(arm)
+    name = ARM_TEXT[arm]
+    data = (fixture.ARMS_DIR / f"{name}.md").read_bytes()
+    pinned = ARM_PIN_SHA256.get(name)
     if pinned is not None and hashlib.sha256(data).hexdigest() != pinned:
         raise SystemExit(f"arms/{arm}.md does not match its pinned SHA-256 "
                          "(D-025 amendments 4-5); a changed arm needs a new amendment")
@@ -276,7 +283,7 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
     cell_id = f"{task.task_id}__{arm}__r{repeat}"
     cell_dir = work / cell_id
     copy = fixture.prepare_copy(task, cell_dir, ref=run["source_sha"], world=ARM_WORLD[arm],
-                                judge=run["judge"])
+                                judge=run["judge"], card=arm in CARD_ARMS)
     env = session_env(copy.env())
     if arm == "views":
         chk = subprocess.run(["gdmd", "view", "--help"], env=env, capture_output=True)
@@ -329,6 +336,7 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
         "model_reported": sorted((res.get("modelUsage") or {}).keys()),
         "cli_version": version, "source_sha": copy.source_sha,
         "overlay_sha": copy.overlay_sha, "judge_sha": run["source_sha"],
+        "card_sha256": copy.card_sha,
         "session_id": session_id, "supersedes": cfg.supersedes,
         "session_jsonl": stored.name if stored else None,
         "session_sha256": sha256(stored) if stored else None,
@@ -339,7 +347,8 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
             "consultation_bytes", "median_turn_occupancy", "gdmd_view_calls",
             "gdmd_graph_calls", "claude_md_loaded", "auto_memory_prompt",
             "assistant_models", "bash_read_calls", "bash_read_bytes", "bash_files_read",
-            "all_files_read", "all_re_reads", "view_mode_bytes", "view_mode_calls")},
+            "all_files_read", "all_re_reads", "view_mode_bytes", "view_mode_calls",
+            "gdmd_spec_section_calls")},
         "out_of_copy_access": len(metrics.get("out_of_copy_access", [])) if metrics else None,
     }
     if not cfg.keep_copies:
@@ -519,7 +528,7 @@ def main(argv: list[str] | None = None) -> int:
         for t, a, r in cells:
             cell = work / f"{t}__{a}__r{r}"
             copy = fixture.prepare_copy(tasks[t], cell, ref=source_sha, world=ARM_WORLD[a],
-                                        judge=run["judge"])
+                                        judge=run["judge"], card=a in CARD_ARMS)
             argv_shown = session_argv(cfg.model, cfg.effort, "<uuid>", f"<arms/{a}.md>",
                                       cfg.budget_usd)
             if a == "views" and subprocess.run(["gdmd", "view", "--help"], env=copy.env(),
@@ -529,7 +538,8 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps({"cell": f"{t}__{a}__r{r}", "world": copy.world,
                               "cwd": str(copy.root), "stdin": f"tasks/{t}.md",
                               "argv": argv_shown, "fixture_base": fixture.BASE_TAG,
-                              "source_sha": copy.source_sha, "overlay_sha": copy.overlay_sha}))
+                              "source_sha": copy.source_sha, "overlay_sha": copy.overlay_sha,
+                              "card_sha256": copy.card_sha}))
             if not cfg.keep_copies:
                 shutil.rmtree(cell, ignore_errors=True)
         print(f"dry-run OK: {len(cells)} cell(s); flags validated against {cli_version}"

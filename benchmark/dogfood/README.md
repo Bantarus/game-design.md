@@ -31,9 +31,11 @@ results/sessions/             session JSONLs, stderr, VCC views (gitignored; com
 | Arm | World: tooling-and-instructions layer | `gdmd` | Appended text |
 | --- | --- | --- | --- |
 | `baseline` | `v0.3`: `CLAUDE.md`, `AGENTS.md`, `docs/spec.md`, `schema/`, `src/`, `pyproject.toml` from tag `v0.3.0` | the v0.3 venv | `arms/baseline.md` |
-| `views` | `matrix`: the matrix commit as-is | the copy's own `src/` | `arms/views.md` |
+| `views` | `matrix`: the matrix commit as-is | the copy's own `src/` | `arms/views.md` (pinned by SHA-256) |
+| `import-full` (Rule C) | `matrix` | the copy's own `src/` | `arms/baseline.md` |
+| `import-card` (Rule C) | `matrix`, with `CLAUDE.md`'s `@docs/spec.md` line swapped for `@docs/spec-card.md` | the copy's own `src/` | `arms/baseline.md` |
 
-Everything else in a copy, including every task tree, comes from the matrix commit in both arms, so task content is identical by construction. The D-024 card ablation (Rule C) runs in the `matrix` world with `arms/baseline.md` (D-024 puts it on the baseline tool arm; the card needs v0.4 tooling).
+Everything else in a copy, including every task tree, comes from the matrix commit in both arms, so task content is identical by construction. The D-024 card ablation (Rule C) runs in the `matrix` world with `arms/baseline.md` (D-024 puts it on the baseline tool arm; the card needs v0.4 tooling). In each `import-card` copy, `fixture.swap_in_card` generates `docs/spec-card.md` with the copy's own `gdmd spec --card` and swaps only that one import line, before the copy's baseline commit, so no checker sees the swap as an edit.
 
 **The judge.** Checkers never use the arm's own `gdmd`. `run.py` exports the matrix commit's `src/` once per run as the fixed judge and passes it as `$DOGFOOD_GDMD`. The preflight refuses a copy if the arm's `gdmd` and the judge lint the untouched fixture differently, before or after the fixture patch.
 
@@ -103,6 +105,8 @@ Each run is exactly one of:
 
 - **Consultation bytes by view mode** (secondary, D-025 amendment 5): `view_mode_bytes` / `view_mode_calls` attribute each Bash call's full result bytes (errors included, as in the primary) to the view mode its command runs: `overview`, `full`, `grep`, `ref` (`gdmd view`), `graph` (any `gdmd graph`), `other` (`--help`), or `mixed` (more than one mode in one call). Descriptive only; it shows whether a mode such as `--full` drove the views arm's cost.
 
+- **`--section` calls** (Rule C secondary): `gdmd_spec_section_calls` counts Bash calls containing `gdmd spec --section`, a sign of what the card leaves out.
+
 These are the two pre-registered primaries: consultation bytes for views vs baseline, per-turn occupancy for the D-024 card ablation. The exact definitions live in D-025; keep this file in sync with it.
 
 ## Commands
@@ -115,6 +119,7 @@ python run.py --pilot                      # baseline x every task x 1 (not evid
 python run.py --task lookup_refs --arm views --repeats 3
 python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
 python analyze.py rule-v results/<run>.jsonl [results/<rerun-or-extension>.jsonl ...]   # Rule V verdict, as locked
+python analyze.py rule-c results/<run>.jsonl [...] --probe results/import-probe-<id>.json   # Rule C verdict (delta from the probe)
 ```
 
 Order of operations (D-023 / D-025): dry run → probe → import probe → pilot (validates checkers, isolation and extraction; estimates cost) → **stop for approval** → full matrix.

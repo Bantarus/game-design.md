@@ -358,6 +358,10 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
                                and "gdmd view" in str(c["input"].get("command", ""))),
         "gdmd_graph_calls": sum(1 for c in calls.values() if c["name"] == "Bash"
                                 and "gdmd graph" in str(c["input"].get("command", ""))),
+        # D-025 Rule C secondary: "Bash calls containing `gdmd spec --section`"
+        "gdmd_spec_section_calls": sum(1 for c in calls.values() if c["name"] == "Bash"
+                                       and "gdmd spec --section"
+                                       in str(c["input"].get("command", ""))),
         "view_mode_bytes": {m: mode_bytes[m] for m in VIEW_MODES if m in mode_bytes},
         "view_mode_calls": {m: mode_calls[m] for m in VIEW_MODES if m in mode_calls},
         "bash_read_calls": bash_calls,

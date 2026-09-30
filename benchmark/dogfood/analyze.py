@@ -1,6 +1,7 @@
-"""Rule V verdict, computed exactly as D-025 locks it (views vs baseline).
+"""Rule V and Rule C verdicts, computed exactly as D-025 locks them.
 
-    python analyze.py rule-v <results.jsonl> [<results.jsonl> ...] [--json]
+    python analyze.py rule-v <results.jsonl> [<results.jsonl> ...]
+    python analyze.py rule-c <results.jsonl> [...] --probe <import-probe.json>
 
 Pass the matrix run's JSONL plus any `--supersedes` re-run files and the
 guarded-task extension run (repeats 4-5). Committed before any matrix data
@@ -206,12 +207,157 @@ def rule_v(lines: list[dict], metrics_loader=metrics_for) -> dict:
     }
 
 
+def rule_c(lines: list[dict], delta: float, metrics_loader=metrics_for,
+           precondition_met: bool = True) -> dict:
+    """Rule C (the card-import ablation), as D-025 locks it.
+
+    Cells `import-full` (control) and `import-card` (treatment). Primary:
+    median per-turn occupancy per run; per task, the median over repeats 1-3
+    of each cell (`M_full,t`, `M_card,t`); `d_t = M_full,t - M_card,t`;
+    `D` = the median over tasks of `d_t`. PASS needs `D >= 0.5 * delta`
+    (delta = the matrix-world import probe's `spec_import_tokens` at the
+    Rule C commit) and non-inferiority, with no guarded task left at e_t = 1.
+    FAIL: clause 1 violated or a guarded task at e_t >= 2. Otherwise NULL,
+    including an unmet precondition (D-024 §2; met at the pilot) or an
+    apparatus NULL. The four resolutions of rule_v apply (amendment 5).
+    """
+    ctl, trt = "import-full", "import-card"
+    eff = {k: v for k, v in effective(lines).items() if k[1] in (ctl, trt)}
+    tasks = sorted({t for t, _, _ in eff})
+    main = {k: v for k, v in eff.items() if k[2] <= 3}
+    ext = {k: v for k, v in eff.items() if k[2] >= 4}
+    contam = {k: contaminated(v, metrics_loader(v)) for k, v in eff.items()}
+
+    def ok(k) -> bool:
+        return eff[k]["outcome"] == "success" and not contam[k]
+
+    n_main = len(main)
+    errors = [k for k in main if main[k]["outcome"] == "error"]
+    apparatus: list[str] = []
+    if n_main and len(errors) / n_main > APPARATUS_MAX:
+        apparatus.append(f"errors {len(errors)}/{n_main} > 10%")
+    for arm in (ctl, trt):
+        arm_keys = [k for k in main if k[1] == arm]
+        c = [k for k in arm_keys if contam[k]]
+        if arm_keys and len(c) / len(arm_keys) > APPARATUS_MAX:
+            apparatus.append(f"contamination in {arm}: {len(c)}/{len(arm_keys)} > 10%")
+
+    per_task, missing = {}, []
+    for t in tasks:
+        med = {}
+        for arm in (ctl, trt):
+            vals = []
+            for r in (1, 2, 3):
+                ln = main.get((t, arm, r))
+                if ln is None or ln.get("median_turn_occupancy") is None:
+                    missing.append(f"{t}/{arm}/r{r}")
+                    continue
+                vals.append(ln["median_turn_occupancy"])
+            med[arm] = statistics.median(vals) if vals else None
+        f, c = med[ctl], med[trt]
+        d_t = (f - c) if None not in (f, c) else None
+        per_task[t] = {"M_full": f, "M_card": c, "d_t": d_t,
+                       "d_t_over_delta": (d_t / delta) if d_t is not None and delta else None,
+                       "relative_reduction": (1 - c / f) if d_t is not None and f else None}
+    ds = [d["d_t"] for d in per_task.values() if d["d_t"] is not None]
+    D = statistics.median(ds) if ds else None
+    threshold = 0.5 * delta
+
+    succ = {arm: sum(1 for k in main if k[1] == arm and ok(k)) for arm in (ctl, trt)}
+    runs = {arm: sum(1 for k in main if k[1] == arm) for arm in (ctl, trt)}
+    rate = {arm: (succ[arm] / runs[arm] if runs[arm] else None) for arm in succ}
+    clause1 = None if None in rate.values() else (rate[ctl] - rate[trt]) <= Y + 1e-9
+    guarded, extension_required = {}, False
+    for t in GUARDED:
+        def not_success(arm, reps):
+            return sum(1 for r in reps if (t, arm, r) in eff and not ok((t, arm, r)))
+        e3 = not_success(trt, (1, 2, 3)) - not_success(ctl, (1, 2, 3))
+        g = {"e_t_r1_3": e3}
+        if e3 == 1:
+            if all((t, a, r) in ext for a in (ctl, trt) for r in (4, 5)):
+                e5 = not_success(trt, (1, 2, 3, 4, 5)) - not_success(ctl, (1, 2, 3, 4, 5))
+                g["e_t_r1_5"] = e5
+                g["state"] = "holds" if e5 <= 0 else ("FAIL" if e5 >= 2 else "NULL")
+            else:
+                extension_required = True
+                g["state"] = "extension required"
+        else:
+            g["state"] = "holds" if e3 <= 0 else "FAIL"
+        guarded[t] = g
+
+    reasons: list[str] = []
+    if not precondition_met:
+        verdict, reasons = "NULL", ["precondition not met (D-024 §2)"]
+    elif apparatus:
+        verdict, reasons = "NULL (apparatus)", apparatus
+    elif extension_required:
+        verdict = "PENDING: run the pre-registered extension (repeats 4-5, guarded tasks)"
+    else:
+        fail = []
+        if clause1 is False:
+            fail.append("non-inferiority clause 1 violated")
+        fail += [f"{t}: e_t >= 2" for t, g in guarded.items() if g["state"] == "FAIL"]
+        if fail:
+            verdict, reasons = "FAIL", fail
+        elif D is not None and D >= threshold and clause1 and \
+                all(g["state"] == "holds" for g in guarded.values()):
+            verdict, reasons = "PASS", [f"D = {D:,.0f} >= 0.5 x delta = {threshold:,.0f}",
+                                        "non-inferiority holds"]
+        else:
+            verdict = "NULL"
+            if D is not None and D < threshold:
+                reasons.append(f"D = {D:,.0f} < 0.5 x delta = {threshold:,.0f}")
+            reasons += [f"{t}: e_t = 1 after the extension" for t, g in guarded.items()
+                        if g["state"] == "NULL"]
+            if D is None:
+                reasons.append("D undefined (missing medians)")
+
+    card_runs = [main[k] for k in main if k[1] == trt]
+    section_calls = [ln.get("gdmd_spec_section_calls") or 0 for ln in card_runs]
+    outcomes = {arm: {} for arm in (ctl, trt)}
+    for k, ln in main.items():
+        outcomes[k[1]][ln["outcome"]] = outcomes[k[1]].get(ln["outcome"], 0) + 1
+    usd = {arm: statistics.median([main[k].get("est_cost_usd") or 0 for k in main if k[1] == arm])
+           if runs[arm] else None for arm in (ctl, trt)}
+    return {
+        "verdict": verdict, "reasons": reasons, "D": D, "delta": delta,
+        "threshold": threshold, "per_task": per_task,
+        "non_inferiority": {"successes": succ, "runs": runs, "rates": rate,
+                            "clause1_holds": clause1, "guarded": guarded},
+        "secondaries": {"median_usd": usd,
+                        "section_calls_total": sum(section_calls),
+                        "runs_with_section_calls": sum(1 for n in section_calls if n),
+                        "section_calls_per_run": (sum(section_calls) / len(section_calls)
+                                                  if section_calls else None)},
+        "apparatus": {"errors": [f"{t}/{a}/r{r}" for t, a, r in errors],
+                      "contaminated": {f"{t}/{a}/r{r}": v for (t, a, r), v in contam.items()
+                                       if v},
+                      "missing_primary": missing},
+        "outcomes": outcomes, "n_main": n_main, "n_extension": len(ext),
+    }
+
+
+def probe_delta(path: Path) -> float:
+    """Rule C's delta: the matrix-world `spec_import_tokens` of the import
+    probe run at the Rule C commit (D-025, "Probed delta")."""
+    d = json.loads(Path(path).read_text())["worlds"]["matrix"]["spec_import_tokens"]
+    if d is None:
+        raise SystemExit(f"{path}: no matrix-world spec_import_tokens")
+    return float(d)
+
+
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="D-025 Rule V verdict")
-    ap.add_argument("rule", choices=["rule-v"])
+    ap = argparse.ArgumentParser(description="D-025 Rule V / Rule C verdicts")
+    ap.add_argument("rule", choices=["rule-v", "rule-c"])
     ap.add_argument("results", nargs="+", type=Path)
+    ap.add_argument("--probe", type=Path, help="rule-c: the import probe at the Rule C commit")
     a = ap.parse_args(argv)
-    print(json.dumps(rule_v(load(a.results)), indent=2, sort_keys=True))
+    if a.rule == "rule-v":
+        print(json.dumps(rule_v(load(a.results)), indent=2, sort_keys=True))
+        return 0
+    if a.probe is None:
+        ap.error("rule-c needs --probe <import-probe json at the Rule C commit>")
+    print(json.dumps(rule_c(load(a.results), probe_delta(a.probe)), indent=2, sort_keys=True))
     return 0
 
 

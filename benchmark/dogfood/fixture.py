@@ -201,6 +201,32 @@ def lint_summary(gdmd: list[str], tree_dir: Path, env: dict | None = None) -> di
         return {"summary": {"errors": -1, "warnings": -1}, "raw": proc.stdout + proc.stderr}
 
 
+# D-025 Rule C: the import-card cell swaps only this line of the copy's CLAUDE.md.
+SPEC_IMPORT_LINE = "- Format definition: @docs/spec.md"
+CARD_IMPORT_LINE = "- Format definition: @docs/spec-card.md"
+
+
+def swap_in_card(root: Path) -> str:
+    """Rule C `import-card` cell construction (D-024 §3, D-025): generate
+    `docs/spec-card.md` with the copy's own `src/` from the copy's own spec
+    (`gdmd spec --card`), and replace only the `@docs/spec.md` import line in
+    the copy's `CLAUDE.md`. Runs before the copy's baseline commit, so the
+    swap is part of the fixture, not a subject edit. Returns the card's sha256."""
+    env = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
+    env["PYTHONPATH"] = str(root / "src")
+    proc = subprocess.run([sys.executable, "-m", "game_design_md", "spec", "--card"],
+                          cwd=root, env=env, capture_output=True, text=True)
+    if proc.returncode != 0 or not proc.stdout.strip():
+        raise FixtureError(f"gdmd spec --card failed in the copy: {proc.stderr[-500:]}")
+    (root / "docs" / "spec-card.md").write_text(proc.stdout, encoding="utf-8")
+    cm = root / "CLAUDE.md"
+    text = cm.read_text(encoding="utf-8")
+    if text.count(SPEC_IMPORT_LINE) != 1:
+        raise FixtureError(f"CLAUDE.md does not have exactly one {SPEC_IMPORT_LINE!r}")
+    cm.write_text(text.replace(SPEC_IMPORT_LINE, CARD_IMPORT_LINE), encoding="utf-8")
+    return hashlib.sha256(proc.stdout.encode("utf-8")).hexdigest()
+
+
 def write_gdmd_shim(bin_dir: Path, copy_root: Path, exe: Path | None = None) -> Path:
     """A `gdmd` executable: `exe` if given (the v0.3 venv), else the copy's own `src/`."""
     bin_dir.mkdir(parents=True, exist_ok=True)
@@ -220,6 +246,7 @@ class PreparedCopy:
     shim_dir: Path
     world: str = "matrix"
     overlay_sha: str | None = None
+    card_sha: str | None = None
 
     def env(self) -> dict:
         env = dict(os.environ)
@@ -241,7 +268,7 @@ def _judge_agrees(copy: PreparedCopy, tree: str, judge: Path, when: str) -> None
 
 
 def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD", world: str = "matrix",
-                 judge: Path | None = None) -> PreparedCopy:
+                 judge: Path | None = None, card: bool = False) -> PreparedCopy:
     """Build the isolated copy for one run of `task` under `cell_dir`.
 
     Raises FixtureError if the task's tree doesn't lint 0/0 before the fixture
@@ -257,12 +284,17 @@ def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD", world: str = "ma
     sha = export_ref(root, ref)
     overlay_sha = overlay_ref(root, V03_TAG, V03_OVERLAY) if world == "v0.3" else None
     strip_excluded(root)
+    if card and world != "matrix":
+        raise FixtureError("the card swap needs the matrix world (D-025 amendment 2)")
+    card_sha = swap_in_card(root) if card else None
     normalize_mtimes(root)
     init_repo(root, f"fixture: game-design.md at {sha[:12]}"
-                    + (f" with the {V03_TAG} tooling layer" if overlay_sha else ""))
+                    + (f" with the {V03_TAG} tooling layer" if overlay_sha else "")
+                    + (" with CLAUDE.md importing the generated card" if card else ""))
     exe = V03_VENV / "bin" / "gdmd" if world == "v0.3" else None
     copy = PreparedCopy(root=root, source_sha=sha, world=world, overlay_sha=overlay_sha,
-                        shim_dir=write_gdmd_shim(cell_dir / "bin", root, exe).parent)
+                        shim_dir=write_gdmd_shim(cell_dir / "bin", root, exe).parent,
+                        card_sha=card_sha)
     pre = lint_summary(["gdmd"], root / task.tree, env=copy.env())["summary"]
     if pre.get("errors") != 0 or pre.get("warnings") != 0:
         raise FixtureError(f"preflight lint of {task.tree} is not clean: {pre}")

@@ -813,3 +813,113 @@ def test_rule_v_contamination_is_not_success_and_listed():
     assert res["apparatus"]["contaminated"] == {"lookup_refs/views/r1": [
         "/home/u/game-design/benchmark/dogfood/tasks/x"]}
     assert res["non_inferiority"]["successes"]["views"] == 14
+
+
+# ---- Rule C cell construction (D-025, D-024 §3) and analyze.rule_c ---------------
+
+def test_import_card_copy_swaps_only_the_spec_import_in_the_baseline_commit(tmp_path):
+    from game_design_md import spec_cmd
+    card = fixture.prepare_copy(TASKS["maintenance_drift"], tmp_path / "card", card=True)
+    full = fixture.prepare_copy(TASKS["maintenance_drift"], tmp_path / "full")
+    cm_card = (card.root / "CLAUDE.md").read_text()
+    cm_full = (full.root / "CLAUDE.md").read_text()
+    assert fixture.CARD_IMPORT_LINE in cm_card and fixture.SPEC_IMPORT_LINE not in cm_card
+    assert cm_card.replace(fixture.CARD_IMPORT_LINE, fixture.SPEC_IMPORT_LINE) == cm_full
+    assert not (full.root / "docs/spec-card.md").exists() and full.card_sha is None
+    # the card is the copy's own `gdmd spec --card` over the copy's own spec
+    spec = spec_cmd._FENCE_RE.sub("", (card.root / "docs/spec.md").read_text(), count=1).lstrip()
+    assert (card.root / "docs/spec-card.md").read_text() == spec_cmd.card(spec)
+    import hashlib
+    assert card.card_sha == hashlib.sha256(spec_cmd.card(spec).encode()).hexdigest()
+    # part of the fixture's baseline commit, so no checker sees it as an edit
+    status = subprocess.run(["git", "status", "--porcelain"], cwd=card.root,
+                            capture_output=True, text=True).stdout
+    assert "CLAUDE.md" not in status and "spec-card.md" not in status
+    # an untouched copy passes the negative control in the card cell too: the
+    # swap is not a change the subject made
+    neg = fixture.prepare_copy(TASKS["negative_control_no_drift"], tmp_path / "neg", card=True)
+    rc, report = check("negative_control_no_drift", neg)
+    assert rc == 0 and not failed(report), report
+
+
+def test_card_swap_refuses_the_v03_world(tmp_path):
+    with pytest.raises(fixture.FixtureError, match="matrix world"):
+        fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "c", world="v0.3", card=True)
+
+
+def test_rule_c_arms_use_the_baseline_text_in_the_matrix_world():
+    assert dogfood_run.ARM_WORLD["import-full"] == dogfood_run.ARM_WORLD["import-card"] == "matrix"
+    base = dogfood_run.load_arm("baseline")
+    assert dogfood_run.load_arm("import-full") == dogfood_run.load_arm("import-card") == base
+
+
+def _c_lines(occ_by_arm, fail=(), run_id="c", repeats=(1, 2, 3), outcome_over=None,
+             section_calls=0):
+    out = []
+    for t in TASK_IDS:
+        for arm in ("import-full", "import-card"):
+            for r in repeats:
+                o = "fail" if (t, arm, r) in fail else "success"
+                if outcome_over and (t, arm, r) in outcome_over:
+                    o = outcome_over[(t, arm, r)]
+                out.append({"run_id": run_id, "cell_id": f"{t}__{arm}__r{r}", "task_id": t,
+                            "arm": arm, "repeat": r, "outcome": o,
+                            "median_turn_occupancy": occ_by_arm[arm], "est_cost_usd": 0.4,
+                            "gdmd_spec_section_calls": section_calls if arm == "import-card"
+                            else 0, "supersedes": None})
+    return out
+
+
+def _rule_c(lines, delta=50_000, **kw):
+    import analyze
+    return analyze.rule_c(lines, delta, metrics_loader=lambda ln: None, **kw)
+
+
+def test_rule_c_verdicts():
+    full = 80_000
+    assert _rule_c(_c_lines({"import-full": full, "import-card": full - 30_000}))["verdict"] \
+        == "PASS"                                                   # D = 30k >= 25k
+    res = _rule_c(_c_lines({"import-full": full, "import-card": full - 20_000}))
+    assert res["verdict"] == "NULL" and res["D"] == 20_000         # D < 0.5 x delta
+    two = {("lookup_refs", "import-card", 1), ("authoring_new_card", "import-card", 2)}
+    res = _rule_c(_c_lines({"import-full": full, "import-card": full - 30_000}, fail=two))
+    assert res["verdict"] == "FAIL"
+    one = {("negative_control_no_drift", "import-card", 1)}
+    assert _rule_c(_c_lines({"import-full": full, "import-card": full - 30_000},
+                            fail=one))["verdict"].startswith("PENDING")
+    errs = {(t, "import-card", 1): "error" for t in TASK_IDS[:4]}
+    assert _rule_c(_c_lines({"import-full": full, "import-card": full - 30_000},
+                            outcome_over=errs))["verdict"] == "NULL (apparatus)"
+    assert _rule_c(_c_lines({"import-full": full, "import-card": full - 30_000}),
+                   precondition_met=False)["verdict"] == "NULL"
+
+
+def test_rule_c_ignores_rule_v_lines_and_reports_section_calls():
+    lines = _c_lines({"import-full": 80_000, "import-card": 50_000}, section_calls=2) + \
+        _lines({"baseline": 1000, "views": 600})
+    res = _rule_c(lines)
+    assert res["n_main"] == 30 and res["verdict"] == "PASS"
+    assert res["secondaries"]["section_calls_total"] == 30
+    assert res["per_task"]["lookup_refs"]["d_t_over_delta"] == pytest.approx(0.6)
+
+
+def test_extract_counts_spec_section_calls(tmp_path):
+    from extract import extract, load_vcc
+    try:
+        vcc = load_vcc()
+    except FileNotFoundError:
+        pytest.skip("VCC.py not installed")
+    usage = {"input_tokens": 1, "cache_creation_input_tokens": 0,
+             "cache_read_input_tokens": 0, "output_tokens": 1}
+    cmds = ["gdmd spec --section 4.8", "gdmd spec --card | head", "gdmd spec --section 3; ls"]
+    recs = [{"type": "user", "message": {"role": "user", "content": "task"}}]
+    for i, cmd in enumerate(cmds):
+        tid = f"toolu_{i:06d}"
+        recs += [_rec("assistant", id=f"m{i}", role="assistant", usage=usage,
+                      content=[{"type": "tool_use", "id": tid, "name": "Bash",
+                                "input": {"command": cmd}}]),
+                 {"type": "user", "message": {"role": "user", "content": [
+                     {"type": "tool_result", "tool_use_id": tid, "content": "x"}]}}]
+    session = tmp_path / "s.jsonl"
+    session.write_text("\n".join(json.dumps(r) for r in recs) + "\n")
+    assert extract(session, vcc, Path("/copy"), tmp_path / "v")["gdmd_spec_section_calls"] == 2
