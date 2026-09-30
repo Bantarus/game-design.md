@@ -654,3 +654,18 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Impact today:** none observed on the 12 in-repo trees. It does matter as a false sense of safety: "lint clean" is weaker than the spec claims.
 - **Consequence for v0.4:** the dogfood authoring checker validates new entities against the content-schema itself (jsonschema, id == stem, required keys) instead of trusting lint.
 - **Resolution:** a new lint rule. It changes lint behavior, so it needs its own D-entry and commit, with proof-of-fire on real trees (the AGENTS.md maintenance-mode rule). Scheduled after v0.4 Checkpoint 3, alongside OI-003.
+- **One-off pass (2026-09-30, read-only, at `3e44035`; requested before the dogfood pilot): not clean.**
+  - All 29 entities linked through a content-schema's `data_dir` pass (a) jsonschema validation, (b) `id` == stem, and (c) `status` + `implemented_in`.
+  - One entity is linked to no schema. `templates/starters/party-rpg/gdd/content/heroes.md` has no `data_dir`, so `content/heroes/example_hero.yaml` is unchecked (it would validate if linked).
+  - A correction note for v0.3's §11 conformance claim is at [`docs/release-notes/v0.3-conformance-correction.md`](docs/release-notes/v0.3-conformance-correction.md). No lint rule is added yet.
+
+## OI-006 — Lint does not validate frontmatter against the normative JSON Schema (spec §10); 10 blocks in 8 trees fail it
+
+- **Logged:** 2026-09-30 (v0.4), found by the OI-005 pass. Evidence and reproduction are in [`docs/release-notes/v0.3-conformance-correction.md`](docs/release-notes/v0.3-conformance-correction.md).
+- **Spec says:** §10 calls `schema/game-design.schema.json` "the normative frontmatter schema". §11 makes `gdmd lint` exit 0 the first conformance item.
+- **Code does:** no schema validation at all (OI-005's `jsonschema` observation). Lint checks some required keys through individual rules, not the schema.
+- **Found:** 10 of 158 frontmatter blocks fail, in 8 of the 12 trees; the four canonical examples pass. Three classes:
+  - **A.** Whole-namespace `applies_to` refs (`"{resources}"`) in 8 `architecture-invariants.md` files. `$defs.TokenRef` needs 2–6 segments, yet **spec §4.11's own example uses the form**. So this is a spec↔schema contradiction first and a tree issue second.
+  - **B.** `cost: { time_cost: …, consumes: … }` on 8 verbs of `benchmark/games/survival/gdd/mechanics.md`, outside `$defs.Cost`.
+  - **C.** `templates/starters/party-rpg/gdd/content/heroes.md` lacks the required `data_dir` and `count_target` (the root of OI-005's unlinked entity).
+- **Resolution:** per class, decide whether the tree or the schema/spec is wrong. Then decide whether lint should run the schema. Either changes lint behavior or tree content, so each gets its own D-entry and commit. Scheduled with OI-005, after v0.4 Checkpoint 3.

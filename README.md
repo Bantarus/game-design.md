@@ -60,7 +60,7 @@ The v0.2 help-benchmark (F-009) reported NULL on success-lift and FAIL on cost-l
 
 ## Tree validation at a glance
 
-All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean at v0.3 — 0 errors, 0 warnings — under default thresholds.
+All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean at v0.3 — 0 errors, 0 warnings — under default thresholds. Lint-clean is weaker than §11 conformance: see the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md).
 
 | Tree | Genre | v0.3 vocab carried |
 | --- | --- | --- |
