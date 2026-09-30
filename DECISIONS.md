@@ -1362,6 +1362,28 @@ The pilot is run `pilot-s2-20260930`: the baseline arm (v0.3 world), one run per
   - the tree (manifest `718e52d2…`), tasks, prompts, answers, cells, primaries, thresholds and verdict mapping;
   - Δ: `DECISIONS.md` is not imported, and the import layer (`CLAUDE.md`, `AGENTS.md`, the spec, the schema, the deckbuilder root, `src/`) is unchanged.
 
+### Amendment 7 (2026-09-30, before any study-2 matrix data): another session's scratchpad is contamination
+
+- **Decided:** by the user at the pilot review: "before the matrices, verify each run touches only its own session's scratchpad directory. Extend the out-of-copy detector: access to another session's scratchpad counts as contamination under D-025's rule, and is tested. Own-session scratchpad use stays listed, not penalized."
+- **Why:**
+  - Claude Code keeps a scratchpad per session outside the copy, at `/tmp/claude-<uid>/<cwd slug>/<session id>/`, and the directories outlive their sessions. The study-2 pilot's are still on disk, with the subjects' scripts and intermediate lists.
+  - A run that read another session's directory, above all another repeat of the same task, would be reading another subject's work.
+- **The rule** (`analyze.scratchpad_access`, applied by `analyze.contaminated`):
+  - **Scratchpad paths** are paths with a `claude-<uid>` component, absolute or relative, including a glob on the uid.
+  - **Own:** the next component is the directory Claude Code keys by the run's copy: the slug of `<workdir>/<run_id>/<cell_id>/repo`, with every non-alphanumeric character turned into `-`.
+    - Copy paths are single-use, so this directory holds only this run's sessions: the subject's (its pinned `--session-id`) and an empty one the CLI creates at startup.
+    - "Own" means that directory rather than the session-id directory, because the empty startup directory belongs to the same run.
+  - **Other:** any other directory under the root, or the root itself, whose listing shows every other session. It is contamination under D-025: the run is not-success and listed, and more than 10% in an arm makes the verdict NULL (apparatus). A denied attempt also counts.
+  - **Residual:** a search rooted above the root (for example `grep -r … /tmp`) is listed as out-of-copy access but not counted, because its path does not name the scratchpad root. The report lists every such case.
+- **Verification on the existing runs:**
+  - **Study 2's pilot:** 18 scratchpad accesses in 3 runs (`s2_impact_files` 6, `s2_impact_tokens` 5, `s2_lookup_backward` 7). Every one is inside the run's own session-id directory; none is anywhere else.
+  - **Study 1 (65 runs):** no scratchpad access. Its verdicts, recomputed, are byte-identical.
+- **Tests** (`tests/test_dogfood_study2.py`):
+  - 13 classified paths: the subject's file, the CLI's startup directory and the copy's own directory are own. The next repeat, another run's cell, the operator's session, the root with and without a slash, and globs on the slug or uid are other, and so is a relative `../../claude-1000/…`. Paths outside the scratchpad root are neither.
+  - Rule V2 counts another session's scratchpad as not-success and lists only that path; the run's own use is not listed.
+  - **The pilot's real paths:** all 18 are own. Re-keyed to the next repeat's cell, the same 18 are contamination (proof of fire).
+- **Not changed:** the copies, cells, primaries, thresholds and verdict mapping.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)

@@ -28,11 +28,19 @@ Resolutions of points the locked text leaves open (recorded in amendment 5):
   `DECISIONS.md`, which copies no longer carry because it names study 2's
   answers (D-026 amendment 6). Conservative: a denied attempt also counts,
   and every case is listed for review.
+- Contamination also covers another session's scratchpad (D-026 amendment
+  7): Claude Code keeps one per session outside the copy, under
+  `<tmp>/claude-<uid>/<slug of the session's cwd>/<session id>/`. A run's
+  cwd is its copy, whose path is single-use, so the directory keyed by the
+  copy holds only this run's sessions. Any other path into the scratchpad
+  root, the root itself included, reaches other sessions' files. Own-session
+  use stays listed, not penalized (`scratchpad_access`).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -71,12 +79,33 @@ def effective(lines: list[dict]) -> dict[tuple[str, str, int], dict]:
     return out
 
 
+# D-026 amendment 7: the scratchpad root component (a glob on the uid included).
+_SCRATCH_ROOT = re.compile(r"(?:^|/)claude-[0-9*?]+(?:/|$)")
+
+
+def _cwd_slug(path: str) -> str:
+    """Claude Code's per-cwd directory name: every non-alphanumeric becomes '-'."""
+    return re.sub(r"[^A-Za-z0-9]", "-", path)
+
+
+def scratchpad_access(line: dict, path: str) -> str | None:
+    """None if `path` is not in a Claude Code scratchpad; "own" if it is inside
+    the directory keyed by this run's copy (<workdir>/<run_id>/<cell_id>/repo);
+    "other" for any other session's directory or the root that holds them."""
+    m = _SCRATCH_ROOT.search(path)
+    if not m:
+        return None
+    slug = path[m.end():].split("/")[0]
+    own = _cwd_slug(f"/{line.get('run_id')}/{line.get('cell_id')}/repo")
+    return "own" if slug and slug.endswith(own) else "other"
+
+
 def contaminated(line: dict, metrics: dict | None) -> list[str]:
     entries = (metrics or {}).get("out_of_copy_access") or []
     hits = []
     for e in entries:
         path = str(e.get("path") or e.get("file_path") or e.get("notebook_path") or "")
-        if any(m in path for m in HARNESS_MARKERS):
+        if any(m in path for m in HARNESS_MARKERS) or scratchpad_access(line, path) == "other":
             hits.append(path)
     return hits
 

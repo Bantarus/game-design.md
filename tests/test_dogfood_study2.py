@@ -593,6 +593,72 @@ def test_rule_c2():
     assert res["verdict"].startswith("PENDING")
 
 
+# ---- D-026 amendment 7: another session's scratchpad is contamination --------------------
+
+SID = "94068110-ec56-4230-a5c4-a1ea9c660af2"
+LINE = {"run_id": "s2", "cell_id": "s2_lookup_forward__views__r1", "session_id": SID}
+OWN = "/tmp/claude-1000/-tmp-gdmd-dogfood-s2-s2-lookup-forward--views--r1-repo"
+
+
+@pytest.mark.parametrize("path,kind", [
+    (f"{OWN}/{SID}/scratchpad/g.py", "own"),
+    (f"{OWN}/51022e8c-0dfb-4fa8-bdb0-07b4c8ca1a29/scratchpad", "own"),   # the CLI's own sibling
+    (OWN, "own"),
+    ("/tmp/claude-1000/-tmp-gdmd-dogfood-s2-s2-lookup-forward--views--r2-repo/x/scratchpad/g.py",
+     "other"),                                                            # the next repeat
+    ("/tmp/claude-1000/-tmp-gdmd-dogfood-s1-s2-lookup-forward--views--r1-repo/x/out.txt",
+     "other"),                                                            # another run's cell
+    ("/tmp/claude-1000/-home-u-game-design/9f18/scratchpad/notes.txt", "other"),  # the operator
+    ("/tmp/claude-1000", "other"),
+    ("/tmp/claude-1000/", "other"),
+    ("/tmp/claude-1000/*/scratchpad", "other"),
+    ("/tmp/claude-*/", "other"),
+    ("../../claude-1000/-tmp-gdmd-dogfood-s1-x-repo/y", "other"),
+    ("/tmp/gdmd-dogfood/s2/judge/src", None),
+    ("/home/u/.claude/projects/x.jsonl", None),
+])
+def test_scratchpad_access_is_own_or_other(path, kind):
+    assert analyze.scratchpad_access(LINE, path) == kind
+    assert analyze.contaminated(LINE, {"out_of_copy_access": [
+        {"tool": "Bash", "path": path}]}) == ([path] if kind == "other" else [])
+
+
+def test_other_session_scratchpad_is_not_success_and_listed():
+    lines = _s2_lines(("baseline", "views"), "consultation_bytes",
+                      {"baseline": 1000, "views": 600})
+    hit = "s2_lookup_forward__views__r1"
+    leak = {"out_of_copy_access": [
+        {"tool": "Read", "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-s2-"
+                                      "s2-lookup-forward--views--r2-repo/x/scratchpad/out.txt"},
+        {"tool": "Bash", "path": f"{OWN}/{SID}/scratchpad/g.py"}]}
+    res = analyze.rule_v2(lines, metrics_loader=lambda ln: leak if ln["cell_id"] == hit else None)
+    assert list(res["apparatus"]["contaminated"]) == ["s2_lookup_forward/views/r1"]
+    assert res["apparatus"]["contaminated"]["s2_lookup_forward/views/r1"] == [
+        leak["out_of_copy_access"][0]["file_path"]]                 # own use is not listed there
+    assert res["non_inferiority"]["successes"]["views"] == 17
+
+
+def test_the_pilots_scratchpad_use_was_all_own_session():
+    """On the committed pilot metrics: 18 scratchpad accesses in 3 runs, every one
+    inside the run's own session directory. Re-keyed to another cell, the same
+    accesses are contamination (proof of fire on real paths)."""
+    lines = analyze.load([analyze.RESULTS_DIR / "pilot-s2-20260930.jsonl"])
+    own, fired = 0, 0
+    for ln in lines:
+        paths = [str(e.get("path") or e.get("file_path"))
+                 for e in analyze.metrics_for(ln)["out_of_copy_access"]]
+        for p in paths:
+            kind = analyze.scratchpad_access(ln, p)
+            assert kind != "other", (ln["cell_id"], p)
+            if kind == "own":
+                own += 1
+                assert f"/{ln['session_id']}/" in p
+        other = dict(ln, cell_id=ln["cell_id"].replace("__r1", "__r2"))
+        fired += len(analyze.contaminated(other, analyze.metrics_for(ln)))
+        assert analyze.contaminated(ln, analyze.metrics_for(ln)) == []
+    assert (own, fired) == (18, 18)
+
+
 def test_each_rule_refuses_the_other_studys_lines():
     s2 = _s2_lines(("baseline", "views"), "consultation_bytes", {"baseline": 1, "views": 1})
     s1 = [dict(ln, study=1) for ln in s2]

@@ -102,6 +102,10 @@ Each answer checker also reports per-question Jaccard (descriptive).
 
 Residual leakage risk: file tools and Bash `cat`/`grep` can read absolute paths outside the copy. It isn't prevented, but it is **detected**: `extract.py` reports any tool input path outside the copy as `out_of_copy_access`, and a run with a non-zero count is flagged.
 
+**Scratchpads (D-026 amendment 7).** Claude Code gives each session a scratchpad outside the copy, at `/tmp/claude-<uid>/<cwd slug>/<session id>/`, and the directories outlive their sessions. A run's cwd is its copy, whose path is single-use, so the directory keyed by the copy holds only that run's sessions. `analyze.scratchpad_access` classifies each out-of-copy path:
+- inside that directory: own use, listed and not penalized;
+- anywhere else under `/tmp/claude-<uid>/`, or the root itself (another cell, another run, the operator's session): contamination, as reading the harness is.
+
 ## Outcomes (D-025)
 
 Each run is exactly one of:
