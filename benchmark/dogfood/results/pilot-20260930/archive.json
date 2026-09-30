@@ -1,0 +1,27 @@
+{
+  "archive": "/home/bantarus/.local/share/gdmd-dogfood/archive/pilot-20260930.tar.xz",
+  "bytes": 106024,
+  "members": {
+    "authoring_new_card__baseline__r1.jsonl": "fb0ae3f71f8a61ce6abb6452490bb358089f9cef29bcd2570573d83bfd2a3c10",
+    "authoring_new_card__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lookup_refs__baseline__r1.jsonl": "2fa2af30de5be6e27ca984e73a9a93301506f8c103505939928f45da52e53ec0",
+    "lookup_refs__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "maintenance_drift__baseline__r1.jsonl": "f228bb76fcaab39010c74cc1f68ed9234e351c812b1c4970a10491d39a0c5863",
+    "maintenance_drift__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "negative_control_no_drift__baseline__r1.jsonl": "69a46afcbe7e6a2349087e6253571e9a7d4f707cc50afd0b67893a6d5d85f156",
+    "negative_control_no_drift__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "operating_energy_budget__baseline__r1.jsonl": "48f13f4e6f86c8c9aa9f662783360ca2db2eb5c50b9daf3c44ad821d93a3b065",
+    "operating_energy_budget__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "views/authoring_new_card__baseline__r1.min.txt": "4463b750f09f85663fff7dc60b17d97d5dd2833e125dc1ca08750d3d0c52968e",
+    "views/authoring_new_card__baseline__r1.txt": "d57ada37896f079671c424bd8e50351662e3bfb365c84bffbd300496824d157b",
+    "views/lookup_refs__baseline__r1.min.txt": "d1aed569c41c7aaafbd9648bd681df73c7d8c44ff243dc1dd3dd0db6126afc3b",
+    "views/lookup_refs__baseline__r1.txt": "88dc5861d77c0747c261d0437f07ee0bf1975518ffb1b4277af16e011029daa1",
+    "views/maintenance_drift__baseline__r1.min.txt": "0a9e96bde1eb93012dabf75cec4fd4688838dfc0dd81a258447b2d271f7af5e6",
+    "views/maintenance_drift__baseline__r1.txt": "2c1eeee6f37290b5634438ed798d79fd79c2df93438e2b2f0589e5015d0a41d8",
+    "views/negative_control_no_drift__baseline__r1.min.txt": "3caddcd9635e19c6c34254d2cae4030f92d553bb3c5799ffcd2c9130de67e7fc",
+    "views/negative_control_no_drift__baseline__r1.txt": "1cdff1dc44490892354d7a23307c2bed112a6c0a6d8059a10717010b4bd1e98a",
+    "views/operating_energy_budget__baseline__r1.min.txt": "e0e4c22711a6d844951012aef3f4126f21f7209ccb571ec4b6b4521eee500192",
+    "views/operating_energy_budget__baseline__r1.txt": "c1f2016d494db3e4f11e34e926bdd3ad1ab6208e203f2e3b7d07d93b714ca2f6"
+  },
+  "sha256": "ea2dd240438a66320595a763ac4aa5fd63b8855f9988bdaa838b7606b85a4523"
+}

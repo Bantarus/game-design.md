@@ -1,0 +1,109 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 2609,
+  "cache_read_tokens": 538153,
+  "cache_creation_tokens": 72724,
+  "tool_calls": 10,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 8381,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 76974.0,
+  "per_turn_occupancy": [
+    72400,
+    74223,
+    75975,
+    76614,
+    77334,
+    77634,
+    78126,
+    78587
+  ],
+  "tool_counts": {
+    "Bash": 8,
+    "Edit": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "32HaKC",
+      "result_bytes": 3283,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:25-104"
+    },
+    {
+      "tool": "Bash",
+      "id": "F4rYqb",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r1.txt:116-116"
+    },
+    {
+      "tool": "Bash",
+      "id": "LNFggK",
+      "result_bytes": 3664,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:128-220"
+    },
+    {
+      "tool": "Bash",
+      "id": "62Q2Ev",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r1.txt:256-256"
+    },
+    {
+      "tool": "Write",
+      "id": "ikaBdd",
+      "result_bytes": 215,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:290-290"
+    },
+    {
+      "tool": "Bash",
+      "id": "ds7Sfh",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r1.txt:302-302"
+    },
+    {
+      "tool": "Bash",
+      "id": "qRe2Ch",
+      "result_bytes": 73,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r1.txt:314-314"
+    },
+    {
+      "tool": "Edit",
+      "id": "thHWEm",
+      "result_bytes": 146,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:333-333"
+    },
+    {
+      "tool": "Bash",
+      "id": "6kFrXn",
+      "result_bytes": 27,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:345-345"
+    },
+    {
+      "tool": "Bash",
+      "id": "2KtFyB",
+      "result_bytes": 732,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r1.txt:357-383"
+    }
+  ]
+}
