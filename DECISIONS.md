@@ -1536,6 +1536,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - All 29 entities linked through a content-schema's `data_dir` pass (a) jsonschema validation, (b) `id` == stem, and (c) `status` + `implemented_in`.
   - One entity is linked to no schema. `templates/starters/party-rpg/gdd/content/heroes.md` has no `data_dir`, so `content/heroes/example_hero.yaml` is unchecked (it would validate if linked).
   - A correction note for v0.3's §11 conformance claim is at [`docs/release-notes/v0.3-conformance-correction.md`](docs/release-notes/v0.3-conformance-correction.md). No lint rule is added yet.
+  - **Update (2026-09-30):** D-031 links the entity. A re-run at `326cd50` finds 30 linked entities, all passing, and none unlinked (OI-006 progress). The lint rule itself still waits until after study 2.
 
 ## OI-006 — Lint does not validate frontmatter against the normative JSON Schema (spec §10); 10 blocks in 8 trees fail it
 
@@ -1544,9 +1545,19 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Code does:** no schema validation at all (OI-005's `jsonschema` observation). Lint checks some required keys through individual rules, not the schema.
 - **Found:** 10 of 158 frontmatter blocks fail, in 8 of the 12 trees; the four canonical examples pass. Three classes:
   - **A.** Whole-namespace `applies_to` refs (`"{resources}"`) in 8 `architecture-invariants.md` files. `$defs.TokenRef` needs 2–6 segments, yet **spec §4.11's own example uses the form**. So this is a spec↔schema contradiction first and a tree issue second.
-  - **B.** `cost: { time_cost: …, consumes: … }` on 8 verbs of `benchmark/games/survival/gdd/mechanics.md`, outside `$defs.Cost`.
+  - **B.** `cost: { time_cost: …, consumes: … }` on the verbs of `benchmark/games/survival/gdd/mechanics.md`, outside `$defs.Cost`. Logged as 8 verbs; it was all 9 (D-030).
   - **C.** `templates/starters/party-rpg/gdd/content/heroes.md` lacks the required `data_dir` and `count_target` (the root of OI-005's unlinked entity).
 - **Resolution:** per class, decide whether the tree or the schema/spec is wrong. Then decide whether lint should run the schema. Either changes lint behavior or tree content, so each gets its own D-entry and commit. Scheduled with OI-005, after v0.4 Checkpoint 3.
+- **Progress (2026-09-30): classes B and C are fixed; class A remains.**
+  - **B:** fixed in the tree by D-030. **C:** fixed in the starter by D-031, which also links OI-005's unlinked entity.
+  - **Re-run of the one-off pass** at `326cd50`, both steps, all 12 trees:
+    - 158 frontmatter blocks, **8 fail**. All 8 are class A, the `architecture-invariants.md` files of the 2 benchmark games and the 6 starters, and each fails only on whole-namespace `applies_to` items.
+    - 16 content-schemas link 30 entities, and all 30 pass §6.2 (a)–(c). No content entity is unlinked.
+  - **Guard:** `tests/test_starter_schema.py`.
+    - Every starter's frontmatter must validate. The 6 class-A starter files are strict xfails, so the xfail fails the day one of them validates.
+    - A second test pins that whole-namespace `applies_to` is their only error, so the xfail cannot hide another defect.
+    - Proof of fire: the pre-D-031 `heroes.md` fails the guard, and an invalid `enforcement:` injected into a class-A file fails the second test.
+  - **Remaining, after study 2 (D-026 amendment 3):** the class A decision (spec §4.11's example vs `$defs.TokenRef`), then whether lint runs the schema.
 
 ## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; tool freeze)
 
