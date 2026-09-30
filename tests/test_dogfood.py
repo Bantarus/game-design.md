@@ -476,6 +476,25 @@ def dogfood_ctx(c):
     return c["claude_md_loaded"], c["auto_memory_prompt"], c["assistant_models"]
 
 
+@pytest.mark.parametrize("command, cwd, want_read, want_paths, want_cwd", [
+    # D-025 amendment 3: Bash reads (non-gating secondaries)
+    ("cat a.yaml b.yaml", "/c", True, ["/c/a.yaml", "/c/b.yaml"], "/c"),
+    ("cd x && head -40 g.md; sed -n 1,20p y.md", "/c", True, ["/c/x/g.md", "/c/x/y.md"], "/c/x"),
+    ("head -n 5 a.md", "/c", True, ["/c/a.md"], "/c"),
+    ('grep -rniE "a|b" gdd/ | grep -v "^./c"', "/c", True, ["/c/gdd"], "/c"),
+    ("grep -n 'x' -A 25 m.md | head -60", "/c", True, ["/c/m.md"], "/c"),
+    ("ls content | head -30", "/c", False, [], "/c"),                  # pipe-fed head
+    ("cat > k.yaml <<'EOF'\nid: x\nname: \"a|b\"\nEOF", "/c", False, [], "/c"),  # write
+    ("sed -i 's/a/b/' x.md", "/c", False, [], "/c"),                 # write
+    ("git show HEAD | head -200", "/c", True, [], "/c"),
+    ("gdmd lint . 2>&1 | tail -5", "/c", False, [], "/c"),
+    ("cd ../..; gdmd touch a.md", "/c/x/y", False, [], "/c"),
+])
+def test_bash_reads(command, cwd, want_read, want_paths, want_cwd):
+    from extract import bash_reads
+    assert bash_reads(command, cwd) == (want_read, want_paths, want_cwd)
+
+
 def test_archive_sessions_outside_repo_with_member_hashes(tmp_path, monkeypatch):
     import tarfile
     monkeypatch.setattr(dogfood_run, "RESULTS_DIR", tmp_path / "results")
@@ -546,6 +565,37 @@ def test_extract_synthetic_session(tmp_path):
     assert m["output_tokens"] == 12
     assert m["out_of_copy_access"] == []
     assert all(d["vcc"] for d in m["tool_detail"])
+
+
+def test_extract_bash_reads_across_calls(tmp_path):
+    # D-025 amendment 3: cwd persists across Bash calls; errored calls don't
+    # read; Read and Bash reads share one copy-relative path space.
+    from extract import extract, load_vcc
+    try:
+        vcc = load_vcc()
+    except FileNotFoundError:
+        pytest.skip("VCC.py not installed")
+    usage = {"input_tokens": 1, "cache_creation_input_tokens": 0,
+             "cache_read_input_tokens": 0, "output_tokens": 1}
+
+    def turn(mid, tid, name, inp, text, err=False):
+        return [_rec("assistant", id=mid, role="assistant", usage=usage,
+                     content=[{"type": "tool_use", "id": tid, "name": name, "input": inp}]),
+                {"type": "user", "message": {"role": "user", "content": [
+                    {"type": "tool_result", "tool_use_id": tid, "content": text,
+                     "is_error": err}]}}]
+    recs = [{"type": "user", "message": {"role": "user", "content": "task"}},
+            *turn("m1", "toolu_aaaaa1", "Bash", {"command": "cd gdd && cat loops.md"}, "L1"),
+            *turn("m2", "toolu_aaaaa2", "Bash", {"command": "head -5 loops.md"}, "L1"),
+            *turn("m3", "toolu_aaaaa3", "Read", {"file_path": "/copy/gdd/mechanics.md"}, "M"),
+            *turn("m4", "toolu_aaaaa4", "Bash", {"command": "cat x.md"}, "denied", err=True)]
+    session = tmp_path / "s.jsonl"
+    session.write_text("\n".join(json.dumps(r) for r in recs) + "\n")
+    m = extract(session, vcc, Path("/copy"), tmp_path / "views")
+    assert (m["bash_read_calls"], m["bash_read_bytes"], m["bash_files_read"]) == (2, 4, 1)
+    assert m["all_files_read_paths"] == ["gdd/loops.md", "gdd/mechanics.md"]
+    assert (m["all_files_read"], m["all_re_reads"]) == (2, 1)
+    assert (m["files_read"], m["re_reads"]) == (1, 0)          # Read-only secondaries unchanged
 
 
 def test_extract_flags_out_of_copy_bash_paths(tmp_path):

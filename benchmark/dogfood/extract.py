@@ -26,6 +26,7 @@ import importlib.util
 import json
 import os
 import re
+import shlex
 import statistics
 from collections import OrderedDict
 from pathlib import Path
@@ -35,6 +36,95 @@ DEFAULT_VCC = Path.home() / ".claude/skills/conversation-compiler/scripts/VCC.py
 # Path-like tokens in a Bash command: absolute, home-relative, or with `..`.
 _PATH_TOKEN = re.compile(r"(?:(?<=\s)|(?<=^)|(?<=[\"'=]))((?:/|~|\.\./)[^\s\"'|;&<>()]*)")
 _HARMLESS_ABS = {"/dev/null", "/"}
+
+
+# ---- Bash reads (D-025 amendment 3: non-gating secondaries) ----------------------
+# Programs whose operands are files the model reads the content of. `git show`
+# counts as a read call but yields no file operands.
+_READ_PROGS = {"cat", "head", "tail", "sed", "grep", "nl", "less", "more", "awk"}
+_OPTS_WITH_VALUE = {"head": {"-n", "-c"}, "tail": {"-n", "-c"}, "grep": {"-e", "-f", "-m", "-A",
+                    "-B", "-C", "--include", "--exclude"}, "sed": {"-e", "-f"}, "awk": {"-f", "-F"}}
+_SEPARATORS = {"&&", "||", ";", "|", "&", ";;", "|&"}
+
+
+def _segments(command: str) -> list[list[str]]:
+    """Split a shell command into simple-command word lists, quote-aware:
+    `|` inside a quoted grep pattern is not a pipe. Unquoted newlines separate
+    commands. Unparseable input falls back to whitespace splitting."""
+    chars, quote = [], None
+    for ch in command:
+        if quote:
+            quote = None if ch == quote else quote
+        elif ch in "'\"":
+            quote = ch
+        elif ch == "\n":
+            ch = ";"
+        chars.append(ch)
+    lex = shlex.shlex("".join(chars), posix=True, punctuation_chars=True)
+    lex.whitespace_split = True
+    out, seg = [], []
+    try:
+        for tok in lex:
+            if tok in _SEPARATORS:
+                out.append(seg)
+                seg = []
+            else:
+                seg.append(tok)
+    except ValueError:
+        return [command.split()]
+    out.append(seg)
+    return [s for s in out if s]
+
+
+def bash_reads(command: str, cwd: str) -> tuple[bool, list[str], str]:
+    """(is a read call, file operands resolved against cwd, cwd after the call).
+
+    Segments are split on `&&`, `||`, `;`, `|` and newlines. A segment counts
+    as a read only if it names at least one file operand (a pipe-fed `head` or
+    `grep` is not a file read); `git show` always counts. A segment with an
+    output redirection (`>`) is a write, and so is `sed -i`. For `grep`/`awk`/
+    `sed` the first non-option operand is the pattern/script, not a file.
+    `cd` updates the working directory for later segments and calls.
+    """
+    is_read, paths = False, []
+    for w in _segments(command):
+        prog = os.path.basename(w[0])
+        if prog == "cd":
+            target = w[1] if len(w) > 1 else cwd
+            cwd = os.path.normpath(target if os.path.isabs(target) else os.path.join(cwd, target))
+            continue
+        if prog == "git" and len(w) > 1 and w[1] == "show":
+            is_read = True
+            continue
+        if prog not in _READ_PROGS or any(t.startswith(">") or t.endswith(">") for t in w[1:]):
+            continue
+        if prog == "sed" and any(t.startswith("-i") for t in w[1:]):
+            continue
+        operands, skip = [], False
+        for t in w[1:]:
+            if skip:
+                skip = False
+                continue
+            if t.startswith("-") and len(t) > 1:
+                skip = t in _OPTS_WITH_VALUE.get(prog, set())
+                continue
+            operands.append(t)
+        if prog in ("grep", "awk") or (prog == "sed" and not any(
+                t in ("-e", "-f") for t in w[1:])):
+            operands = operands[1:]
+        files = [o for o in operands if o != "-"]
+        if not files:  # reading a pipe or stdin, not a file
+            continue
+        is_read = True
+        paths += [os.path.normpath(o if os.path.isabs(o) else os.path.join(cwd, o))
+                  for o in files]
+    return is_read, paths, cwd
+
+
+def _rel(path: str, root: str | None) -> str:
+    if root and (path == root or path.startswith(root + os.sep)):
+        return os.path.relpath(path, root)
+    return path
 
 
 def load_vcc(path: str | os.PathLike | None = None):
@@ -142,8 +232,27 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
     files_read, re_reads, bytes_read, out_of_copy = [], 0, 0, []
     root = str(copy_root.resolve()) if copy_root else None
     detail = []
+    # amendment 3: Bash reads, and all reads (Read + Bash) by copy-relative path
+    cwd = root or os.getcwd()
+    bash_calls, bash_bytes, bash_paths = 0, 0, []
+    all_seen: set[str] = set()
+    all_re_reads = 0
     for tid, c in calls.items():
         inp = c["input"] if isinstance(c["input"], dict) else {}
+        read_paths: list[str] = []
+        if c["name"] == "Read" and not c["is_error"]:
+            read_paths = [_rel(os.path.normpath(str(inp.get("file_path", ""))), root)]
+        if c["name"] == "Bash" and not c["is_error"]:
+            is_read, ops, cwd = bash_reads(str(inp.get("command", "")), cwd)
+            if is_read:
+                bash_calls += 1
+                bash_bytes += c["result_bytes"]
+                read_paths = [_rel(o, root) for o in ops]
+                bash_paths += read_paths
+        for rp in dict.fromkeys(read_paths):
+            if rp in all_seen:
+                all_re_reads += 1
+            all_seen.add(rp)
         if c["name"] == "Read":
             fp = str(inp.get("file_path", ""))
             if fp in seen:
@@ -190,6 +299,12 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
                                and "gdmd view" in str(c["input"].get("command", ""))),
         "gdmd_graph_calls": sum(1 for c in calls.values() if c["name"] == "Bash"
                                 and "gdmd graph" in str(c["input"].get("command", ""))),
+        "bash_read_calls": bash_calls,
+        "bash_read_bytes": bash_bytes,
+        "bash_files_read": len(set(bash_paths)),
+        "all_files_read": len(all_seen),
+        "all_re_reads": all_re_reads,
+        "all_files_read_paths": sorted(all_seen),
         "out_of_copy_access": out_of_copy,
         **session_context(session),
         "tool_detail": detail,

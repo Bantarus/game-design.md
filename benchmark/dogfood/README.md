@@ -99,6 +99,8 @@ Each run is exactly one of:
 - **Per-turn context occupancy** = `input + cache_creation + cache_read` tokens of one API call. A turn is one assistant message id; split records are deduplicated.
 - **Consultation bytes** = the UTF-8 bytes of all raw tool-result content returned to the model.
 
+- **Reads** (secondary, D-025 amendment 3): subjects mostly read through Bash (`cat`, `head`, `sed -n`, `grep`), not `Read`. `bash_read_calls`, `bash_read_bytes`, `bash_files_read`, `all_files_read` and `all_re_reads` count both. `cd` is tracked across calls, and errored or denied calls read nothing. The `Read`-only `files_read` / `bytes_read` / `re_reads` stay for continuity.
+
 These are the two pre-registered primaries: consultation bytes for views vs baseline, per-turn occupancy for the D-024 card ablation. The exact definitions live in D-025; keep this file in sync with it.
 
 ## Commands
