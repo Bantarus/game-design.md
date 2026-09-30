@@ -855,6 +855,38 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - The pilot sessions go from `files_read` of 0–3 to `all_files_read` of 0–7. Example: authoring reads 0 files through `Read` and 5 through Bash, with 1 re-read.
   - Known limits: shell globs are not expanded, and a directory operand counts as one path.
 
+### Lineage note (2026-09-30): the branch was rebased onto `main`
+
+- **What happened.** `v0.4-views` forked at `61c95fe` (tag `v0.3.0`). `main` then gained `db1950e`, a post-v0.3 docs-drift sweep (PR #1). At the user's request, before the Checkpoint 3 commit, the branch was rebased onto `origin/main`. This rewrote every branch commit's SHA.
+- **Pre-rebase history is preserved.** The tag `v0.4-views-prerebase` points at `1665b0e`.
+- **Citations stay as they are.** The SHAs cited in this entry, in OI-003, in the v0.3 conformance correction and in `benchmark/dogfood/results/` are the commits the work and the runs actually used. The pilot ran at `337a72b`, whose tree differs from its rebased twin, which also contains `db1950e`. Result files are data and are not edited.
+- **Old → rebased:**
+
+  | Old | Rebased | Old | Rebased |
+  | --- | --- | --- | --- |
+  | `19bce45` (D-022) | `2cefcb2` | `3f035cf` (operating task) | `06e86a2` |
+  | `efb05d9` (OI-001..004) | `e61f40c` | `9998502` (shim fix) | `985424a` |
+  | `b2f098d` (D-023) | `99f9013` | `79a1827` (**D-025 lock**) | `fa48944` |
+  | `8761ae8` (D-024) | `fffc2c1` | `337a72b` (**amendment 1; pilot source**) | `7c04c1c` |
+  | `b1cd860` (OI-005) | `0d95860` | `e045ef1` (pilot results) | `e2fd99c` |
+  | `3e44035` (harness drafts) | `31e8922` | `15faca6` (amendment 2) | `e442041` |
+  | `8537ddb` (OI-006, correction) | `d7269a0` | `e9ecff5` (amendment 3) | `ab52140` |
+  | `f43d357` (time-bomb test fix) | dropped: `db1950e` made the identical fix | `1665b0e` (D-026) | `d590d1d` |
+
+- **Order preserved.** Every lock still precedes the runs it governs. The pre-rebase history shows it with the original commit times, and the rebase kept author dates. No run happened after the rebase.
+- **Effect on the worlds (item 1).**
+  - The v0.3 world is the tag, so it is unchanged.
+  - The matrix world now also carries `db1950e`'s fixes: AGENTS.md's four-field stability guarantee and its corrected `{loops.combat_turn}` example, and spec §1, §2.2, §4, §4.8, §9, §11.2 and Appendix C.
+  - Re-recorded sizes at the rebased head `d590d1d`:
+
+    | File | v0.3.0 | Pre-rebase | Rebased head |
+    | --- | --- | --- | --- |
+    | `spec.md` | 121,539 | 122,948 | **124,279** bytes |
+    | `AGENTS.md` | 12,197 | 12,197 | **12,580** bytes |
+
+    `CLAUDE.md`, `schema/` and `src/` are unchanged.
+  - The pilot reads' token figures (45,975 / 46,475) describe the pre-rebase commit. The import probe is re-run at each matrix commit, and its JSON is committed with that matrix's results. Rule C's Δ is re-probed there anyway, as locked.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design
