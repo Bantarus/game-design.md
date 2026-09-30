@@ -1009,6 +1009,15 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
    - the limits: a generated, synthetic tree; small n; a single model; tasks and generator by the format's own author (oracle independence is at the code-path level only); the same world difference as study 1; no comparability with F-009.
 4. **No post-hoc metric switching;** any reframe gets its own DECISIONS entry and faces the counterfactual-adoption test.
 
+### Amendment 1 (2026-09-30, before any study-2 build): impact prompts are worded in value references
+
+- **Decided:** by the user at Checkpoint 3 review, before the generator or any prompt exists.
+- **Why:** the locked oracle for both impact tasks is the reverse closure over **value** edges, the `{ns.id}` references in frontmatter and content-entity files. The template wording ("references it"; "must be re-checked") also admits prose mentions and judgment calls, which the oracle excludes. A subject that includes a `rationale` section, or reasons about re-checking, would fail on the wording, not on the task. `gdmd graph --impact` also includes prose leaves (D-027), so the prompt must say which edges count.
+- **Prompt templates (replacing the table wording):**
+  - `s2_impact_tokens`: "The value of `{X}` is about to change. List every token and content entity **whose value references `{X}`, directly or transitively** (through the values of other tokens and content entities)." The oracle is unchanged: the reverse closure of `{X}` over value edges.
+  - `s2_impact_files`: "`{Y}` is about to change. List every subfile that contains **a token whose value references `{Y}`, directly or transitively**." The oracle is made explicit: the set of `file_type: subfile` files that define a top-level token in the value-edge reverse closure of `{Y}`. Content-entity and content-schema files are not subfiles.
+- **Not changed:** the task classes, answer-set size ranges, success criterion, cells, primaries, thresholds and verdict mapping.
+
 ---
 
 # Open items
