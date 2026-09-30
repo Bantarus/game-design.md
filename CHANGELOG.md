@@ -26,6 +26,10 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
 - **`DECISIONS.md` Open items** (OI-001…OI-005): logged spec↔code drifts and a lint-rule vs schema mismatch, each to be resolved in its own D-entry.
+- **[v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md) + OI-006.** A read-only jsonschema pass (OI-005) finds lint-clean weaker than §11 conformance.
+  - All 29 linked content entities validate. The party-rpg starter's `heroes` content-schema lacks `data_dir`, leaving its entity unlinked.
+  - 10 of 158 frontmatter blocks, in 8 trees (both benchmark games and all six starters), fail the normative JSON Schema. One class, whole-namespace `applies_to` refs, is used by spec §4.11's own example.
+  - Nothing is fixed yet; each class gets its own D-entry.
 
 ### Changed
 
