@@ -1020,6 +1020,120 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 
 ---
 
+## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
+
+- **Status:** decided (2026-09-30) at v0.4 Checkpoint 3. The draft was reviewed by the user; the review's changes are incorporated below, and its answers to the open points are recorded at the end. Implementation follows in its own commits.
+- **Spec:** §9.9.
+- **Related:** kickoff WS2 and plan amendments 4 (`graph`) and 8 (`decision` deferred); D-024 (the card points at both commands); D-025 / D-026 (the views arm); OI-001, OI-002, OI-004, OI-006 (resolution constraints).
+
+### Decisions
+
+1. **Tooling, not format.**
+   - No namespace, schema field or tree file is added. A v0.3 tree is viewable unchanged.
+   - Views are a consultation interface over the existing format, which is why the spec text lives in §9 (CLI), not §2–§8.
+2. **One compiler, several consumers.** One IR and one reference graph serve `view`, `graph`, WS3's `hook check --show-tokens` (whose `Reference.location` is already the primary coordinate) and the WS4 card's pointers. The pipeline mirrors VCC's lex → parse → IR → lower → emit.
+3. **Positions come from composing, not from a second parser.**
+   - Frontmatter is composed with `GdmdLoader` (`yaml.compose`) and constructed from the node graph, so each file is parsed once and keeps its YAML-1.1 boolean and timestamp strictness (D-001, D-004).
+   - The Markdown fence offset (+1 line) maps frontmatter lines to file lines.
+   - **Feasibility checked before drafting** (a read-only prototype, not committed), on all 12 in-repo trees:
+     - compose + construct equals `loader.read` for every file;
+     - all 452 namespace tokens have a line range whose verbatim slice re-parses to the identical value;
+     - that slice equals the file's lines at the pointer.
+
+     It took about 50 ms per tree, including the re-parse check.
+4. **Reference semantics are the linter's, exactly.**
+   - Extraction: `walk_refs` for frontmatter, `TOKEN_REF_RE` for bodies.
+   - Resolution: `Tree.has_token`, with the longest-prefix target.
+   - Context-local exclusion: `CONTEXT_LOCAL_PREFIXES`.
+   - The backlink predicate is the `orphaned-entity` predicate.
+   - Why: the backlink-completeness test compares against lint's own data. Two definitions would make that test compare different things, and a view and `lint` could disagree about the tree.
+   - Consequences: content entities resolve by parent directory (OI-001). Globs resolve against the tree root (OI-002). Core frontmatter is not tokenized (OI-004). Whole-namespace strings like `"{resources}"` are not references (OI-006 class A); if class A is later decided as a schema fix, views change in the same commit as lint.
+5. **Coordinates.**
+   - Primary: `{ns.id}` where a token identity exists, otherwise a file anchor (`<path>#<key>`, `<path>#<heading>`).
+   - Secondary: `<path>:<start>-<end>`, whole-file 1-based lines, recomputed on every compile. It is the only pointer target.
+   - Field paths (`do[0].sample`) are annotations, not coordinates: the reference syntax caps depth at 6 segments, and list indices would make coordinates unstable across edits.
+6. **Roles** (closed set): `token`, `invariant`, `content-entity`, `rationale`, `impl`, `meta`.
+   - `decision` is deferred, as agreed at plan approval: no game tree has a DECISIONS file, and the root one records format decisions.
+   - `meta` is **new relative to the kickoff's list** (approved at review, point (a)). It covers every top-level frontmatter key outside a namespace:
+     - file metadata: `status`, `last_verified`, `files`, `core_loop_ref`, content-schema `schema` / `balance_refs` / `data_dir`;
+     - the **normative non-namespace keys**: `prng` (D-015 / D-018), `trajectory` (§9.5.5), `verify_targets` and `adapters` (§9.5).
+
+     Without `meta`, the views could not serve the maintenance ritual (`last_verified` with a pointer), and the normative verification and PRNG contracts would have no coordinate.
+7. **Nesting, gaps and coverage** (review items 2 and 3).
+   - Blocks nest: an `impl` block for a token- or entity-level `implemented_in:` lies inside its token or entity block, and a `###` rationale block lies inside its `##`.
+   - `--full` emits each line once, inside its outermost block. `--grep` selects the innermost matching block and shows its ancestors.
+   - **Gap lines**, meaning lines outside every outermost block (fences, namespace key lines, comments between tokens, body text before the first `##`), are emitted by `--full` verbatim or as pointer-carrying elisions.
+   - So `--full` **covers every non-blank line of every loaded file exactly once**, and a property test enforces it. This closes the gap a block-only projection would leave: an agent using `--full` in place of reading files would otherwise never see a tree's title or its namespace keys.
+8. **`tree_sha`** (review item 4). It is the SHA-256 of the sorted manifest of `<tree-relative path>\t<sha256 of bytes>` over the files the loader classifies. It appears in every JSON output and in the `--full` header. It identifies the tree state a pointer belongs to, so a consumer can detect stale pointers without recompiling.
+9. **Block extents.**
+   - Token blocks include contiguous comment lines directly above the key, because several trees explain tokens in YAML comments (e.g. `distributions.md`), and dropping them would lose authored rationale.
+   - Trailing blank and comment lines after the value are excluded; they belong to the gap.
+10. **The lowering rule is normative (MUST) in §9.9.2.** Select, truncate, annotate; token values verbatim; every elision carries a pointer. JSON's optional `value` is the loader's own parse, the data lint compiles against, so it is not a second rendering.
+11. **Views.**
+   - Overview, `--full`, `--grep`, `--ref [--hops N]`, `--flat` and `--json`, as in the kickoff.
+   - Plus `--role`, a selection filter that works with every view.
+   - The overview lists content entities per kind (count, counts by status, pointer), not one line each. On a D-026-sized tree, per-entity listing would make the overview the largest view. The elision marker names the view that lists them.
+12. **Graph.**
+    - `--impact` is the reverse closure over all edges, with `rationale` nodes as leaves.
+    - `--from/--to` gives shortest paths only, capped by `--max-paths` (default 20). The paths are chosen in a deterministic lexicographic order, and an elision annotation gives the total when there are more (review point (c)).
+    - `--cycles` gives SCCs over `value` edges.
+    - Formats: `text | json | dot`.
+    - The graph is structure only; it adds no semantics (no "depends-on" typing beyond the edge kind).
+13. **Determinism and storage.** Output is a pure function of the tree bytes and the arguments. Nothing is written; memoization is in-process only.
+14. **Budget** (review point (f)).
+    - The spec states only a SHOULD. The numbers live here: **compile + emit ≤ 150 ms in-process per in-repo tree**, which leaves room under a 200 ms CLI wall-clock target that includes interpreter start-up.
+    - The measurement is the in-process pytest only; there is no wall-clock CI gate, because wall-clock is machine-dependent.
+    - For reference, the Checkpoint 3 prototype composed, constructed and re-parsed all 12 trees in 634 ms total (about 50 ms per tree) on the maintainer's machine.
+    - Once D-026's Lanternfall tree is frozen, it joins the budget test, and its timing is reported descriptively in the D-026 freeze amendment. It is not a gate, because the budget was set before that tree existed.
+15. **Exit codes.** `2` for a non-resolving `--ref` / `--impact` / `--from` / `--to` argument; otherwise `0`. Views never fail on lint findings.
+
+### Tests (all run in pytest; no model calls)
+
+- **Fixture per view:** golden outputs, text and JSON, for overview, `--full`, `--grep`, `--ref --hops 1/2`, `--flat`, `--role`, and each `graph` mode, on `tests/fixtures/`, not on `examples/` (the "examples realistic, fixtures exhaustive" rule).
+- **Verbatim property:** on all 12 trees, every emitted source line equals the file's line at its number, and every token block's slice re-parses to the token's value.
+- **Pointer round-trip:** every pointer in every view resolves to exactly the block it claims.
+- **Backlink completeness:**
+  - For each token `orphaned-entity` checks: zero backlinks ⇔ an orphan finding.
+  - Each backlink's reference satisfies the predicate.
+  - Every unresolved edge is a `broken-ref` finding, and vice versa.
+- **`graph --impact X` ⊇ `view --ref X --hops N` backlinks,** for every token X and N ∈ {1, 2, 3}.
+- **Compose equivalence:** the constructed values equal `loader.read`, for every file in the 12 trees.
+- **Coverage:** on all 12 trees, every non-blank line of every loaded file appears in `--full` exactly once, verbatim at its line number or inside an elision pointer.
+- **Nesting:** no line is emitted twice by `--full`. `--grep` on a line inside an `impl` block selects that `impl` block and shows its token's header.
+- **`tree_sha`:** stable across runs; changes when any byte of any loaded file changes; unchanged by an edit to a file the loader does not classify.
+- **`--max-paths`:** on a fixture with more shortest paths than the cap, exactly N paths are emitted, in lexicographic order, with the total in the elision annotation.
+- **Determinism:** two compiles give byte-identical output.
+- **No writes:** the tree's mtimes and file list are unchanged after every command.
+- **Budget:** the in-process check above.
+
+### Consequences for the dogfood studies and the docs
+
+- **`arms/views.md`** (review item 7) becomes a **neutral command reference derived from §9.9**: what each command returns, with no advice tuned to any task.
+  - A test checks that every flag it names is in §9.9's synopsis.
+  - Its SHA-256 is recorded in a D-025 amendment before the Rule V matrix, and the same bytes are reused unchanged for D-026's Rule V2.
+  - The harness already refuses the views arm until `gdmd view --help` succeeds in a copy.
+- **The v0.3 world** carries none of this, by construction (D-025 item 1).
+- **The verb lists** (review item 5).
+  - After the rebase onto `main` (D-025 lineage note), §9's list already names all nine shipped verbs.
+  - `view` and `graph` join it, and the README's list, **in the commit that registers them**. `scripts/docs_lint.py` (CI) requires both lists to equal the registered click commands, so listing them earlier would turn CI red.
+
+### Review answers (Checkpoint 3, 2026-09-30)
+
+Every point below was answered at review. The draft text follows the answers as recorded.
+
+- **(a) The `meta` role.** File-level frontmatter keys outside namespaces (`status`, `last_verified`, `files`, `core_loop_ref`, content-schema `schema` / `balance_refs`) need a block. Without one, the overview can't show a file's `last_verified` with a pointer, and the core `files:` map has no coordinate.
+  - Alternatives: omit them (the views can't serve the maintenance ritual), or fold them into `token` (a role that then no longer means "§3 token").
+  - My lean is `meta`. It is observed need: the pilot's maintenance task hinges on `last_verified`.
+  - **Answer:** yes. It also covers the normative non-namespace keys (Decision 6).
+- **(b) `--impact` includes prose.** `rationale` nodes are included as leaves. My lean is yes: a prose section that names a changing token is exactly what the anti-drift ritual must re-check. `--role` can exclude it. **Answer:** yes.
+- **(c) Shortest paths only for `--from/--to`.** All simple paths grow exponentially on dense trees such as D-026's. My lean is shortest only, with `--impact` for "everything reachable". **Answer:** shortest only, plus `--max-paths` (default 20) with an elision annotation giving the total.
+- **(d) The overview elides content entities per kind** (Decision 11). **Answer:** yes.
+- **(e) Leading comments belong to the token below them** (Decision 9). **Answer:** yes.
+- **(f) Budget measurement.** The in-process pytest, plus the spec's CLI wall-clock statement. My lean is not to make wall-clock a hard CI gate. **Answer:** the in-process test only. The spec states a SHOULD with no machine reference, and the numbers live here (Decision 14).
+- **Also required at review, and applied:** block nesting (Decision 7); `--full` coverage of gap lines, with a property test (Decisions 7 and 8 and Tests); `tree_sha` (Decision 8); the verb-list update and "DRAFT" dropped from §9.9 (Consequences); a neutral `arms/views.md` whose hash is recorded before the Rule V matrix (Consequences); and a check that the branch was based on current `main` (it was not; it has been rebased; see the D-025 lineage note).
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.

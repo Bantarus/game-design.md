@@ -23,6 +23,12 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - An orchestrator whose `--dry-run` validates every CLI flag against `claude --help`, plus a model-id probe and the D-024 import-size probe.
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
+- **Spec §9.9 + D-027: `gdmd view` and `gdmd graph` specified** (v0.4 Checkpoint 3; not yet implemented).
+  - Projected views over a tree: overview, `--full`, `--grep`, `--ref --hops`, `--flat`, `--role`, `--json`; graph `--impact`, `--from/--to` (shortest paths, `--max-paths`), `--cycles`.
+  - The views use the linter's reference and backlink semantics exactly.
+  - Normative lowering rule: select, truncate or annotate; token values verbatim; every elision carries a pointer.
+  - Nested blocks with six roles. `--full` covers every non-blank line once. A `tree_sha` identifies the tree state behind each pointer.
+  - Nothing is stored, and no cost claim is made (§11.3).
 - **D-026: dogfood study 2 (consultation at scale), locked before any study-1 matrix data.**
   - **The tree:** a generated content-heavy dungeon-crawler tree (~320 entities, seed 20260930). Answers come from the generator's planted graph, independent of `gdmd` code.
   - **Tasks:** six, covering multi-hop lookup (forward and backward), impact (tokens and files), maintenance and a negative control.

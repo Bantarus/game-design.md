@@ -1400,6 +1400,167 @@ gdmd init [<dest>]                 # interactive prompt
 
 **Refusal of non-empty destinations.** `gdmd init` refuses to copy into a directory that contains existing files; either pass a fresh path or clear the destination first. This is the equivalent of `mkdir` refusing to clobber — `init` is destructive in the sense that it lays down a tree, so we explicitly avoid the silent-overwrite failure mode.
 
+### 9.9 `view` and `graph` — projected views over a tree (v0.4)
+
+```
+gdmd view  <path> [--full | --grep <regex> [--ignore-case] | --ref <{ns.id}> [--hops N]]
+                  [--flat] [--role <role>]... [--json]
+gdmd graph <path> [--impact <{ns.id}> | --from <{ns.id}> --to <{ns.id}> [--max-paths N] | --cycles]
+                  [--format text|json|dot]
+```
+
+**Status: specified at v0.4 (`DECISIONS.md` D-027).**
+
+`view` and `graph` are a **consultation interface**. They let an agent read a tree through projections computed on demand, instead of opening whole files. They are tooling, not format: they add no namespace, no schema field and no file to the tree, and a tree needs nothing new to support them.
+
+Whether projected views reduce session cost is an empirical question. It is governed by §11.3 and the locked rules in D-025 / D-026, and this section makes no such claim.
+
+#### 9.9.1 The compiled model
+
+Every invocation compiles the tree afresh. The pipeline has five stages:
+
+1. **Load:** the §2 loader.
+2. **Parse with positions:** the YAML is composed with the same strict loader, so every value keeps its source position.
+3. **IR:** a list of **blocks**.
+4. **Lower:** one of the views below.
+5. **Emit:** text or JSON.
+
+**Nothing is stored.** A conformant implementation writes no cache, index or other file, and memoizes only in-process. Output is a deterministic function of the tree's bytes and the arguments: the same inputs MUST produce byte-identical output.
+
+**Blocks and roles.** Each block has exactly one role, drawn from this closed set:
+
+| Role | One block per | Extent |
+| --- | --- | --- |
+| `token` | top-level token of a §3 namespace in a subfile, except `invariants` | the token's key line through the last non-blank line of its value, plus any contiguous comment lines directly above the key |
+| `invariant` | `invariants.<id>` token (§4.11) | as `token` |
+| `content-entity` | content-entity file (§6.2) | the whole file |
+| `rationale` | `##` section of a Markdown body; `###` sections are child blocks | the heading line through the line before the next heading of the same or higher level, with trailing blank lines trimmed |
+| `impl` | `implemented_in:` declaration (per token or per file) and the core file's `implementation_pointers:` | the key's lines |
+| `meta` | any other top-level frontmatter key: file metadata (`status`, `last_verified`, `files`, `core_loop_ref`, `schema`, `balance_refs`, …) and the normative non-namespace keys (`prng`, `trajectory`, `verify_targets`, `adapters`) | the key's lines |
+
+**Nesting.** Blocks nest:
+
+- An `impl` block for a token-level or entity-level `implemented_in:` lies inside its `token`, `invariant` or `content-entity` block.
+- A `###` rationale block lies inside its `##` block.
+
+Every other block is outermost. A block's **ancestors** are the blocks that contain it, plus, for frontmatter blocks, the namespace key line above them.
+
+**Gap lines.** Lines outside every outermost block are gap lines:
+
+- frontmatter fences;
+- namespace key lines (`verbs:`);
+- comment and blank lines between tokens;
+- body text before the first `##` (a title, an introduction).
+
+**`tree_sha`.** This identifies the compiled tree state. It is the SHA-256 of a manifest with one line per loaded file, sorted by tree-relative POSIX path; each line is the path, a tab, and the SHA-256 of the file's bytes. The loaded files are those the §2 loader classifies, with frontmatter. Any byte change in any of them changes `tree_sha`. Pointers are valid only against the `tree_sha` they were emitted with.
+
+**Coordinates.** Every block carries two coordinates:
+
+- **Primary (stable across edits):**
+  - `{ns.id}` for `token`, `invariant` and `content-entity` blocks (content entities are `{entities.<kind>.<id>}`, as resolved in §3);
+  - `{ns.id}` of the owning token for a token-level `impl` block;
+  - `<path>#<key>` for `meta` blocks and file-level `impl` blocks;
+  - `<path>#<heading>` or `<path>#<heading>/<subheading>` for `rationale` blocks.
+- **Secondary (recomputed on every compile):** `<path>:<start>-<end>`. The path is tree-relative; the lines are 1-based, inclusive and counted in the whole file. **The secondary coordinate is the only valid pointer target.** Reading lines `start`..`end` of `path` MUST yield exactly the block's source text.
+
+  A pointer is valid only for the tree state it was compiled from. After any edit, an agent MUST re-run the view instead of reusing an old pointer.
+
+**Attribution:** a `###` rationale section whose heading equals the id of a token defined in the same file (the §4.11 convention, `### <invariant_id>`) is annotated as explaining that token.
+
+**References and backlinks.** `view` and `graph` use the linter's definitions exactly (§9.1), so a view and `lint` can never disagree about the graph:
+
+- **Extraction:**
+  - Frontmatter references are every `{…}` occurrence in any string value of any file (`walk_refs`).
+  - Body references are every occurrence in a Markdown body.
+  - A whole-namespace string such as `"{resources}"` does not match the reference syntax, so it is not a reference.
+- **Resolution** follows §3 as implemented by the linter (`has_token`). A reference's **target** is the longest prefix naming a top-level token or content entity; the remainder is its sub-path.
+  - A reference that does not resolve is shown as `unresolved`, the `broken-ref` predicate.
+  - `{actor.*}` and `{target.*}` (D-012) are shown as `context-local` and are not edges.
+- **Backlinks.** The backlinks of token `T` are every reference `r` with `r == T` or `r` starting with `T.`. This is exactly the `orphaned-entity` predicate. For every token that rule checks (it exempts `verbs`, `invariants`, `cut` tokens and `actor` entities), the token has no backlinks if and only if `orphaned-entity` reports it.
+- **Edges.** An edge runs from the block containing a reference to the reference's target. It carries the field path (frontmatter) or line (body) where the reference occurs, and its kind: `value` (frontmatter) or `prose` (body).
+
+#### 9.9.2 The lowering rule (normative)
+
+A view is a projection of the tree. **Views select, truncate, or annotate; they never rewrite.**
+
+1. Everything a view emits about the tree MUST be one of:
+   - a **verbatim slice** of a tree file (whole source lines, unmodified, with their original indentation);
+   - a **coordinate**;
+   - an **annotation** computed deterministically from the tree: a role, a status, a count, a resolution outcome, an edge kind, a hop distance or an elision marker.
+2. **Token values MUST be emitted verbatim**, as the source lines at the block's pointer. They are never re-serialized, reformatted, paraphrased or summarized.
+3. **Every omission inside an emitted block MUST be marked** with an elision marker carrying the pointer of the omitted lines (`… N lines · <path>:<a>-<b>`). A view MUST NOT silently drop lines from a block it emits.
+4. In JSON output a block's `source` field is the verbatim slice. It MAY be accompanied by `value`, the loader's own parse of that slice: the same data `lint` compiles against. JSON output MUST NOT carry any other rendering of the value.
+
+#### 9.9.3 `gdmd view`
+
+- **`gdmd view <path>`: overview.** A compiled index, not an authored summary:
+  - Each file: its path, `file_type`, `status` and `last_verified`, with a pointer.
+  - Each §3 namespace, in `SUBFILE_NAMESPACES` order: every top-level token's id, its `status` (or `-`) and its pointer.
+  - Content entities are listed **per kind, not per entity**: the kind, the count, counts by status, and the pointer to its content-schema file. The elision marker names the view that lists them (`--flat --role content-entity`).
+- **`--full`: the flattened tree.**
+  - It opens with a header line carrying the tree path and its `tree_sha`.
+  - It then emits every outermost block verbatim, each preceded by a header line (`[role] <primary> <secondary>`). Nested blocks are not emitted a second time; their headers appear as annotations within the enclosing block.
+  - Gap lines are emitted verbatim, marked `[gap] <secondary>`, or as elision markers carrying their pointer.
+  - **Every non-blank line of every loaded file appears in `--full` exactly once:** either verbatim, or inside the pointer range of an elision marker.
+
+  The order is canonical:
+  1. the core file;
+  2. files in the core `files:` map order;
+  3. the remaining files in path order;
+  4. content entities grouped by kind and sorted by id.
+
+  Within a file, frontmatter blocks come in source order, then rationale blocks.
+- **`--grep <regex>`: adaptive.** The regex is Python syntax, case-sensitive unless `--ignore-case`.
+  - Selects the **innermost** block containing each match: its source text, or its primary coordinate. A match inside an `impl` block selects the `impl` block, shown within its token's structure.
+  - Each selected block is lowered to its header, the matching lines, the header lines of its ancestor blocks, and **every ancestor key line of each matching line** (namespace → token → field). All other lines are replaced by elision markers.
+  - Output is grouped by file, in canonical order.
+- **`--ref <{ns.id}> [--hops N]`: graph-adaptive.**
+  - The focus token's block, in full.
+  - Its **forward references:** each with its field path, target, resolution outcome, and the target block's pointer.
+  - Its **backlinks:** each with the referencing block's header, its edge kind, and the referencing source line verbatim.
+  - With `--hops N` (default 1), neighbors up to N edges away in both directions are listed by hop distance, each with its header and the referencing line, never its full block.
+  - A sub-path argument (`{rules.card_draw.do}`) focuses the owning token and names the sub-path.
+- **`--flat`: transposed.** The current selection (all blocks, `--grep` matches, or `--ref` neighbors) as one line per block: role, primary, secondary, status.
+- **`--role <role>`** (repeatable) restricts the selection to those roles. It works with every view.
+- **`--json`** emits the same selection as one JSON document, always carrying `tree_sha`:
+
+```json
+{
+  "view": "grep", "tree": "examples/deckbuilder", "tree_sha": "5f0c…", "args": {"regex": "energy"},
+  "blocks": [
+    {"role": "token", "id": "{resources.energy}", "pointer": "gdd/mechanics.md:89-96",
+     "status": "draft", "source": "  energy:\n    scope: per_turn\n…",
+     "elided": [{"pointer": "gdd/mechanics.md:91-92", "lines": 2}]}
+  ],
+  "edges": []
+}
+```
+
+#### 9.9.4 `gdmd graph`
+
+`graph` renders the same reference graph as `view`, built by the same implementation, as structure. Nodes are blocks: `token`, `invariant` and `content-entity` blocks, plus `rationale` and `meta` blocks that contain references. Edges are as in §9.9.1; several references between the same two nodes form one edge carrying every location.
+
+- **`--impact <{ns.id}>`:** the transitive reverse closure. It lists every node that references the token, directly or through any chain of references, with its hop distance, edge kinds and pointer. `rationale` nodes appear as leaves (nothing references a prose section). For every token, the impact set MUST contain the backlinks `view --ref` reports at every hop count.
+- **`--from <A> --to <B>`:** the **shortest** forward paths from A to B, each as a node sequence with the reference location of every step.
+  - At most `--max-paths N` paths are emitted (default 20), in a deterministic order: lexicographic by node primary coordinates.
+  - When more shortest paths exist, an elision annotation gives the total (`… 20 of 57 shortest paths`).
+  - No path means empty output and exit 0.
+- **`--cycles`:** every strongly connected component of more than one node, plus self-referencing nodes, over `value` edges.
+- **No mode:** the whole graph.
+- **`--format`:** `text` (default), `json`, or `dot` for rendering with standard graph tools. JSON output carries `tree_sha`.
+
+#### 9.9.5 Budget, exit codes, and what views do not do
+
+- **Budget:** a `view` or `graph` invocation SHOULD be cheap enough to run for every consultation, and far cheaper than reading the files it projects. The reference implementation's budget and how it is measured are recorded in D-027.
+- **Exit codes:**
+  - `0` on success, including empty selections.
+  - `2` for a `--ref`, `--impact`, `--from` or `--to` argument that does not resolve. The command prints the argument and exits.
+  - Views never fail a tree for lint findings; unresolved references are annotated, not raised.
+- **What views do not do:**
+  - Nothing is summarized, embedded or LLM-extracted. Every edge is one the author wrote as a `{ns.id}` reference.
+  - Views do not resolve `DECISIONS.md` or other non-tree files; a `decision` role is deferred (D-027).
+  - They do not follow the spec→code direction beyond listing `impl` globs and the files those globs match. The code→spec direction is `gdmd hook check` (§9.7).
+
 ---
 
 ## 10. JSON Schema
