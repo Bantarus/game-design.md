@@ -2,6 +2,8 @@
 [file] game-design.md core
 [meta] game-design.md#name game-design.md:5-5
 name: "Lamplight"
+[gap] game-design.md:27-27
+# Lamplight
 [file] gdd/mechanics.md subfile
 [gap] gdd/mechanics.md:48-48
 rules:

@@ -8,6 +8,17 @@
   },
   "blocks": [
     {
+      "role": "gap",
+      "id": null,
+      "file": "game-design.md",
+      "pointer": "game-design.md:29-29",
+      "context": [],
+      "matches": [
+        29
+      ],
+      "source": "> Intro text before the first section mentions `{resources.focus}`: a gap-line reference."
+    },
+    {
       "role": "token",
       "id": "{entities.player}",
       "pointer": "gdd/mechanics.md:9-13",

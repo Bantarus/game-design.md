@@ -43,9 +43,9 @@ def status_str(s: str | None) -> str:
     return s if s is not None else "-"
 
 
-def flat_line(b: Block, extra: str = "") -> str:
-    line = f"{b.role} {b.primary} {b.secondary} {status_str(b.status)}"
-    return f"{line} {extra}" if extra else line
+def flat_line(r: dict) -> str:
+    line = f"{r['role']} {r['id'] or '-'} {r['pointer']} {status_str(r.get('status'))}"
+    return f"{line} {r['note']}" if r.get("note") else line
 
 
 def block_meta(b: Block) -> dict:
@@ -320,10 +320,26 @@ def render_unit(model: Model, root: Block, show: set[int], headers: set[int]
     return out, elided
 
 
+def _runs(lines: list[int]) -> list[tuple[int, int]]:
+    """Maximal runs of consecutive line numbers: [(first, last), ...]."""
+    out: list[tuple[int, int]] = []
+    for ln in sorted(lines):
+        if out and ln == out[-1][1] + 1:
+            out[-1] = (out[-1][0], ln)
+        else:
+            out.append((ln, ln))
+    return out
+
+
 def view_grep(model: Model, tree_arg: str, pattern: str, ignore_case: bool,
               roles: tuple[str, ...]):
+    """Blocks containing a match, lowered to the matching lines and their
+    ancestors (§9.9.3). A match on a gap line is a `gap` selection: the run of
+    matching gap lines with its pointer, under its file, with its ancestor key
+    lines. `--role` excludes gap selections: a gap line has no role."""
     rx = re.compile(pattern, re.IGNORECASE if ignore_case else 0)
     units: dict[int, _Unit] = {}
+    gap_lines: dict[str, list[int]] = {}
 
     def unit_for(root: Block) -> _Unit:
         if root.index not in units:
@@ -338,24 +354,58 @@ def view_grep(model: Model, tree_arg: str, pattern: str, ignore_case: bool,
             if not rx.search(sf.lines[ln - 1]):
                 continue
             b = _select_block(model, sf, ln, roles)
-            if b is None:  # a gap line: --grep selects blocks only (§9.9.3)
+            if b is None:
+                if not roles and sf.innermost[ln - 1] is None:
+                    gap_lines.setdefault(sf.path, []).append(ln)
                 continue
             u = unit_for(_outermost(model, b))
             u.selected.add(b)
             u.lines.add(ln)
 
+    file_rank = {sf.path: i for i, sf in enumerate(model.files)}
+    items: list[tuple] = [(file_rank[u.root.path], u.root.start, "block", u)
+                          for u in units.values()]
+    for path, lines in gap_lines.items():
+        items += [(file_rank[path], a, "gap", (path, a, z)) for a, z in _runs(lines)]
+    items.sort(key=lambda it: (it[0], it[1], it[2]))
+
     text = [view_header("grep", tree_arg, model.tree_sha)]
     out_json = []
     current_file = None
-    last_context: list[int] = []
-    for k in sorted(units):  # block indices are in canonical order
-        u = units[k]
-        path = u.root.path
+    printed: set[int] = set()   # gap lines already printed in the current file
+
+    def print_context(sf: SourceFile, context: list[int]) -> None:
+        # Ancestor key lines outside a selection (the namespace key) are gap
+        # lines: each is printed once per file, with its own pointer.
+        for ln in context:
+            if ln not in printed:
+                text.append(f"[gap] {sf.path}:{ln}-{ln}")
+                text.append(sf.lines[ln - 1])
+                printed.add(ln)
+
+    for _, _, kind, item in items:
+        path = item.root.path if kind == "block" else item[0]
         sf = model.by_path[path]
         if path != current_file:
             text.append(f"[file] {path} {sf.pf.file_type}")
             current_file = path
-            last_context = []
+            printed = set()
+        if kind == "gap":
+            _, a, z = item
+            context = sorted({c for ln in range(a, z + 1) if in_frontmatter(sf, ln)
+                              for c in ancestor_key_lines(sf, ln)} - set(range(a, z + 1)))
+            print_context(sf, context)
+            text.append(f"[gap] {path}:{a}-{z}")
+            text.extend(sf.slice(a, z))
+            printed.update(range(a, z + 1))
+            out_json.append({"role": "gap", "id": None, "file": path,
+                             "pointer": f"{path}:{a}-{z}",
+                             "context": [{"pointer": f"{path}:{c}-{c}", "text": sf.lines[c - 1]}
+                                         for c in context],
+                             "matches": list(range(a, z + 1)),
+                             "source": "\n".join(sf.slice(a, z))})
+            continue
+        u = item
         show: set[int] = set(u.lines)
         headers: set[int] = set()
         for s in u.selected:
@@ -368,15 +418,8 @@ def view_grep(model: Model, tree_arg: str, pattern: str, ignore_case: bool,
             for a in model.ancestors(inner) + [inner]:
                 if model.blocks[a].role == "rationale":
                     show.add(model.blocks[a].start)   # the section headings
-        # Ancestor key lines outside the block (the namespace key) are gap
-        # lines: each is printed with its own pointer, before the block, once
-        # per run of consecutive blocks under it.
         context = sorted(ln for ln in show if not u.root.start <= ln <= u.root.end)
-        if context and context != last_context:
-            for ln in context:
-                text.append(f"[gap] {path}:{ln}-{ln}")
-                text.append(sf.lines[ln - 1])
-            last_context = context
+        print_context(sf, context)
         rendered, elided = render_unit(model, u.root, show, headers)
         text.extend(rendered)
         d = block_meta(u.root)
@@ -480,24 +523,33 @@ def view_ref(model: Model, tree_arg: str, focus: int, sub_path: str | None, hops
 # ---- --flat -----------------------------------------------------------------------
 
 def flat_rows(model: Model, mode: str, roles: tuple[str, ...], grep_json=None,
-              ref_ctx=None) -> list[tuple[Block, str]]:
+              ref_ctx=None) -> list[dict]:
+    """One row per selected block (and per `--grep` gap selection)."""
+    def row(b: Block, note: str = "") -> dict:
+        d = block_meta(b)
+        if note:
+            d["note"] = note
+        return d
+
     if mode in ("overview", "full"):
-        return [(b, "") for b in model.blocks if role_ok(b, roles)]
+        return [row(b) for b in model.blocks if role_ok(b, roles)]
     if mode == "grep":
-        by_pointer = {(b.primary, b.secondary): b for b in model.blocks}
         rows = []
         for d in grep_json["blocks"]:
-            for sel in d.get("selected", []):
-                rows.append((by_pointer[(sel["id"], sel["pointer"])], ""))
+            if d["role"] == "gap":
+                rows.append({"role": "gap", "id": None, "pointer": d["pointer"],
+                             "status": None})
+            else:
+                rows += [dict(sel) for sel in d["selected"]]
         return rows
     focus, hops = ref_ctx
-    rows = [(model.blocks[focus], "focus")]
+    rows = [row(model.blocks[focus], "focus")]
     for direction, found in (("back", model.bfs(focus, "back", hops)),
                              ("forward", model.bfs(focus, "forward", hops))):
         for n in sorted((n for n in found if not isinstance(n, tuple)),
                         key=lambda n: (found[n][0], _node_sort(model, n))):
             if role_ok(model.blocks[n], roles):
-                rows.append((model.blocks[n], f"hop={found[n][0]} {direction}"))
+                rows.append(row(model.blocks[n], f"hop={found[n][0]} {direction}"))
     return rows
 
 
@@ -547,11 +599,10 @@ def run_view(model: Model, tree_arg: str, *, full: bool = False, grep: str | Non
                          ref_ctx=ref_ctx)
         if as_json:
             out = {"view": mode, "tree": tree_arg, "tree_sha": model.tree_sha, "args": args,
-                   "blocks": [dict(block_meta(b), **({"note": e} if e else {}))
-                              for b, e in rows]}
+                   "blocks": rows}
             return json.dumps(out, indent=2, ensure_ascii=False)
         header = view_header(f"{mode} --flat", tree_arg, model.tree_sha)
-        return "\n".join([header] + [flat_line(b, e) for b, e in rows])
+        return "\n".join([header] + [flat_line(r) for r in rows])
     if as_json:
         out = {"view": mode, "tree": tree_arg, "tree_sha": model.tree_sha, "args": args}
         out.update(data)

@@ -108,19 +108,25 @@ def test_full_json_sources_are_the_slices_at_their_pointers(model):
 
 # ---- --grep ------------------------------------------------------------------------
 
-@pytest.mark.parametrize("pattern", [r"status", r"\{", r"^##", r"the"])
-def test_grep_lines_are_verbatim_and_every_block_match_is_shown(model, pattern):
+@pytest.mark.parametrize("pattern", [r"status", r"\{", r"^##", r"the", r"^#", r"^[a-z_]+:$"])
+def test_grep_shows_every_match_verbatim_exactly_once(model, pattern):
+    """Every matching line is shown, in a block or as a gap selection (§9.9.3),
+    verbatim at its number, and no line is printed twice."""
     out = run_view(model, "T", grep=pattern).split("\n")
     covered = walk_output(model, out[1:])
     rx = re.compile(pattern)
     emitted = {k for k, v in covered.items() if v}
-    elided_or_shown = set(covered)
     for sf in model.files:
         for ln, text in enumerate(sf.lines, 1):
-            if rx.search(text) and sf.innermost[ln - 1] is not None:
+            if rx.search(text):
                 assert (sf.path, ln) in emitted, (sf.path, ln)
-    # a unit never shows a line twice
-    assert all(v == 1 for k, v in covered.items() if k in elided_or_shown)
+    assert all(v == 1 for v in covered.values())
+
+
+def test_grep_role_filter_excludes_gap_selections(model):
+    data = json.loads(run_view(model, "T", grep=r"^[a-z_]+:$", roles=("token", "meta"),
+                               as_json=True))
+    assert all(d["role"] != "gap" for d in data["blocks"])
 
 
 def test_grep_json_selected_blocks_are_innermost(model):
@@ -260,6 +266,27 @@ def test_grep_inside_impl_selects_the_impl_block_within_its_token(tiny):
         "[impl] {resources.mana} gdd/mechanics.md:12-12",
         '    implemented_in: ["src/mana_impl.py"]',
     ]
+
+
+def test_grep_selects_gap_lines_with_pointer_file_and_context(tiny):
+    m = compile_tree(tiny)
+    out = run_view(m, "T", grep=r"^(# Tiny|resources:)$").split("\n")
+    assert out[1:] == [
+        "[file] game-design.md core",
+        "[gap] game-design.md:11-11",
+        "# Tiny",
+        "[file] gdd/mechanics.md subfile",
+        "[gap] gdd/mechanics.md:7-7",
+        "resources:",
+    ]
+    data = json.loads(run_view(m, "T", grep=r"^resources:$", as_json=True))
+    assert data["blocks"] == [{"role": "gap", "id": None, "file": "gdd/mechanics.md",
+                               "pointer": "gdd/mechanics.md:7-7", "context": [],
+                               "matches": [7], "source": "resources:"}]
+    flat = run_view(m, "T", grep=r"^resources:$", flat=True).split("\n")[1:]
+    assert flat == ["gap - gdd/mechanics.md:7-7 -"]
+    assert json.loads(run_view(m, "T", grep=r"^resources:$", roles=("token",),
+                               as_json=True))["blocks"] == []
 
 
 def test_grep_role_filter_selects_the_enclosing_role(tiny):

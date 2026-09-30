@@ -1,0 +1,44 @@
+{
+  "view": "grep",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "regex": "^(# Lamplight|verbs:|# trailing .*)$",
+    "ignore_case": false
+  },
+  "blocks": [
+    {
+      "role": "gap",
+      "id": null,
+      "file": "game-design.md",
+      "pointer": "game-design.md:27-27",
+      "context": [],
+      "matches": [
+        27
+      ],
+      "source": "# Lamplight"
+    },
+    {
+      "role": "gap",
+      "id": null,
+      "file": "gdd/mechanics.md",
+      "pointer": "gdd/mechanics.md:18-18",
+      "context": [],
+      "matches": [
+        18
+      ],
+      "source": "verbs:"
+    },
+    {
+      "role": "gap",
+      "id": null,
+      "file": "gdd/mechanics.md",
+      "pointer": "gdd/mechanics.md:69-69",
+      "context": [],
+      "matches": [
+        69
+      ],
+      "source": "# trailing comment after the last namespace"
+    }
+  ]
+}

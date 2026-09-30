@@ -35,6 +35,8 @@ VIEW_CASES = {
     "full": {"full": True},
     "grep": {"grep": "focus"},
     "grep-ignore-case": {"grep": "LAMP", "ignore_case": True},
+    "grep-gap": {"grep": r"^(# Lamplight|verbs:|# trailing .*)$"},
+    "grep-gap-role": {"grep": r"^(# Lamplight|verbs:|# trailing .*)$", "roles": ("token",)},
     "ref-hops1": {"ref": "{resources.focus}"},
     "ref-hops2": {"ref": "{resources.focus}", "hops": 2},
     "ref-subpath": {"ref": "{rules.study_rule.do}"},

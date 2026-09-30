@@ -28,6 +28,17 @@
       "elided": []
     },
     {
+      "role": "gap",
+      "id": null,
+      "file": "game-design.md",
+      "pointer": "game-design.md:27-27",
+      "context": [],
+      "matches": [
+        27
+      ],
+      "source": "# Lamplight"
+    },
+    {
       "role": "token",
       "id": "{rules.study_rule}",
       "pointer": "gdd/mechanics.md:49-58",

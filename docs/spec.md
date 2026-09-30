@@ -1513,6 +1513,7 @@ A view is a projection of the tree. **Views select, truncate, or annotate; they 
 - **`--grep <regex>`: adaptive.** The regex is Python syntax, case-sensitive unless `--ignore-case`.
   - Selects the **innermost** block containing each match: its source text, or its primary coordinate. A match inside an `impl` block selects the `impl` block, shown within its token's structure.
   - Each selected block is lowered to its header, the matching lines, the header lines of its ancestor blocks, and **every ancestor key line of each matching line** (namespace → token → field). All other lines are replaced by elision markers.
+  - A match on a gap line (outside every block: a namespace key, a comment between tokens, a title or introduction) is a **`gap` selection**: the matching lines verbatim with their pointer, under their file, with their ancestor key lines. `--role` excludes gap selections, since a gap line has no role.
   - Output is grouped by file, in canonical order.
 - **`--ref <{ns.id}> [--hops N]`: graph-adaptive.**
   - The focus token's block, in full.

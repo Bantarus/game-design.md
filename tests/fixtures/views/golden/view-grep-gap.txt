@@ -1,0 +1,9 @@
+[view grep] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+[file] game-design.md core
+[gap] game-design.md:27-27
+# Lamplight
+[file] gdd/mechanics.md subfile
+[gap] gdd/mechanics.md:18-18
+verbs:
+[gap] gdd/mechanics.md:69-69
+# trailing comment after the last namespace
