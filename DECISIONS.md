@@ -887,6 +887,26 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
     `CLAUDE.md`, `schema/` and `src/` are unchanged.
   - The pilot reads' token figures (45,975 / 46,475) describe the pre-rebase commit. The import probe is re-run at each matrix commit, and its JSON is committed with that matrix's results. Rule C's Δ is re-probed there anyway, as locked.
 
+#### Addendum (2026-09-30, after the push)
+
+- **The force-push was verified after the fact, not by the pre-push check.**
+  - The agreed pre-push check (`git merge-base --is-ancestor origin/v0.4-views v0.4-views-prerebase`) can only pass before a force-push. It was run after the push had already happened, so it failed by construction.
+  - The verification is therefore GitHub's branch activity (`gh api repos/{owner}/{repo}/activity?ref=refs/heads/v0.4-views`):
+
+    | Time (UTC) | Event | Before | After |
+    | --- | --- | --- | --- |
+    | 16:01:53 | branch created | — | `e9ecff5` |
+    | 16:22:20 | force push | `e9ecff5` | `7c4a254` |
+
+    Nothing else was pushed to the branch in between. So `e9ecff5` is the only remote state the force-push overwrote.
+  - `git merge-base --is-ancestor e9ecff5 v0.4-views-prerebase` exits 0: `e9ecff5` is an ancestor of the tag. The tag (`1665b0e`) is on the remote (`git ls-remote`), so every pre-rebase commit remains reachable.
+- **"Lock precedes run" is verifiable only against the tag's history.**
+  - The rebase kept author dates but rewrote committer dates: every rebased commit carries committer date 2026-09-30 18:14:42 +0200, later than every run.
+  - In the tag's history the order is visible: the lock `79a1827` was committed at 08:17:58 +0200 and amendment 1 `337a72b` at 08:23:47 +0200; the pilot's first `started_at` is 06:24:22 UTC (08:24:22 +0200). The probes carry no timestamps; their `source_sha` is the commit they ran on (`79a1827` for the first import probe, `337a72b` for the second and for every pilot line), all in the tag's history.
+  - **The tag `v0.4-views-prerebase` must never be deleted or moved.** A GitHub tag ruleset ("protect v0.4-views-prerebase", id 24259648, active, no bypass actors) blocks its deletion, update and non-fast-forward on the remote.
+- **Forward-only from the first full-matrix run.** From the first Rule V or Rule C full-matrix run onward, `v0.4-views` only moves forward. Changes from `main` come in by merge, never by rebase, so every matrix's `source_sha` stays on the branch's history.
+- **Rule V limits.** The views world now also carries `db1950e`'s docs-drift fixes to `docs/spec.md` and `AGENTS.md` (listed above); the baseline's v0.3 world does not. The Rule V report lists this in its limits (stopping rule 3), alongside the v0.3/v0.4 world difference. It is part of what Rule V compares, not a separate effect it can isolate.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design
