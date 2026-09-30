@@ -1,0 +1,66 @@
+{
+  "turns": 4,
+  "input_tokens": 8,
+  "output_tokens": 1059,
+  "cache_read_tokens": 248552,
+  "cache_creation_tokens": 76702,
+  "tool_calls": 3,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 7340,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81474.0,
+  "per_turn_occupancy": [
+    79085,
+    80201,
+    82747,
+    83229
+  ],
+  "tool_counts": {
+    "Bash": 3
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {
+    "grep": 5170
+  },
+  "view_mode_calls": {
+    "grep": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 1992,
+  "bash_files_read": 0,
+  "all_files_read": 0,
+  "all_re_reads": 0,
+  "all_files_read_paths": [],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "aFBJhx",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r1.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "yEEHQX",
+      "result_bytes": 5170,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r1.txt:77-169"
+    },
+    {
+      "tool": "Bash",
+      "id": "BpN9ge",
+      "result_bytes": 178,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r1.txt:187-196"
+    }
+  ]
+}

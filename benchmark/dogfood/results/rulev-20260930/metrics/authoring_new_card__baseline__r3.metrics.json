@@ -1,0 +1,94 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1883,
+  "cache_read_tokens": 385792,
+  "cache_creation_tokens": 72689,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10229,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 77062.0,
+  "per_turn_occupancy": [
+    72404,
+    75155,
+    76638,
+    77486,
+    78258,
+    78552
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Edit": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 9091,
+  "bash_files_read": 6,
+  "all_files_read": 6,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder/content/cards/bellows.yaml",
+    "examples/deckbuilder/content/cards/firewall.yaml",
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/content/_index.md",
+    "examples/deckbuilder/gdd/content/cards.md",
+    "examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "EHceQb",
+      "result_bytes": 6059,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r3.txt:25-179"
+    },
+    {
+      "tool": "Bash",
+      "id": "r4guLs",
+      "result_bytes": 3032,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r3.txt:191-276"
+    },
+    {
+      "tool": "Bash",
+      "id": "HWVXKf",
+      "result_bytes": 591,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r3.txt:311-333"
+    },
+    {
+      "tool": "Write",
+      "id": "6Xrezg",
+      "result_bytes": 215,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r3.txt:367-367"
+    },
+    {
+      "tool": "Edit",
+      "id": "eLtmBP",
+      "result_bytes": 146,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r3.txt:386-386"
+    },
+    {
+      "tool": "Bash",
+      "id": "gntHnp",
+      "result_bytes": 186,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r3.txt:398-408"
+    }
+  ]
+}

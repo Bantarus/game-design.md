@@ -1,0 +1,64 @@
+{
+  "turns": 4,
+  "input_tokens": 8,
+  "output_tokens": 599,
+  "cache_read_tokens": 226640,
+  "cache_creation_tokens": 68973,
+  "tool_calls": 3,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 3908,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 74195.5,
+  "per_turn_occupancy": [
+    72394,
+    73903,
+    74488,
+    74836
+  ],
+  "tool_counts": {
+    "Bash": 3
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 3908,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "sKDkkB",
+      "result_bytes": 2661,
+      "is_error": false,
+      "vcc": "negative_control_no_drift__baseline__r3.txt:20-67"
+    },
+    {
+      "tool": "Bash",
+      "id": "2nxrDC",
+      "result_bytes": 876,
+      "is_error": false,
+      "vcc": "negative_control_no_drift__baseline__r3.txt:79-96"
+    },
+    {
+      "tool": "Bash",
+      "id": "gGcG7F",
+      "result_bytes": 371,
+      "is_error": false,
+      "vcc": "negative_control_no_drift__baseline__r3.txt:108-122"
+    }
+  ]
+}

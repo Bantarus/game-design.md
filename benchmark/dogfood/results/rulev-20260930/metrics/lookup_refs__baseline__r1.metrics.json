@@ -1,0 +1,80 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1700,
+  "cache_read_tokens": 306189,
+  "cache_creation_tokens": 72084,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 9235,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 76963,
+  "per_turn_occupancy": [
+    72574,
+    73182,
+    76963,
+    77617,
+    77947
+  ],
+  "tool_counts": {
+    "Bash": 3,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 8783,
+  "bash_files_read": 8,
+  "all_files_read": 8,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder",
+    "examples/deckbuilder/content",
+    "examples/deckbuilder/gdd/economy-balance.md",
+    "examples/deckbuilder/gdd/feel.md",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/systems/*.md",
+    "examples/deckbuilder/gdd/systems/combat.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "UUdUnQ",
+      "result_bytes": 709,
+      "is_error": false,
+      "vcc": "lookup_refs__baseline__r1.txt:27-52"
+    },
+    {
+      "tool": "Bash",
+      "id": "w6AgHH",
+      "result_bytes": 8074,
+      "is_error": false,
+      "vcc": "lookup_refs__baseline__r1.txt:64-301"
+    },
+    {
+      "tool": "Bash",
+      "id": "PxVL5d",
+      "result_bytes": 272,
+      "is_error": true,
+      "vcc": "lookup_refs__baseline__r1.txt:313-313"
+    },
+    {
+      "tool": "Write",
+      "id": "z6hWqT",
+      "result_bytes": 180,
+      "is_error": false,
+      "vcc": "lookup_refs__baseline__r1.txt:329-329"
+    }
+  ]
+}

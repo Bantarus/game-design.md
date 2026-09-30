@@ -1,0 +1,133 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 2907,
+  "cache_read_tokens": 402653,
+  "cache_creation_tokens": 78179,
+  "tool_calls": 11,
+  "files_read": 2,
+  "bytes_read": 4476,
+  "re_reads": 0,
+  "consultation_bytes": 19446,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81855.5,
+  "per_turn_occupancy": [
+    72418,
+    77634,
+    80977,
+    82734,
+    83039,
+    84042
+  ],
+  "tool_counts": {
+    "Bash": 3,
+    "Edit": 5,
+    "Grep": 1,
+    "Read": 2
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 1,
+  "bash_read_bytes": 1572,
+  "bash_files_read": 7,
+  "all_files_read": 9,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/economy-balance.md",
+    "examples/deckbuilder/gdd/feel.md",
+    "examples/deckbuilder/gdd/glossary.md",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/pillars.md",
+    "examples/deckbuilder/gdd/systems/combat.md",
+    "examples/deckbuilder/gdd/verification.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Grep",
+      "id": "oWZjPH",
+      "result_bytes": 11517,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:24-94"
+    },
+    {
+      "tool": "Read",
+      "id": "kZS4YF",
+      "result_bytes": 3927,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:106-179"
+    },
+    {
+      "tool": "Read",
+      "id": "msMBGM",
+      "result_bytes": 549,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:193-212"
+    },
+    {
+      "tool": "Bash",
+      "id": "KewHmQ",
+      "result_bytes": 1572,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:224-256"
+    },
+    {
+      "tool": "Edit",
+      "id": "JbxHdf",
+      "result_bytes": 227,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:275-275"
+    },
+    {
+      "tool": "Edit",
+      "id": "XDNbuR",
+      "result_bytes": 227,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:290-290"
+    },
+    {
+      "tool": "Edit",
+      "id": "RK3J9N",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:309-309"
+    },
+    {
+      "tool": "Edit",
+      "id": "FGMELG",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:324-324"
+    },
+    {
+      "tool": "Edit",
+      "id": "8HS1jA",
+      "result_bytes": 151,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:343-343"
+    },
+    {
+      "tool": "Bash",
+      "id": "CGyRGt",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "operating_energy_budget__baseline__r3.txt:355-355"
+    },
+    {
+      "tool": "Bash",
+      "id": "AtEyLs",
+      "result_bytes": 779,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r3.txt:369-397"
+    }
+  ]
+}

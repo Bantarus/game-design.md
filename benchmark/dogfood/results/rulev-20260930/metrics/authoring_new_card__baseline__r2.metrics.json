@@ -1,0 +1,102 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 2084,
+  "cache_read_tokens": 465526,
+  "cache_creation_tokens": 73127,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10609,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 77775,
+  "per_turn_occupancy": [
+    72398,
+    75360,
+    76825,
+    77775,
+    78544,
+    78775,
+    78990
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Edit": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 9393,
+  "bash_files_read": 6,
+  "all_files_read": 6,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder/content/cards/ember_strike.yaml",
+    "examples/deckbuilder/examples/deckbuilder",
+    "examples/deckbuilder/examples/deckbuilder/content/cards/bellows.yaml",
+    "examples/deckbuilder/examples/deckbuilder/content/cards/firewall.yaml",
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/content/cards.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "fzEx6h",
+      "result_bytes": 6496,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r2.txt:25-200"
+    },
+    {
+      "tool": "Bash",
+      "id": "KSTHj9",
+      "result_bytes": 2897,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r2.txt:212-273"
+    },
+    {
+      "tool": "Bash",
+      "id": "3GE8gV",
+      "result_bytes": 577,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r2.txt:307-328"
+    },
+    {
+      "tool": "Write",
+      "id": "GvrdwF",
+      "result_bytes": 215,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r2.txt:362-362"
+    },
+    {
+      "tool": "Edit",
+      "id": "45Chqe",
+      "result_bytes": 146,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r2.txt:381-381"
+    },
+    {
+      "tool": "Bash",
+      "id": "1Rx7yB",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "authoring_new_card__baseline__r2.txt:393-393"
+    },
+    {
+      "tool": "Bash",
+      "id": "quJVjF",
+      "result_bytes": 87,
+      "is_error": false,
+      "vcc": "authoring_new_card__baseline__r2.txt:405-411"
+    }
+  ]
+}

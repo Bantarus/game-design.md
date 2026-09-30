@@ -1,0 +1,74 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1193,
+  "cache_read_tokens": 302474,
+  "cache_creation_tokens": 70474,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 6742,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 74827,
+  "per_turn_occupancy": [
+    72377,
+    73495,
+    74827,
+    75922,
+    76337
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 6564,
+  "bash_files_read": 3,
+  "all_files_read": 3,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat",
+    "examples/tick-combat/game-design.md",
+    "examples/tick-combat/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "bPjXPY",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r3.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "H9opQR",
+      "result_bytes": 2480,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r3.txt:77-110"
+    },
+    {
+      "tool": "Bash",
+      "id": "8rt1yW",
+      "result_bytes": 2092,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r3.txt:122-173"
+    },
+    {
+      "tool": "Bash",
+      "id": "fsrukz",
+      "result_bytes": 178,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r3.txt:185-194"
+    }
+  ]
+}
