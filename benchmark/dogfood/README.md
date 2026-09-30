@@ -12,6 +12,8 @@ tasks/<task_id>.md            prompt given to the subject verbatim (on stdin)
 tasks/<task_id>.check.py      deterministic checker: exit 0 = success, JSON report on stdout
 tasks/*.fixture.patch         teammate commit applied before the session (git format-patch)
 tasks/lookup_refs.expected.json   frozen, hand-verified answers (never recomputed at check time)
+fixtures/study2/              study 2 (D-026): generate.py and its frozen output: the Lanternfall tree
+                              (tree/), prompts/, patches/, answers/ (from the planted edges), edges.json
 arms/baseline.md              appended to the system prompt: the current workflow
 arms/views.md                 baseline.md + a neutral §9.9 command reference (hash recorded in D-025 before the Rule V matrix)
 fixture.py                    isolated per-run copies
@@ -63,6 +65,19 @@ The copy sits outside the native installer's `versions/` directory, so auto-upda
 | `operating_energy_budget` | operating | deckbuilder | The token diff equals the expected propagation set, including a coupling lint can't see; nothing else; lint 0/0. |
 | `maintenance_drift` | maintenance | tick-combat | A teammate's behavior-preserving refactor under `implemented_in`: `last_verified` bumped on exactly the affected section, no token churn, impl untouched, lint 0/0. |
 | `negative_control_no_drift` | negative control | tick-combat | Same prompt as maintenance; the teammate change is in a file no section references. The copy must be left unchanged. |
+
+**Study 2 (D-026)** adds six tasks on a generated tree, `fixtures/study2/tree/`, which `fixture.prepare_copy` places at `examples/lanternfall/` inside each copy's baseline commit (read from the run's commit). `generate.py` writes the tree, the prompts, the two teammate patches and the frozen answers; `generate.py --check` confirms the frozen output reproduces, and `generate.py --leaks` runs the §7 leak check. Run a study-2 cell with `--study 2`, which also applies study 2's caps (80 turns, 1800 s, $5.00).
+
+| Task | Class | Success (checker) |
+| --- | --- | --- |
+| `s2_lookup_forward` | lookup, forward | `answers/s2_lookup_forward.txt`: two questions, "exactly k references" (k = 2, 3), exact set equality |
+| `s2_lookup_backward` | lookup, backward | two questions, "at most k references" (k = 2, 3), exact set equality |
+| `s2_impact_tokens` | impact | the value-edge reverse closure of a token, exact set equality |
+| `s2_impact_files` | impact (ritual-shaped) | the subfiles holding that closure's tokens, exact set equality |
+| `s2_maintenance` | maintenance (guarded) | `last_verified` bumped on exactly the two covering subfiles, no token churn, impl untouched, lint 0/0 |
+| `s2_negative_control` | negative control (guarded) | same prompt; the copy is unchanged |
+
+Each answer checker also reports per-question Jaccard (descriptive).
 
 "Ritual metadata" (a root `version` increase with `last_updated`, and `last_verified` bumps) is allowed but never required, except where it is the thing being tested (maintenance) or where no change at all is correct (the control). See `checklib.check_ritual_metadata`.
 
@@ -118,6 +133,7 @@ python run.py --probe                      # 1 call: is the pinned model id serv
 python run.py --import-probe               # 4 calls: spec.md @-import size in both worlds (D-024)
 python run.py --card-probe --ref <sha>     # 2 calls: the card @-import's own size, matrix world (Rule C addendum)
 python run.py --pilot                      # baseline x every task x 1 (not evidence)
+python run.py --pilot --study 2            # study 2's pilot: baseline x its six tasks x 1
 python run.py --task lookup_refs --arm views --repeats 3
 python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
 python analyze.py rule-v results/<run>.jsonl [results/<rerun-or-extension>.jsonl ...]   # Rule V verdict, as locked

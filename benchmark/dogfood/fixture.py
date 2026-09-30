@@ -6,7 +6,9 @@ Each run gets its own copy:
    copy must live outside the repo: otherwise Claude Code's parent-directory
    discovery would load the real repo's CLAUDE.md on top of the copy's.
 2. Harness files stripped (`EXCLUDE_FROM_COPY`), so the subject can't read
-   tasks, checkers or frozen answers.
+   tasks, checkers or frozen answers. A study-2 task's generated tree
+   (`fixtures/<name>/tree`, D-026 §1) is then placed at the task's tree path,
+   read from the same commit, so it is part of the copy's baseline.
 3. Every mtime set to `FIXTURE_MTIME`. `git archive` stamps files with the
    commit time, which would make every `prototyped` section look stale to
    `stale-section` (impl mtime vs `last_verified:`). With normalized mtimes
@@ -52,6 +54,7 @@ DOGFOOD_DIR = Path(__file__).resolve().parent
 REPO_ROOT = DOGFOOD_DIR.parents[1]
 TASKS_DIR = DOGFOOD_DIR / "tasks"
 ARMS_DIR = DOGFOOD_DIR / "arms"
+FIXTURES_DIR = DOGFOOD_DIR / "fixtures"
 
 EXCLUDE_FROM_COPY = ("benchmark/dogfood", "tests/test_dogfood.py")
 FIXTURE_MTIME = datetime(2026, 5, 1).timestamp()
@@ -72,10 +75,14 @@ class Task:
     mode: str
     tree: str
     fixture_patch: str | None
+    study: int = 1
+    # D-026 §1: a generated tree (fixtures/<name>/tree) placed at `tree` in the copy.
+    fixture_tree: str | None = None
+    prompt_file: str | None = None     # relative to TASKS_DIR; default <task_id>.md
 
     @property
     def prompt_path(self) -> Path:
-        return TASKS_DIR / f"{self.task_id}.md"
+        return TASKS_DIR / (self.prompt_file or f"{self.task_id}.md")
 
     @property
     def checker_path(self) -> Path:
@@ -88,7 +95,9 @@ class Task:
 def load_tasks() -> dict[str, Task]:
     data = yaml.safe_load((TASKS_DIR / "tasks.yaml").read_text(encoding="utf-8"))
     return {
-        tid: Task(tid, spec["mode"], spec["tree"], spec.get("fixture_patch"))
+        tid: Task(tid, spec["mode"], spec["tree"], spec.get("fixture_patch"),
+                  study=spec.get("study", 1), fixture_tree=spec.get("fixture_tree"),
+                  prompt_file=spec.get("prompt"))
         for tid, spec in data["tasks"].items()
     }
 
@@ -161,6 +170,26 @@ def make_judge(dest: Path, ref: str) -> Path:
         raise FixtureError(f"{dest} already exists")
     export_ref(dest, ref, paths=("src",))
     return write_gdmd_shim(dest / "bin", dest)
+
+
+def place_fixture_tree(root: Path, sha: str, name: str, dest: str, scratch: Path) -> None:
+    """D-026 §1: put the frozen tree `fixtures/<name>/tree` of commit `sha` at
+    `dest` inside the copy, before its baseline commit, so it looks native.
+    Read from the commit (not the working tree), like the rest of the copy."""
+    src_rel = f"{FIXTURES_DIR.relative_to(REPO_ROOT).as_posix()}/{name}/tree"
+    target = root / dest
+    if target.exists():
+        raise FixtureError(f"{dest} already exists in the copy")
+    tmp = scratch / f"fixture-{name}"
+    if tmp.exists():
+        raise FixtureError(f"{tmp} already exists")
+    try:
+        export_ref(tmp, sha, paths=(src_rel,))
+    except subprocess.CalledProcessError as e:
+        raise FixtureError(f"{src_rel} is not in commit {sha[:12]}") from e
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(tmp / src_rel), str(target))
+    shutil.rmtree(tmp)
 
 
 def strip_excluded(root: Path) -> None:
@@ -316,6 +345,8 @@ def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD", world: str = "ma
     sha = export_ref(root, ref)
     overlay_sha = overlay_ref(root, V03_TAG, V03_OVERLAY) if world == "v0.3" else None
     strip_excluded(root)
+    if task.fixture_tree:
+        place_fixture_tree(root, sha, task.fixture_tree, task.tree, cell_dir)
     if card and world != "matrix":
         raise FixtureError("the card swap needs the matrix world (D-025 amendment 2)")
     if world == "matrix":

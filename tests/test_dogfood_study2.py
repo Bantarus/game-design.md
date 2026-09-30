@@ -15,6 +15,7 @@ No model calls.
 from __future__ import annotations
 
 import importlib.util
+import re
 import json
 import os
 import shutil
@@ -261,3 +262,204 @@ def test_imported_files_cover_both_worlds_and_the_card():
         assert {"CLAUDE.md", "AGENTS.md", "docs/spec.md", "schema/game-design.schema.json",
                 "examples/deckbuilder/game-design.md"} <= set(world)
     assert "docs/spec-card.md" in mat
+
+
+# ---- the harness: placement, guarded fixtures, checkers, --study (D-026) -------------------
+
+import run as dogfood_run  # noqa: E402
+
+TASKS = fixture.load_tasks()
+S2 = sorted(t for t in TASKS if TASKS[t].study == 2)
+PLACED = "examples/lanternfall"
+
+
+def _copy(task: str, tmp_path: Path, world: str = "matrix", judge=None, card=False):
+    return fixture.prepare_copy(TASKS[task], tmp_path / f"{task}-{world}", world=world,
+                                judge=judge, card=card)
+
+
+def _gdmd(copy, *args) -> subprocess.CompletedProcess:
+    return subprocess.run(["gdmd", *args], cwd=copy.root, env=copy.env(),
+                          capture_output=True, text=True)
+
+
+def _check(task: str, copy) -> tuple[int, dict]:
+    proc = subprocess.run([sys.executable, str(TASKS[task].checker_path), str(copy.root)],
+                          env=copy.env(), capture_output=True, text=True)
+    return proc.returncode, json.loads(proc.stdout)
+
+
+def _failed(report: dict) -> set[str]:
+    return {k for k, v in report["criteria"].items() if not v["pass"]}
+
+
+def test_study2_registry():
+    assert S2 == ["s2_impact_files", "s2_impact_tokens", "s2_lookup_backward",
+                  "s2_lookup_forward", "s2_maintenance", "s2_negative_control"]
+    for t in S2:
+        task = TASKS[t]
+        assert task.tree == PLACED and task.fixture_tree == "study2"
+        assert task.prompt_path.is_file() and task.checker_path.is_file()
+        assert task.prompt() == (STUDY2 / "prompts" / f"{t}.md").read_text()
+    assert TASKS["s2_maintenance"].prompt() == TASKS["s2_negative_control"].prompt()
+    assert all(TASKS[t].study == 1 for t in TASKS if not t.startswith("s2_"))
+
+
+def test_prompts_name_only_the_start_tokens():
+    for t in ("s2_lookup_forward", "s2_lookup_backward", "s2_impact_tokens", "s2_impact_files"):
+        prompt = TASKS[t].prompt()
+        assert f"answers/{t}.txt" in prompt
+        named = set(re.findall(r"\{([a-z_]+\.[a-z0-9_.]+)\}", prompt))
+        starts = {q["start"] for q in ANSWERS[t]["questions"].values()}
+        # the only tree tokens a prompt names are its questions' start tokens;
+        # the rest are generic placeholders ({ns.id}, {entities.<kind>.<id>})
+        assert named & set(EDGES["nodes"]) == starts, (t, named)
+        assert not {n for n in named - starts
+                    if n.split(".")[0] not in ("ns", "namespace", "verbs", "entities")}
+        for q in ANSWERS[t]["questions"].values():
+            assert not set(q["answer"]) & named
+
+
+def test_copy_places_the_tree_in_the_baseline_commit(tmp_path):
+    c = _copy("s2_lookup_forward", tmp_path)
+    assert (c.root / PLACED / "game-design.md").is_file()
+    assert not (c.root / "benchmark/dogfood").exists()
+    tracked = fixture.git(c.root, "ls-files", PLACED).splitlines()
+    assert len(tracked) == sum(1 for p in TREE.rglob("*") if p.is_file()
+                               and "__pycache__" not in p.parts)
+    for rel in tracked[:: max(1, len(tracked) // 25)]:
+        assert (c.root / rel).read_bytes() == (TREE / rel[len(PLACED) + 1:]).read_bytes()
+    res = json.loads(_gdmd(c, "lint", PLACED).stdout)["summary"]
+    assert (res["errors"], res["warnings"]) == (0, 0)
+
+
+def test_study1_copies_do_not_get_the_tree(tmp_path):
+    c = fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "s1")
+    assert not (c.root / PLACED).exists()
+
+
+def test_judge_agrees_in_both_worlds_before_and_after_the_patches(tmp_path):
+    sha = fixture.git(REPO_ROOT, "rev-parse", "HEAD")
+    judge = fixture.make_judge(tmp_path / "judge", sha)
+    worlds = ["matrix"] + (["v0.3"] if V03_GDMD.is_file() else [])
+    for world in worlds:
+        for t in ("s2_lookup_forward", "s2_maintenance", "s2_negative_control"):
+            c = _copy(t, tmp_path, world=world, judge=judge)   # raises on disagreement
+            assert c.world == world
+    c = _copy("s2_impact_tokens", tmp_path, judge=judge, card=True)
+    assert (c.root / "docs/spec-card.md").is_file()
+
+
+def test_maintenance_fixture_makes_exactly_the_two_subfiles_stale(tmp_path):
+    c = _copy("s2_maintenance", tmp_path)
+    changed = fixture.git(c.root, "show", "--name-only", "--format=", "HEAD").splitlines()
+    assert changed == [ANSWERS["s2_maintenance"]["patched"]]
+    res = json.loads(_gdmd(c, "lint", PLACED).stdout)
+    warn = sorted((f["rule"], f["file"]) for f in res["findings"] if f["severity"] != "info")
+    assert warn == [("stale-section", "gdd/systems/distributions.md"),
+                    ("stale-section", "gdd/systems/loot.md")]
+    hook = _gdmd(c, "hook", "check", PLACED, *changed).stdout
+    assert "gdd/systems/loot.md" in hook and "gdd/systems/distributions.md" in hook
+
+
+def test_negative_control_fixture_is_invisible(tmp_path):
+    c = _copy("s2_negative_control", tmp_path)
+    changed = fixture.git(c.root, "show", "--name-only", "--format=", "HEAD").splitlines()
+    assert changed == [ANSWERS["s2_negative_control"]["patched"]]
+    res = json.loads(_gdmd(c, "lint", PLACED).stdout)["summary"]
+    assert (res["errors"], res["warnings"]) == (0, 0)
+    assert _gdmd(c, "hook", "check", PLACED, *changed).stdout.strip() == ""
+
+
+def _write_answer(c, task: str, tweak=None, paths=False) -> None:
+    lines = []
+    for q, spec in sorted(ANSWERS[task]["questions"].items()):
+        items = list(spec["answer"])
+        if tweak:
+            items = tweak(q, items)
+        lines.append(f"{q}:")
+        lines += [x if paths else "{" + x + "}" for x in items]
+    (c.root / "answers").mkdir(exist_ok=True)
+    (c.root / "answers" / f"{task}.txt").write_text("\n".join(lines) + "\n")
+
+
+@pytest.mark.parametrize("task", ["s2_lookup_forward", "s2_lookup_backward",
+                                  "s2_impact_tokens", "s2_impact_files"])
+def test_answer_checkers(task, tmp_path):
+    paths = task == "s2_impact_files"
+    c = _copy(task, tmp_path)
+    rc, rep = _check(task, c)
+    assert rc == 1 and "answer_file_written" in _failed(rep)
+    _write_answer(c, task, paths=paths)
+    rc, rep = _check(task, c)
+    assert rc == 0 and not _failed(rep), rep
+    assert all(v["detail"]["jaccard"] == 1.0 for k, v in rep["criteria"].items()
+               if k.endswith("_correct"))
+    # normalizations: repo-relative paths, bullets, backticks, one-line lists
+    if paths:
+        _write_answer(c, task, tweak=lambda q, xs: [f"- `{PLACED}/{x}`" for x in xs],
+                      paths=True)
+    else:
+        q1 = ANSWERS[task]["questions"]["Q1"]["answer"]
+        rest = "".join(f"{q}:\n" + "\n".join(f"- `{x}`" for x in s["answer"]) + "\n"
+                       for q, s in sorted(ANSWERS[task]["questions"].items()) if q != "Q1")
+        (c.root / "answers" / f"{task}.txt").write_text(
+            "Q1: " + ", ".join("{" + x + "}" for x in q1) + "\n" + rest)
+    rc, rep = _check(task, c)
+    assert rc == 0, rep
+    # a missing item and an extra item each fail their question, with Jaccard < 1
+    _write_answer(c, task, paths=paths, tweak=lambda q, xs: xs[1:] if q == "Q1" else xs)
+    rc, rep = _check(task, c)
+    assert rc == 1 and _failed(rep) == {"q1_correct"}
+    assert rep["criteria"]["q1_correct"]["detail"]["jaccard"] < 1
+    _write_answer(c, task, paths=paths,
+                  tweak=lambda q, xs: xs + (["gdd/pillars.md"] if paths else
+                                            ["loops.delve_turn"]) if q == "Q1" else xs)
+    rc, rep = _check(task, c)
+    assert rc == 1 and _failed(rep) == {"q1_correct"}
+    # any other change fails
+    _write_answer(c, task, paths=paths)
+    (c.root / PLACED / "gdd/glossary.md").write_text("changed\n")
+    rc, rep = _check(task, c)
+    assert rc == 1 and "no_other_changes" in _failed(rep)
+
+
+def test_maintenance_checker(tmp_path):
+    c = _copy("s2_maintenance", tmp_path)
+    rc, rep = _check("s2_maintenance", c)
+    assert rc == 1 and {"touched_exactly_affected_sections", "lint_clean"} <= _failed(rep)
+    for sub in ("gdd/systems/loot.md", "gdd/systems/distributions.md"):
+        assert _gdmd(c, "touch", f"{PLACED}/{sub}").returncode == 0
+    rc, rep = _check("s2_maintenance", c)
+    assert rc == 0 and not _failed(rep), rep
+    # touching a third subfile, or editing the implementation, fails
+    assert _gdmd(c, "touch", f"{PLACED}/gdd/loops.md").returncode == 0
+    rc, rep = _check("s2_maintenance", c)
+    assert "touched_exactly_affected_sections" in _failed(rep)
+    c2 = _copy("s2_maintenance", tmp_path / "b")
+    for sub in ("gdd/systems/loot.md", "gdd/systems/distributions.md"):
+        _gdmd(c2, "touch", f"{PLACED}/{sub}")
+    impl = c2.root / ANSWERS["s2_maintenance"]["patched"]
+    impl.write_text(impl.read_text() + "\n")
+    rc, rep = _check("s2_maintenance", c2)
+    assert "implementation_untouched" in _failed(rep)
+
+
+def test_negative_control_checker(tmp_path):
+    c = _copy("s2_negative_control", tmp_path)
+    rc, rep = _check("s2_negative_control", c)
+    assert rc == 0 and not _failed(rep), rep
+    _gdmd(c, "touch", f"{PLACED}/gdd/systems/loot.md")
+    rc, rep = _check("s2_negative_control", c)
+    assert rc == 1 and "repository_unchanged" in _failed(rep)
+
+
+def test_study_flag_selects_tasks_and_caps(tmp_path, capsys):
+    assert dogfood_run.STUDY_CAPS[2] == {"turn_cap": 80, "timeout_s": 1800.0,
+                                         "budget_usd": 5.0}       # D-026, as locked
+    assert dogfood_run.STUDY_CAPS[1] == {"turn_cap": 60, "timeout_s": 1200.0,
+                                         "budget_usd": 3.0}       # D-025
+    with pytest.raises(SystemExit):
+        dogfood_run.main(["--dry-run", "--task", "s2_lookup_forward"])     # study 1 default
+    with pytest.raises(SystemExit):
+        dogfood_run.main(["--dry-run", "--study", "2", "--task", "lookup_refs"])

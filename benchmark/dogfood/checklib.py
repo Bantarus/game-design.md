@@ -202,3 +202,121 @@ def check_ritual_metadata(report: Report, root: Path, tree: str, base: str,
         handled.add(rel)
     report.check("ritual_metadata_valid", not problems, problems)
     return handled
+
+
+# ---- study 2 (D-026): answer files --------------------------------------------------
+
+STUDY2_ANSWERS = Path(__file__).resolve().parent / "fixtures" / "study2" / "answers"
+STUDY2_TREE = "examples/lanternfall"
+_HEADER = re.compile(r"^\s*(Q\d+)\s*:\s*(.*)$")
+
+
+def _items(text: str) -> list[str]:
+    out = []
+    for part in text.split(","):
+        item = part.strip()
+        item = re.sub(r"^(?:[-*+]|\d+[.)])\s+", "", item).strip().strip("`").strip()
+        if item:
+            out.append(item)
+    return out
+
+
+def parse_answer_file(text: str) -> dict[str, list[str]]:
+    """{"Q1": [item, ...], ...} from the study-2 answer format: a `Q<n>:` header
+    line, then one item per line. Items after the header on the same line,
+    comma-separated items, list bullets and backticks are tolerated."""
+    out: dict[str, list[str]] = {}
+    cur = None
+    for line in text.splitlines():
+        m = _HEADER.match(line)
+        if m:
+            cur = m.group(1)
+            out.setdefault(cur, []).extend(_items(m.group(2)))
+        elif cur and line.strip():
+            out[cur].extend(_items(line))
+    return out
+
+
+def norm_id(item: str) -> str:
+    item = item.strip()
+    if item.startswith("{") and item.endswith("}"):
+        item = item[1:-1]
+    return item.strip()
+
+
+def norm_path(item: str) -> str:
+    item = item.strip()
+    for prefix in ("./", STUDY2_TREE + "/"):
+        if item.startswith(prefix):
+            item = item[len(prefix):]
+    return item
+
+
+def jaccard(a: set, b: set) -> float:
+    return 1.0 if not a and not b else len(a & b) / len(a | b)
+
+
+def check_study2_answers(task: str, paths: bool = False,
+                         argv: list[str] | None = None) -> None:
+    """Checker body for the four study-2 answer tasks (D-026): the answer file
+    is the only change, and every question's set equals the frozen answer
+    exactly. Per-question Jaccard is reported, descriptive only."""
+    a = parse_args(argv)
+    r = Report(task)
+    answer = f"answers/{task}.txt"
+    expected = json.loads((STUDY2_ANSWERS / f"{task}.json").read_text(encoding="utf-8"))
+    changes = changed_paths(a.root, a.base)
+    r.check("answer_file_written", changes.get(answer) in ("A", "?"), changes.get(answer))
+    r.check("no_other_changes", set(changes) <= {answer}, sorted(set(changes) - {answer}))
+    got = parse_answer_file(read_text(a.root, answer) or "")
+    norm = norm_path if paths else norm_id
+    for q, spec in sorted(expected["questions"].items()):
+        want = set(spec["answer"])
+        have = {norm(x) for x in got.get(q, [])} if q in got else None
+        detail = None if have is None else {
+            "missing": sorted(want - have), "extra": sorted(have - want),
+            "jaccard": round(jaccard(want, have), 4)}
+        r.check(f"{q.lower()}_correct", have == want, detail)
+    r.finish()
+
+
+def check_study2_maintenance(task: str, argv: list[str] | None = None) -> None:
+    """Checker body for s2_maintenance (D-026): last_verified bumped on exactly
+    the subfiles whose implemented_in covers the patched file; no token or
+    file change beyond allowed ritual metadata; the implementation and
+    everything outside the tree untouched; lint 0/0."""
+    a = parse_args(argv)
+    r = Report(task)
+    tree = STUDY2_TREE
+    expected = set(json.loads((STUDY2_ANSWERS / f"{task}.json").read_text())["touched"])
+    changes = changed_paths(a.root, a.base)
+    r.check("nothing_outside_tree_changed",
+            not [p for p in changes if not p.startswith(tree + "/")],
+            sorted(p for p in changes if not p.startswith(tree + "/")))
+    impl = sorted(p for p in changes if p.startswith(f"{tree}/impl/"))
+    r.check("implementation_untouched", not impl, impl)
+    handled = check_ritual_metadata(r, a.root, tree, a.base, changes,
+                                    run_date=a.run_date, check_date=a.check_date)
+    other = sorted(p for p in changes if p.startswith(tree + "/") and p not in handled
+                   and p not in impl)
+    r.check("no_token_or_file_changes", not other, other)
+    touched = set()
+    for rel in changes:
+        if rel.endswith(".md"):
+            b, _ = doc_at(a.root, rel, a.base)
+            n, _ = doc_at(a.root, rel)
+            if (b or {}).get("last_verified") != (n or {}).get("last_verified"):
+                touched.add(rel)
+    r.check("touched_exactly_affected_sections", touched == expected, sorted(touched))
+    r.lint_clean(a.root, tree)
+    r.finish()
+
+
+def check_study2_negative_control(task: str, argv: list[str] | None = None) -> None:
+    """Checker body for s2_negative_control (D-026): the copy is unchanged."""
+    a = parse_args(argv)
+    r = Report(task)
+    changes = changed_paths(a.root, a.base)
+    r.check("repository_unchanged", not changes, changes)
+    r.lint_clean(a.root, STUDY2_TREE)
+    r.finish()

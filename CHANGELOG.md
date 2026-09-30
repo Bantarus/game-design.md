@@ -44,6 +44,11 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - **Card adoption:** a study-1 card PASS is re-tested; a C2 FAIL reverts it.
   - **Freeze:** fixtures are built and frozen before study 2's own pilot.
 - **Dogfood copies in the matrix world force `CLAUDE.md`'s `@docs/spec.md` import** (`fixture.force_spec_import`), as D-026 requires for V2 and D-024 §4 for the views comparison. This keeps every locked cell's import intact after the repo adopts the card. `import-card` swaps to the card as before.
+- **Dogfood study 2 tasks in the harness** (D-026).
+  - Copies place the frozen Lanternfall tree at `examples/lanternfall/`, read from the run's commit (`fixture.place_fixture_tree`).
+  - Six tasks in `tasks.yaml` (`study: 2`), with checkers that compare against the frozen answers and report per-question Jaccard.
+  - `run.py --study 2` selects study 2's tasks and its caps (80 turns, 1800 s, $5.00). Every result line records its study and caps.
+  - Tests: placement in both worlds with the judge agreeing before and after each patch; the maintenance patch makes exactly its two subfiles stale; the control patch is invisible to lint and `hook check`; every checker passes known-good answers and fails known-bad ones.
 - **Dogfood study 2 fixture: the generated "Lanternfall" tree** (D-026 §§1–9; `benchmark/dogfood/fixtures/study2/`). `generate.py` (seed 20260930, fixed word lists, no wall-clock input) writes:
   - a dungeon-crawler tree with 320 content entities (140 items, 90 skills, 60 monsters, 30 encounters), 94 non-content tokens in 12 namespaces and 15 subfiles, a prototyped subset over a stub `impl/`;
   - the planted reference graph (`edges.json`), six task prompts, the two guarded tasks' teammate patches, and frozen answers computed from the planted edges only.

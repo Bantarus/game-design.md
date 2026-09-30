@@ -5,8 +5,11 @@
     python run.py --probe                                  # 1 call: model-id gate
     python run.py --import-probe                           # 4 calls: D-024 import size
     python run.py --card-probe [--ref R]                   # 2 calls: the card import's size
-    python run.py --pilot                                  # baseline x each task x 1
+    python run.py --pilot [--study 2]                      # baseline x each task x 1
     python run.py --task T --arm A --repeats N [--repeat-start K]   # any cell(s)
+
+`--study` (default 1) selects that study's tasks and caps (STUDY_CAPS); a run
+is one study.
 
 Each cell runs one headless Claude Code session in an isolated copy
 (fixture.prepare_copy), then runs the task's deterministic checker with the
@@ -82,6 +85,10 @@ ARM_TEXT = {"baseline": "baseline", "views": "views",
 CARD_ARMS = {"import-card"}
 ARMS = tuple(ARM_WORLD)
 OUTCOMES = ("success", "fail", "capped", "error")
+# Per-run caps, identical across arms: D-025 (study 1) and D-026 (study 2,
+# which may raise them once, upward, after its pilot if one binds).
+STUDY_CAPS = {1: {"turn_cap": 60, "timeout_s": 1200.0, "budget_usd": 3.0},
+              2: {"turn_cap": 80, "timeout_s": 1800.0, "budget_usd": 5.0}}
 HARNESS_PATHS = ["benchmark/dogfood", "tests/test_dogfood.py",
                  ":(exclude)benchmark/dogfood/results"]
 
@@ -328,6 +335,8 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
                        checker_success=chk.returncode == 0 and bool(checker.get("success")))
     line = {
         "run_id": run["run_id"], "cell_id": cell_id, "task_id": task.task_id,
+        "study": task.study, "turn_cap": cfg.turn_cap, "timeout_s": cfg.timeout_s,
+        "budget_usd": cfg.budget_usd,
         "mode": task.mode, "arm": arm, "world": copy.world, "repeat": repeat,
         "pilot": bool(cfg.pilot), "outcome": outcome, "success": outcome == "success",
         "checker_detail": checker.get("criteria", checker),
@@ -524,8 +533,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--repeats", type=int, default=1)
     ap.add_argument("--repeat-start", type=int, default=1,
                     help="first repeat number (D-025's pre-registered extension uses 4)")
+    ap.add_argument("--study", type=int, choices=sorted(STUDY_CAPS), default=1,
+                    help="which study's tasks and caps (D-025: 1, D-026: 2)")
     ap.add_argument("--pilot", action="store_true",
-                    help="baseline arm, every task, 1 repeat; marked pilot (not evidence)")
+                    help="baseline arm, every task of --study, 1 repeat; marked pilot "
+                         "(not evidence)")
     ap.add_argument("--dry-run", action="store_true",
                     help="validate flags, prepare fixtures, print argv; no model calls")
     ap.add_argument("--probe", action="store_true", help="model-id probe (1 call)")
@@ -536,9 +548,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="probes only: export copies (and the judge) at REF instead of HEAD")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--effort", default=DEFAULT_EFFORT)
-    ap.add_argument("--turn-cap", type=int, default=60)
-    ap.add_argument("--timeout-s", type=float, default=1200)
-    ap.add_argument("--budget-usd", type=float, default=3.0)
+    ap.add_argument("--turn-cap", type=int, default=None, help="default: the study's cap")
+    ap.add_argument("--timeout-s", type=float, default=None, help="default: the study's cap")
+    ap.add_argument("--budget-usd", type=float, default=None, help="default: the study's cap")
     ap.add_argument("--vcc", default=None, help="path to VCC.py")
     ap.add_argument("--workdir", type=Path,
                     default=Path(tempfile.gettempdir()) / "gdmd-dogfood")
@@ -547,6 +559,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--supersedes", default=None, metavar="RUN_ID/CELL_ID",
                     help="D-025 error re-run: the errored cell this run replaces")
     cfg = ap.parse_args(argv)
+    for k, v in STUDY_CAPS[cfg.study].items():
+        if getattr(cfg, k) is None:
+            setattr(cfg, k, v)
+    other = sorted(t for t in cfg.task or [] if tasks[t].study != cfg.study)
+    if other:
+        ap.error(f"{other} belong to another study than --study {cfg.study}; "
+                 "one run is one study")
     if cfg.ref and not (cfg.import_probe or cfg.card_probe):
         ap.error("--ref applies to the probes only; a matrix run pins HEAD")
     if cfg.supersedes and (cfg.pilot or len(cfg.task or []) != 1 or len(cfg.arm or []) != 1
@@ -574,10 +593,11 @@ def main(argv: list[str] | None = None) -> int:
     if cfg.card_probe:
         return card_probe(cfg, run, work)
 
+    study_tasks = sorted(t for t in tasks if tasks[t].study == cfg.study)
     if cfg.pilot:
-        task_ids, arms, repeats = sorted(tasks), ["baseline"], range(1, 2)
+        task_ids, arms, repeats = study_tasks, ["baseline"], range(1, 2)
     else:
-        task_ids, arms = cfg.task or sorted(tasks), cfg.arm or ["baseline"]
+        task_ids, arms = cfg.task or study_tasks, cfg.arm or ["baseline"]
         repeats = range(cfg.repeat_start, cfg.repeat_start + cfg.repeats)
     cells = [(t, a, r) for t in task_ids for a in arms for r in repeats]
 
