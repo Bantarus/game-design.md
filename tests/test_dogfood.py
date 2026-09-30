@@ -268,6 +268,31 @@ def test_operating_bad_half_propagated(tmp_path):
     assert rc == 1 and failed(rep) == {"balance_targets.energy_per_turn_updated"}
 
 
+def test_operating_bad_band_instead_of_hard_target(tmp_path):
+    # The task text fixes the end state: still a hard target, so [4, 4].
+    copy = make_copy("operating_energy_budget", tmp_path)
+    _raise_energy(copy, tolerance=False)
+    edit(copy.root / "examples/deckbuilder/gdd/economy-balance.md",
+         "    tolerance: [3, 3]\n", "    tolerance: [3, 4]\n")
+    rc, rep = check("operating_energy_budget", copy)
+    assert rc == 1 and failed(rep) == {"balance_targets.energy_per_turn_updated"}
+
+
+def test_operating_bad_retuned_unrelated_target(tmp_path):
+    # "Change nothing that doesn't restate it": average_card_cost stays.
+    copy = make_copy("operating_energy_budget", tmp_path)
+    _raise_energy(copy)
+    econ = copy.root / "examples/deckbuilder/gdd/economy-balance.md"
+    text = econ.read_text()
+    start = text.index("  average_card_cost:")
+    old = text[start:text.index("target:", start) + len("target:")]
+    tail = text[start + len(old):]
+    value_end = tail.index("\n")
+    econ.write_text(text[:start] + old + " 2.5" + tail[value_end:])
+    rc, rep = check("operating_energy_budget", copy)
+    assert rc == 1 and failed(rep) == {"no_unexpected_token_changes"}
+
+
 def test_operating_bad_changed_card_schema(tmp_path):
     copy = make_copy("operating_energy_budget", tmp_path)
     _raise_energy(copy)
