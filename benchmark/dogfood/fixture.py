@@ -225,6 +225,19 @@ def force_spec_import(root: Path) -> None:
                        "expected exactly one of them")
 
 
+CARD_PATH = "docs/spec-card.md"
+
+
+def remove_unimported_card(root: Path) -> None:
+    """D-026 amendment 4: a copy whose cell does not import the card carries no
+    card file. Since the adoption (49b53b4) the repo commits
+    `docs/spec-card.md`; study 2 was locked when no card file existed, and
+    the file describes v0.4's `view` / `graph`, which the v0.3 world must not
+    show. Every copy except `import-card` drops it (that cell regenerates it
+    in-copy, `swap_in_card`)."""
+    (root / CARD_PATH).unlink(missing_ok=True)
+
+
 def swap_in_card(root: Path) -> str:
     """Rule C `import-card` cell construction (D-024 §3, D-025): generate
     `docs/spec-card.md` with the copy's own `src/` from the copy's own spec
@@ -237,7 +250,7 @@ def swap_in_card(root: Path) -> str:
                           cwd=root, env=env, capture_output=True, text=True)
     if proc.returncode != 0 or not proc.stdout.strip():
         raise FixtureError(f"gdmd spec --card failed in the copy: {proc.stderr[-500:]}")
-    (root / "docs" / "spec-card.md").write_text(proc.stdout, encoding="utf-8")
+    (root / CARD_PATH).write_text(proc.stdout, encoding="utf-8")
     cm = root / "CLAUDE.md"
     text = cm.read_text(encoding="utf-8")
     if text.count(SPEC_IMPORT_LINE) != 1:
@@ -307,7 +320,11 @@ def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD", world: str = "ma
         raise FixtureError("the card swap needs the matrix world (D-025 amendment 2)")
     if world == "matrix":
         force_spec_import(root)
-    card_sha = swap_in_card(root) if card else None
+    if card:
+        card_sha = swap_in_card(root)
+    else:
+        remove_unimported_card(root)
+        card_sha = None
     normalize_mtimes(root)
     init_repo(root, f"fixture: game-design.md at {sha[:12]}"
                     + (f" with the {V03_TAG} tooling layer" if overlay_sha else "")

@@ -826,12 +826,10 @@ def test_import_card_copy_swaps_only_the_spec_import_in_the_baseline_commit(tmp_
     assert fixture.CARD_IMPORT_LINE in cm_card and fixture.SPEC_IMPORT_LINE not in cm_card
     assert cm_card.replace(fixture.CARD_IMPORT_LINE, fixture.SPEC_IMPORT_LINE) == cm_full
     assert full.card_sha is None
-    # After the card adoption (D-024), docs/spec-card.md is a repo file, so an
-    # import-full copy carries it too, unimported; the cells still differ only
-    # in CLAUDE.md's import line, and both files are the same card.
-    if (full.root / "docs/spec-card.md").exists():
-        assert (full.root / "docs/spec-card.md").read_text() == \
-            (card.root / "docs/spec-card.md").read_text()
+    # D-026 amendment 4: the repo commits the card since the adoption, but an
+    # import-full copy carries no card file (its cell doesn't import it).
+    assert (REPO / "docs/spec-card.md").is_file()
+    assert not (full.root / "docs/spec-card.md").exists()
     # the card is the copy's own `gdmd spec --card` over the copy's own spec
     spec = spec_cmd._FENCE_RE.sub("", (card.root / "docs/spec.md").read_text(), count=1).lstrip()
     assert (card.root / "docs/spec-card.md").read_text() == spec_cmd.card(spec)
@@ -957,3 +955,28 @@ def test_matrix_copies_import_the_full_spec(tmp_path):
 def test_ref_is_for_probes_only():
     with pytest.raises(SystemExit):
         dogfood_run.main(["--ref", "HEAD", "--dry-run"])
+
+
+def test_only_import_card_copies_carry_the_card_file(tmp_path):
+    """D-026 amendment 4: the card file exists only where the cell imports it.
+    Matrix-world copies (views, import-full, and the probes' copies) drop it;
+    the v0.3-world copy is tested below, where the venv exists."""
+    task = TASKS["lookup_refs"]
+    for arm in ("views", "import-full", "import-card"):
+        c = fixture.prepare_copy(task, tmp_path / arm, world=dogfood_run.ARM_WORLD[arm],
+                                 card=arm in dogfood_run.CARD_ARMS)
+        tracked = fixture.git(c.root, "ls-files", "docs").splitlines()
+        imports_card = fixture.CARD_IMPORT_LINE in (c.root / "CLAUDE.md").read_text()
+        assert ("docs/spec-card.md" in tracked) == imports_card == (arm == "import-card"), arm
+        assert (c.root / "docs/spec-card.md").exists() == imports_card, arm
+
+
+@needs_v03
+def test_v03_world_copy_has_no_card_file(tmp_path):
+    c = fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "b",
+                             world=dogfood_run.ARM_WORLD["baseline"])
+    assert c.world == "v0.3"
+    assert not (c.root / "docs/spec-card.md").exists()
+    # the v0.3 CLAUDE.md imports the full spec and nothing else of docs/
+    assert fixture.SPEC_IMPORT_LINE in (c.root / "CLAUDE.md").read_text()
+    assert "spec-card" not in (c.root / "CLAUDE.md").read_text()

@@ -1171,6 +1171,25 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - **Tree-only fixes may land now,** each with its own D-entry: OI-006 classes B and C, including the party-rpg starter's `data_dir`. None of the study-1 task trees is touched by them.
 - **Not changed:** study 2's design, cells, primaries, thresholds and verdict mapping.
 
+### Amendment 4 (2026-09-30, after study 1, before the study-2 freeze): a copy carries the card file only if its cell imports it
+
+- **Decided:** by the user at the Rule C review, before any study-2 build or data.
+- **The defect:** the card adoption (`49b53b4`, D-024) committed `docs/spec-card.md` to the repository. From then on every copy exported from the repo carried it, including cells that do not import it:
+  - both V2 arms, including the v0.3-world baseline, where `V03_OVERLAY` leaves the file in place because it did not exist at `v0.3.0`;
+  - C2's `import-full` cell.
+
+  A subject in those cells could read the card, and in the v0.3 world it describes v0.4's `view` / `graph` (its §9.9 synopsis).
+- **The change:** `fixture.remove_unimported_card` deletes `docs/spec-card.md` from every copy whose cell does not import it: `baseline`, `views` and `import-full`, plus the probes' spec-import copies.
+  - `import-card` copies keep generating the card in-copy from the copy's own `src/` and spec (`swap_in_card`), as Rule C did.
+- **Why:**
+  - It restores the conditions D-026 was locked under, when no card file existed.
+  - It matches study 1 exactly: Rule V (`e693f2a`) and Rule C (`b4b1596`) both ran before the file was committed, so no study-1 copy outside `import-card` had it.
+  - It keeps a v0.4 file out of the v0.3 world.
+- **Tests:** in `tests/test_dogfood.py`:
+  - for `views`, `import-full` and `import-card`, the card file exists (and is tracked in the copy) exactly when `CLAUDE.md` imports it;
+  - a v0.3-world copy has no card file.
+- **Not changed:** the cells, primaries, thresholds and verdict mapping. The Δ re-probe (C2) now runs on copies without the card file, like probe4.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
