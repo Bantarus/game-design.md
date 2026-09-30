@@ -1881,6 +1881,55 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Appendix B:** the reference-syntax row.
 - The card is regenerated. It only changed its source hash, because its §3 excerpt does not include the new paragraph.
 
+## D-034 — Lint runs the normative JSON Schema: rule `schema-violation` (OI-006)
+
+- **Status:** decided (2026-09-30), the second step of the user's OI-006 order ("then the schema-validation lint rule, which should land green").
+- **Related:** OI-006, D-033 (class A, which made the 12 trees schema-valid), D-003 (balance targets), spec §9.1, §10 and §11.
+
+### The gap
+
+- §10 calls `schema/game-design.schema.json` "the normative frontmatter schema", and §11 item 1 makes lint exit 0 the first conformance item.
+- But lint never ran the schema. At v0.3, 10 blocks in 8 trees were schema-invalid and still linted clean (OI-006).
+
+### Decisions
+
+1. **The rule:** `schema-violation`, severity **error**.
+   - Every file of the tree that identifies as a game-design.md file validates against the §10 schema, using `jsonschema`, which is already a runtime dependency.
+   - It emits one finding per schema error, at the offending field (`invariants.x.applies_to[1]`). A message is capped at 200 characters.
+2. **Which branch:** the file's `file_type:` branch of the discriminated union (`CoreFile`, `Subfile`, `ContentSchemaFile`, `ContentEntityFile`).
+   - A missing or unknown `file_type:` validates against the whole schema.
+   - For an `anyOf` / `oneOf` failure, the message is the best-matching sub-error.
+   - Why: against the whole union, every error reads "is not valid under any of the given schemas", which names no field.
+3. **Which files:** only files that say they are game-design.md files: `spec: game-design.md`, or a `file_type:` key.
+   - Why: `Tree.load` reads every YAML file under the root. A CI config or a manifest with its own `spec:` is not a game-design.md file.
+4. **Error, not warning:** the schema is normative, so §11 item 1 now implies §10 validity.
+   - Lint still does not validate content entities against their content-schema (§11 item 4). That is OI-005, next.
+5. **Cost:** 24 ms on the 340-file study-2 tree and 5 ms on the deckbuilder. The validators are built once per process.
+
+### Effect
+
+- **The 12 in-repo trees land green:** 0/0, with lint output unchanged. D-033 made the last 8 blocks valid.
+- **The study-2 fixture:** all 340 blocks were already valid, and its lint output is unchanged.
+- **Overlap with D-003:**
+  - A balance target without `target_kind` is schema-invalid, since `$defs.BalanceTarget` requires it. So it now gets a `schema-violation` error beside `balance-target-untyped`'s warning, and one existing test is updated to expect both.
+  - D-003 had scheduled `balance-target-untyped` itself to become an error at v0.3, and the spec's §9.1 table says it did, but the code still warns. That drift is logged as OI-009 rather than changed here.
+
+### Tests and proof of fire (`tests/test_lint.py`)
+
+- **Field naming:** a bad `severity` is reported at `invariants.damage_int.severity`.
+- **List index and union message:** a bad `applies_to` item is reported at `…applies_to[1]`, with the message from the matching sub-schema.
+- **Foreign YAML** (a manifest's `spec:`, a CI file) is not validated.
+- **An unknown `file_type`** is reported against the whole schema.
+- **Proof of fire on the real defects OI-006 found by hand**, re-created in copies of the real trees. Lint passed both at v0.3:
+  - class B: `time_cost` nested in `cost` on a survival benchmark verb, reported at `verbs.<id>.cost`;
+  - class C: the party-rpg starter's `heroes.md` without `data_dir` and `count_target`, reported on that file.
+
+### Spec
+
+- **§9.1:** a new table row. §10 is unchanged.
+- **AGENTS.md:** the rule joins the "keep green" list.
+- The card is regenerated (hash line only).
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -1951,6 +2000,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
     - Proof of fire: the pre-D-031 `heroes.md` fails the guard, and an invalid `enforcement:` injected into a class-A file fails the second test.
   - **Remaining, after study 2 (D-026 amendment 3):** the class A decision (spec §4.11's example vs `$defs.TokenRef`), then whether lint runs the schema.
 - **Progress (2026-09-30): class A is fixed** by D-033, in the schema's favour: `applies_to` accepts whole-namespace refs, and lint and views implement them. The one-off pass is now **0 of 158** blocks failing. The starter guard's strict xfails are retired. What remains is whether lint runs the schema (next entry).
+- **Resolved (2026-09-30):** lint runs the schema as rule `schema-violation` (D-034, error). All 12 trees pass it. OI-006 is closed.
 
 ## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; the tool freeze ended with study 2)
 
@@ -1977,3 +2027,15 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - The tree lints 0/0 and validates.
 - **Resolution (later, its own D-entry):** a tree-content fix, such as expressing the sleep's delta in minutes or making the clock's capture rule explicit for sleep. It is decided with the tree's other stale content, such as the `## Tokens` counts D-030 observed.
   - The benchmark tree is not a study-2 task tree, so study 2 does not block the fix. It is scheduled after study 2 with the lint-hold items, to keep the pre-matrix change set to the decided items.
+
+## OI-009 — `balance-target-untyped` never ratcheted to error at v0.3, as D-003 scheduled
+
+- **Logged:** 2026-09-30, found while landing D-034.
+- **D-003 says:** `balance-target-untyped` is a warning through v0.2 and "ratchets to error in v0.3". The spec's §9.1 table says "warning (v0.2.0-alpha), error (v0.3+)".
+- **The code does:** it still emits a **warning**, with the message "ratchets to error in v0.3". A test pins the warning.
+- **Since D-034:** the missing `target_kind` is already an **error** through `schema-violation`, because the schema has required it all along. So a tree cannot lint clean with an untyped target. The open question is only what the dedicated rule should be.
+- **Options (decided later, with their own D-entry):**
+  1. Ratchet it to error, as D-003 said. The tree then gets two errors for one defect.
+  2. Keep it a warning as the migration hint (with its suggestion), and fix the spec table and the message.
+  3. Retire it in favour of `schema-violation`.
+

@@ -12,13 +12,17 @@ config to the ones that do.
 """
 from __future__ import annotations
 
+import functools
 import inspect
+import json
 import re
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Iterable
+
+import jsonschema
 
 from .findings import Finding, LintResult
 from .refs import TOKEN_REF_RE, walk_refs
@@ -1030,6 +1034,71 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
     # advisory and verify, respectively.
 
 
+# ---- schema-violation (D-034, spec §9.1 / §10) ---------------------------------
+
+# Each file validates against its own file_type's branch of the discriminated
+# union, so a finding names the field that is wrong rather than "valid under
+# none of the given schemas".
+SCHEMA_BRANCHES = {"core": "CoreFile", "subfile": "Subfile",
+                   "content-schema": "ContentSchemaFile", "content-entity": "ContentEntityFile"}
+_SCHEMA_MESSAGE_MAX = 200
+
+
+@functools.lru_cache(maxsize=1)
+def _schema_validators() -> tuple[Any, dict[str, Any]]:
+    """(whole-schema validator, {file_type: branch validator}), built once."""
+    from .export_cmd import export_schema
+    schema = json.loads(export_schema())
+    cls = jsonschema.Draft202012Validator
+    branches = {ft: cls({"$schema": schema["$schema"], "$defs": schema["$defs"],
+                         "$ref": f"#/$defs/{name}"})
+                for ft, name in SCHEMA_BRANCHES.items()}
+    return cls(schema), branches
+
+
+def _claims_spec(fm: dict) -> bool:
+    """A file is a game-design.md file if it says so: `spec: game-design.md` or a
+    `file_type`. Other YAML under the tree (a CI config, a manifest with its own
+    `spec:`) is not validated."""
+    return fm.get("spec") == "game-design.md" or "file_type" in fm
+
+
+def _schema_location(path) -> str:
+    out = ""
+    for seg in path:
+        out += f"[{seg}]" if isinstance(seg, int) else ("." if out else "") + str(seg)
+    return out or "frontmatter"
+
+
+def _schema_message(e) -> str:
+    if e.validator in ("anyOf", "oneOf") and e.context:
+        e = jsonschema.exceptions.best_match(e.context)
+    msg = e.message
+    return msg if len(msg) <= _SCHEMA_MESSAGE_MAX else msg[:_SCHEMA_MESSAGE_MAX - 1] + "…"
+
+
+def rule_schema_violation(tree: Tree) -> list[Finding]:
+    """Every game-design.md file's frontmatter validates against the normative
+    JSON Schema (§10): its file_type's branch, or the whole schema when the
+    file_type is missing or unknown."""
+    whole, branches = _schema_validators()
+    findings: list[Finding] = []
+    for pf in tree.files:
+        fm = pf.frontmatter
+        if not isinstance(fm, dict) or not _claims_spec(fm):
+            continue
+        validator = branches.get(pf.file_type, whole)
+        errors = sorted(validator.iter_errors(fm),
+                        key=lambda e: ([str(x) for x in e.absolute_path], e.message))
+        for e in errors:
+            findings.append(Finding(
+                rule="schema-violation", severity="error", file=pf.rel_str,
+                location=_schema_location(e.absolute_path),
+                message=_schema_message(e),
+            ))
+    return findings
+
+
 # ---- Dispatch -----------------------------------------------------------------
 
 ALL_RULES: list[Callable[..., list[Finding]]] = [
@@ -1051,6 +1120,7 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_invariant_violation,
     rule_prototyped_without_pointer,     # v0.3 Task 6: NEW
     rule_shipped_stale_doc,              # v0.3 Task 6: NEW
+    rule_schema_violation,               # v0.4 D-034
 ]
 
 

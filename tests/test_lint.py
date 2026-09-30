@@ -212,6 +212,70 @@ def test_numeric_domain_whole_namespace_proof_of_fire_on_a_starter(tmp_path):
                and f.location.endswith(".max") for f in _lint(root).findings)
 
 
+# ---- schema-violation (D-034) --------------------------------------------------------
+
+def _schema_findings(res):
+    return [(f.file, f.location, f.severity) for f in res.findings if f.rule == "schema-violation"]
+
+
+def test_schema_violation_names_the_field(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        "severity: error", "severity: fatal")
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    assert _schema_findings(res) == [
+        ("gdd/architecture-invariants.md", "invariants.damage_int.severity", "error")]
+    assert res.exit_code == 1
+
+
+def test_schema_violation_list_index_and_union_message(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'applies_to: ["{resources.energy}"]', 'applies_to: ["{resources.energy}", "{Bad}"]')
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    [f] = [f for f in res.findings if f.rule == "schema-violation"]
+    assert f.location == "invariants.damage_int.applies_to[1]"
+    assert "does not match" in f.message and len(f.message) <= 200
+
+
+def test_schema_violation_skips_yaml_that_is_not_a_game_design_file(make_tree):
+    """A manifest with its own `spec:` or a CI file under the tree is not validated."""
+    root = make_tree({"deploy/app.yaml": "kind: Deployment\nspec:\n  replicas: 2\n",
+                      "ci.yml": "on: [push]\njobs: {}\n"})
+    assert _schema_findings(_lint(root)) == []
+
+
+def test_schema_violation_unknown_file_type_uses_the_whole_schema(make_tree):
+    root = make_tree({"gdd/odd.md": "---\nspec: game-design.md\nspec_version: 0.3.0\n"
+                                    "file_type: appendix\n---\n\n## Notes\n"})
+    assert ("gdd/odd.md", "file_type", "error") in _schema_findings(_lint(root))
+
+
+def test_schema_violation_proof_of_fire_on_the_real_oi006_defects(tmp_path):
+    """The defects OI-006 found by hand, re-created in copies of the real trees:
+    class B (time_cost nested in cost, D-030) and class C (heroes.md without
+    data_dir / count_target, D-031). Lint passed both at v0.3."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    surv = tmp_path / "survival"
+    shutil.copytree(REPO_ROOT / "benchmark/games/survival", surv)
+    mech = surv / "gdd/mechanics.md"
+    text = mech.read_text()
+    bad = text.replace("    cost: 0\n    time_cost: { in_game_minutes: 60 }\n",
+                       "    cost: { time_cost: { in_game_minutes: 60 } }\n", 1)
+    assert bad != text
+    mech.write_text(bad)
+    locs = [loc for f, loc, _ in _schema_findings(_lint(surv)) if f == "gdd/mechanics.md"]
+    assert len(locs) == 1 and locs[0].startswith("verbs.") and locs[0].endswith(".cost")
+
+    rpg = tmp_path / "party-rpg"
+    shutil.copytree(REPO_ROOT / "templates/starters/party-rpg", rpg)
+    heroes = rpg / "gdd/content/heroes.md"
+    heroes.write_text(heroes.read_text().replace("data_dir: ../../content/heroes\n", "")
+                      .replace("count_target: 8\n", ""))
+    found = [f for f in _lint(rpg).findings if f.rule == "schema-violation"]
+    assert [f.file for f in found] == ["gdd/content/heroes.md"] * len(found) and found
+    assert {("data_dir" in f.message) or ("count_target" in f.message) for f in found} == {True}
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):
@@ -293,8 +357,12 @@ def test_balance_target_untyped_warning(make_tree):
     findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
     assert findings, "expected balance-target-untyped on the legacy target"
     assert all(f.severity == "warning" for f in findings)
-    # Warnings don't affect exit code.
-    assert res.errors == 0
+    # D-034: the schema has required target_kind since D-003, so the error for
+    # the legacy shape comes from schema-violation; the warning stays the
+    # migration hint (OI-009).
+    schema = [(f.location, f.severity) for f in res.findings if f.rule == "schema-violation"]
+    assert schema == [(findings[0].location, "error")]
+    assert res.errors == 1
 
 
 def test_balance_target_typed_is_silent(make_tree):
