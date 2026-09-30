@@ -6,7 +6,7 @@ Follow the repository's own workflow (`AGENTS.md`, `CLAUDE.md`). To consult a de
 
 ## Projected views: `gdmd view` and `gdmd graph`
 
-This copy's `gdmd` also provides projected views over a tree (spec §9.9). They are computed from the tree on every call and store nothing. Every block they print is a verbatim slice of a tree file, with a `<path>:<start>-<end>` pointer. Omitted lines are marked with the pointer of what was omitted.
+This copy's `gdmd` also provides projected views over a tree (spec §9.9). They are computed from the tree on every call and store nothing. Every block they print is a verbatim slice of a tree file, with a `<path>:<start>-<end>` pointer; the path is relative to the tree root. Omitted lines are marked with the pointer of what was omitted.
 
 - `gdmd view <tree>`: overview. Each file (type, status, `last_verified`), each namespace's tokens (id, status, pointer), and content entities counted per kind.
 - `gdmd view <tree> --full`: every block and gap line of the tree, in canonical order, each with its pointer.
