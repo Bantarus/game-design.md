@@ -825,7 +825,13 @@ def test_import_card_copy_swaps_only_the_spec_import_in_the_baseline_commit(tmp_
     cm_full = (full.root / "CLAUDE.md").read_text()
     assert fixture.CARD_IMPORT_LINE in cm_card and fixture.SPEC_IMPORT_LINE not in cm_card
     assert cm_card.replace(fixture.CARD_IMPORT_LINE, fixture.SPEC_IMPORT_LINE) == cm_full
-    assert not (full.root / "docs/spec-card.md").exists() and full.card_sha is None
+    assert full.card_sha is None
+    # After the card adoption (D-024), docs/spec-card.md is a repo file, so an
+    # import-full copy carries it too, unimported; the cells still differ only
+    # in CLAUDE.md's import line, and both files are the same card.
+    if (full.root / "docs/spec-card.md").exists():
+        assert (full.root / "docs/spec-card.md").read_text() == \
+            (card.root / "docs/spec-card.md").read_text()
     # the card is the copy's own `gdmd spec --card` over the copy's own spec
     spec = spec_cmd._FENCE_RE.sub("", (card.root / "docs/spec.md").read_text(), count=1).lstrip()
     assert (card.root / "docs/spec-card.md").read_text() == spec_cmd.card(spec)
