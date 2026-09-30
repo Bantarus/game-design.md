@@ -544,6 +544,12 @@ def test_bash_reads(command, cwd, want_read, want_paths, want_cwd):
     ("gdmd graph t --help", "other"),
     ("cd examples && gdmd view deckbuilder --grep x", "grep"),
     ("gdmd view t; gdmd graph t", "mixed"),
+    # D-026 amendment 2: the command word may follow a shell keyword
+    ('for v in a b; do gdmd view . --ref "{verbs.$v}" | sed -n 1,25p; done', "ref"),
+    ("if true; then gdmd view t --full; fi", "full"),
+    ("if false; then :; else gdmd graph t --cycles; fi", "graph"),
+    ("( cd t && gdmd view . --grep x )", "grep"),
+    ("{ gdmd view t; }", "overview"),
     ('grep -rn "gdmd view" docs', None),       # quoted: a pattern, not a command
     ("echo gdmd view", None),
     ("gdmd lint t", None),

@@ -108,7 +108,7 @@ Medians per run over repeats 1–3:
 
   Their error text is counted in the bytes above, as the primary counts it.
 - The baseline arm made no view calls.
-- **One call is not attributed to a mode.** In `lookup_refs` views r2, a `for v in …; do gdmd view . --ref "{verbs.$v}"; done` loop was refused by Claude Code before it ran (`Contains simple_expansion`, 25 bytes of error text). The mode parser stops at the shell keyword `do`, so the table leaves it out. The locked substring counter `gdmd_view_calls` does count it. Without it, the manipulation-check median would still be 1. Proposed for review, not applied: skip shell keywords (`do`, `then`, `else`, `{`, `(`) before the program, so study 2 attributes such calls.
+- **One call is not attributed to a mode.** In `lookup_refs` views r2, a `for v in …; do gdmd view . --ref "{verbs.$v}"; done` loop was refused by Claude Code before it ran (`Contains simple_expansion`, 25 bytes of error text). The mode parser stops at the shell keyword `do`, so the table leaves it out. The locked substring counter `gdmd_view_calls` does count it. Without it, the manipulation-check median would still be 1. The fix (skip shell keywords before the program) was applied afterwards; see the addendum below.
 
 ### Raw results (one row per run)
 
@@ -173,6 +173,15 @@ Medians per run over repeats 1–3:
 - **It does not say views reduce session cost.** NULL supports no cost claim, and §11.3 forbids stating one.
 - **It says nothing about larger trees.** These trees are small (tens of KB), and study 2 (D-026) tests consultation at scale on a generated ~320-entity tree with rule V2, reusing the same pinned arm text.
 - **It says nothing about the card.** Rule C is pending the WS4 build; its precondition was met at the pilot.
+
+### Addendum (2026-09-30): view-mode parser fix and re-extraction
+
+After the review, the view-mode parser was fixed to skip shell keywords (`do`, `then`, `else`, `{`, `(`) before the command word (D-026 amendment 2). Every study-1 session was then re-extracted and compared field by field with the committed metrics (`results/rulev-20260930/reextract-d026a2.json`).
+
+- **Rule V matrix:** one run changes, in the view-mode secondary only. In `lookup_refs` views r2, the refused loop call is now attributed to `--ref`. The views arm's `--ref` row becomes 5 calls and 12,824 bytes (8.8% of the arm's consultation bytes, unchanged to one decimal place). Every other number in this section, including consultation bytes and occupancy, is identical, and so are the manipulation check's inputs.
+- **Pilot:** no committed field changes.
+
+The verdict stays as recorded: **NULL**.
 
 ## Rule C: card-import ablation
 

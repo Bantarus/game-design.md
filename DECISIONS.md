@@ -1099,6 +1099,16 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - `s2_impact_files`: "`{Y}` is about to change. List every subfile that contains **a token whose value references `{Y}`, directly or transitively**." The oracle is made explicit: the set of `file_type: subfile` files that define a top-level token in the value-edge reverse closure of `{Y}`. Content-entity and content-schema files are not subfiles.
 - **Not changed:** the task classes, answer-set size ranges, success criterion, cells, primaries, thresholds and verdict mapping.
 
+### Amendment 2 (2026-09-30, after study 1's Rule V, before any study-2 build): the view-mode parser skips shell keywords
+
+- **Decided:** by the user at the Rule V review. It is recorded here because study 2 reports the same secondary (consultation bytes by view mode, D-025 amendment 5) and relies on it.
+- **The defect:** `extract.view_mode` read the first word of each shell segment as the program. A command behind a shell keyword (`for v in …; do gdmd view … ; done`) was not attributed to a mode. Study 1's Rule V matrix had one such call: `lookup_refs` views r2, refused by Claude Code before it ran (25 bytes of error text).
+- **The fix:** before the command word, the parser now skips `do`, `then`, `else`, `{` and `(`, as it already skipped env assignments and simple wrappers. There are five new classification tests.
+- **Re-extraction** (`benchmark/dogfood/results/rulev-20260930/reextract-d026a2.json`): every study-1 session was re-extracted with the fixed extractor and compared field by field with the committed metrics.
+  - **Rule V matrix (30 sessions):** exactly one field pair differs. In `lookup_refs` views r2, `view_mode_calls` goes from `ref` 1 to 2 and `view_mode_bytes` from `ref` 4,241 to 4,266. Consultation bytes, occupancy, every other secondary and the substring counts behind the manipulation check are identical.
+  - **Pilot (5 sessions):** no committed field differs. The only additions are fields introduced after the pilot (amendments 3 and 5).
+- **Not changed:** the Rule V verdict (NULL) and its inputs. The committed result files are data and are not edited; the report carries a descriptive addendum.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)

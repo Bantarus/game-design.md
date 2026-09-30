@@ -1,0 +1,41 @@
+{
+  "extract_py": "at the commit that adds this file",
+  "pilot-20260930": {
+    "differences": "none in any committed field",
+    "fields_added_after_the_pilot": [
+      "all_files_read",
+      "all_files_read_paths",
+      "all_re_reads",
+      "bash_files_read",
+      "bash_read_bytes",
+      "bash_read_calls",
+      "view_mode_bytes",
+      "view_mode_calls"
+    ],
+    "sessions": 5
+  },
+  "rulev-20260930": {
+    "differences": {
+      "lookup_refs__views__r2": {
+        "view_mode_bytes": {
+          "committed": {
+            "ref": 4241
+          },
+          "re-extracted": {
+            "ref": 4266
+          }
+        },
+        "view_mode_calls": {
+          "committed": {
+            "ref": 1
+          },
+          "re-extracted": {
+            "ref": 2
+          }
+        }
+      }
+    },
+    "sessions": 30
+  },
+  "what": "Re-extraction of every study-1 session with extract.py after D-026 amendment 2 (the view-mode parser skips shell keywords). Compared field by field with the committed metrics files; tool_detail compared without VCC line pointers."
+}

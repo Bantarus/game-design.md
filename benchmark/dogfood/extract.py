@@ -127,13 +127,17 @@ def bash_reads(command: str, cwd: str) -> tuple[bool, list[str], str]:
 VIEW_MODES = ("overview", "full", "grep", "ref", "graph", "other", "mixed")
 _GDMD_PROGS = {"gdmd", "game-design.md"}
 _WRAPPERS = {"env", "time", "timeout", "nice", "nohup", "command", "exec", "uv", "run"}
+# D-026 amendment 2: shell keywords that can precede the command word in a
+# segment (`for …; do gdmd view …; done`, `( gdmd view … )`).
+_SHELL_KEYWORDS = {"do", "then", "else", "{", "("}
 _ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 
 
 def _segment_view_mode(w: list[str]) -> str | None:
     i = 0
     while i < len(w) and (_ASSIGNMENT.match(w[i]) or os.path.basename(w[i]) in _WRAPPERS
-                          or w[i].startswith("-") or w[i].isdigit()):
+                          or w[i] in _SHELL_KEYWORDS or w[i].startswith("-")
+                          or w[i].isdigit()):
         i += 1
     if i >= len(w) or os.path.basename(w[i]) not in _GDMD_PROGS:
         return None
