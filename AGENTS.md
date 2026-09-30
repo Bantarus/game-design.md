@@ -73,6 +73,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Using `experimental` as an escape hatch for uncertainty.** It means "code exists, design under active evaluation." NOT "I'm not sure what status this is." (Spec §8.1 + D-020.)
 - **Committing with a what-only message.** The *why* — which discipline applied, which calibration the choice rests on, which sister-disciplines apply — is the audit trail future agents need. Commit messages are first-class artifacts.
 - **Silently calibrating against the population you'd validate.** Name the calibration source explicitly in the commit message (Task 6 named "defaults grounded in reasonable cadence, NOT in-repo distribution").
+- **Citing study 2's views PASS without study 1's NULL** (D-032). The two results measure the same treatment on two tree regimes, so they are always cited together, and neither is a session-cost claim.
 - **Changing the workflow without updating AGENTS.md.** Every new CLI command, every new ritual step, every new mode prohibition lands here too. (CLAUDE.md only if the change is Claude-specific.)
 - **Deferring memory writes.** Save the discipline when it's concrete and worth saving for future sessions; deferred memory writes get forgotten. Save mid-flow, not at end-of-session.
 

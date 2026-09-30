@@ -60,6 +60,8 @@ The v0.2 cross-engine pass demonstrated that the spec drives byte-identical inte
 
 The v0.2 help-benchmark (F-009) reported NULL on success-lift and FAIL on cost-lift under the locked rule on a single-subject Qwen-Coder configuration. The result was reported by the rule that had been locked before the trial fired. The reading of what that meant — and the reframe into the longitudinal living-doc proposition v0.3 ships under — is the worked example at [`docs/case-studies/F-009.md`](docs/case-studies/F-009.md). The methodology that produced both the locked rule and the reframe lives at [`docs/methodology/README.md`](docs/methodology/README.md). The validation surface v0.3 ships under is scoped in [`docs/spec.md`](docs/spec.md) §11.2.
 
+v0.4's dogfood studies (locked rules, headless coding-agent sessions) found projected views NULL on this repo's own small trees ([study 1](docs/case-studies/dogfood-01.md)) and PASS on a content-heavy synthetic tree ([study 2](docs/case-studies/dogfood-02.md): a median 33% fewer consultation bytes, driven by graph-shaped tasks; not a session-cost claim). The two are always cited together, and both found the agent card cuts about 47k tokens per turn, with non-inferiority tested only at the ceiling.
+
 ## Tree validation at a glance
 
 All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean at v0.3 — 0 errors, 0 warnings — under default thresholds. Lint-clean is weaker than §11 conformance: see the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md).

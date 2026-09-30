@@ -1772,6 +1772,29 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - `last_verified` is not touched, because no code changed.
 - **Release notes:** the v0.3 correction note gains a section for trees already scaffolded from the v0.3 party-rpg starter, with the fix.
 
+## D-032 — Where the dogfood results may be stated, and how
+
+- **Status:** decided (2026-09-30) by the user at the study-2 review.
+- **Related:** D-025 (Rules V and C), D-026 (Rules V2 and C2), spec §9.9.5 and §11.3; `docs/release-notes/v0.4.md`; README.
+
+### Decisions
+
+1. **The spec states no empirical claim.** §9.9.5 keeps deferring to §11.3 ("this section makes no such claim"). It is unchanged.
+2. **The v0.4 release notes state the views results together:**
+   - study 1 Rule V **NULL**, on the repository's own small trees;
+   - study 2 Rule V2 **PASS**, on a content-heavy synthetic tree: a median 33.3% fewer consultation bytes, against a 30% threshold. It was driven by the graph-shaped tasks, the guarded tasks consulted more, and it is not a session-cost claim.
+3. **The card result:** Rule C and Rule C2 **PASS**, about 47k fewer tokens per turn. Non-inferiority was tested only at the ceiling.
+4. **One descriptive note:** on the large tree, subjects in both C2 cells used `view` / `graph` without the arm text prompting them.
+5. **The pairing rule:** study 2's V2 PASS is **never cited without study 1's NULL**, anywhere: README, release notes, commit messages, talks. AGENTS.md lists this as a Maintenance-mode prohibition.
+6. **README:** one line in "What's been demonstrated" links both case studies, with the same pairing.
+
+### Why
+
+- The two views results measure the same pinned treatment on two tree regimes. Either one alone misstates what is known.
+  - V2 alone reads as "views save a third" without its scope: a synthetic, content-heavy tree, with the effect carried by graph-shaped tasks.
+  - V1 alone reads as "views do nothing".
+- The spec is normative. An empirical number there would present a measured, scoped, small-n result as a property of the format.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
