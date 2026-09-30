@@ -1789,3 +1789,18 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   4. **`-i` as an alias of `--ignore-case`.** One subject wrote `--grep -i '<pattern>'`, and `-i` became the pattern.
   5. **Cosmetic, harness only:** under the dogfood shim, click's usage line names `python -m game_design_md` instead of `gdmd`.
 - **Evaluation:** any change to view or graph output is a v0.4.x change, evaluated in a later study, never retrofitted into study 1's or study 2's result.
+
+## OI-008 — Survival benchmark: the clock's delta cannot read `sleep_through_night`'s hours-based `time_cost`
+
+- **Logged:** 2026-09-30, from D-030's clock check. The user ruled at the study-2 pilot review that it is a tree fix for later, not now.
+- **The tree says:**
+  - `{clocks.world_time}` (`benchmark/games/survival/gdd/clocks.md`) declares `delta_source: "actor.last_action_time_cost"`.
+  - The tree's prose defines that value as the fired verb's `time_cost.in_game_minutes`.
+  - `{verbs.sleep_through_night}` (`gdd/mechanics.md`) declares `time_cost: { in_game_hours: hours_until_dawn }`: another unit, and a symbolic value rather than a number.
+- **So:** under the tree's own definition, the clock has no delta to read when the player sleeps. The other 8 verbs declare `time_cost.in_game_minutes` (D-030).
+- **Not a schema or lint issue.**
+  - `time_cost` is a free verb-level key (`$defs.Verb` admits additional properties).
+  - `delta_source` is a context-local path, which lint does not resolve (D-012).
+  - The tree lints 0/0 and validates.
+- **Resolution (later, its own D-entry):** a tree-content fix, such as expressing the sleep's delta in minutes or making the clock's capture rule explicit for sleep. It is decided with the tree's other stale content, such as the `## Tokens` counts D-030 observed.
+  - The benchmark tree is not a study-2 task tree, so study 2 does not block the fix. It is scheduled after study 2 with the lint-hold items, to keep the pre-matrix change set to the decided items.
