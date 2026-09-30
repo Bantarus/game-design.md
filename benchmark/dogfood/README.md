@@ -114,6 +114,7 @@ python run.py --import-probe               # 4 calls: spec.md @-import size in b
 python run.py --pilot                      # baseline x every task x 1 (not evidence)
 python run.py --task lookup_refs --arm views --repeats 3
 python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
+python analyze.py rule-v results/<run>.jsonl [results/<rerun-or-extension>.jsonl ...]   # Rule V verdict, as locked
 ```
 
 Order of operations (D-023 / D-025): dry run → probe → import probe → pilot (validates checkers, isolation and extraction; estimates cost) → **stop for approval** → full matrix.

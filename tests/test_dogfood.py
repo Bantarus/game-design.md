@@ -713,3 +713,97 @@ def test_extract_flags_out_of_copy_bash_paths(tmp_path):
     flagged = [e["path"] for e in extract(session, vcc, Path("/copy"),
                                           tmp_path / "views")["out_of_copy_access"]]
     assert flagged == ["/home/x/repo/benchmark/dogfood/tasks/a.json", "../other", "~/secrets"]
+
+
+# ---- analyze.py: the Rule V verdict as D-025 locks it (amendment 5) ---------------
+
+TASK_IDS = ("authoring_new_card", "lookup_refs", "maintenance_drift",
+            "negative_control_no_drift", "operating_energy_budget")
+
+
+def _lines(bytes_by_arm, fail=(), run_id="m", repeats=(1, 2, 3), outcome_over=None,
+           views_calls=2):
+    """Synthetic result lines: every cell succeeds unless listed in `fail`."""
+    out = []
+    for t in TASK_IDS:
+        for arm in ("baseline", "views"):
+            for r in repeats:
+                o = "fail" if (t, arm, r) in fail else "success"
+                if outcome_over and (t, arm, r) in outcome_over:
+                    o = outcome_over[(t, arm, r)]
+                out.append({"run_id": run_id, "cell_id": f"{t}__{arm}__r{r}", "task_id": t,
+                            "arm": arm, "repeat": r, "outcome": o,
+                            "consultation_bytes": bytes_by_arm[arm],
+                            "gdmd_view_calls": views_calls if arm == "views" else 0,
+                            "gdmd_graph_calls": 0, "supersedes": None})
+    return out
+
+
+def _rule_v(lines):
+    import analyze
+    return analyze.rule_v(lines, metrics_loader=lambda ln: None)
+
+
+def test_rule_v_pass_fail_null_by_R():
+    assert _rule_v(_lines({"baseline": 1000, "views": 600}))["verdict"] == "PASS"   # R = 0.4
+    res = _rule_v(_lines({"baseline": 1000, "views": 800}))                         # R = 0.2
+    assert res["verdict"] == "NULL" and res["R"] == pytest.approx(0.2)
+    assert _rule_v(_lines({"baseline": 1000, "views": 1000}))["verdict"] == "FAIL"  # R = 0
+
+
+def test_rule_v_zero_baseline_rule():
+    import analyze
+    res = analyze.rule_v(_lines({"baseline": 0, "views": 0}), metrics_loader=lambda ln: None)
+    assert all(d["r_t"] == 0.0 for d in res["per_task"].values())
+    res = analyze.rule_v(_lines({"baseline": 0, "views": 5}), metrics_loader=lambda ln: None)
+    assert all(d["r_t"] == -1.0 for d in res["per_task"].values())
+
+
+def test_rule_v_non_inferiority_clause_1():
+    one = {("lookup_refs", "views", 1)}
+    two = one | {("authoring_new_card", "views", 2)}
+    assert _rule_v(_lines({"baseline": 1000, "views": 600}, fail=one))["verdict"] == "PASS"
+    res = _rule_v(_lines({"baseline": 1000, "views": 600}, fail=two))
+    assert res["verdict"] == "FAIL" and "non-inferiority clause 1 violated" in res["reasons"]
+
+
+def test_rule_v_guarded_extension_trigger_and_resolution():
+    fail = {("maintenance_drift", "views", 2)}             # e_t = 1 on a guarded task
+    main = _lines({"baseline": 1000, "views": 600}, fail=fail)
+    assert _rule_v(main)["verdict"].startswith("PENDING")
+    ext_ok = _lines({"baseline": 1000, "views": 600}, run_id="ext", repeats=(4, 5))
+    ext_ok = [ln for ln in ext_ok if ln["task_id"] in ("maintenance_drift",
+                                                       "negative_control_no_drift")]
+    assert _rule_v(main + ext_ok)["verdict"] == "NULL"     # e_t stays 1 over r1-5
+    ext_base_fails = [dict(ln, outcome="fail") if (ln["task_id"], ln["arm"], ln["repeat"])
+                      == ("maintenance_drift", "baseline", 4) else ln for ln in ext_ok]
+    assert _rule_v(main + ext_base_fails)["verdict"] == "PASS"   # e_t = 0 over r1-5
+    two = fail | {("maintenance_drift", "views", 3)}
+    res = _rule_v(_lines({"baseline": 1000, "views": 600}, fail=two))
+    assert res["verdict"] == "FAIL" and "maintenance_drift: e_t >= 2" in res["reasons"]
+
+
+def test_rule_v_apparatus_nulls_and_supersedes():
+    errs = {(t, "views", 1): "error" for t in TASK_IDS[:4]}   # 4/30 > 10%
+    res = _rule_v(_lines({"baseline": 1000, "views": 600}, outcome_over=errs))
+    assert res["verdict"] == "NULL (apparatus)"
+    lines = _lines({"baseline": 1000, "views": 600}, outcome_over=errs)
+    reruns = [{**ln, "run_id": "rr", "outcome": "success",
+               "supersedes": f"m/{ln['cell_id']}"} for ln in lines if ln["outcome"] == "error"]
+    assert _rule_v(lines + reruns)["verdict"] == "PASS"
+    res = _rule_v(_lines({"baseline": 1000, "views": 600}, views_calls=0))
+    assert res["verdict"] == "NULL (apparatus)"
+    assert "manipulation check" in res["reasons"][0]
+
+
+def test_rule_v_contamination_is_not_success_and_listed():
+    import analyze
+    lines = _lines({"baseline": 1000, "views": 600})
+    leak = {"out_of_copy_access": [{"tool": "Bash",
+                                    "path": "/home/u/game-design/benchmark/dogfood/tasks/x"}]}
+    hit = ("lookup_refs", "views", 1)
+    res = analyze.rule_v(lines, metrics_loader=lambda ln: leak if (
+        ln["task_id"], ln["arm"], ln["repeat"]) == hit else None)
+    assert res["apparatus"]["contaminated"] == {"lookup_refs/views/r1": [
+        "/home/u/game-design/benchmark/dogfood/tasks/x"]}
+    assert res["non_inferiority"]["successes"]["views"] == 14
