@@ -463,3 +463,73 @@ def test_study_flag_selects_tasks_and_caps(tmp_path, capsys):
         dogfood_run.main(["--dry-run", "--task", "s2_lookup_forward"])     # study 1 default
     with pytest.raises(SystemExit):
         dogfood_run.main(["--dry-run", "--study", "2", "--task", "lookup_refs"])
+
+
+# ---- Rules V2 and C2 (D-026), committed before any study-2 data ---------------------------
+
+import analyze  # noqa: E402
+
+
+def _s2_lines(arms: tuple[str, str], metric: str, by_arm: dict, fail=(), repeats=(1, 2, 3)):
+    out = []
+    for t in S2:
+        for arm in arms:
+            for r in repeats:
+                out.append({"run_id": "s2", "cell_id": f"{t}__{arm}__r{r}", "task_id": t,
+                            "study": 2, "arm": arm, "repeat": r,
+                            "outcome": "fail" if (t, arm, r) in fail else "success",
+                            metric: by_arm[arm], "est_cost_usd": 1.0,
+                            "gdmd_view_calls": 3 if arm == "views" else 0,
+                            "gdmd_graph_calls": 0, "gdmd_spec_section_calls": 0})
+    return out
+
+
+def _v2(by_arm, **kw):
+    return analyze.rule_v2(_s2_lines(("baseline", "views"), "consultation_bytes", by_arm, **kw),
+                           metrics_loader=lambda ln: None)
+
+
+def _c2(by_arm, delta=50_000, **kw):
+    return analyze.rule_c2(_s2_lines(("import-full", "import-card"), "median_turn_occupancy",
+                                     by_arm, **kw), delta, metrics_loader=lambda ln: None)
+
+
+def test_rule_v2_thresholds_and_non_inferiority_at_18_runs_per_arm():
+    assert _v2({"baseline": 1000, "views": 600})["verdict"] == "PASS"
+    assert _v2({"baseline": 1000, "views": 800})["verdict"] == "NULL"
+    assert _v2({"baseline": 1000, "views": 1000})["verdict"] == "FAIL"
+    one = {("s2_lookup_forward", "views", 1)}
+    res = _v2({"baseline": 1000, "views": 600}, fail=one)
+    assert res["non_inferiority"]["runs"]["views"] == 18
+    assert res["verdict"] == "PASS"                          # 1/18 fewer: within 10 points
+    two = one | {("s2_impact_files", "views", 2)}
+    assert _v2({"baseline": 1000, "views": 600}, fail=two)["verdict"] == "FAIL"   # 2/18
+
+
+def test_rule_v2_guards_study2_tasks():
+    res = _v2({"baseline": 1000, "views": 600}, fail={("s2_maintenance", "views", 1)})
+    assert set(res["non_inferiority"]["guarded"]) == set(analyze.GUARDED_S2)
+    assert res["verdict"].startswith("PENDING")              # e_t = 1: the extension
+    res = _v2({"baseline": 1000, "views": 600},
+              fail={("s2_negative_control", "views", 1), ("s2_negative_control", "views", 2)})
+    assert res["verdict"] == "FAIL"                          # e_t >= 2
+
+
+def test_rule_c2():
+    assert _c2({"import-full": 90_000, "import-card": 60_000})["verdict"] == "PASS"
+    assert _c2({"import-full": 90_000, "import-card": 70_000})["verdict"] == "NULL"
+    res = _c2({"import-full": 90_000, "import-card": 60_000},
+              fail={("s2_maintenance", "import-card", 3)})
+    assert res["verdict"].startswith("PENDING")
+
+
+def test_each_rule_refuses_the_other_studys_lines():
+    s2 = _s2_lines(("baseline", "views"), "consultation_bytes", {"baseline": 1, "views": 1})
+    s1 = [dict(ln, study=1) for ln in s2]
+    with pytest.raises(SystemExit):
+        analyze.rule_v2(s1, metrics_loader=lambda ln: None)
+    no_field = [{k: v for k, v in ln.items() if k != "study"} for ln in s2]
+    with pytest.raises(SystemExit):
+        analyze.rule_v2(no_field, metrics_loader=lambda ln: None)   # pre-study-2 lines
+    with pytest.raises(SystemExit):
+        analyze.only_study(s2, 1)

@@ -138,6 +138,8 @@ python run.py --task lookup_refs --arm views --repeats 3
 python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
 python analyze.py rule-v results/<run>.jsonl [results/<rerun-or-extension>.jsonl ...]   # Rule V verdict, as locked
 python analyze.py rule-c results/<run>.jsonl [...] --probe results/import-probe-<id>.json   # Rule C verdict (delta from the probe)
+python analyze.py rule-v2 results/<run>.jsonl [...]                                     # D-026 Rule V2 (study 2's guarded tasks)
+python analyze.py rule-c2 results/<run>.jsonl [...] --probe results/import-probe-<id>.json  # D-026 Rule C2 (Δ at the study-2 commit)
 ```
 
 Order of operations (D-023 / D-025): dry run → probe → import probe → pilot (validates checkers, isolation and extraction; estimates cost) → **stop for approval** → full matrix.

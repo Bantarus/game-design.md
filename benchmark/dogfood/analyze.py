@@ -2,6 +2,12 @@
 
     python analyze.py rule-v <results.jsonl> [<results.jsonl> ...]
     python analyze.py rule-c <results.jsonl> [...] --probe <import-probe.json>
+    python analyze.py rule-v2 <results.jsonl> [...]                    # D-026 study 2
+    python analyze.py rule-c2 <results.jsonl> [...] --probe <import-probe.json>
+
+Rules V2 and C2 are D-025's computations unchanged, with study 2's guarded
+tasks (D-026: "identical to D-025, including the extension"). Committed
+before any study-2 data. Each command refuses lines from the other study.
 
 Pass the matrix run's JSONL plus any `--supersedes` re-run files and the
 guarded-task extension run (repeats 4-5). Committed before any matrix data
@@ -32,6 +38,7 @@ from pathlib import Path
 DOGFOOD = Path(__file__).resolve().parent
 RESULTS_DIR = DOGFOOD / "results"
 GUARDED = ("maintenance_drift", "negative_control_no_drift")
+GUARDED_S2 = ("s2_maintenance", "s2_negative_control")      # D-026
 X = 0.30          # PASS threshold on R
 Y = 0.10          # non-inferiority margin on the pooled success rate
 APPARATUS_MAX = 0.10
@@ -76,7 +83,8 @@ def metrics_for(line: dict) -> dict | None:
     return json.loads(p.read_text()) if p.is_file() else None
 
 
-def rule_v(lines: list[dict], metrics_loader=metrics_for) -> dict:
+def rule_v(lines: list[dict], metrics_loader=metrics_for,
+           guarded_tasks: tuple[str, ...] = GUARDED) -> dict:
     eff = effective(lines)
     tasks = sorted({t for t, _, _ in eff})
     main = {k: v for k, v in eff.items() if k[2] <= 3}
@@ -138,7 +146,7 @@ def rule_v(lines: list[dict], metrics_loader=metrics_for) -> dict:
 
     guarded = {}
     extension_required = False
-    for t in GUARDED:
+    for t in guarded_tasks:
         def not_success(arm, reps, pool):
             return sum(1 for r in reps if (t, arm, r) in pool and not ok((t, arm, r)))
         e3 = not_success("views", (1, 2, 3), eff) - not_success("baseline", (1, 2, 3), eff)
@@ -208,7 +216,7 @@ def rule_v(lines: list[dict], metrics_loader=metrics_for) -> dict:
 
 
 def rule_c(lines: list[dict], delta: float, metrics_loader=metrics_for,
-           precondition_met: bool = True) -> dict:
+           precondition_met: bool = True, guarded_tasks: tuple[str, ...] = GUARDED) -> dict:
     """Rule C (the card-import ablation), as D-025 locks it.
 
     Cells `import-full` (control) and `import-card` (treatment). Primary:
@@ -268,7 +276,7 @@ def rule_c(lines: list[dict], delta: float, metrics_loader=metrics_for,
     rate = {arm: (succ[arm] / runs[arm] if runs[arm] else None) for arm in succ}
     clause1 = None if None in rate.values() else (rate[ctl] - rate[trt]) <= Y + 1e-9
     guarded, extension_required = {}, False
-    for t in GUARDED:
+    for t in guarded_tasks:
         def not_success(arm, reps):
             return sum(1 for r in reps if (t, arm, r) in eff and not ok((t, arm, r)))
         e3 = not_success(trt, (1, 2, 3)) - not_success(ctl, (1, 2, 3))
@@ -346,18 +354,46 @@ def probe_delta(path: Path) -> float:
     return float(d)
 
 
+def study_of(line: dict) -> int:
+    """Lines written before study 2 carry no `study` field: they are study 1."""
+    return int(line.get("study", 1))
+
+
+def only_study(lines: list[dict], study: int) -> list[dict]:
+    wrong = sorted({ln["task_id"] for ln in lines if study_of(ln) != study})
+    if wrong:
+        raise SystemExit(f"lines from another study than {study}: {wrong}")
+    return lines
+
+
+def rule_v2(lines: list[dict], metrics_loader=metrics_for) -> dict:
+    """D-026 Rule V2: D-025 Rule V on study 2's lines, with its guarded tasks."""
+    return rule_v(only_study(lines, 2), metrics_loader, guarded_tasks=GUARDED_S2)
+
+
+def rule_c2(lines: list[dict], delta: float, metrics_loader=metrics_for) -> dict:
+    """D-026 Rule C2: D-025 Rule C on study 2's lines, with its guarded tasks;
+    delta is re-probed in the matrix world at the study-2 commit."""
+    return rule_c(only_study(lines, 2), delta, metrics_loader, guarded_tasks=GUARDED_S2)
+
+
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="D-025 Rule V / Rule C verdicts")
-    ap.add_argument("rule", choices=["rule-v", "rule-c"])
+    ap = argparse.ArgumentParser(description="D-025 / D-026 verdicts")
+    ap.add_argument("rule", choices=["rule-v", "rule-c", "rule-v2", "rule-c2"])
     ap.add_argument("results", nargs="+", type=Path)
-    ap.add_argument("--probe", type=Path, help="rule-c: the import probe at the Rule C commit")
+    ap.add_argument("--probe", type=Path,
+                    help="rule-c / rule-c2: the import probe at the rule's commit")
     a = ap.parse_args(argv)
-    if a.rule == "rule-v":
-        print(json.dumps(rule_v(load(a.results)), indent=2, sort_keys=True))
+    lines = load(a.results)
+    if a.rule in ("rule-v", "rule-v2"):
+        res = rule_v(only_study(lines, 1)) if a.rule == "rule-v" else rule_v2(lines)
+        print(json.dumps(res, indent=2, sort_keys=True))
         return 0
     if a.probe is None:
-        ap.error("rule-c needs --probe <import-probe json at the Rule C commit>")
-    print(json.dumps(rule_c(load(a.results), probe_delta(a.probe)), indent=2, sort_keys=True))
+        ap.error(f"{a.rule} needs --probe <import-probe json at the rule's commit>")
+    delta = probe_delta(a.probe)
+    res = rule_c(only_study(lines, 1), delta) if a.rule == "rule-c" else rule_c2(lines, delta)
+    print(json.dumps(res, indent=2, sort_keys=True))
     return 0
 
 
