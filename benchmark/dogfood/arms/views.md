@@ -4,18 +4,20 @@ You are working autonomously in a copy of the `game-design.md` repository. No hu
 
 Follow the repository's own workflow (`AGENTS.md`, `CLAUDE.md`). To consult a design tree, read its root `game-design.md` first, then use its `files:` map to open only the subfiles your task needs; open individual content files on demand. Use the `gdmd` CLI as the workflow describes: `gdmd lint <tree>` to check your work, `gdmd hook check <tree> <paths...>` to see which spec sections reference code paths, and `gdmd touch <subfile...>` to bump `last_verified:`.
 
-## Consulting a tree with projected views
+## Projected views: `gdmd view` and `gdmd graph`
 
-<!-- DRAFT: command syntax follows the WS2 plan and is finalized after v0.4 Checkpoint 3.
-     run.py refuses the views arm until `gdmd view --help` succeeds in the copy. -->
+This copy's `gdmd` also provides projected views over a tree (spec §9.9). They are computed from the tree on every call and store nothing. Every block they print is a verbatim slice of a tree file, with a `<path>:<start>-<end>` pointer. Omitted lines are marked with the pointer of what was omitted.
 
-Instead of opening whole files, consult the tree through `gdmd view` and `gdmd graph`. They are computed on the fly from the tree and never paraphrase it: every token value is shown verbatim, and every block carries a `file:start-end` pointer you can open if you need the surrounding text.
+- `gdmd view <tree>`: overview. Each file (type, status, `last_verified`), each namespace's tokens (id, status, pointer), and content entities counted per kind.
+- `gdmd view <tree> --full`: every block and gap line of the tree, in canonical order, each with its pointer.
+- `gdmd view <tree> --grep <regex> [--ignore-case]`: the blocks that contain a match, reduced to the matching lines and their ancestor keys.
+- `gdmd view <tree> --ref <{ns.id}> [--hops N]`: one token in full, its forward references, and the blocks that reference it, out to N hops.
+- `--flat`: any selection, as one line per block (role, id, pointer, status).
+- `--role <role>`: restricts any view to the given roles: `token`, `invariant`, `content-entity`, `rationale`, `impl`, `meta`.
+- `--json`: any view as JSON, including the tree's `tree_sha`.
+- `gdmd graph <tree> --impact <{ns.id}>`: every block that references the token, directly or transitively, with its hop distance.
+- `gdmd graph <tree> --from <{ns.id}> --to <{ns.id}> [--max-paths N]`: the shortest reference paths between two tokens.
+- `gdmd graph <tree> --cycles`: reference cycles.
+- `--format text|json|dot`: the graph output format.
 
-- `gdmd view <tree>`: overview. Every token per namespace, with its status and a pointer.
-- `gdmd view <tree> --ref {ns.id} [--hops N]`: one token, with the tokens it references and the tokens that reference it (backlinks).
-- `gdmd view <tree> --grep <pattern>`: only the matching blocks, keeping their namespace → token → field structure.
-- `gdmd view <tree> --flat`: the same, as a flat list tagged by role.
-- `gdmd graph <tree> --impact {ns.id}`: everything that transitively depends on a token.
-- `gdmd graph <tree> --from {ns.id} --to {ns.id}`: the reference paths between two tokens.
-
-Prefer a view to reading a whole file. When a view truncates something it says so and gives the pointer; open only that range.
+Pointers are valid for the tree state (`tree_sha`) they were printed for. Re-run a view after editing.

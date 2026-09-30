@@ -13,7 +13,7 @@ tasks/<task_id>.check.py      deterministic checker: exit 0 = success, JSON repo
 tasks/*.fixture.patch         teammate commit applied before the session (git format-patch)
 tasks/lookup_refs.expected.json   frozen, hand-verified answers (never recomputed at check time)
 arms/baseline.md              appended to the system prompt: the current workflow
-arms/views.md                 baseline.md + a "projected views" section (draft until WS2 lands)
+arms/views.md                 baseline.md + a neutral §9.9 command reference (hash recorded in D-025 before the Rule V matrix)
 fixture.py                    isolated per-run copies
 checklib.py                   shared checker helpers
 extract.py                    trace metrics via VCC

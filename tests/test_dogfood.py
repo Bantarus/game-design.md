@@ -81,6 +81,22 @@ def test_arms_differ_only_by_appended_views_section():
     assert "gdmd view" not in base and "gdmd graph" not in base
 
 
+def test_views_arm_is_the_spec_9_9_command_reference():
+    # D-027 / review item 7: a neutral reference derived from §9.9, with
+    # exactly the flags of §9.9's synopsis, no more and no fewer.
+    import re
+    spec = (REPO / "docs" / "spec.md").read_text()
+    sec = spec[spec.index("### 9.9 "):]
+    synopsis = sec[sec.index("```") + 3:]
+    synopsis = synopsis[:synopsis.index("```")]
+    flag = re.compile(r"--[a-z][a-z-]*")
+    appended = (DOGFOOD / "arms" / "views.md").read_text()[
+        len((DOGFOOD / "arms" / "baseline.md").read_text()):]
+    assert set(flag.findall(appended)) == set(flag.findall(synopsis))
+    for word in ("prefer", "instead of", "should"):
+        assert word not in appended.lower(), f"arm text steers: {word!r}"
+
+
 def test_control_prompt_identical_to_maintenance_prompt():
     assert TASKS["maintenance_drift"].prompt() == TASKS["negative_control_no_drift"].prompt()
 

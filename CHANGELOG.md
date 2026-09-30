@@ -23,6 +23,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - An orchestrator whose `--dry-run` validates every CLI flag against `claude --help`, plus a model-id probe and the D-024 import-size probe.
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
+- **Dogfood views arm (`arms/views.md`):** a neutral command reference derived from spec §9.9, with no task-tuned advice. A test pins its flags to §9.9's synopsis. Its SHA-256 is recorded in a D-025 amendment before the Rule V matrix and reused unchanged for D-026's Rule V2.
 - **Spec §9.9 + D-027: `gdmd view` and `gdmd graph` specified** (v0.4 Checkpoint 3; not yet implemented).
   - Projected views over a tree: overview, `--full`, `--grep`, `--ref --hops`, `--flat`, `--role`, `--json`; graph `--impact`, `--from/--to` (shortest paths, `--max-paths`), `--cycles`.
   - The views use the linter's reference and backlink semantics exactly.
