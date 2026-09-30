@@ -968,6 +968,33 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - The views arm's per-turn occupancy and USD are higher, by about the world difference in spec-import size (5,837 tokens).
 - **From this run on, `v0.4-views` moves forward only** (lineage addendum).
 
+### Amendment 6 (2026-09-30, after the WS4 build, before any Rule C data): the Rule C cells and computation
+
+- **Decided:** by the user at the Rule V review ("the WS4 build, then the cell construction commit, the import probe at the Rule C commit (Δ), the Rule C matrix, once, as locked"). This records the apparatus the Rule C matrix runs on. No rule changes.
+- **Built:**
+  - WS4 (`abb13e0`, D-029): `gdmd spec --card` / `--section`, with D-024's completeness test.
+  - The cell construction (`0b8419d`):
+    - arms `import-full` and `import-card`, both in the matrix world with `arms/baseline.md`;
+    - `fixture.swap_in_card`, which generates each `import-card` copy's `docs/spec-card.md` with the copy's own `gdmd spec --card` and swaps only `CLAUDE.md`'s `@docs/spec.md` line, inside the copy's baseline commit;
+    - the `--section` call counter;
+    - `analyze.py rule-c`.
+  - A dry run at `0b8419d` prepared all 10 cells, and every card was identical.
+- **The card at the Rule C commit:** 8,491 bytes, SHA-256 `7c280fa1dbf1f4631438fff238347d7e5c564fda88d0248062c515f82184a99f`, generated from a 139,743-byte spec. Every `import-card` result line carries the card's hash.
+- **The computation is fixed before the data.** `analyze.py rule-c` implements this entry's Rule C. Rule V's four resolutions apply unchanged (amendment 5): supersedes, missing values, apparatus-NULL precedence and contamination. In addition:
+  - A line with no `median_turn_occupancy` is listed and left out of its task-cell median.
+  - Δ is read from the matrix world of the import probe run at the Rule C commit (`--probe`), as locked ("Probed delta").
+  - The precondition is the pilot's gating read (59.3% ≥ 20%, met). Rule C has no manipulation check in this entry, and none is added.
+- **The Rule C limits, for the report:**
+  - small n and a single model;
+  - tasks written by the format's own author;
+  - both cells run in the v0.4 world, where `gdmd view` / `graph` exist and AGENTS.md lists them;
+  - the card's §9.9 synopsis names them in the `import-card` cell only, while the full spec in `import-full` contains all of §9.9;
+  - the precondition was read in the v0.3 world at the pilot, and Δ is re-probed in the matrix world;
+  - the judge residual;
+  - no comparability with F-009.
+- **Order from here:** full sweep → `git push origin v0.4-views` (plain) → the import probe at this amendment's commit → the Rule C matrix, 30 runs, once, plus the guarded extension only if `analyze.py rule-c` reports it pending → report by the rule in `docs/case-studies/dogfood-01.md` (Rule C section) → D-024's adoption consequence, only on PASS, in its own commit → stop.
+- **Not changed:** thresholds, the primary, cells, aggregation, non-inferiority and verdict mapping.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design
@@ -1331,7 +1358,7 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
    - Headings inside fenced code blocks, such as the `## High Concept` lines in §5.2 and §7.1, are not sections.
    - An unknown id exits 2.
 8. **Not a committed file.** The card is generated on demand. Rule C's `import-card` cells generate it inside each copy from that copy's own `src/` and spec, as D-025 locks.
-9. **Size:** 8,500 bytes, against the spec's 139,743 (about 6%).
+9. **Size:** 8,491 bytes, against the spec's 139,743 (about 6%).
 
 ### Tests
 
