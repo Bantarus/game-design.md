@@ -5,6 +5,8 @@ mutates the baseline to trigger exactly one rule, then asserts the finding.
 """
 from __future__ import annotations
 
+import json
+
 from game_design_md import linter
 from game_design_md.tree import Tree
 
@@ -372,6 +374,54 @@ def test_data_source_when_present_repeats_the_content_schema_data_dir(tmp_path):
                         .replace("    data_source: ../../content/enemies\n", ""))
     res = _lint(root)
     assert res.errors == 0 and "data_source" not in mech.read_text()
+
+
+# ---- reserved owned keys and schema_ref (D-039, OI-004) ---------------------------
+
+def test_reserved_owned_keys_are_not_referenceable(make_tree):
+    """§3 (D-039): `{pillars.x}` and a whole-namespace `{pillars}` in applies_to
+    are broken-ref; `{pillars}` in prose, as seven places in four in-repo
+    trees write it, is plain text to the tools."""
+    extra = """\
+---
+spec: game-design.md
+spec_version: 0.3.0
+file_type: subfile
+status: draft
+last_verified: "2026-09-30"
+invariants:
+  pillar_guard:
+    kind: architectural_pattern
+    rule: "Honors {pillars.p1}."
+    applies_to: ["{pillars}"]
+    enforcement: advisory
+    severity: info
+---
+
+## Notes
+
+Per `{pillars}`, and `{pillars}[2]` in particular.
+"""
+    res = _lint(make_tree({"gdd/extra.md": extra}))
+    broken = sorted((f.location, f.message) for f in res.findings if f.rule == "broken-ref")
+    assert [loc for loc, _ in broken] == ["frontmatter:invariants.pillar_guard.applies_to.[0]",
+                                          "frontmatter:invariants.pillar_guard.rule"]
+
+
+def test_schema_ref_is_removed_from_the_schema(make_tree):
+    """D-039: `$defs.Entity` no longer declares `schema_ref` (no tree used it;
+    the spec's §4.1 example named `{content_schema.cards}`, which is no
+    namespace). Entity admits additional properties, so a tree carrying it
+    stays schema-valid, and its reference is broken-ref, as before."""
+    from game_design_md.export_cmd import export_schema
+    assert "schema_ref" not in json.loads(export_schema())["$defs"]["Entity"]["properties"]
+    mech = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "    data_source: ../../content/cards\n",
+        "    data_source: ../../content/cards\n    schema_ref: \"{content_schema.cards}\"\n")
+    res = _lint(make_tree({"gdd/mechanics.md": mech}))
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
+    assert [f.location for f in res.findings if f.rule == "broken-ref"] == [
+        "frontmatter:entities.cards.schema_ref"]
 
 
 # ---- implementation-pointer-outside-repo (D-038, OI-002) ---------------------------

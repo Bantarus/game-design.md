@@ -21,14 +21,13 @@ ROOT = Path(__file__).resolve().parent.parent
 # The four stability-guarantee fields per spec §5.1 / §8.2.
 STABILITY_FIELDS = ["pillars", "non_goals", "player_experience_goals", "core_loop_ref"]
 
-# Valid reference namespaces per spec §3 (namespace-ownership table), plus the
-# context-local prefixes (D-012) and the doc-placeholder spellings used when
-# teaching the syntax rather than referencing a real token.
+# Valid reference namespaces per spec §3: the twelve referenceable namespaces
+# (not the reserved owned keys, D-039: `{pillars.x}` does not resolve), plus
+# the context-local prefixes (D-012) and the doc-placeholder spellings used
+# when teaching the syntax rather than referencing a real token.
 VALID_NAMESPACES = {
     "entities", "verbs", "resources", "states", "events", "rules", "loops",
     "clocks", "distributions", "feel", "balance_targets", "invariants",
-    "verify_targets", "adapters", "pillars", "player_experience_goals",
-    "content_schema",
     # context-local (bound at rule-evaluation time, not globally resolvable)
     "actor", "target",
     # documentation placeholders

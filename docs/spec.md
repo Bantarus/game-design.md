@@ -143,7 +143,7 @@ Subfiles have a free per-namespace top-level key in their frontmatter (e.g. `loo
 
 Tokens are referenced inline as `{namespace.id}` with literal curly braces. Examples: `{loops.combat_turn}`, `{resources.energy}`, `{verbs.play_card}`, `{distributions.card_draw}`, `{entities.cards.ember_strike}`.
 
-**Namespace ownership.** Each namespace is owned by exactly one subfile:
+**Namespace ownership.** Each namespace is owned by exactly one subfile. These twelve are the referenceable namespaces: a subfile keys each one's tokens by id.
 
 | Namespace | Owning subfile |
 | --- | --- |
@@ -159,9 +159,14 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 | `feel` | `gdd/feel.md` |
 | `balance_targets` | `gdd/economy-balance.md` |
 | `invariants` | `gdd/architecture-invariants.md` |
-| `verify_targets` / `adapters` | `gdd/verification.md` |
+
+**Reserved owned keys (v0.4, D-039): not referenceable.** These frontmatter keys also have an owning file, but they are lists or free-form mappings, not tokens keyed by id, so a reference has nothing to name. `{pillars.<x>}` fires `broken-ref`, and so does a whole-namespace `{pillars}` in `applies_to`. Elsewhere, `{pillars}` is plain text to the tools.
+
+| Key | Owning file |
+| --- | --- |
 | `pillars` | `gdd/pillars.md` (and the root `game-design.md`) |
 | `player_experience_goals` | the root `game-design.md` |
+| `verify_targets` / `adapters` | `gdd/verification.md` |
 
 **Resolution.** A reference `{ns.id}` resolves by looking up `ns` in the namespace table above, opening the owning subfile, and reading the value at `ns.id` in its frontmatter. References may chain through dot paths into nested objects (e.g. `{entities.cards.ember_strike.cost}`).
 
@@ -173,7 +178,7 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 **Whole-namespace references (v0.4, D-033).** An item of an invariant's `applies_to:` list (§4.11) whose entire string is `{namespace}` is a **whole-namespace reference**: it names every token of that namespace, including tokens added later. This is the only place a one-segment reference is recognized; anywhere else, `{word}` is plain text.
 
-- It resolves when `namespace` is one of the subfile namespaces in the table above (`entities` … `clocks`, `invariants`), whether or not the tree declares a token in it yet. Otherwise it fires `broken-ref`.
+- It resolves when `namespace` is one of the twelve referenceable namespaces in the first table above, whether or not the tree declares a token in it yet. Otherwise, a reserved key included, it fires `broken-ref`.
 - It is not a use of any individual token. It does not count as a reference for `orphaned-entity` or `unreferenced-verb`.
 
 **Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
@@ -228,7 +233,6 @@ entities:
   cards:
     # Entries: content/cards/*.yaml, via the data_dir of the content-schema with entity: cards (§6.1).
     type: content_collection
-    schema_ref: "{content_schema.cards}"
     status: balanced
     count_target: 220
   # F-008 v0.3: instance_container — N owned instances with per-instance state.

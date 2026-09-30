@@ -101,7 +101,6 @@
           "deprecated": true,
           "description": "Deprecated (D-037, v0.4); to be removed before v1.0. Optional. When present it repeats, as the same string, the `data_dir` of the content-schema whose `entity` is this entity's key; lint (`content-entity-invalid`) checks the two are equal."
         },
-        "schema_ref": { "$ref": "#/$defs/TokenRef" },
         "count_target": { "type": "integer", "minimum": 0 },
         "capacity": {
           "type": "integer",

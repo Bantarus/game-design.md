@@ -2076,6 +2076,53 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - The existing hook tests run in temporary trees with no `.git`, so they exercise the tree-root fallback and pass unchanged.
 - AGENTS.md adds the rule to the "keep green" list.
 
+## D-039 — §3 separates the 12 referenceable namespaces from reserved owned keys; `schema_ref` removed (OI-004)
+
+- **Status:** decided (2026-09-30) by the user on OI-004's proposal (step (e) of the post-study-2 order).
+- **Related:** OI-004, D-033 (whole-namespace references), spec §3 and §4.1, schema `$defs.Entity`.
+
+### Decisions
+
+1. **§3's ownership table becomes two tables.**
+   - **Referenceable namespaces:** exactly the twelve `Tree` indexes (`SUBFILE_NAMESPACES`).
+   - **Reserved owned keys, not referenceable:** `pillars`, `player_experience_goals`, `verify_targets` / `adapters`, each with its owning file. The spec states the resolution behavior:
+     - `{pillars.<x>}` fires `broken-ref`, and so does a whole-namespace `{pillars}` in `applies_to`;
+     - elsewhere, `{pillars}` is plain text to the tools.
+   - D-033's whole-namespace bullet now points at "the twelve referenceable namespaces".
+   - It is spec text only and describes today's code. Lint and views are unchanged.
+2. **`schema_ref` is dropped** from the §4.1 example and removed from `$defs.Entity`.
+   - No tree used it, and the example's value, `{content_schema.cards}`, names no namespace.
+   - `Entity` admits additional properties, so a tree still carrying it stays schema-valid. Its reference is `broken-ref`, as it always was.
+   - The CHANGELOG names the removal under "Removed".
+3. **`scripts/docs_lint.py` follows the split.** Its valid-namespace set for refs AGENTS.md teaches loses the reserved keys and `content_schema`. Otherwise it would accept a taught `{pillars.x}` that the spec now says cannot resolve. AGENTS.md teaches none of them, and docs-lint stays clean.
+4. **The card** excerpts only §3's first table, so `CLAUDE.md`'s import now lists the twelve and no longer teaches the reserved keys as namespaces.
+
+### A correction to OI-004's facts
+
+- The proposal said "No tree references any of them". That holds for references the tools recognize: none in any tree's frontmatter, and none as a ref anywhere.
+- **But tree prose writes `{pillars}` seven times, in four trees:**
+  - the deckbuilder (`gdd/content/cards.md`, `gdd/glossary.md`);
+  - party-rpg (`gdd/systems/distributions.md`, and `{pillars}[2]` in `gdd/economy-balance.md`);
+  - tcg (`{pillars}[2]` in `gdd/economy-balance.md`);
+  - the platformer benchmark (`gdd/mechanics.md`, `gdd/systems/distributions.md`).
+- These point a human or agent reader at the pillars list, `[2]` meaning the third pillar. The tools read them as plain text, since one-segment refs are recognized only in `applies_to` (D-033).
+- **This decision does not change them,** and none is a lint finding. It is observed use of a pillars pointer, though, so the user may want to weigh it later: for example, whether the pillars should become id-keyed, and so referenceable. That is not decided here.
+
+### Tests
+
+- **`tests/test_tree.py`:**
+  - §3's first table parses to exactly `SUBFILE_NAMESPACES`, the second to the four reserved keys, and the two are disjoint;
+  - `docs_lint`'s set covers the twelve and excludes the reserved keys and `content_schema`.
+- **`tests/test_lint.py`:**
+  - `{pillars.p1}` and `applies_to: ["{pillars}"]` are `broken-ref`, while prose `{pillars}` and `{pillars}[2]` are not;
+  - `schema_ref` is gone from the schema, and a tree carrying it is schema-valid with its ref `broken-ref`.
+- Three of the four fail on the pre-D-039 text. The reserved-key lint test passes on both versions, as intended: it pins the behavior the new text describes.
+
+### Effect
+
+- No code under `src/` changes.
+- The 12 trees stay 0/0, and the study-2 tree is unaffected.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2167,6 +2214,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
        - Either (a) proposed: remove the property from `$defs.Entity`. No tree uses it, and `additionalProperties: true` keeps any tree that does valid.
        - Or (b) keep it, described as reserved with no resolution defined.
   - **Alternative (not proposed): index them.** That would need id-keyed shapes for pillars and experience goals, which no tree shows a need for (the observed-use discipline).
+- **Resolved (2026-09-30):** the user decided as proposed, with (a) for `schema_ref`. D-039. One fact above is corrected there: tree prose writes `{pillars}` seven times in four trees, as plain text to the tools. OI-004 is closed.
 
 ## OI-005 — Lint does not validate content entities against their content-schema (spec §6.2, §11 item 4)
 

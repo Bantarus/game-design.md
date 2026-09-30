@@ -44,6 +44,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - **Card adoption:** a study-1 card PASS is re-tested; a C2 FAIL reverts it.
   - **Freeze:** fixtures are built and frozen before study 2's own pilot.
 - **Dogfood copies in the matrix world force `CLAUDE.md`'s `@docs/spec.md` import** (`fixture.force_spec_import`), as D-026 requires for V2 and D-024 §4 for the views comparison. This keeps every locked cell's import intact after the repo adopts the card. `import-card` swaps to the card as before.
+- **D-039 (OI-004): spec §3 separates the twelve referenceable namespaces from the reserved owned keys** (`pillars`, `player_experience_goals`, `verify_targets` / `adapters`). A reference into a reserved key is `broken-ref`, as it always was. `docs_lint` now accepts only the twelve in refs that AGENTS.md teaches. OI-004 is closed.
 - **D-038 (OI-002): paths are relative to the tree root, and `../` globs work end to end.** The spec now says what lint and `hook check` always did: `files:`, `implemented_in:` and `implementation_pointers:` resolve against the directory holding the root `game-design.md` (§2.3). A glob may climb out of the tree with `../`. `gdmd hook check` now keys its index and the staged paths against the git repository root, so a staged `src/x.py` meets a tree's `../../src/**` glob. It was silent before. Inside a repository, `triggered by:` therefore names files as git stages them. New warning `implementation-pointer-outside-repo` flags a glob whose base leaves the repository. The 12 trees stay 0/0. OI-002 is closed.
 - **D-037 (OI-001): content resolution, as the code does it, is the spec.** `{entities.<kind>.<id>}` resolves by directory name (§3), and the spec names the content-schema's field `data_dir` throughout. `content-entity-invalid` gains two checks: a content-schema's `data_dir` must name a directory called its `entity:` (§6.1), so validation and resolution reach the same files, and an entity's `data_source`, when present, must equal that `data_dir`. All 13 trees already comply; no tree changes. OI-001 is closed.
 - **D-036 (OI-003): `prototyped-without-pointer` exempts namespaces whose schema forbids `implemented_in:`.** The set is read from the §10 schema: today `balance_targets` (plus `invariants` and `states`, which have no status). A `balanced` target on a stale file no longer draws a warning whose only remedy, a placeholder pointer, is schema-illegal. OI-003 is closed.
@@ -130,6 +131,10 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 ### Deprecated
 
 - **An entity's `data_source:`** (D-037; spec §4.1, schema `$defs.Entity`), to be removed before v1.0. It is optional from v0.4; when present, it must be the same string as its content-schema's `data_dir:`. It was required before, though no tool read it, and in every in-repo tree it was a copy of `data_dir:`.
+
+### Removed
+
+- **`schema_ref` from the schema's `$defs.Entity`** (D-039), and the line from the spec's §4.1 example. No tree used it, and the example's value, `{content_schema.cards}`, named no namespace. `Entity` admits additional properties, so a tree still carrying the key stays schema-valid; its reference is `broken-ref`, as it always was.
 
 ### Fixed
 
