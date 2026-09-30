@@ -89,7 +89,7 @@ OUTCOMES = ("success", "fail", "capped", "error")
 # which may raise them once, upward, after its pilot if one binds).
 STUDY_CAPS = {1: {"turn_cap": 60, "timeout_s": 1200.0, "budget_usd": 3.0},
               2: {"turn_cap": 80, "timeout_s": 1800.0, "budget_usd": 5.0}}
-HARNESS_PATHS = ["benchmark/dogfood", "tests/test_dogfood.py",
+HARNESS_PATHS = ["benchmark/dogfood", "tests/test_dogfood.py", "tests/test_dogfood_study2.py",
                  ":(exclude)benchmark/dogfood/results"]
 
 

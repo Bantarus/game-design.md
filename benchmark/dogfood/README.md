@@ -84,7 +84,7 @@ Each answer checker also reports per-question Jaccard (descriptive).
 ## Isolation (per run)
 
 - **Copy:** a `git archive` export of the run's pinned commit (HEAD when the run starts; a real run refuses to start with uncommitted harness changes), extracted **outside** the repo. That way Claude Code's parent-directory `CLAUDE.md` discovery sees only the copy's own `CLAUDE.md`, and so both arms pay the same `@`-imports.
-- **Excluded from the copy:** `benchmark/dogfood/` and `tests/test_dogfood.py` (tasks, checkers, answers).
+- **Excluded from the copy:** `benchmark/dogfood/`, `tests/test_dogfood.py` and `tests/test_dogfood_study2.py` (tasks, checkers, answers), and `DECISIONS.md`, whose study-2 freeze amendment names the questions and hand-traced answers (D-026 amendment 6). Reading any of them from the real repo counts as contamination.
 - **mtimes:** normalized to a fixed date, so `stale-section` reads the copy like the working tree. The fixture patch is the only fresh mtime, and so the only drift signal.
 - **Git:** a fresh `git init`, with its own `.git`; not a worktree, so a subject's commit can't reach the real repo. Checkers diff against the `dogfood-base` tag.
 - **CLI under test:** `gdmd` on PATH is a per-cell shim: the copy's own `src/` (`matrix`) or the v0.3 venv (`v0.3`).
@@ -148,6 +148,6 @@ Order of operations (D-023 / D-025): dry run → probe → import probe → pilo
 
 - Small n: the default is 3 repeats per cell.
 - A single subject model.
-- The tasks were designed by the format's own author, on the format's own trees; the subject may also notice from `DECISIONS.md` that it is being benchmarked, which affects both arms equally.
+- The tasks were designed by the format's own author, on the format's own trees; the subject may also notice that it is being benchmarked (from `DECISIONS.md` in study 1's copies; from `CHANGELOG.md` and the case studies in study 2's), which affects both arms equally.
 - Not a longitudinal test (spec §11.2).
 - Not comparable to F-009 (D-023).

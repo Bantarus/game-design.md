@@ -1333,6 +1333,35 @@ The pilot is run `pilot-s2-20260930`: the baseline arm (v0.3 world), one run per
   - **Wall-clock:** about 27 minutes per matrix, run sequentially.
 - **Stop:** per the order of operations, the study-2 matrices wait for approval.
 
+### Amendment 6 (2026-09-30, after the study-2 pilot, before any study-2 matrix data): copies carry no file that names study 2's questions
+
+- **Found:** while preparing the matrices, after the user approved them and before any matrix run. This change was not part of that approval; it is recorded here before any matrix data and reported at the post-matrix review.
+- **The defect:** every copy carried `DECISIONS.md`.
+  - Since the freeze (`e429173`), its amendment 5 names every question's start token (the question table). Its hand traces give the full answers to 4 of the 6 answer questions (both lookup Q1s and both impact tasks), and the table names the maintenance and control tasks' expected edits.
+  - A `grep -rn <start token> .` from the copy root would have returned them.
+  - D-026 §1 keeps the generator and the answers out of every copy. §7's leak check covered only what `CLAUDE.md` imports, so it could not see a file the subject has to go and read.
+  - `tests/test_dogfood_study2.py` was in every copy too. It names no tree id, but it is harness.
+- **Nothing so far was affected:** none of the 71 dogfood sessions (study 1's pilot and both of its matrices, study 2's pilot) read `DECISIONS.md` or received any of its text in a tool result. Study 2's pilot subjects kept their searches inside `examples/lanternfall/`.
+- **The change:**
+  - `fixture.EXCLUDE_FROM_COPY` gains `DECISIONS.md` and `tests/test_dogfood_study2.py`, for every copy in both worlds.
+  - D-025's contamination rule extends to them: an out-of-copy access naming `DECISIONS.md` or `test_dogfood_study2.py` counts (`analyze.HARNESS_MARKERS`).
+  - `run.py` treats the study-2 test as harness, so a real run refuses to start while it has uncommitted changes.
+- **Why remove the file rather than redact it:**
+  - Redacting amendment 5's question table and hand traces would keep the rest of the file. But every later note that names an id would need the same care, and the copy would carry a partial file.
+  - No subject read the file in 71 sessions, so removing it takes away nothing a subject was observed to use.
+  - It also takes v0.4's design text (D-027) out of the v0.3 world.
+- **Tests** (`tests/test_dogfood_study2.py`):
+  - **Every study-2 cell type:** baseline (v0.3 world), views and import-full (matrix world), and import-card with its card. No copy file outside `examples/lanternfall/` names a question's start, answer or impact closure, by §7's convention (the full id, or the bare id when compound).
+    - Three files match by coincidence: `loops.expedition` in the platformer benchmark (two files) and `rules.spawn_encounter` in the party-rpg example. These are those trees' own tokens, which predate the generator (May 2026), and they are pinned.
+  - **Proof of fire:** the same scan finds more than 30 question ids in the repo's `DECISIONS.md`.
+  - **Contamination:** reading the real repo's `DECISIONS.md` or the study-2 test counts.
+- **Study 1 is unaffected.** Its runs are complete, and its verdicts recomputed with the new markers are byte-identical (Rule V NULL, Rule C PASS).
+- **Counterfactual adoption:** decided before any study-2 matrix data, and identical across arms and cells. It would be adopted whatever the results.
+- **Report limit, reworded:** study 1's "possible awareness effect from reading `DECISIONS.md`" becomes, for study 2, awareness from `CHANGELOG.md` and the case studies. They describe study 2 but name no question id.
+- **Not changed:**
+  - the tree (manifest `718e52d2…`), tasks, prompts, answers, cells, primaries, thresholds and verdict mapping;
+  - Δ: `DECISIONS.md` is not imported, and the import layer (`CLAUDE.md`, `AGENTS.md`, the spec, the schema, the deckbuilder root, `src/`) is unchanged.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)

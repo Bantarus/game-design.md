@@ -24,8 +24,10 @@ Resolutions of points the locked text leaves open (recorded in amendment 5):
   manipulation check failing) decides the verdict: the data cannot support
   PASS or FAIL.
 - Contamination: an `out_of_copy_access` entry naming the harness
-  (`benchmark/dogfood` or `test_dogfood.py`). Conservative: a denied attempt
-  also counts, and every case is listed for review.
+  (`benchmark/dogfood`, `test_dogfood.py` or `test_dogfood_study2.py`) or
+  `DECISIONS.md`, which copies no longer carry because it names study 2's
+  answers (D-026 amendment 6). Conservative: a denied attempt also counts,
+  and every case is listed for review.
 """
 from __future__ import annotations
 
@@ -42,7 +44,8 @@ GUARDED_S2 = ("s2_maintenance", "s2_negative_control")      # D-026
 X = 0.30          # PASS threshold on R
 Y = 0.10          # non-inferiority margin on the pooled success rate
 APPARATUS_MAX = 0.10
-HARNESS_MARKERS = ("benchmark/dogfood", "test_dogfood.py")
+HARNESS_MARKERS = ("benchmark/dogfood", "test_dogfood.py",
+                   "test_dogfood_study2.py", "DECISIONS.md")       # + D-026 amendment 6
 
 
 def load(paths: list[Path]) -> list[dict]:

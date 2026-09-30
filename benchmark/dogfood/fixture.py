@@ -6,7 +6,9 @@ Each run gets its own copy:
    copy must live outside the repo: otherwise Claude Code's parent-directory
    discovery would load the real repo's CLAUDE.md on top of the copy's.
 2. Harness files stripped (`EXCLUDE_FROM_COPY`), so the subject can't read
-   tasks, checkers or frozen answers. A study-2 task's generated tree
+   tasks, checkers or frozen answers; so is `DECISIONS.md`, whose study-2
+   freeze amendment names the questions and hand-traced answers (D-026
+   amendment 6). A study-2 task's generated tree
    (`fixtures/<name>/tree`, D-026 §1) is then placed at the task's tree path,
    read from the same commit, so it is part of the copy's baseline.
 3. Every mtime set to `FIXTURE_MTIME`. `git archive` stamps files with the
@@ -56,7 +58,10 @@ TASKS_DIR = DOGFOOD_DIR / "tasks"
 ARMS_DIR = DOGFOOD_DIR / "arms"
 FIXTURES_DIR = DOGFOOD_DIR / "fixtures"
 
-EXCLUDE_FROM_COPY = ("benchmark/dogfood", "tests/test_dogfood.py")
+# D-026 amendment 6: DECISIONS.md and the study-2 test name study 2's questions
+# and answers (the freeze amendment's question table and hand traces).
+EXCLUDE_FROM_COPY = ("benchmark/dogfood", "tests/test_dogfood.py",
+                     "tests/test_dogfood_study2.py", "DECISIONS.md")
 FIXTURE_MTIME = datetime(2026, 5, 1).timestamp()
 BASE_TAG = "dogfood-base"
 

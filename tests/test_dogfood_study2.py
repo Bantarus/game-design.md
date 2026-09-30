@@ -338,6 +338,76 @@ def test_study1_copies_do_not_get_the_tree(tmp_path):
     assert not (c.root / PLACED).exists()
 
 
+# ---- D-026 amendment 6: no copy file outside the tree names a question ------------------
+
+def _question_ids() -> set[str]:
+    """Every tree token a question starts from, answers with, or (impact) closes over."""
+    ids: set[str] = set()
+    for task in ANSWERS.values():
+        for q in (task.get("questions") or {}).values():
+            ids |= {q["start"], *q["answer"], *q.get("closure", [])}
+    return ids & set(EDGES["nodes"])
+
+
+def _naming_files(base: Path, skip: tuple[str, ...] = ()) -> dict[str, set[str]]:
+    """Files under `base` naming a question id: the full id, or its bare id when
+    compound (the §7 leak-check convention). `.git` and `skip` are not read."""
+    ids = _question_ids()
+    bare = {n.split(".")[-1]: n for n in ids if "_" in n.split(".")[-1]}
+    pat = re.compile("|".join([re.escape(n) for n in sorted(ids, key=len, reverse=True)]
+                              + [rf"\b{re.escape(b)}\b" for b in sorted(bare)]))
+    hits: dict[str, set[str]] = {}
+    for p in sorted(base.rglob("*")):
+        rel = p.relative_to(base).as_posix()
+        if not p.is_file() or rel.split("/")[0] == ".git" or rel.startswith(skip):
+            continue
+        for m in pat.findall(p.read_bytes().decode("utf-8", "ignore")):
+            hits.setdefault(rel, set()).add(bare.get(m, m))
+    return hits
+
+
+def test_the_scan_fires_on_the_repos_decisions_file():
+    """Proof of fire: the freeze amendment's question table and hand traces."""
+    named = set().union(*(_naming_files(REPO_ROOT, skip=("benchmark/", "examples/",
+                                                         "templates/", "tests/", "src/",
+                                                         "docs/", "schema/")).values()))
+    assert len(named) >= 30
+    assert "entities.encounters.lich_hollow" in named
+
+
+# Other trees' own tokens that share a name with a Lanternfall question id. Both
+# predate the generator (dc12419 and 0562909, May 2026) and say nothing about it.
+COINCIDENT = {"benchmark/games/platformer/game-design.md": {"loops.expedition"},
+              "benchmark/games/platformer/gdd/loops.md": {"loops.expedition"},
+              "examples/party-rpg/gdd/mechanics.md": {"rules.spawn_encounter"}}
+
+
+@pytest.mark.skipif(not _has_v03_tag(), reason="needs the v0.3.0 tag")
+def test_no_copy_file_outside_the_tree_names_a_question(tmp_path):
+    """Every study-2 cell type (baseline in the v0.3 world; views and
+    import-full in the matrix world; import-card with its card): no file of the
+    copy outside `examples/lanternfall/` names a question's start, answer or
+    closure, except the pinned coincidences. DECISIONS.md did, so copies no
+    longer carry it (amendment 6)."""
+    cells = {"baseline": ("v0.3", False), "views/import-full": ("matrix", False),
+             "import-card": ("matrix", True)}
+    for name, (world, card) in cells.items():
+        c = fixture.prepare_copy(TASKS["s2_lookup_forward"], tmp_path / name.replace("/", "-"),
+                                 world=world, card=card)
+        for rel in ("DECISIONS.md", "tests/test_dogfood_study2.py", "tests/test_dogfood.py",
+                    "benchmark/dogfood"):
+            assert not (c.root / rel).exists(), (name, rel)
+        assert _naming_files(c.root, skip=(PLACED + "/",)) == COINCIDENT, name
+
+
+def test_reading_the_real_decisions_file_is_contamination():
+    import analyze
+    for path in ("/home/u/game-design/DECISIONS.md",
+                 "/home/u/game-design/tests/test_dogfood_study2.py"):
+        assert analyze.contaminated({}, {"out_of_copy_access": [
+            {"tool": "Read", "file_path": path}]}) == [path]
+
+
 def test_judge_agrees_in_both_worlds_before_and_after_the_patches(tmp_path):
     sha = fixture.git(REPO_ROOT, "rev-parse", "HEAD")
     judge = fixture.make_judge(tmp_path / "judge", sha)
