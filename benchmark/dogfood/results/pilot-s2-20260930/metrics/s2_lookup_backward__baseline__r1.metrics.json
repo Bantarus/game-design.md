@@ -1,0 +1,239 @@
+{
+  "turns": 15,
+  "input_tokens": 30,
+  "output_tokens": 10294,
+  "cache_read_tokens": 1170086,
+  "cache_creation_tokens": 90763,
+  "tool_calls": 21,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 27283,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82667,
+  "per_turn_occupancy": [
+    72632,
+    77133,
+    77692,
+    78002,
+    78876,
+    80588,
+    82393,
+    82667,
+    83473,
+    85647,
+    87843,
+    90517,
+    92092,
+    94698,
+    96626
+  ],
+  "tool_counts": {
+    "Bash": 9,
+    "Grep": 10,
+    "Write": 2
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 4,
+  "bash_read_bytes": 16905,
+  "bash_files_read": 7,
+  "all_files_read": 7,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/examples/lanternfall/content/encounters/sable_gallery.yaml",
+    "examples/lanternfall/examples/lanternfall/content/items/lich_dirk.yaml",
+    "examples/lanternfall/examples/lanternfall/content/skills/fen_wail.yaml",
+    "examples/lanternfall/examples/lanternfall/gdd/content/monsters.md",
+    "examples/lanternfall/examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/examples/lanternfall/gdd/systems/spawning.md",
+    "examples/lanternfall/game-design.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/out.txt"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/out.txt"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/g.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-lookup-backward--baseline--r1-repo/03d0e0c2-8642-4a7e-bcf6-2d3e7150349a/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "g2Q3mp",
+      "result_bytes": 8847,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:33-292"
+    },
+    {
+      "tool": "Bash",
+      "id": "LFPwdb",
+      "result_bytes": 29,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:304-304"
+    },
+    {
+      "tool": "Bash",
+      "id": "xkEQnQ",
+      "result_bytes": 116,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:316-316"
+    },
+    {
+      "tool": "Bash",
+      "id": "K5ntSR",
+      "result_bytes": 1451,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:328-404"
+    },
+    {
+      "tool": "Bash",
+      "id": "9C66mY",
+      "result_bytes": 34,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:465-465"
+    },
+    {
+      "tool": "Write",
+      "id": "SXuo3n",
+      "result_bytes": 241,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:556-556"
+    },
+    {
+      "tool": "Bash",
+      "id": "vginqN",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:568-568"
+    },
+    {
+      "tool": "Bash",
+      "id": "LEmqXB",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:581-581"
+    },
+    {
+      "tool": "Grep",
+      "id": "YyPN3H",
+      "result_bytes": 198,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:597-599"
+    },
+    {
+      "tool": "Grep",
+      "id": "wDUsjF",
+      "result_bytes": 389,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:613-618"
+    },
+    {
+      "tool": "Grep",
+      "id": "iZWmyg",
+      "result_bytes": 385,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:632-637"
+    },
+    {
+      "tool": "Grep",
+      "id": "AUxuJU",
+      "result_bytes": 557,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:651-659"
+    },
+    {
+      "tool": "Bash",
+      "id": "ikkxca",
+      "result_bytes": 1504,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:671-723"
+    },
+    {
+      "tool": "Grep",
+      "id": "udG3wz",
+      "result_bytes": 306,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:737-741"
+    },
+    {
+      "tool": "Grep",
+      "id": "ne94pg",
+      "result_bytes": 2470,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:755-786"
+    },
+    {
+      "tool": "Bash",
+      "id": "HCBzX7",
+      "result_bytes": 5103,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:798-955"
+    },
+    {
+      "tool": "Grep",
+      "id": "Z8yFST",
+      "result_bytes": 359,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:970-977"
+    },
+    {
+      "tool": "Grep",
+      "id": "oBZPgW",
+      "result_bytes": 1141,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:992-1003"
+    },
+    {
+      "tool": "Grep",
+      "id": "4cWYFC",
+      "result_bytes": 2507,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:1018-1047"
+    },
+    {
+      "tool": "Grep",
+      "id": "njKshz",
+      "result_bytes": 1384,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:1062-1104"
+    },
+    {
+      "tool": "Write",
+      "id": "dqMgG4",
+      "result_bytes": 202,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:1134-1134"
+    }
+  ]
+}

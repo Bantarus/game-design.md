@@ -1,0 +1,187 @@
+{
+  "turns": 14,
+  "input_tokens": 28,
+  "output_tokens": 6253,
+  "cache_read_tokens": 1055183,
+  "cache_creation_tokens": 81977,
+  "tool_calls": 14,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 18475,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81834.5,
+  "per_turn_occupancy": [
+    72627,
+    75596,
+    76806,
+    77490,
+    77963,
+    79739,
+    81028,
+    82641,
+    82896,
+    83863,
+    85522,
+    86295,
+    86882,
+    87840
+  ],
+  "tool_counts": {
+    "Bash": 12,
+    "Write": 2
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 9,
+  "bash_read_bytes": 17617,
+  "bash_files_read": 10,
+  "all_files_read": 10,
+  "all_re_reads": 14,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/content",
+    "examples/lanternfall/content/skills/ochre_sear.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-impact-tokens--baseline--r1-repo/57f5f7bb-c57a-4da0-a53a-cd5dc63c05f5/scratchpad/c.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-impact-tokens--baseline--r1-repo/57f5f7bb-c57a-4da0-a53a-cd5dc63c05f5/scratchpad/c.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-impact-tokens--baseline--r1-repo/57f5f7bb-c57a-4da0-a53a-cd5dc63c05f5/scratchpad/c.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/gdmd-dogfood/pilot-s2-20260930-s2-impact-tokens--baseline--r1/repo/examples/lanternfall"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-impact-tokens--baseline--r1-repo/57f5f7bb-c57a-4da0-a53a-cd5dc63c05f5/scratchpad/c.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-pilot-s2-20260930-s2-impact-tokens--baseline--r1-repo/57f5f7bb-c57a-4da0-a53a-cd5dc63c05f5/scratchpad/c.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "R82oVj",
+      "result_bytes": 5614,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:27-189"
+    },
+    {
+      "tool": "Bash",
+      "id": "Ao3HLp",
+      "result_bytes": 1575,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:201-256"
+    },
+    {
+      "tool": "Bash",
+      "id": "m4XEYT",
+      "result_bytes": 627,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:268-274"
+    },
+    {
+      "tool": "Bash",
+      "id": "pkBDMt",
+      "result_bytes": 554,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:286-292"
+    },
+    {
+      "tool": "Bash",
+      "id": "EPkFiy",
+      "result_bytes": 3518,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:304-398"
+    },
+    {
+      "tool": "Bash",
+      "id": "rAh3Yb",
+      "result_bytes": 59,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:448-448"
+    },
+    {
+      "tool": "Write",
+      "id": "xeAYCq",
+      "result_bytes": 239,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:517-517"
+    },
+    {
+      "tool": "Bash",
+      "id": "ogZb5F",
+      "result_bytes": 332,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:529-529"
+    },
+    {
+      "tool": "Bash",
+      "id": "rVAwA9",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:543-543"
+    },
+    {
+      "tool": "Bash",
+      "id": "hkvTDX",
+      "result_bytes": 1042,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:555-578"
+    },
+    {
+      "tool": "Bash",
+      "id": "B9hgFS",
+      "result_bytes": 2890,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:590-658"
+    },
+    {
+      "tool": "Bash",
+      "id": "f9WA25",
+      "result_bytes": 1015,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:670-690"
+    },
+    {
+      "tool": "Bash",
+      "id": "tb9rhc",
+      "result_bytes": 782,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:704-719"
+    },
+    {
+      "tool": "Write",
+      "id": "x8NP3A",
+      "result_bytes": 198,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:746-746"
+    }
+  ]
+}

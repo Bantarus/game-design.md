@@ -44,6 +44,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - **Card adoption:** a study-1 card PASS is re-tested; a C2 FAIL reverts it.
   - **Freeze:** fixtures are built and frozen before study 2's own pilot.
 - **Dogfood copies in the matrix world force `CLAUDE.md`'s `@docs/spec.md` import** (`fixture.force_spec_import`), as D-026 requires for V2 and D-024 §4 for the views comparison. This keeps every locked cell's import intact after the repo adopts the card. `import-card` swaps to the card as before.
+- **Dogfood study 2 pilot** (`pilot-s2-20260930`; baseline arm, 6 tasks, not evidence). Every run succeeded, and every answer was exact. No cap bound: the maxima were 15 of 80 turns, 95 s and $0.70, so no cap is raised. The import probe at the freeze commit measured the matrix-world spec import at 52,645 tokens. Estimated matrix cost: ≈ $20 (V2) + ≈ $14 (C2).
 - **D-026 amendment 5: study 2's fixture is frozen** before its pilot.
   - Pinned: the tree's manifest SHA-256 (`718e52d2…`), plus the answers, prompts, patches and planted edges. `prepare_copy` refuses a changed tree, and a test pins the rest.
   - One hand trace per task, read from the files.

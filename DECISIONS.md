@@ -1307,6 +1307,32 @@ Each question was chosen deterministically, by the seeded RNG, among the candida
 
 **Not changed:** the hypotheses, cells, primaries, thresholds and verdict mapping.
 
+### Pilot reads (2026-09-30), not evidence
+
+The pilot is run `pilot-s2-20260930`: the baseline arm (v0.3 world), one run per study-2 task, at the freeze commit `e429173`, CLI 2.1.285, caps 80 turns / 1800 s / $5.00. Results are in `benchmark/dogfood/results/pilot-s2-20260930*`. As in study 1, these are read only as apparatus validation and a cost estimate.
+
+- **Dry run first** (no model calls): all 24 cells (6 tasks × `baseline`, `views`, `import-full`, `import-card`) built at `e429173`, with the judge agreeing on every copy. Flags validated against 2.1.285. Every `import-card` copy carries the card `7c280fa1…`, the one Rule C used.
+- **Δ re-probed at the freeze commit** (`import-probe-probe5-20260930.json`):
+  - matrix world: **52,645 tokens**, so C2's PASS threshold is 26,322;
+  - v0.3 world: 45,975;
+  - probe4 at the Rule C commit read 52,651. The copies differ in AGENTS.md (the card-regeneration line and the new authoring rule), which both sides of the differential carry.
+- **Apparatus:**
+  - 6 of 6 runs completed, passed the context check and produced a checker report.
+  - Logs archived outside the repo (24 files, `pilot-s2-20260930.tar.xz`).
+  - **Out-of-copy access:** 20 entries, none naming the harness, so no contamination. Most are a category study 1 did not show: on these larger tasks the subject wrote intermediate lists to Claude Code's own per-session scratchpad (`/tmp/claude-1000/<copy>/<session>/`, outside the copy) and read them back. It is per session, so nothing carries between runs, and the checkers only see the copy. The rest are one mistyped copy path and one `../..`. Listed, not penalized, as D-025 prescribes.
+- **Outcomes:** 6 of 6 successes, every question exact (Jaccard 1.0). The maintenance run bumped exactly `loot.md` and `distributions.md`; the control run left the copy unchanged.
+- **Caps:** none bound. The maxima were 15 of 80 turns, 95 of 1800 s and $0.70 of $5.00. **No cap is raised.**
+- **Workload:** 3–15 turns and 6.0–32.7 KB of tool results per run, against 1.5–16 KB in study 1's pilot. Median per-turn occupancy was 74.9k–85.7k tokens. Descriptive only; the baseline alone says nothing about H2-V.
+- **Cost estimate** (each task's pilot cost standing in for its cells; $3.21 for one run of each of the six tasks):
+  - **V2 (36 runs):** ≈ $20, taking the views arm about 7% above baseline as in study 1. Plus ≈ $2.9 if the guarded extension triggers (8 runs).
+  - **C2 (36 runs):** ≈ $14.
+    - `import-full` ≈ $10: the matrix-world spec import is about 7% larger than v0.3's.
+    - `import-card` ≈ $4: Rule C's median card/full cost ratio is 0.40.
+    - Upper bound at baseline cost for every cell: $19.3. Plus ≈ $2.9 for the extension.
+  - **Total:** ≈ $34, at most about $45 with both extensions.
+  - **Wall-clock:** about 27 minutes per matrix, run sequentially.
+- **Stop:** per the order of operations, the study-2 matrices wait for approval.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
