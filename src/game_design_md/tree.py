@@ -59,13 +59,20 @@ class Tree:
     parse_errors: list[tuple[Path, str]] = field(default_factory=list)
 
     @classmethod
-    def load(cls, root: Path) -> "Tree":
+    def load(cls, root: Path, reader=None) -> "Tree":
+        """Load every `.md` / `.yaml` file under `root`.
+
+        `reader(path) -> (frontmatter, body)` defaults to `loader.read`. The
+        views compiler (`ir.py`) passes a reader that also keeps positions,
+        so each file is still parsed once.
+        """
+        reader = reader or loader.read
         tree = cls(root=Path(root))
         for p in sorted(tree.root.rglob("*")):
             if not p.is_file() or p.suffix not in (".md", ".yaml", ".yml"):
                 continue
             try:
-                fm, body = loader.read(p)
+                fm, body = reader(p)
             except Exception as e:  # noqa: BLE001
                 tree.parse_errors.append((p, str(e)))
                 continue

@@ -16,6 +16,15 @@ import pytest
 
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# The 12 in-repo trees: 4 canonical examples, 2 benchmark games, 6 starters.
+IN_REPO_TREES: tuple[str, ...] = (
+    "examples/deckbuilder", "examples/tick-combat", "examples/party-rpg",
+    "examples/tcg", "benchmark/games/platformer", "benchmark/games/survival",
+) + tuple(f"templates/starters/{g}" for g in (
+    "deckbuilder", "party-rpg", "platformer", "survival", "tcg", "tick-combat",
+))
 
 
 BASELINE_FILES: dict[str, str] = {

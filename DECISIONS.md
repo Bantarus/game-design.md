@@ -1152,6 +1152,21 @@ Every point below was answered at review. The draft text follows the answers as 
 - **(f) Budget measurement.** The in-process pytest, plus the spec's CLI wall-clock statement. My lean is not to make wall-clock a hard CI gate. **Answer:** the in-process test only. The spec states a SHOULD with no machine reference, and the numbers live here (Decision 14).
 - **Also required at review, and applied:** block nesting (Decision 7); `--full` coverage of gap lines, with a property test (Decisions 7 and 8 and Tests); `tree_sha` (Decision 8); the verb-list update and "DRAFT" dropped from §9.9 (Consequences); a neutral `arms/views.md` whose hash is recorded before the Rule V matrix (Consequences); and a check that the branch was based on current `main` (it was not; it has been rebased; see the D-025 lineage note).
 
+### Implementation notes (WS2)
+
+Choices the spec leaves to the implementation, recorded as they land. None changes a §9.9 rule.
+
+- **Block model** (`src/game_design_md/ir.py`):
+  - **One parse per file.** `Tree.load` takes an optional `reader`; the compiler passes `loader.read_positioned`, which returns `read`'s exact values plus the composed node and line offsets. The `Tree` the views use is therefore the `Tree` lint uses, built from the same parse.
+  - **Value extents come from the leaves.** A block collection's YAML end mark points at the next token, past trailing comments and blank lines, so a value's last line is the last line of its last scalar or flow collection. A block scalar keeps its `#`-prefixed content lines.
+  - **Leading comments** attach to a token only between the previous token's last line and its key line; a comment directly under the namespace key belongs to the first token.
+  - **Headings** are ATX headings outside fenced code blocks. Setext headings are not blocks, matching lint's `section-order`, which reads ATX `##` only.
+  - **Attribution of references.** A value reference belongs to its outermost frontmatter block (the token, entity or `meta` key), including one inside a nested `impl` block. A prose reference belongs to its innermost rationale section. A prose reference on a gap line (none exist in the 12 trees) has no block; the graph shows it as a `gap` leaf.
+  - **A token defined twice** (the same id in two files) resolves to the definition `Tree` registered, the last one loaded, as in lint.
+  - **Line numbers** count lines of the file read in text mode (universal newlines), as the loader reads it.
+  - **`tree_sha`'s manifest** ends every line, including the last, with `\n`.
+  - **Measured:** compile takes 14–44 ms per in-repo tree. On all 12 trees, the 452 token blocks re-parse to their values, value references equal `walk_refs` in order and path, unresolved references equal `broken-ref` findings, and backlinks agree with `orphaned-entity` for every checked token.
+
 ---
 
 # Open items

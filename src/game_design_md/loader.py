@@ -65,6 +65,78 @@ def parse_yaml(text: str) -> Any:
     return load_yaml(text)
 
 
+class Positioned:
+    """One file read with positions kept (spec §9.9.1, D-027 decision 3).
+
+    `frontmatter` and `body` are exactly what `read` returns for the same
+    file. `node` is the composed YAML node the frontmatter was constructed
+    from (None when there is no YAML document). `fm_text` is the YAML source
+    the node's marks index into; its line `L` (0-based) is file line
+    `fm_line_offset + L + 1`. `body_line_offset` is the number of file lines
+    before the body's first line.
+    """
+
+    __slots__ = ("frontmatter", "body", "text", "node", "fm_text",
+                 "fm_line_offset", "body_line_offset")
+
+    def __init__(self, frontmatter, body, text, node, fm_text,
+                 fm_line_offset, body_line_offset):
+        self.frontmatter = frontmatter
+        self.body = body
+        self.text = text
+        self.node = node
+        self.fm_text = fm_text
+        self.fm_line_offset = fm_line_offset
+        self.body_line_offset = body_line_offset
+
+
+def _compose_construct(text: str):
+    """Compose once, construct from the node graph: `(node, data)`.
+
+    Same result as `load_yaml(text)`, which is `get_single_node` followed by
+    `construct_document`.
+    """
+    ldr = GdmdLoader(text)
+    try:
+        node = ldr.get_single_node()
+        data = ldr.construct_document(node) if node is not None else None
+    finally:
+        ldr.dispose()
+    return node, data
+
+
+def read_positioned(path: Path) -> Positioned:
+    """`read`, keeping the composed YAML node and the line offsets.
+
+    Returns the same `(frontmatter, body)` values as `read`, and raises the
+    same errors, so a `Tree` built with this reader is the `Tree` built
+    with `read`.
+    """
+    text = path.read_text(encoding="utf-8")
+    if path.suffix == ".md":
+        m = _FENCE_RE.match(text)
+        if not m:
+            return Positioned(None, text, text, None, "", 0, 0)
+        fm_text = m.group(1)
+        node, fm = _compose_construct(fm_text)
+        body = text[m.end():]
+        fm_off = text[:m.start(1)].count("\n")
+        body_off = text[:m.end()].count("\n")
+        if fm is None:
+            return Positioned({}, body, text, node, fm_text, fm_off, body_off)
+        if not isinstance(fm, dict):
+            raise ValueError(f"frontmatter is not a mapping: {type(fm).__name__}")
+        return Positioned(fm, body, text, node, fm_text, fm_off, body_off)
+    if path.suffix in (".yaml", ".yml"):
+        node, doc = _compose_construct(text)
+        if doc is None:
+            return Positioned({}, "", text, node, text, 0, 0)
+        if not isinstance(doc, dict):
+            return Positioned(None, "", text, node, text, 0, 0)
+        return Positioned(doc, "", text, node, text, 0, 0)
+    raise ValueError(f"unsupported file type: {path.suffix}")
+
+
 def read(path: Path) -> tuple[dict | None, str]:
     """Read a .md or .yaml file. Returns (frontmatter|root-doc, body).
 

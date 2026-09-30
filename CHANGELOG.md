@@ -24,6 +24,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
 - **Dogfood views arm (`arms/views.md`):** a neutral command reference derived from spec §9.9, with no task-tuned advice. A test pins its flags to §9.9's synopsis. Its SHA-256 is recorded in a D-025 amendment before the Rule V matrix and reused unchanged for D-026's Rule V2.
+- **WS2 block model (`src/game_design_md/ir.py`, D-027).** The compiled model behind `gdmd view` / `gdmd graph`: nested blocks with six roles, `<path>:<start>-<end>` pointers, every reference occurrence located to its line, and `tree_sha`. Each file is parsed once: `Tree.load` gains an optional `reader`, and `loader.read_positioned` returns `read`'s values plus the composed YAML node. Property tests on all 12 trees check the model against the loader and the linter's own data (`tests/test_ir.py`). No CLI change yet.
 - **Spec §9.9 + D-027: `gdmd view` and `gdmd graph` specified** (v0.4 Checkpoint 3; not yet implemented).
   - Projected views over a tree: overview, `--full`, `--grep`, `--ref --hops`, `--flat`, `--role`, `--json`; graph `--impact`, `--from/--to` (shortest paths, `--max-paths`), `--cycles`.
   - The views use the linter's reference and backlink semantics exactly.
