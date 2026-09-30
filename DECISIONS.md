@@ -857,6 +857,128 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 
 ---
 
+## D-026 — Dogfood study 2 (consultation at scale): locked design
+
+- **Status:** locked (2026-09-30), **before any study-1 matrix data exists**. The only dogfood runs so far are the probes and the study-1 pilot (baseline arm; not evidence).
+  - Locked here: hypotheses, primaries, thresholds, task classes, and the fixture's construction parameters.
+  - The fixtures are built from these parameters and **frozen before study 2's own pilot**. A D-026 amendment records the freeze hashes.
+- **Decided:** 2026-09-30, by the user at the post-pilot review ("study 1 runs as locked; lock study 2's design before any study-1 matrix data").
+- **Related:** D-023 (protocol), D-024 (card adoption rule, unchanged), D-025 and its amendments (the apparatus inherited here), spec §11.3.
+- **Lineage (why a second study):**
+  - Study 1's pilot, read only as an apparatus observation, showed small workloads: every task finished in 3–8 turns and consumed 1.5–16 KB of tool results, next to ~77k tokens of context per turn.
+  - Study 1 stays as locked and reports by its rule (D-025).
+  - Study 2 targets the regime projected views are designed for: a content-heavy tree, where answers require multi-hop traversal.
+  - It is a **new pre-registered study, not an amendment to study 1**. It is locked before any views-arm or card data exists, so no comparison result informs it.
+
+### Hypotheses
+
+- **H2-V (views at scale).** On a content-heavy tree, for multi-hop lookup and impact tasks, the views arm consumes fewer consultation bytes than the v0.3 baseline, without a loss of success.
+- **H2-C (card re-test at scale).** On the same tasks, importing the card instead of the full spec lowers per-turn context occupancy without a loss of success. This is the D-024 gate, re-tested.
+
+### Fixture: the study-2 tree (construction parameters locked; content built later and frozen)
+
+1. **One new tree, built by a committed generator.** `benchmark/dogfood/fixtures/study2/` holds the generator, its frozen output and the frozen answers.
+   - The source lives under `benchmark/dogfood/`, so it is excluded from every copy. Reading it from the real repo counts as contamination (D-025).
+   - `fixture.py` places the frozen tree in each copy at `examples/lanternfall/`, inside the copy's base commit, so it looks native to the subject.
+   - It is never added to the repo's real `examples/`, which stay realistic hand-authored trees, not benchmark fixtures.
+2. **Genre:** a dungeon-crawler RPG ("Lanternfall"). It is deliberately **not** a deckbuilder, because the deckbuilder root is `@`-imported into every session by `CLAUDE.md`.
+3. **Size:** about **320 content entities** in four content-heavy kinds (`count_target ≥ 20`, `data_dir` pattern per §6):
+
+   | Kind | Count |
+   | --- | --- |
+   | `items` | 140 |
+   | `skills` | 90 |
+   | `monsters` | 60 |
+   | `encounters` | 30 |
+
+   Plus core subfiles (pillars, loops, mechanics, architecture invariants, distributions, economy-balance, feel if any verb declares one, a glossary), with **≥ 60 non-content tokens across ≥ 8 namespaces**.
+4. **Planted reference graph.** Every edge is a `{ns.id}` ref written by the generator from its own edge list. Edge types:
+   - `monsters → items` (drops, 1–3)
+   - `monsters → skills` (1–2)
+   - `items → skills` (grants, 0–1)
+   - `skills → distributions` (1) and `skills → states` nodes (0–1)
+   - `encounters → monsters` (2–4) and `encounters → distributions` (1)
+   - rules and verbs → encounters and monsters (boss and spawn rules)
+   - balance targets referenced from loops and content schemas
+
+   Some reverse closure must reach **depth ≥ 4**.
+5. **Determinism:** generator seed **20260930**, fixed word lists, and no wall-clock inputs. Re-running the generator reproduces the frozen output byte-for-byte (a pytest checks this).
+6. **Lint:** the tree lints 0 errors / 0 warnings under both the v0.3 `gdmd` and the matrix-commit `gdmd`. The judge preflight must pass on every task copy.
+7. **No leak from the in-context spec.** The build script asserts that:
+   - no token id of the tree occurs in any file `CLAUDE.md` imports, in either world;
+   - each lookup and impact answer's evidence (the lines carrying its edges) spans **≥ 3 files**;
+   - task prompts name only the start token(s) and the relation.
+8. **Oracle independence** (the frozen-fixtures rule).
+   - Answers are computed from the generator's planted edge list, never by parsing the tree with `gdmd` code, which the views arm uses.
+   - A pytest cross-checks them **once** against `gdmd graph` / `gdmd view` and `refs.walk_refs`.
+   - A disagreement is a generator or tool bug. It is fixed at its source before the freeze, never by editing answers to match the tool.
+   - One question per task is also hand-traced by reading the files. The trace is recorded in the freeze amendment.
+9. **Statuses and implementation:** mostly `draft`, with a `prototyped` subset whose `implemented_in` points at a small stub `impl/` tree under `examples/lanternfall/`. That subset supports the maintenance tasks.
+10. **Freeze:** before study 2's pilot, a D-026 amendment records:
+    - the generator commit;
+    - the SHA-256 of the frozen tree (a sorted-path manifest) and of the answer files;
+    - the hand traces.
+
+    Any change to a locked parameter above is itself an amendment that faces the counterfactual-adoption test and is recorded before the pilot.
+
+### Task classes (6 tasks; prompts written at build, from these templates)
+
+| Task | Class | Question / success (deterministic checker) |
+| --- | --- | --- |
+| `s2_lookup_forward` | lookup, multi-hop forward | Two questions. From a named start token, list the tokens of a named kind reached by following **exactly k** planted forward edges (k = 2 and k = 3). Answer sets have 3–12 items. |
+| `s2_lookup_backward` | lookup, multi-hop backward | Two questions. List the content entities that reach a named token within **≤ k** edges (k = 2 and k = 3). Answer sets have 3–15 items. |
+| `s2_impact_tokens` | impact | "The value of `{X}` is about to change: list every token and content entity whose value references it, directly or transitively." That is the reverse closure over value edges, with 10–40 items spanning ≥ 3 files and ≥ 2 content kinds. |
+| `s2_impact_files` | impact (ritual-shaped) | "`{Y}` is about to change: list every subfile whose `last_verified:` must be re-checked." That is the set of subfiles containing the reverse closure's non-content tokens, 4–10 files. |
+| `s2_maintenance` | maintenance (**guarded**) | A teammate's behavior-preserving refactor under an `implemented_in` path referenced by tokens in exactly 2 of the ≥ 12 subfiles. Success means those two are touched, with no token churn, the impl untouched, and lint 0/0. |
+| `s2_negative_control` | negative control (**guarded**) | The same prompt as `s2_maintenance`; the change is in a file no token references. Success means the copy is unchanged. |
+
+- **Answer formats** are fixed per task, like study 1's `lookup_refs`: `answers/<task>.txt`, one `{ns.id}` or path per line, under `Q<n>:` headers.
+- **Success is exact set equality for every question.** Per-question Jaccard similarity is reported descriptively.
+
+### Cells, primaries and verdicts
+
+- **Apparatus:** D-025's shared apparatus as amended (1–3): pinned CLI, worlds, fixed judge, one commit per run, flags, outcomes (success / fail / capped / error), error handling, contamination, logs. The only change is the caps, **80 turns, 1800 s and $5.00 per run**, which are identical across arms. They may be raised at most once, upward, after study 2's pilot, and only if the pilot shows one binding.
+- **Repeats:** 3 per cell. This is small, and the report says so.
+- **Rule V2.**
+  - Cells: 6 tasks × {`baseline` (v0.3 world, `baseline.md`), `views` (matrix world, `views.md`)} × 3 = 36 runs.
+  - **Both arms' copies force the `CLAUDE.md` import line to `@docs/spec.md`.** This holds the import constant even if a card adoption has switched the repo.
+  - Primary: **consultation bytes**, as defined in D-025.
+  - Aggregation: as D-025 Rule V (median over repeats → per-task ratio → median over tasks), with per-task values descriptive.
+  - Manipulation check: as D-025 Rule V.
+  - **PASS:** `R ≥ 30%` and non-inferiority holds. **FAIL:** `R ≤ 0`, or non-inferiority violated. **NULL:** otherwise.
+- **Rule C2.**
+  - Cells: 6 × {`import-full`, `import-card`} × 3 = 36 runs, in the matrix world with `baseline.md` (as D-025 amendment 2).
+  - Primary: median per-turn occupancy.
+  - Δ is re-probed in the matrix world at the study-2 commit.
+  - **PASS:** `D ≥ 0.5 × Δ` and non-inferiority holds. **FAIL:** non-inferiority violated. **NULL:** otherwise.
+- **Non-inferiority:** identical to D-025, including the extension. The overall success drop is at most 10 points (18 runs per arm, so at most one fewer success). Guarded tasks `s2_maintenance` and `s2_negative_control`: `e_t = 1` gives NULL plus one extension to 5 repeats on those tasks only; `e_t ≥ 2` gives FAIL.
+- **Why the same thresholds as study 1:** so the two studies are directly comparable. At this scale larger effects are plausible, but the thresholds are not raised or lowered on that expectation.
+
+### Adoption linkage (D-024 unchanged)
+
+- D-024's rule stands: a card PASS switches the repo's `CLAUDE.md` to the card, in its own commit citing the result. The switch is reversible.
+- **Study 2 re-tests a study-1 card PASS.**
+  - C2 **PASS:** the card stays. It is adopted now if study 1 was not a PASS, because D-024 applies to any locked ablation.
+  - C2 **FAIL:** revert `CLAUDE.md` to the full import, in its own commit citing D-026.
+  - C2 **NULL:** no change to whatever state exists.
+- Rule V2 has no adoption consequence. A PASS licenses a views-cost claim scoped "on content-heavy trees", in the §11.3 sense.
+
+### Order, stopping and reporting
+
+1. **Order of operations.**
+   1. Study 1 completes: WS2 → Rule V matrix; WS4 build → Rule C matrix.
+   2. Then the study-2 generator, build and cross-check, followed by the freeze amendment.
+   3. Then the dry run → import probe → study-2 pilot (baseline arm, 1 run per task; not evidence).
+   4. Then the cost estimate, and a **stop for approval**.
+   5. Then the Rule V2 and Rule C2 matrices, once each.
+2. **Nothing is re-run, added or dropped after results,** beyond D-025's single error re-run and the guarded-task extension.
+3. **Report** in `docs/case-studies/dogfood-02.md`, by the rule, including NULL and FAIL:
+   - the raw table, per-task values and per-question Jaccard;
+   - the limits: a generated, synthetic tree; small n; a single model; tasks and generator by the format's own author (oracle independence is at the code-path level only); the same world difference as study 1; no comparability with F-009.
+4. **No post-hoc metric switching;** any reframe gets its own DECISIONS entry and faces the counterfactual-adoption test.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
