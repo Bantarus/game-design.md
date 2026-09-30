@@ -2326,3 +2326,105 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   3. Retire it in favour of `schema-violation`.
 - **Resolved (2026-09-30):** the user chose option 3. D-040 retires the rule and updates §4.10 and the §9.1 row. D-003's loader clause is left to the ratchet audit (OI-010). OI-009 is closed.
 
+
+## OI-010 — Ratchet audit: every scheduled ratchet, its due version and its state in code (for the user's decision)
+
+- **Logged:** 2026-10-01, at the user's request (item 5 of the step-(e) decisions: "list every ratchet scheduled in DECISIONS.md and the spec … propose apply now / reschedule / drop … decide nothing yet"). **Nothing below is decided or changed.**
+- **Method:**
+  - Every "ratchet", "in v0.3/v0.4", "becomes required/error" and "advisory at" statement in DECISIONS.md, the spec, the schema, the CHANGELOG and the v0.3 release notes was listed. The code was read for each one.
+  - Impacts are measured on the 12 in-repo trees and the study-2 tree.
+  - "Apply now" impacts come from in-memory prototypes, with nothing committed (`proto_d005.py`, `ratchet_data.py` in the session scratchpad; each is reproducible from this entry).
+
+### Due at ≤ v0.4, with a proposal each
+
+| # | Ratchet (source) | Scheduled | State in code | Proposal |
+| --- | --- | --- | --- | --- |
+| R1 | `balance-target-untyped` → error (D-003) | v0.3 | Retired by D-040. | Closed. |
+| R2 | `target_kind` "structurally required by the loader" (D-003) | v0.3 | Not implemented: `Tree.load` validates nothing. | **Drop.** |
+| R3 | `undefined-event` → error, and the schema requires `event:` to be `{events.<id>}` (D-005, §4.4) | v0.3 | A warning. The schema accepts any string. | **Apply now**, in D-040's shape. |
+| R4 | An optional `emits:` field on verbs/rules, plus an event-production cross-check (D-005, "optionally") | v0.3 | Not implemented. | **Reschedule** (unversioned). |
+| R5 | `output_domain` / `round_mode` required on gaussian/uniform, plus rule `distribution-output-undeclared` (D-010) | v0.3 | Not implemented. | **Drop.** |
+| R6 | `determinism-undetermined-rule` → warning (v0.3), then error (v0.4), plus a `# determinism-ok:` silencing comment (D-011, §9.1) | v0.3 / v0.4 | Info. §4.5 says "ratchets to error in v0.3", contradicting D-011 and §9.1. | **Reschedule**, and fix §4.5. |
+| R7 | The context-local prefix set closes (D-012; §3: "a v0.3 ratchet may close the set or extend it") | v0.3 | Already closed in code at `{actor, target}` (`CONTEXT_LOCAL_PREFIXES`). | **Apply now** (spec text only). |
+| R8 | `pcg32` / `pcg64` per-game opt-in (D-015: "reserved for v0.3") | v0.3 | Already in the schema's enum. The spec says "reserved for future per-game opt-in". No tree uses them. | **Reschedule** (unversioned). |
+| R9 | A declared `field:` required on mutation steps (D-019) | v0.4 | Not implemented. `write-to-template-field` is opt-in. | **Reschedule**, tied to R10. |
+| R10 | A closed `do[].kind` vocabulary (D-011: "v0.3 ratchets one"; §4.5: "a v0.4+ concern") | v0.3 / v0.4+ | Project-defined. | **Reschedule** (unversioned). |
+| R11 | A `trajectory-schema-validation` lint rule (§9.5.5; `$defs.TrajectorySpec`: "ratchets to JSON Schema validation in v0.3") | v0.3 | Not implemented. `verify` checks byte-identity to the golden. | **Reschedule** line validation. An optional narrower static check could apply now. |
+
+### Reasons, impact and proof of fire
+
+- **R2, drop.**
+  - D-034 and D-040 already make a missing `target_kind` an error, with its location.
+  - All CLI verbs share one loader (D-004). A load failure would stop `view`, `graph`, `status`, `hook check` and `touch` on a tree with one schema defect, and lint could no longer report the rest.
+  - Impact: none.
+- **R3, apply now, in D-040's shape:**
+  - `$defs.StateTransition.event` gains the pattern `^\{events\.[a-z0-9_][a-z0-9_-]*\}$`, so `schema-violation` reports a bare-string event as an error.
+  - The `undefined-event` sub-finding retires as subsumed. The alternative is to ratchet it to error as well, which reports one defect twice.
+  - **Impact, measured with the schema patched in memory:** 0/0 on all 12 trees and on the study-2 tree. All 89 transitions in the 12 trees, and the study-2 tree's 11, already use tokens.
+  - **Proof of fire:** a deckbuilder copy with one event made bare (`draw`) gets `schema-violation` (error) at `states.card_lifecycle.transitions[0].event`. Today it gets only the warning. `tests/fixtures/undefined_event` fires the same way.
+  - It also removes stale text: the in-code message and §4.4 still say "ratchets to error in v0.3".
+- **R4, reschedule.** D-005 made it optional. No tree or engine has needed event-production tracking, and tick-combat verifies 3/3 without it.
+- **R5, drop.**
+  - D-016 superseded D-010. Integer-native distributions (`discrete_sum`, integer `uniform` or `weighted`) are normative for state, and `gaussian` is reserved for cosmetic use. The spec calls the two fields "a deprecated cosmetic-only path".
+  - Requiring them would push authors onto that path.
+  - Impact if applied anyway: 5 of the 7 gaussian/uniform distributions in the 12 trees lack `output_domain`, and so do all 10 in the frozen study-2 tree.
+- **R6, reschedule.** Keep it at info, and correct §4.5 to agree with D-011 and §9.1.
+  - **The escape hatch cannot be read.** D-011's only one is a YAML comment, and the loader drops comments. So a warning or error would leave a deliberate prose step no way out but restructuring.
+  - **The check tests form, not computability.** `{ kind: tick_status_effects }` satisfies it as well as a real procedure does, so raising the severity raises the reward for cosmetic wrapping.
+  - **The one cross-engine tree has no hits.** tick-combat, whose determinism the rule protects, has 0.
+  - **Impact if applied now:** 4 findings in 2 trees:
+    - party-rpg `rules.end_of_turn`: `tick_status_effects`, `regenerate_mp`;
+    - tcg `rules.card_play_resolution`: `pay_mana_cost`, `apply_card_effects`.
+  - The definition of done would require those 4 steps to be restructured in the same commit.
+- **R7, apply now (spec text only).**
+  - §3 and §4.8 would state that the set is `{actor, target}`, and that a new prefix is a D-entry on observed need.
+  - Observed use: `actor` 25 times, `target` 18, nothing else.
+  - **Proof of fire:** in a tick-combat copy, `params_from.mean: "{world.attack}"` already fires `broken-ref`. The code closed the set; the text never said so.
+  - Impact: none.
+  - Out of scope: clocks' `delta_source` is a separate dotted-path syntax (D-012 / F-010), not a brace reference.
+- **R8, reschedule.**
+  - The enum already admits both values. Every `prng:` declaration MUST ship reference vectors, so any algorithm a tree declares validates itself.
+  - Pinning the PCG variant is due when a tree opts in: D-015 requires a D-entry for that. Only the D-015 text's "v0.3" is stale.
+  - Trees today: 6 declare `xoshiro256_starstar`, and the tcg starter declares `chacha20`.
+- **R9, reschedule.** Lint cannot tell a mutation step from any other without R10's closed vocabulary. 2 of the 169 `do[]` steps in the 12 trees declare `field:`.
+- **R10, reschedule.**
+  - There are 89 distinct `kind:` values across 169 steps. The head is `sample` (21), then `emit_event` (7); every other value appears 5 times or fewer. 53 of the values appear only in the two benchmark games.
+  - The one cross-engine tree uses 4.
+  - Closing the set now would calibrate the vocabulary on the population it would then validate. The trigger is observed cross-engine need: a second engine-backed tree.
+- **R11, reschedule line validation.**
+  - For the one tree with a trajectory, tick-combat, byte-identity to the golden (the D-009 bar) is strictly stronger than checking each line against the schema.
+  - Line validation earns its place with an engine's first run before a golden exists, where it would say where a trajectory goes wrong.
+  - The `schema:` body is not JSON Schema (`sort_by`, field-map `items`), so "JSON Schema validation" needs rewording either way.
+  - **A narrower check could apply now:** "every array in `trajectory.schema:` declares `sort_by:`" is a §9.5.5 MUST that nothing checks statically. Impact: 0, since tick-combat's one array, `units`, declares it.
+
+### Not due, or not versioned (listed for completeness)
+
+- **Closed:** D-002 (applied at v0.2), R1 (D-040).
+- **Conditional:** D-001's `on:` revisit, if the ecosystem moves to YAML-1.2-only loaders.
+- **Scheduled after v0.4:** D-037's `data_source` removal, before v1.0.
+- **Gated on observed need, with no version:**
+  - D-012's snapshot escape hatch;
+  - D-018's unbiased reduction;
+  - D-020's `blocked` status;
+  - §4.7's `scheduled` clock mode;
+  - §9.1's "no-code prototyping" vocabulary;
+  - §9.7's spec → code direction and index caching.
+
+### Found while auditing (not ratchets)
+
+- **`gdmd verify --baseline` and its `verify-result-regression` finding** are specified (§9.5, and a §9.1 row) but not implemented: the CLI has no `--baseline` option. Logged as OI-011.
+- **Stale version text that follows the decisions above:**
+  - the `undefined-event` message and §4.4 (R3);
+  - §4.5 against §9.1 (R6);
+  - `$defs.TrajectorySpec`'s description (R11);
+  - D-015's "reserved for v0.3" (R8).
+
+## OI-011 — `gdmd verify --baseline` and `verify-result-regression` are specified but not implemented
+
+- **Logged:** 2026-10-01, found by the ratchet audit (OI-010).
+- **Spec says:**
+  - §9.5: "When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline", at error for `build_health` / `behavioral_alignment` and warning for `presentation_usability`.
+  - §9.1 lists the finding, "emitted only by `gdmd verify`".
+- **Code does:** `gdmd verify` has only `--adapter`, and no code emits `verify-result-regression`.
+- **Impact today:** none. No workflow in the repository passes `--baseline`, and tick-combat's gate is byte-identity to the golden.
+- **Resolution (later, with its own D-entry):** implement it, or mark it reserved in §9.5 and §9.1 until a tree needs regression tracking. The observed-need discipline applies.
