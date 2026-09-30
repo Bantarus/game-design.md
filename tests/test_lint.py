@@ -374,6 +374,43 @@ def test_data_source_when_present_repeats_the_content_schema_data_dir(tmp_path):
     assert res.errors == 0 and "data_source" not in mech.read_text()
 
 
+# ---- implementation-pointer-outside-repo (D-038, OI-002) ---------------------------
+
+def _outside(res):
+    return [(f.file, f.location) for f in res.findings
+            if f.rule == "implementation-pointer-outside-repo"]
+
+
+def test_implementation_pointer_outside_repo_proof_of_fire(tmp_path):
+    """Real content: tick-combat in docs/, its code at the repository root via
+    `../../impl/...` globs, lints 0/0. With the repository root moved to
+    docs/, the same globs point outside it: each one warns, and nothing else
+    changes (the globs still resolve)."""
+    import shutil
+    from tests.conftest import tick_combat_out_of_tree
+    repo, tree_root = tick_combat_out_of_tree(tmp_path)
+    res = _lint(tree_root)
+    assert (res.errors, res.warnings) == (0, 0)
+    n = sum(1 for _, pat, _ in linter._impl_patterns(Tree.load(tree_root))
+            if pat.startswith("../../impl/"))
+    assert n > 0
+    shutil.move(repo / ".git", repo / "docs/.git")
+    res = _lint(tree_root)
+    assert len(_outside(res)) == n and res.errors == 0 and res.warnings == n
+
+
+def test_implementation_pointer_outside_repo_ignores_status_and_needs_a_repository(make_tree):
+    """A draft's planned path outside the repository warns too; with no git
+    repository above the tree, there is no boundary and the rule is silent."""
+    extra = ("---\nspec: game-design.md\nspec_version: 0.3.0\nfile_type: subfile\n"
+             "status: draft\nlast_verified: \"2026-09-30\"\n"
+             "implemented_in: [\"../elsewhere/**/*.py\", \"src/**/*.py\"]\n---\n\n## Notes\n")
+    root = make_tree({"gdd/extra.md": extra})
+    assert _outside(_lint(root)) == []
+    (root / ".git").mkdir()
+    assert _outside(_lint(root)) == [("gdd/extra.md", "implemented_in[0]")]
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):

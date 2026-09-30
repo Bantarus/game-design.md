@@ -36,6 +36,7 @@ this is 50-100ms easily.
 """
 from __future__ import annotations
 
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
@@ -44,7 +45,7 @@ from pathlib import Path
 
 import yaml
 
-from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree, find_repo_root
 
 
 @dataclass(frozen=True)
@@ -59,17 +60,40 @@ class Reference:
 HOOK_ENTRY_ID = "gdmd-anti-drift"
 
 
+def key_frame(tree: Tree) -> Path:
+    """The directory code paths are keyed against (D-038): the git
+    repository root, which is the frame pre-commit's staged names use, or
+    the tree root when the tree is in no git repository."""
+    root = tree.root.resolve()
+    return find_repo_root(root) or root
+
+
+def code_key(path: Path, frame: Path) -> str:
+    """`path`, resolved (so `impl/../x` and a `../` glob's hits normalize),
+    as a POSIX path relative to `frame`."""
+    try:
+        return Path(os.path.relpath(Path(path).resolve(), frame)).as_posix()
+    except ValueError:   # another drive (Windows): no relative form
+        return Path(path).resolve().as_posix()
+
+
 def build_inverted_index(tree: Tree) -> dict[str, list[Reference]]:
-    """Build the inverse map `{resolved_code_path: [Reference, ...]}` once
-    at lookup time.
+    """Build the inverse map `{code_path: [Reference, ...]}` once at lookup
+    time.
 
     Walks every ParsedFile in the tree, expanding each `implemented_in:`
     glob (subfile-level + per-token) and the core file's
     `implementation_pointers:` map into the set of files they currently
     resolve to. The resulting map lets `gdmd hook check` answer "which
     spec sections reference this code path?" in O(1) per staged file.
+
+    Globs are relative to the tree root and may climb out of it with `../`
+    (spec §2.1). Each hit is keyed by `code_key` against `key_frame`: the
+    git repository root, so a key is the name git stages the file under,
+    or the tree root outside a repository (D-038).
     """
     index: dict[str, list[Reference]] = defaultdict(list)
+    frame = key_frame(tree)
 
     def _add(pf: ParsedFile, patterns: list, location: str) -> None:
         for pat in patterns:
@@ -82,11 +106,8 @@ def build_inverted_index(tree: Tree) -> dict[str, list[Reference]]:
             for src in matches:
                 if not src.is_file():
                     continue
-                try:
-                    rel = str(src.relative_to(tree.root))
-                except ValueError:
-                    rel = str(src)
-                index[rel].append(Reference(file=pf.rel_str, location=location))
+                index[code_key(src, frame)].append(
+                    Reference(file=pf.rel_str, location=location))
 
     for pf in tree.files:
         impl = pf.frontmatter.get("implemented_in") if pf.frontmatter else None
@@ -118,35 +139,34 @@ def check_staged(tree: Tree, staged_files: list[str],
                  cwd: Path | None = None) -> dict[str, list[Reference]]:
     """Intersect `staged_files` against the inverted index.
 
-    Returns `{tree_relative_path: [Reference, ...]}` for each staged file
-    referenced by at least one spec section. Files not referenced by any
-    section are absent from the result (the hook stays silent on them).
+    Returns `{code_path: [Reference, ...]}` for each staged file referenced
+    by at least one spec section, keyed as the index is (`key_frame`).
+    Files not referenced by any section are absent from the result (the
+    hook stays silent on them).
 
     **Path normalization (pre-commit convention).** Pre-commit invokes
     hooks from the repo root and passes staged filenames as repo-relative
-    paths. The inverted index is keyed by tree-relative paths. We bridge
-    the two: each staged path is resolved against `cwd` (defaults to
-    `Path.cwd()` — i.e. the repo root when pre-commit invoked us), then
-    made relative to the tree root. Absolute staged paths and already-
-    tree-relative staged paths both pass through naturally.
+    paths. Each staged path is resolved against `cwd` (defaults to
+    `Path.cwd()` — i.e. the repo root when pre-commit invoked us) and keyed
+    against the same frame as the index, so a staged `src/x.py` meets the
+    hit of a tree's `../src/**` glob (D-038). Absolute staged paths and
+    paths relative to a tree-root CWD pass through the same way.
     """
     index = build_inverted_index(tree)
     if not index:
         return {}
     if cwd is None:
         cwd = Path.cwd()
-    tree_root_abs = tree.root.resolve()
+    frame = key_frame(tree)
     result: dict[str, list[Reference]] = {}
     for sf in staged_files:
         p = Path(sf)
         try:
-            abs_sf = (p if p.is_absolute() else (cwd / p)).resolve()
-            rel = str(abs_sf.relative_to(tree_root_abs))
-        except (ValueError, OSError):
-            # Fallback: literal lookup (CWD already IS the tree root case).
-            rel = sf
-        if rel in index:
-            result[rel] = index[rel]
+            key = code_key(p if p.is_absolute() else (cwd / p), frame)
+        except OSError:
+            key = sf
+        if key in index:
+            result[key] = index[key]
     return result
 
 

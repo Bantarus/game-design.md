@@ -190,6 +190,48 @@ def test_check_staged_handles_repo_root_relative_paths(make_tree, tmp_path,
     assert "src/loops/main.py" in matches
 
 
+def test_check_staged_keys_are_repo_relative_inside_a_git_repository(tmp_path, monkeypatch):
+    """D-038: inside a git repository, code paths are keyed against the
+    repository root, as git names the staged files; the previous test's
+    tree-relative keys are the no-repository fallback."""
+    from .conftest import BASELINE_FILES
+    repo = tmp_path / "alt_repo"
+    (repo / ".git").mkdir(parents=True)
+    tree_root = repo / "spec-tree"
+    for rel, content in {**BASELINE_FILES, "gdd/loops.md": _SUBFILE_WITH_IMPL,
+                         "src/loops/main.py": "# stub\n"}.items():
+        (tree_root / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tree_root / rel).write_text(content)
+    monkeypatch.chdir(repo)
+    matches = hook_cmd.check_staged(Tree.load(tree_root), ["spec-tree/src/loops/main.py"])
+    assert list(matches) == ["spec-tree/src/loops/main.py"]
+
+
+def test_check_staged_matches_globs_that_climb_out_of_the_tree(tmp_path, monkeypatch):
+    """D-038 (OI-002) proof of fire on real content: tick-combat in docs/, its
+    engine code at the repository root, globs `../../impl/...`. Pre-commit
+    stages `impl/xtreme/src/rules.rs`. Before D-038 the index keyed the hit
+    `../../impl/...` and the staged path fell back to its literal name, so
+    the hook was silent; lint followed the same globs all along."""
+    from click.testing import CliRunner
+    from game_design_md.cli import main
+    from .conftest import tick_combat_out_of_tree
+    repo, tree_root = tick_combat_out_of_tree(tmp_path)
+    monkeypatch.chdir(repo)
+    matches = hook_cmd.check_staged(Tree.load(tree_root), ["impl/xtreme/src/rules.rs",
+                                                           "README.md"])
+    assert list(matches) == ["impl/xtreme/src/rules.rs"]
+    assert {(r.file, r.location) for r in matches["impl/xtreme/src/rules.rs"]} >= {
+        ("gdd/mechanics.md", "(file-level)")}
+    assert any(r.location.startswith("rules.") for r in matches["impl/xtreme/src/rules.rs"])
+    out = CliRunner().invoke(main, ["hook", "check", "docs/tick-combat",
+                                    "impl/xtreme/src/rules.rs"]).output
+    assert "triggered by: impl/xtreme/src/rules.rs" in out
+    touch = next(line for line in out.splitlines() if line.strip().startswith("gdmd touch"))
+    assert touch.split()[2:] == ["docs/tick-combat/game-design.md",
+                                 "docs/tick-combat/gdd/mechanics.md"]
+
+
 # ---- render_hook_output ------------------------------------------------------
 
 def test_render_hook_output_empty_when_no_matches():

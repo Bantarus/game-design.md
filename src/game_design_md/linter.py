@@ -15,6 +15,7 @@ from __future__ import annotations
 import functools
 import inspect
 import json
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
@@ -26,7 +27,7 @@ import jsonschema
 
 from .findings import Finding, LintResult
 from .refs import TOKEN_REF_RE, walk_refs
-from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree, find_repo_root
 
 
 @dataclass(frozen=True)
@@ -505,6 +506,70 @@ def rule_broken_implementation_pointer(tree: Tree) -> list[Finding]:
             for key, pat in ip.items():
                 if isinstance(pat, str):
                     check_glob(tree.core, pat, f"implementation_pointers.{key}")
+    return findings
+
+
+def _impl_patterns(tree: Tree) -> Iterable[tuple[ParsedFile, str, str]]:
+    """Every implementation glob in the tree, whatever its status, as
+    (declaring file, pattern, location): file-level and per-token
+    `implemented_in:`, and the core's `implementation_pointers:`."""
+    for pf in tree.files:
+        impl = pf.frontmatter.get("implemented_in") if pf.frontmatter else None
+        if isinstance(impl, list):
+            for i, pat in enumerate(impl):
+                if isinstance(pat, str):
+                    yield pf, pat, f"implemented_in[{i}]"
+        if pf.file_type != "subfile":
+            continue
+        for ns in SUBFILE_NAMESPACES:
+            block = pf.frontmatter.get(ns)
+            if not isinstance(block, dict):
+                continue
+            for k, v in block.items():
+                sub = v.get("implemented_in") if isinstance(v, dict) else None
+                if isinstance(sub, list):
+                    for i, pat in enumerate(sub):
+                        if isinstance(pat, str):
+                            yield pf, pat, f"{ns}.{k}.implemented_in[{i}]"
+    if tree.core is not None:
+        ip = tree.core.frontmatter.get("implementation_pointers")
+        if isinstance(ip, dict):
+            for key, pat in ip.items():
+                if isinstance(pat, str):
+                    yield tree.core, pat, f"implementation_pointers.{key}"
+
+
+_GLOB_MAGIC = re.compile(r"[*?\[]")
+
+
+def _glob_base(pattern: str) -> str:
+    """A glob's literal leading segments: the directory it cannot leave."""
+    parts = pattern.split("/")
+    first_magic = next((i for i, p in enumerate(parts) if _GLOB_MAGIC.search(p)), len(parts))
+    return "/".join(parts[:first_magic]) or "."
+
+
+def rule_implementation_pointer_outside_repo(tree: Tree) -> list[Finding]:
+    """D-038 (OI-002): an implementation glob is relative to the tree root and
+    may climb out of it with `../` (spec §2.1), but not out of the git
+    repository: files there are never staged in this repository, so
+    `gdmd hook check` cannot see them change, and another clone does not
+    have them. Judged on the glob's literal base, so it fires whether or not
+    anything matches. Silent when the tree is in no git repository."""
+    root = tree.root.resolve()
+    repo = find_repo_root(root)
+    if repo is None:
+        return []
+    findings: list[Finding] = []
+    for pf, pat, loc in _impl_patterns(tree):
+        base = Path(os.path.normpath(root / _glob_base(pat)))
+        if not base.is_relative_to(repo):
+            findings.append(Finding(
+                rule="implementation-pointer-outside-repo", severity="warning",
+                file=pf.rel_str, location=loc,
+                message=(f"glob {pat!r} points outside the git repository root; "
+                         f"hook check never sees files there staged, and other "
+                         f"clones do not have them")))
     return findings
 
 
@@ -1248,6 +1313,7 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_shipped_stale_doc,              # v0.3 Task 6: NEW
     rule_schema_violation,               # v0.4 D-034
     rule_content_entity_invalid,         # v0.4 D-035 (OI-005)
+    rule_implementation_pointer_outside_repo,  # v0.4 D-038 (OI-002)
 ]
 
 

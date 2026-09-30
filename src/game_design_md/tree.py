@@ -26,6 +26,17 @@ SUBFILE_NAMESPACES = (
 )
 
 
+def find_repo_root(path: Path) -> Path | None:
+    """The git work tree containing `path`: the nearest ancestor (or `path`
+    itself) holding a `.git` entry, a directory or, for a worktree or a
+    submodule, a file. None when `path` is in no git repository (D-038)."""
+    p = Path(path).resolve()
+    for d in (p, *p.parents):
+        if (d / ".git").exists():
+            return d
+    return None
+
+
 @dataclass
 class ParsedFile:
     abs_path: Path

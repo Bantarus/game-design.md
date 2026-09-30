@@ -2038,6 +2038,44 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - The 12 trees stay 0/0. The study-2 tree's lint output is byte-identical, and its pin holds.
 - README and AGENTS.md said a `data_source:` field points to the content directory. They now name the content-schema's `data_dir:`.
 
+## D-038 — Paths are relative to the tree root; `../` globs reach `hook check`; a warning for globs outside the repository (OI-002)
+
+- **Status:** decided (2026-09-30) by the user on OI-002's proposal (step (e) of the post-study-2 order).
+- **Related:** OI-002, D-028 (`hook check --show-tokens`), spec §2.2, §2.3, §8.2, §9.1 and §9.7, schema `$defs.ImplementedIn` / `ImplementationPointers`.
+
+### Decisions
+
+1. **The spec follows the code: paths are relative to the tree root**, the directory holding the root `game-design.md`.
+   - This covers `files:` values and the globs in `implemented_in:` and `implementation_pointers:`. Lint and `hook check` have always resolved them this way.
+   - Spec text: a new "Paths" paragraph in §2.3, the `files:` contract in §2.2 (it said "workspace-relative"), §8.2 mechanism 1 ("a real file in the repo"), and the two schema descriptions.
+2. **`../` is allowed**, for a tree whose code lives outside it (a tree in `docs/gdd/`, code in `src/`). Lint already followed such globs.
+3. **`hook check` matches them.**
+   - **The defect:** the index keyed a `../../src/**` hit as `../../src/x.py`. A staged `src/x.py` resolved outside the tree root and fell back to its literal name, so the two never met and the hook stayed silent.
+   - **The fix, as the user specified: index keys are normalized against the repository root.** Both the index's hits and the staged paths are resolved, then keyed relative to the git repository root: the nearest ancestor of the tree root with a `.git` entry (`tree.find_repo_root`). With no repository, the key frame is the tree root, which is the v0.3 behavior for in-tree code.
+   - **Visible consequence:** inside a git repository, `triggered by:` now names each file as git stages it. For example, in this repository `hook check examples/tick-combat …` now prints `examples/tick-combat/impl/xtreme/src/rules.rs` where v0.3 printed `impl/xtreme/src/rules.rs`. The spec file paths and the `gdmd touch` line are unchanged. §9.7 says so.
+4. **New rule `implementation-pointer-outside-repo`, severity warning.**
+   - It fires when a glob's literal base (the segments before its first wildcard), resolved against the tree root, is outside the git repository root.
+   - Why: `hook check` never sees files there staged, and another clone does not have them.
+   - It is judged on the base, so it fires whether or not the glob matches. It covers every status, `draft` included, since a planned path outside the repository is still outside.
+   - It is silent when the tree is in no git repository: there is no boundary to check.
+
+### Proof of fire (real content: `tests/conftest.tick_combat_out_of_tree`)
+
+- **The layout:** tick-combat's tree copied to `repo/docs/tick-combat/`, its engine code (`impl/xtreme/src`, `impl/godot/src`, `Cargo.toml`) at `repo/impl/`, and its 22 implementation globs rewritten from `impl/…` to `../../impl/…`. `repo/.git` marks the repository.
+- **Lint:** 0/0 on this layout. The globs resolve, and none leaves the repository.
+- **Hook:** staging `impl/xtreme/src/rules.rs` from the repository root surfaces `gdd/mechanics.md` (file-level and the two `rules.*` tokens) and the core's `implementation_pointers.engine_a_xtreme`. Before D-038 the hook was silent: `[] == ['impl/xtreme/src/rules.rs']`.
+- **Warning:** with the repository root moved to `repo/docs/`, the same 22 globs point outside it. Each warns once, and nothing else changes.
+- **Unit:** a `draft` subfile's `../elsewhere/**` glob warns, the in-tree glob beside it does not, and neither warns without a `.git`.
+- A further test pins repository-relative keys for in-tree code inside a repository.
+- All four tests fail on the pre-D-038 code.
+
+### Effect
+
+- The 12 trees stay 0/0: all their globs are inside the tree.
+- The study-2 tree's lint output is byte-identical.
+- The existing hook tests run in temporary trees with no `.git`, so they exercise the tree-root fallback and pass unchanged.
+- AGENTS.md adds the rule to the "keep green" list.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2093,6 +2131,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
       - **(i) proposed:** allow `../`, and fix `hook check` to key its index and the staged files by resolved absolute path, with a test on an out-of-tree layout;
       - (ii) the spec forbids `../` for now, as tree-root-only, and lint flags it.
     - Either way, today's behavior for code outside the tree is silently half-supported.
+- **Resolved (2026-09-30):** the user chose tree-root-relative paths, with `../` allowed. `hook check` keys the index and the staged paths against the repository root, and a new warning, `implementation-pointer-outside-repo`, flags globs that leave the git repository. D-038. OI-002 is closed.
 
 ## OI-003 — `prototyped-without-pointer` fires on `balance_targets`, whose schema forbids `implemented_in`
 

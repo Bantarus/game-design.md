@@ -320,3 +320,22 @@ def fixture_overlay(make_tree, tmp_path: Path):
             dest.write_text(src_file.read_text())
         return root
     return _overlay
+
+
+def tick_combat_out_of_tree(tmp_path: Path) -> tuple[Path, Path]:
+    """D-038 (OI-002): the real tick-combat tree at `repo/docs/tick-combat`,
+    with its engine code at the repository root (`repo/impl/`) and its
+    implementation globs rewritten from `impl/...` to `../../impl/...`.
+    `repo/.git` marks the repository root. Returns (repo, tree)."""
+    import shutil
+    src = REPO_ROOT / "examples/tick-combat"
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    tree = repo / "docs/tick-combat"
+    shutil.copytree(src, tree, ignore=shutil.ignore_patterns("impl"))
+    for rel in ("impl/xtreme/src", "impl/godot/src"):
+        shutil.copytree(src / rel, repo / rel)
+    shutil.copy(src / "impl/xtreme/Cargo.toml", repo / "impl/xtreme/Cargo.toml")
+    for f in (tree / "game-design.md", *tree.glob("gdd/**/*.md")):
+        f.write_text(f.read_text().replace('"impl/', '"../../impl/'))
+    return repo, tree
