@@ -48,6 +48,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 - **Test-suite time-bomb defused** — `test_prototyped_without_pointer_silent_on_fresh_baseline` asserted the baseline fixture's baked `last_verified` dates were "fresh" against wall-clock today; it began failing 30 days after the dates were written. Now injects a fixed `now` like the rest of the anti-staleness tests.
 - **`httpx` added to dev extras** — `benchmark/harness/llama_server.py` imports it; test collection failed without it.
 - **pyproject `[project.urls]`** — added `Changelog` and `Issues`.
+- **Dogfood copies ran the wrong `gdmd`.** `fixture.prepare_copy` put the shim *file* on `PATH` instead of its directory. So `gdmd` inside a copy fell through to whatever install was on the caller's `PATH`: during development, the real repository's editable install. Tests and the commit-5 dry run passed only because that install was the same code. No model session had run. A regression test pins resolution to the cell's own shim.
 
 ## [0.3.0] — 2026-05-29
 

@@ -170,7 +170,7 @@ def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD") -> PreparedCopy:
     normalize_mtimes(root)
     init_repo(root, f"fixture: game-design.md at {sha[:12]}")
     copy = PreparedCopy(root=root, source_sha=sha,
-                        shim_dir=write_gdmd_shim(cell_dir / "bin", root))
+                        shim_dir=write_gdmd_shim(cell_dir / "bin", root).parent)
     pre = lint_summary(["gdmd"], root / task.tree, env=copy.env())["summary"]
     if pre.get("errors") != 0 or pre.get("warnings") != 0:
         raise FixtureError(f"preflight lint of {task.tree} is not clean: {pre}")
