@@ -1109,6 +1109,19 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   - **Pilot (5 sessions):** no committed field differs. The only additions are fields introduced after the pilot (amendments 3 and 5).
 - **Not changed:** the Rule V verdict (NULL) and its inputs. The committed result files are data and are not edited; the report carries a descriptive addendum.
 
+### Amendment 3 (2026-09-30, after study 1's Rule V, before any study-2 build): tool freeze and lint hold until study 2's matrices complete
+
+- **Decided:** by the user at the Rule V review.
+- **Tool freeze.** Until study 2's matrices (V2 and C2) complete, `gdmd view` and `gdmd graph` receive **bug fixes only**.
+  - A bug is output that contradicts §9.9, a crash, or a wrong pointer.
+  - A bug fix gets its own D-entry, states its effect on the pinned arm text (normally none), and regenerates the goldens with the diff reviewed.
+  - A usability change waits, even one study 1 motivates. Such ideas are queued in OI-007, not coded.
+  - Why: study 2 measures the same tool study 1 measured, with the same pinned arm text (`f77848a6…`). Changing the tool between the studies would make V2 a different treatment.
+- **Lint hold.** Changes to lint *behavior* wait until after study 2: OI-003, OI-005 and OI-006 class A (the schema / `applies_to` decision).
+  - Why: the judge is the matrix commit's lint, and D-025's judge residual assumes no rule is added between `v0.3.0` and the studies.
+  - **Tree-only fixes may land now,** each with its own D-entry: OI-006 classes B and C, including the party-rpg starter's `data_dir`. None of the study-1 task trees is touched by them.
+- **Not changed:** study 2's design, cells, primaries, thresholds and verdict mapping.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
@@ -1321,3 +1334,14 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - **B.** `cost: { time_cost: …, consumes: … }` on 8 verbs of `benchmark/games/survival/gdd/mechanics.md`, outside `$defs.Cost`.
   - **C.** `templates/starters/party-rpg/gdd/content/heroes.md` lacks the required `data_dir` and `count_target` (the root of OI-005's unlinked entity).
 - **Resolution:** per class, decide whether the tree or the schema/spec is wrong. Then decide whether lint should run the schema. Either changes lint behavior or tree content, so each gets its own D-entry and commit. Scheduled with OI-005, after v0.4 Checkpoint 3.
+
+## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; tool freeze)
+
+- **Logged:** 2026-09-30, from study 1's Rule V traces. These are descriptive observations, not evidence. Under D-026 amendment 3 they wait until study 2's matrices complete; none is in code.
+- **Candidates**, each needing observed need and its own D-entry when taken up:
+  1. **A `--grep` match cap** (for example `--max-matches N`, with an elision giving the total). One task's subjects searched `energy|\b3\b`, and single calls returned 8–18 KB.
+  2. **A count-only mode** (matches per block or file, no lines), so a search can be sized before its lines are fetched.
+  3. **`--full` header compaction.** One-line `meta` keys each carry a header, which makes `--full` 23–38% larger than the files (D-025 amendment 5). No study-1 run used `--full`.
+  4. **`-i` as an alias of `--ignore-case`.** One subject wrote `--grep -i '<pattern>'`, and `-i` became the pattern.
+  5. **Cosmetic, harness only:** under the dogfood shim, click's usage line names `python -m game_design_md` instead of `gdmd`.
+- **Evaluation:** any change to view or graph output is a v0.4.x change, evaluated in a later study, never retrofitted into study 1's or study 2's result.
