@@ -1,0 +1,91 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1607,
+  "cache_read_tokens": 176656,
+  "cache_creation_tokens": 31333,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10832,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 35230.0,
+  "per_turn_occupancy": [
+    30865,
+    33236,
+    34775,
+    35685,
+    36244,
+    37196
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 8951,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd",
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/loot.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "3wt9FU",
+      "result_bytes": 4881,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:20-146"
+    },
+    {
+      "tool": "Bash",
+      "id": "Gypbos",
+      "result_bytes": 3034,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:158-219"
+    },
+    {
+      "tool": "Bash",
+      "id": "VBe9FY",
+      "result_bytes": 1036,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:231-265"
+    },
+    {
+      "tool": "Bash",
+      "id": "SSzRzR",
+      "result_bytes": 568,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:281-295"
+    },
+    {
+      "tool": "Bash",
+      "id": "MgqKnf",
+      "result_bytes": 31,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:300-300"
+    },
+    {
+      "tool": "Bash",
+      "id": "HHpgRM",
+      "result_bytes": 1282,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r3.txt:312-349"
+    }
+  ]
+}

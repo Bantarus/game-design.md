@@ -1,0 +1,77 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1219,
+  "cache_read_tokens": 330478,
+  "cache_creation_tokens": 77274,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 4713,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81395,
+  "per_turn_occupancy": [
+    79739,
+    81105,
+    81395,
+    82386,
+    83137
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 4394
+  },
+  "view_mode_calls": {
+    "graph": 3
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 319,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_impact_tokens.txt"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "cky28X",
+      "result_bytes": 2511,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-full__r2.txt:27-130"
+    },
+    {
+      "tool": "Bash",
+      "id": "RrmbBo",
+      "result_bytes": 194,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__import-full__r2.txt:146-149"
+    },
+    {
+      "tool": "Bash",
+      "id": "5JTF41",
+      "result_bytes": 1689,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-full__r2.txt:161-179"
+    },
+    {
+      "tool": "Bash",
+      "id": "d3QtRt",
+      "result_bytes": 319,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-full__r2.txt:191-203"
+    }
+  ]
+}

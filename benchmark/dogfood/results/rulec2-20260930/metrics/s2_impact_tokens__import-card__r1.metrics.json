@@ -1,0 +1,86 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 2094,
+  "cache_read_tokens": 183177,
+  "cache_creation_tokens": 32254,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 11362,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 36971.0,
+  "per_turn_occupancy": [
+    31090,
+    34620,
+    36709,
+    37233,
+    37674,
+    38117
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 7576
+  },
+  "view_mode_calls": {
+    "graph": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 3347,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "D4VReF",
+      "result_bytes": 7576,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-card__r1.txt:27-350"
+    },
+    {
+      "tool": "Bash",
+      "id": "YHfrWD",
+      "result_bytes": 3347,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-card__r1.txt:362-401"
+    },
+    {
+      "tool": "Bash",
+      "id": "9Rmzgs",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__import-card__r1.txt:429-429"
+    },
+    {
+      "tool": "Bash",
+      "id": "PxYtQE",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__import-card__r1.txt:441-441"
+    },
+    {
+      "tool": "Write",
+      "id": "LRhTKh",
+      "result_bytes": 199,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__import-card__r1.txt:470-470"
+    }
+  ]
+}

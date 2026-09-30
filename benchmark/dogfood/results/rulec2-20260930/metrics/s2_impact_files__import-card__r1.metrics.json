@@ -1,0 +1,100 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1715,
+  "cache_read_tokens": 211616,
+  "cache_creation_tokens": 31421,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10468,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 35656,
+  "per_turn_occupancy": [
+    31042,
+    31316,
+    35038,
+    35656,
+    36188,
+    36527,
+    37284
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Grep": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 2,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 8345
+  },
+  "view_mode_calls": {
+    "graph": 2
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 496,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../../answers"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "z3Baif",
+      "result_bytes": 236,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-card__r1.txt:27-27"
+    },
+    {
+      "tool": "Bash",
+      "id": "Wg9BwU",
+      "result_bytes": 8109,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r1.txt:39-372"
+    },
+    {
+      "tool": "Bash",
+      "id": "RnJvGH",
+      "result_bytes": 496,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r1.txt:384-395"
+    },
+    {
+      "tool": "Bash",
+      "id": "h52WWt",
+      "result_bytes": 399,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-card__r1.txt:407-407"
+    },
+    {
+      "tool": "Write",
+      "id": "j7zQE1",
+      "result_bytes": 197,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r1.txt:426-426"
+    },
+    {
+      "tool": "Grep",
+      "id": "1LgpDT",
+      "result_bytes": 1031,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r1.txt:442-464"
+    }
+  ]
+}

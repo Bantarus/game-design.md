@@ -1,0 +1,94 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1950,
+  "cache_read_tokens": 419562,
+  "cache_creation_tokens": 79826,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 8860,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83287.5,
+  "per_turn_occupancy": [
+    79691,
+    82178,
+    82571,
+    84004,
+    85267,
+    85689
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Grep": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 7184
+  },
+  "view_mode_calls": {
+    "graph": 3
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 1359,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "zkPNhK",
+      "result_bytes": 5194,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r1.txt:27-226"
+    },
+    {
+      "tool": "Bash",
+      "id": "rFrsyK",
+      "result_bytes": 265,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-full__r1.txt:244-249"
+    },
+    {
+      "tool": "Bash",
+      "id": "ffVH3Q",
+      "result_bytes": 1725,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r1.txt:261-279"
+    },
+    {
+      "tool": "Grep",
+      "id": "wxTH57",
+      "result_bytes": 317,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r1.txt:293-308"
+    },
+    {
+      "tool": "Bash",
+      "id": "6qneS3",
+      "result_bytes": 1280,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r1.txt:320-330"
+    },
+    {
+      "tool": "Bash",
+      "id": "t39Mm3",
+      "result_bytes": 79,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r1.txt:344-348"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1732,
+  "cache_read_tokens": 420764,
+  "cache_creation_tokens": 79170,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 7040,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83860.0,
+  "per_turn_occupancy": [
+    79739,
+    82916,
+    83655,
+    84065,
+    84538,
+    85033
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 2,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 6597
+  },
+  "view_mode_calls": {
+    "graph": 2
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 5689,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "Dp3U4f",
+      "result_bytes": 5689,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r2.txt:33-213"
+    },
+    {
+      "tool": "Bash",
+      "id": "wMvotf",
+      "result_bytes": 908,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r2.txt:225-232"
+    },
+    {
+      "tool": "Bash",
+      "id": "3DbtKX",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-full__r2.txt:261-261"
+    },
+    {
+      "tool": "Bash",
+      "id": "tyaZD2",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-full__r2.txt:273-273"
+    },
+    {
+      "tool": "Write",
+      "id": "mmD3up",
+      "result_bytes": 203,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r2.txt:301-301"
+    }
+  ]
+}

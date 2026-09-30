@@ -1,0 +1,116 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 2560,
+  "cache_read_tokens": 269615,
+  "cache_creation_tokens": 35103,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 14231,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 39045.0,
+  "per_turn_occupancy": [
+    31092,
+    36618,
+    37929,
+    38801,
+    39289,
+    39771,
+    40268,
+    40966
+  ],
+  "tool_counts": {
+    "Bash": 7
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 2,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 11787
+  },
+  "view_mode_calls": {
+    "graph": 2
+  },
+  "bash_read_calls": 4,
+  "bash_read_bytes": 13083,
+  "bash_files_read": 7,
+  "all_files_read": 7,
+  "all_re_reads": 2,
+  "all_files_read_paths": [
+    "answers/s2_lookup_backward.txt",
+    "examples/lanternfall/content",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/monsters/moth_hound.yaml",
+    "examples/lanternfall/content/skills/grave_sear.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../gdd"
+    },
+    {
+      "tool": "Bash",
+      "path": "../gdd"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "TnnakM",
+      "result_bytes": 10879,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:33-313"
+    },
+    {
+      "tool": "Bash",
+      "id": "cfqNmM",
+      "result_bytes": 1611,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:325-376"
+    },
+    {
+      "tool": "Bash",
+      "id": "yyVcoS",
+      "result_bytes": 908,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:388-395"
+    },
+    {
+      "tool": "Bash",
+      "id": "A9x4SH",
+      "result_bytes": 200,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:407-413"
+    },
+    {
+      "tool": "Bash",
+      "id": "48feEy",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:442-442"
+    },
+    {
+      "tool": "Bash",
+      "id": "oNU6vR",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:456-456"
+    },
+    {
+      "tool": "Bash",
+      "id": "BNCzZT",
+      "result_bytes": 393,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r3.txt:468-481"
+    }
+  ]
+}
