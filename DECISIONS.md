@@ -1384,6 +1384,32 @@ The pilot is run `pilot-s2-20260930`: the baseline arm (v0.3 world), one run per
   - **The pilot's real paths:** all 18 are own. Re-keyed to the next repeat's cell, the same 18 are contamination (proof of fire).
 - **Not changed:** the copies, cells, primaries, thresholds and verdict mapping.
 
+### Review decisions at the pilot (2026-09-30), before any matrix data
+
+The user accepted items 1–6 of the Rule C review and the study-2 freeze, then decided:
+
+1. **The `{entities.items}` leak exemption:** accepted as amendment 5 records it.
+2. **Tasks the pilot's baseline answered exactly:** no change; the tasks run as locked.
+   - `dogfood-02.md` states this limit: at ceiling success, the non-inferiority clause is weak. It allows one fewer success out of 18, which few failures can test. So C2 is a weaker re-test of the card than designed.
+   - The limit is recorded here before any matrix data. The report states it whatever the results.
+3. **Scratchpads:** the check is amendment 7.
+4. **Clock-driven rules reference the monster collection.**
+   - Amendment 5 records this as a construction choice made before the pilot ("Construction decisions and one exception, recorded before the pilot", item 2).
+   - The depth ≥ 4 check ran on the output that includes it: the generator's build refuses a tree whose deepest reverse closure is below 4. Amendment 5 states "≥ 4" but gives neither the number nor its relation to the choice. That link is recorded here as a note before the matrices, with no tree change; the manifest `718e52d2…` stands.
+   - **Measured now** by a BFS over the frozen `edges.json` (not generator code):
+     - the deepest reverse closure is **7**, from `{entities.skills.yew_bolt}`;
+     - it is still 7 with the clock node removed, so the depth does not come from the clock↔rule cycle;
+     - 285 of the 414 nodes have a reverse closure of depth ≥ 4;
+     - the two impact questions' closures reach depths 6 (`{distributions.barrowchill_roll}`) and 5 (`{entities.items.iron_buckler}`), and neither contains a clock node.
+5. **The survival tree's `sleep_through_night`:** logged as OI-008, a tree fix for later.
+
+**The matrix commit.** The matrices run at the commit that carries this note (HEAD when each run starts), because amendments 6 and 7 must be committed before a real run. A copy at that commit carries the same files as a copy at the freeze commit `e429173`, with two differences:
+
+- `CHANGELOG.md` has these entries;
+- `DECISIONS.md` and the study-2 test are no longer carried (amendment 6).
+
+The tree, the tooling layer, the import layer and every task file are byte-identical to `e429173`. So Δ, re-probed at `e429173`, stands: 52,645 tokens, and C2's PASS threshold is 26,322.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
