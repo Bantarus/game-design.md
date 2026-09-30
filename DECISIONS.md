@@ -2157,6 +2157,46 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - The 12 trees stay 0/0: every target in them declares `target_kind`.
 - The study-2 tree is unaffected.
 
+## D-041 — Survival benchmark: sleep's time cost in minutes, and the stale token counts (OI-008)
+
+- **Status:** decided (2026-10-01), step (f) of the user's post-study-2 order ("OI-008 tree fix"). It is a tree-content fix; no spec, schema or code changes.
+- **Related:** OI-008, D-030 (the clock check that found it), D-012 (apply-time binding), spec §4.7.
+
+### The fix
+
+- **The defect:**
+  - `{clocks.world_time}` advances by the fired verb's `time_cost.in_game_minutes`, which the tree's prose says in five places.
+  - `{verbs.sleep_through_night}` declared `time_cost: { in_game_hours: hours_until_dawn }`, another unit, so the clock had no delta to read when the player slept.
+- **Of OI-008's two options, the tree now takes the first: sleep's delta in minutes.**
+  - The verb declares `time_cost: { in_game_minutes: minutes_until_dawn }`, and `gdd/mechanics.md`'s verbs rationale defines it: the in-game minutes from the moment the verb fires to dawn, the end of the night day-part, computed when the verb fires, as `gather`'s tool-dependent cost is.
+  - The night is 8 in-game hours (`{balance_targets.day_part_hour_boundaries}`), so a sleep begun at nightfall costs 480 minutes.
+  - **Why this option:** all 9 verbs now declare `time_cost.in_game_minutes`, so the tree's five prose definitions of the clock's delta hold with no exception.
+  - The other option, a capture rule that converts hours for sleep, would have kept two units and added a special case to the clock.
+- **Consistent with the rules as written:**
+  - `sleep_resolution` already moves `{states.world_clock}` to `morning_subsequent`.
+  - The clock then adds the night's minutes (`advance_world_time`) and decays hunger and thirst over them (`tick_meters`), so the player wakes hungrier. The tree's rules already did this for every other verb.
+- **Derived, not invented:** 480 is the night's 8 hours from the tree's own `day_part_hour_boundaries`. No new token or number is introduced.
+
+### The stale prose, in the same file (`gdd/mechanics.md`)
+
+- **`## Tokens`:** it said 5 entities and 11 verbs. The file declares 6 entities (with `player_inventory`, the F-008 instance_container) and 9 verbs.
+- **Entities rationale:** "the five entities" becomes six entities in five roles.
+- **Verbs rationale:** "10 verbs" becomes 8 player verbs plus `start_day`. The old counts predate F-010, which removed the synthetic `advance_world_time` verb.
+- **Events rationale:** it said each event is emitted by exactly one verb or rule, and the other five fire at most once per run. But `dawn_after_sleep` has two emitting rules and fires each dawn, and `pyre_layer_assembled` fires once per layer. The paragraph now states each event's frequency from the tree's own rules and transitions.
+- **Rules rationale:** "cover the ten verbs" becomes one rule per verb (nine), plus the two that the clock drives.
+
+### Not changed
+
+- **The capture on the actor is still only in prose,** as D-030 recorded. `delta_source: "actor.last_action_time_cost"` reads a value that the player entity does not declare, while the survival starter reads the verb directly. Aligning them is a modelling choice, not a defect of OI-008's kind.
+- **The "Twelve recipes" claim** matches `count_target: 12`. The tree ships 3 example recipe files by design.
+
+### Ritual and checks
+
+- The root `version` goes 0.2.1 → 0.2.2, and `last_updated` to 2026-10-01.
+- `last_verified` is not touched: no referenced code changed, since the tree has no implementation (D-030's precedent).
+- The tree lints 0/0.
+- It is not a study-2 task tree, and no test pins its content.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2313,6 +2353,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - The tree lints 0/0 and validates.
 - **Resolution (later, its own D-entry):** a tree-content fix, such as expressing the sleep's delta in minutes or making the clock's capture rule explicit for sleep. It is decided with the tree's other stale content, such as the `## Tokens` counts D-030 observed.
   - The benchmark tree is not a study-2 task tree, so study 2 does not block the fix. It is scheduled after study 2 with the lint-hold items, to keep the pre-matrix change set to the decided items.
+- **Resolved (2026-10-01):** D-041 expresses sleep's delta in minutes (`minutes_until_dawn`, defined in the tree) and corrects the stale counts in `gdd/mechanics.md`. OI-008 is closed.
 
 ## OI-009 — `balance-target-untyped` never ratcheted to error at v0.3, as D-003 scheduled
 
