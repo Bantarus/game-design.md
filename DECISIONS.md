@@ -2010,6 +2010,29 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **The spec names the field inconsistently:** `data_source` (§3, §4.1, §6 prose, Appendix B) vs `data_dir` (§2.3 table, §6.1 example, the schema's `ContentSchemaFile`, and every in-repo tree).
 - **Impact today:** none. In all 12 trees each `data_dir` basename equals the directory name.
 - **Constraint for v0.4:** `gdmd view` / `gdmd graph` reuse `Tree` resolution exactly, so the backlink oracle stays one definition. The fix is a separate commit (either the spec text or the code), not part of WS2.
+- **Proposal (2026-09-30), for the user's decision.** OI-001 is three questions. The user's lean is that the spec follows the code where trees depend on it (`data_dir` naming).
+  1. **Field name on the content-schema file.**
+     - Where the spec and the tools say what:
+       - the schema (`ContentSchemaFile.data_dir`, required), §2.3, §6.1 and all 13 trees say `data_dir`;
+       - §3, the §2.2 tree comment, §6's rule paragraph and Appendix B (two rows) say `data_source`.
+     - **Proposed: spec text only.** Those five places say `data_dir` for the content-schema file. `data_source` remains the name of the `content_collection` entity's own field (next item). No code or tree change.
+  2. **How `{entities.<kind>.<id>}` resolves.**
+     - `Tree` registers content entities by their parent directory's name. D-035 validates them through the content-schema's resolved `data_dir`.
+     - On all 13 trees the two coincide: each `data_dir` basename equals the schema's `entity:`, which equals the directory.
+     - | | Change | Cost |
+       | --- | --- | --- |
+       | **A (proposed): spec follows code** | §3: `<kind>` is the entity file's directory name. A content-schema's `data_dir` basename must equal its `entity:`, a new `content-entity-invalid` sub-finding, so D-035's validation and resolution always reach the same files. | Spec text plus one lint check. Every tree already complies. `Tree`, views and graph are unchanged (one definition, D-027). |
+       | B: code follows spec | `Tree` registers entities through each content-schema's `data_dir`. An entity that no `data_dir` covers becomes unreferenceable. | `Tree`, the views, graph goldens and the resolution tests change, and no tree behaves differently today. |
+  3. **The entity's `data_source:` value.**
+     - Every `content_collection` in the 13 trees declares `data_source: ../../content/<kind>`.
+     - Read from the file that declares it (`gdd/mechanics.md`), or from the tree root, that path points **outside the tree**. It only makes sense from the content-schema file's directory: it is a copy of `data_dir`.
+     - No code reads it, and the schema requires it on every `content_collection`.
+     - | | Change | Cost |
+       | --- | --- | --- |
+       | **a (proposed)** | The spec says `data_source` repeats the content-schema's `data_dir`, same string and same base (the content-schema file). A lint check requires them to be equal. | Descriptive: all 19 values comply, including the frozen study-2 tree, which cannot change without a D-026 amendment. |
+       | b | `data_source` becomes tree-root-relative (`content/<kind>`). | Churn in 13 trees, and the frozen study-2 tree breaks its manifest pin. |
+       | c | `data_source` is deprecated (no longer required), with `data_dir` as the one source. | A schema change for a field every tree carries. |
+  - Each part gets its own D-entry and commit once decided.
 
 ## OI-002 — `implemented_in` globs: the spec says workspace-relative, the code resolves them against the tree root
 
@@ -2017,6 +2040,22 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Spec says:** "workspace-relative path globs" (§2.3, schema `$defs.ImplementedIn`).
 - **Code does:** `rule_broken_implementation_pointer`, `rule_stale_section` and `hook_cmd.build_inverted_index` all expand with `tree.root.glob(pattern)`. They agree with each other, not with the spec. The in-repo trees depend on tree-root semantics, e.g. tick-combat points at `impl/xtreme/...` inside its tree.
 - **Constraint for v0.4:** same as OI-001. WS3's `hook check --show-tokens` inherits the current semantics unchanged.
+- **Proposal (2026-09-30), for the user's decision.** The user's lean is that the spec follows the code (tree-root globs).
+  - **What the spec and tools actually say:**
+    - "workspace-relative" appears twice: the `files:` map contract (§2.1) and `$defs.ImplementedIn`'s description.
+    - §8.2 mechanism 1 says the paths must resolve to "a real file in the repo".
+    - §9.7 already says `tree_relative_code_path`.
+    - Lint (`broken-implementation-pointer`, `stale-section`) and `hook check` all glob from the tree root, and every in-repo tree keeps its code inside the tree (`impl/…`).
+  - **Proposed (spec follows code):** `implemented_in:`, `implementation_pointers:` and `files:` values are paths or globs **relative to the tree root**, the directory holding the root `game-design.md`. For a tree at the repository root that is the workspace, so nothing changes there.
+    - Spec text: §2.1 (the `files:` contract), §2.3, §8.2 mechanism 1 and the `ImplementedIn` description.
+    - No tree changes.
+  - **One gap to decide with it: code outside the tree** (a tree in `docs/gdd/`, code in `src/`).
+    - Lint follows a `../src/**` glob: `Path.glob` walks `..` on the pinned Python.
+    - But `hook check` never matches it. The index keys the hit as `../src/x.py`. A staged `src/x.py` resolves outside the tree root, so it falls back to the literal `src/x.py`, and the two never meet.
+    - Options:
+      - **(i) proposed:** allow `../`, and fix `hook check` to key its index and the staged files by resolved absolute path, with a test on an out-of-tree layout;
+      - (ii) the spec forbids `../` for now, as tree-root-only, and lint flags it.
+    - Either way, today's behavior for code outside the tree is silently half-supported.
 
 ## OI-003 — `prototyped-without-pointer` fires on `balance_targets`, whose schema forbids `implemented_in`
 
@@ -2037,6 +2076,21 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Code does:** `SUBFILE_NAMESPACES` omits all of these, and the core file's frontmatter is not tokenized. A ref such as `{pillars.<id>}` would fire `broken-ref`.
 - **Impact today:** none. No in-repo tree references these namespaces.
 - **Constraint for v0.4:** views do not index them either (same single-definition constraint as OI-001). The resolution is either to index them or to trim the table. The observed-need discipline applies.
+- **Proposal (2026-09-30), for the user's decision.** The user's lean is to trim the unindexed namespaces or mark them reserved.
+  - **Facts:**
+    - `pillars` is a list of strings, both in the root and in `gdd/pillars.md`. `player_experience_goals` is a mapping of lists (`primary`, `secondary`, …). `verify_targets` is a list, and `adapters` a name → command mapping.
+    - None of them is keyed by token id, so `{pillars.<id>}` has nothing to name.
+    - No tree references any of them. Since D-033, a whole-namespace `{pillars}` does not resolve either.
+    - The §4.1 example's `schema_ref: "{content_schema.cards}"` names `content_schema`, which is not a namespace at all. No tree uses `schema_ref`, and `$defs.Entity` still declares it as a `TokenRef`.
+  - **Proposed:**
+    1. **§3's table becomes two tables.**
+       - The **12 token namespaces**, which are referenceable: exactly `SUBFILE_NAMESPACES`.
+       - The **owned keys**: `pillars`, `player_experience_goals`, `verify_targets` / `adapters`. It keeps their owning file, marked **reserved: not referenceable**. A `{ns.id}` into them is `broken-ref`, as today.
+       - Spec text only: no code change, and it describes today's behavior.
+    2. **`schema_ref`:** drop the line from the §4.1 example.
+       - Either (a) proposed: remove the property from `$defs.Entity`. No tree uses it, and `additionalProperties: true` keeps any tree that does valid.
+       - Or (b) keep it, described as reserved with no resolution defined.
+  - **Alternative (not proposed): index them.** That would need id-keyed shapes for pillars and experience goals, which no tree shows a need for (the observed-use discipline).
 
 ## OI-005 — Lint does not validate content entities against their content-schema (spec §6.2, §11 item 4)
 
