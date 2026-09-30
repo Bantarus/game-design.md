@@ -1,0 +1,486 @@
+{
+  "view": "overview",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "flat": true
+  },
+  "blocks": [
+    {
+      "role": "meta",
+      "id": "game-design.md#spec",
+      "pointer": "game-design.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#spec_version",
+      "pointer": "game-design.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#file_type",
+      "pointer": "game-design.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#name",
+      "pointer": "game-design.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#short_pitch",
+      "pointer": "game-design.md:6-6",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#genre_tags",
+      "pointer": "game-design.md:7-7",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#status",
+      "pointer": "game-design.md:8-8",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#version",
+      "pointer": "game-design.md:9-9",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#last_updated",
+      "pointer": "game-design.md:10-10",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#target_platforms_neutral",
+      "pointer": "game-design.md:11-11",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#pillars",
+      "pointer": "game-design.md:12-12",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#non_goals",
+      "pointer": "game-design.md:13-13",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#player_experience_goals",
+      "pointer": "game-design.md:14-15",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#core_loop_ref",
+      "pointer": "game-design.md:16-16",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#files",
+      "pointer": "game-design.md:17-22",
+      "status": null
+    },
+    {
+      "role": "impl",
+      "id": "game-design.md#implementation_pointers",
+      "pointer": "game-design.md:23-24",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#Glossary",
+      "pointer": "game-design.md:35-37",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#spec",
+      "pointer": "gdd/mechanics.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#spec_version",
+      "pointer": "gdd/mechanics.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#file_type",
+      "pointer": "gdd/mechanics.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#status",
+      "pointer": "gdd/mechanics.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#last_verified",
+      "pointer": "gdd/mechanics.md:6-6",
+      "status": null
+    },
+    {
+      "role": "impl",
+      "id": "gdd/mechanics.md#implemented_in",
+      "pointer": "gdd/mechanics.md:7-7",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{entities.relics}",
+      "pointer": "gdd/mechanics.md:14-17",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:26-26",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:34-34",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:47-47",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:58-58",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:66-66",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale",
+      "pointer": "gdd/mechanics.md:76-86",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale/study",
+      "pointer": "gdd/mechanics.md:84-86",
+      "status": null,
+      "explains": "{verbs.study}"
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#spec",
+      "pointer": "gdd/loops.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#spec_version",
+      "pointer": "gdd/loops.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#file_type",
+      "pointer": "gdd/loops.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#status",
+      "pointer": "gdd/loops.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#last_verified",
+      "pointer": "gdd/loops.md:6-6",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:18-18",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#spec",
+      "pointer": "gdd/architecture-invariants.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#spec_version",
+      "pointer": "gdd/architecture-invariants.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#file_type",
+      "pointer": "gdd/architecture-invariants.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#status",
+      "pointer": "gdd/architecture-invariants.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#last_verified",
+      "pointer": "gdd/architecture-invariants.md:6-6",
+      "status": null
+    },
+    {
+      "role": "invariant",
+      "id": "{invariants.focus_is_integer}",
+      "pointer": "gdd/architecture-invariants.md:8-13",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale",
+      "pointer": "gdd/architecture-invariants.md:16-20",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+      "pointer": "gdd/architecture-invariants.md:18-20",
+      "status": null,
+      "explains": "{invariants.focus_is_integer}"
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#spec",
+      "pointer": "gdd/economy-balance.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#spec_version",
+      "pointer": "gdd/economy-balance.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#file_type",
+      "pointer": "gdd/economy-balance.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#status",
+      "pointer": "gdd/economy-balance.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#last_verified",
+      "pointer": "gdd/economy-balance.md:6-6",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#spec",
+      "pointer": "gdd/content/relics.md:2-2",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#spec_version",
+      "pointer": "gdd/content/relics.md:3-3",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#file_type",
+      "pointer": "gdd/content/relics.md:4-4",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#status",
+      "pointer": "gdd/content/relics.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#last_verified",
+      "pointer": "gdd/content/relics.md:6-6",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#entity",
+      "pointer": "gdd/content/relics.md:7-7",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#schema",
+      "pointer": "gdd/content/relics.md:8-12",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#data_dir",
+      "pointer": "gdd/content/relics.md:13-13",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#count_target",
+      "pointer": "gdd/content/relics.md:14-14",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#balance_refs",
+      "pointer": "gdd/content/relics.md:15-15",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Schema",
+      "pointer": "gdd/content/relics.md:18-20",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Representative Example",
+      "pointer": "gdd/content/relics.md:22-24",
+      "status": null
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:6-6",
+      "status": null
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:1-7",
+      "status": "draft"
+    },
+    {
+      "role": "impl",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:6-6",
+      "status": null
+    }
+  ]
+}

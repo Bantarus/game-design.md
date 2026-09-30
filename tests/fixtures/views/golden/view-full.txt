@@ -1,0 +1,322 @@
+[view full] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+[file] game-design.md core
+[gap] game-design.md:1-1
+---
+[meta] game-design.md#spec game-design.md:2-2
+spec: game-design.md
+[meta] game-design.md#spec_version game-design.md:3-3
+spec_version: 0.3.0
+[meta] game-design.md#file_type game-design.md:4-4
+file_type: core
+[meta] game-design.md#name game-design.md:5-5
+name: "Lamplight"
+[meta] game-design.md#short_pitch game-design.md:6-6
+short_pitch: "A fixture tree for the gdmd view / graph goldens."
+[meta] game-design.md#genre_tags game-design.md:7-7
+genre_tags: [test]
+[meta] game-design.md#status game-design.md:8-8
+status: draft
+[meta] game-design.md#version game-design.md:9-9
+version: 0.1.0
+[meta] game-design.md#last_updated game-design.md:10-10
+last_updated: "2026-09-30"
+[meta] game-design.md#target_platforms_neutral game-design.md:11-11
+target_platforms_neutral: [desktop]
+[meta] game-design.md#pillars game-design.md:12-12
+pillars: ["P1", "P2", "P3"]
+[meta] game-design.md#non_goals game-design.md:13-13
+non_goals: ["NG1"]
+[meta] game-design.md#player_experience_goals game-design.md:14-15
+player_experience_goals:
+  primary: [discovery]
+[meta] game-design.md#core_loop_ref game-design.md:16-16
+core_loop_ref: "{loops.day}"
+[meta] game-design.md#files game-design.md:17-22
+files:
+  mechanics: gdd/mechanics.md
+  loops: gdd/loops.md
+  invariants: gdd/architecture-invariants.md
+  balance: gdd/economy-balance.md
+  relics: gdd/content/relics.md
+[impl] game-design.md#implementation_pointers game-design.md:23-24
+implementation_pointers:
+  sim: "src/sim/**/*.py"
+[gap] game-design.md:25-29
+---
+
+# Lamplight
+
+> Intro text before the first section mentions `{resources.focus}`: a gap-line reference.
+[rationale] game-design.md#High Concept game-design.md:31-33
+## High Concept
+
+A day of study is `{loops.day}`.
+[rationale] game-design.md#Glossary game-design.md:35-37
+## Glossary
+
+None.
+[file] gdd/mechanics.md subfile
+[gap] gdd/mechanics.md:1-1
+---
+[meta] gdd/mechanics.md#spec gdd/mechanics.md:2-2
+spec: game-design.md
+[meta] gdd/mechanics.md#spec_version gdd/mechanics.md:3-3
+spec_version: 0.3.0
+[meta] gdd/mechanics.md#file_type gdd/mechanics.md:4-4
+file_type: subfile
+[meta] gdd/mechanics.md#status gdd/mechanics.md:5-5
+status: draft
+[meta] gdd/mechanics.md#last_verified gdd/mechanics.md:6-6
+last_verified: "2026-09-30"
+[impl] gdd/mechanics.md#implemented_in gdd/mechanics.md:7-7
+implemented_in: ["src/sim/*.py"]
+[gap] gdd/mechanics.md:8-8
+entities:
+[token] {entities.player} gdd/mechanics.md:9-13 status=draft
+  player:
+    type: actor
+    properties:
+      focus: { from: "{resources.focus}" }
+    status: draft
+[token] {entities.relics} gdd/mechanics.md:14-17 status=draft
+  relics:
+    type: content_collection
+    data_source: ../content/relics
+    status: draft
+[gap] gdd/mechanics.md:18-18
+verbs:
+[token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+  study:
+    actor: "{entities.player}"
+    cost: { resource: "{resources.focus}", amount: 1 }
+    target_schema: { type: "{entities.relics}" }
+    effects:
+      - resolve: "{rules.study_rule}"
+    status: draft
+[impl] {verbs.study} gdd/mechanics.md:26-26
+    implemented_in: ["src/sim/study.py"]
+[token] {verbs.rest} gdd/mechanics.md:27-34 status=draft
+  rest:
+    actor: "{entities.player}"
+    cost: 0
+    target_schema: {}
+    effects:
+      - resolve: "{rules.rest_rule}"
+    status: draft
+[impl] {verbs.rest} gdd/mechanics.md:34-34
+    implemented_in: ["src/sim/rest.py"]
+[gap] gdd/mechanics.md:35-35
+resources:
+[token] {resources.focus} gdd/mechanics.md:36-47 status=draft
+  # Focus is the only resource: every verb spends or restores it.
+  focus:
+    scope: per_turn
+    min: 0
+    max: 5
+    velocity_target: "{balance_targets.focus_per_day}"
+    visibility: hud
+    note: |
+      A block scalar.
+      # This line is scalar content, not a YAML comment.
+    status: draft
+[impl] {resources.focus} gdd/mechanics.md:47-47
+    implemented_in: ["src/sim/focus.py"]
+[gap] gdd/mechanics.md:48-48
+rules:
+[token] {rules.study_rule} gdd/mechanics.md:49-58 status=draft
+  study_rule:
+    given: { verb: "{verbs.study}" }
+    do:
+      - kind: spend
+        amount: "{actor.focus_cost}"
+      - kind: inspect
+        target: "{entities.relics.lamp}"
+    outputs: ["{events.studied}"]
+    status: draft
+[impl] {rules.study_rule} gdd/mechanics.md:58-58
+    implemented_in: ["src/sim/rules.py"]
+[token] {rules.rest_rule} gdd/mechanics.md:59-66 status=draft
+  rest_rule:
+    given: { verb: "{verbs.rest}" }
+    do:
+      - kind: restore
+        target: "{resources.focus.nonexistent}"
+    outputs: []
+    status: draft
+[impl] {rules.rest_rule} gdd/mechanics.md:66-66
+    implemented_in: ["src/sim/rules.py"]
+[gap] gdd/mechanics.md:67-67
+events:
+[token] {events.studied} gdd/mechanics.md:68-68 status=draft
+  studied: { status: draft, description: "Emitted by {rules.study_rule}." }
+[gap] gdd/mechanics.md:69-70
+# trailing comment after the last namespace
+---
+[rationale] gdd/mechanics.md#Tokens gdd/mechanics.md:72-74
+## Tokens
+
+`{verbs.study}` and `{verbs.rest}` are the whole verb set.
+[rationale] gdd/mechanics.md#Rationale gdd/mechanics.md:76-86
+## Rationale
+
+Focus is scarce so that `{verbs.rest}` matters.
+
+```yaml
+## not a heading: inside a code fence
+```
+
+[rationale] gdd/mechanics.md#Rationale/study gdd/mechanics.md:84-86 explains={verbs.study}
+### study
+
+Studying the lamp (`{entities.relics.lamp}`) is the core beat.
+[file] gdd/loops.md subfile
+[gap] gdd/loops.md:1-1
+---
+[meta] gdd/loops.md#spec gdd/loops.md:2-2
+spec: game-design.md
+[meta] gdd/loops.md#spec_version gdd/loops.md:3-3
+spec_version: 0.3.0
+[meta] gdd/loops.md#file_type gdd/loops.md:4-4
+file_type: subfile
+[meta] gdd/loops.md#status gdd/loops.md:5-5
+status: draft
+[meta] gdd/loops.md#last_verified gdd/loops.md:6-6
+last_verified: "2026-09-30"
+[gap] gdd/loops.md:7-7
+loops:
+[token] {loops.day} gdd/loops.md:8-18 status=draft
+  day:
+    timescale: moment
+    duration: "~1m"
+    sequence:
+      - study: "{verbs.study}"
+      - rest: "{verbs.rest}"
+    intended_dynamics: ["pacing focus"]
+    intended_aesthetics: [discovery]
+    balance_targets: ["{balance_targets.focus_per_day}"]
+    status: draft
+[impl] {loops.day} gdd/loops.md:18-18
+    implemented_in: ["src/sim/day.py"]
+[gap] gdd/loops.md:19-19
+---
+[rationale] gdd/loops.md#Rationale gdd/loops.md:21-23
+## Rationale
+
+`{loops.day}` alternates `{verbs.study}` and `{verbs.rest}`.
+[file] gdd/architecture-invariants.md subfile
+[gap] gdd/architecture-invariants.md:1-1
+---
+[meta] gdd/architecture-invariants.md#spec gdd/architecture-invariants.md:2-2
+spec: game-design.md
+[meta] gdd/architecture-invariants.md#spec_version gdd/architecture-invariants.md:3-3
+spec_version: 0.3.0
+[meta] gdd/architecture-invariants.md#file_type gdd/architecture-invariants.md:4-4
+file_type: subfile
+[meta] gdd/architecture-invariants.md#status gdd/architecture-invariants.md:5-5
+status: draft
+[meta] gdd/architecture-invariants.md#last_verified gdd/architecture-invariants.md:6-6
+last_verified: "2026-09-30"
+[gap] gdd/architecture-invariants.md:7-7
+invariants:
+[invariant] {invariants.focus_is_integer} gdd/architecture-invariants.md:8-13
+  focus_is_integer:
+    kind: numeric_domain
+    rule: "Focus resolves to an integer."
+    applies_to: ["{resources.focus}"]
+    enforcement: advisory
+    severity: warning
+[gap] gdd/architecture-invariants.md:14-14
+---
+[rationale] gdd/architecture-invariants.md#Rationale gdd/architecture-invariants.md:16-20
+## Rationale
+
+[rationale] gdd/architecture-invariants.md#Rationale/focus_is_integer gdd/architecture-invariants.md:18-20 explains={invariants.focus_is_integer}
+### focus_is_integer
+
+Fractional focus would make `{balance_targets.focus_per_day}` unmeasurable.
+[file] gdd/economy-balance.md subfile
+[gap] gdd/economy-balance.md:1-1
+---
+[meta] gdd/economy-balance.md#spec gdd/economy-balance.md:2-2
+spec: game-design.md
+[meta] gdd/economy-balance.md#spec_version gdd/economy-balance.md:3-3
+spec_version: 0.3.0
+[meta] gdd/economy-balance.md#file_type gdd/economy-balance.md:4-4
+file_type: subfile
+[meta] gdd/economy-balance.md#status gdd/economy-balance.md:5-5
+status: draft
+[meta] gdd/economy-balance.md#last_verified gdd/economy-balance.md:6-6
+last_verified: "2026-09-30"
+[gap] gdd/economy-balance.md:7-7
+balance_targets:
+[token] {balance_targets.focus_per_day} gdd/economy-balance.md:8-13 status=draft
+  focus_per_day:
+    target_kind: scalar
+    target: 5
+    tolerance: [4, 5]
+    measure: "focus available per {loops.day}"
+    status: draft
+[gap] gdd/economy-balance.md:14-14
+---
+[rationale] gdd/economy-balance.md#Rationale gdd/economy-balance.md:16-18
+## Rationale
+
+Tuned against `{resources.focus}`.
+[file] gdd/content/relics.md content-schema
+[gap] gdd/content/relics.md:1-1
+---
+[meta] gdd/content/relics.md#spec gdd/content/relics.md:2-2
+spec: game-design.md
+[meta] gdd/content/relics.md#spec_version gdd/content/relics.md:3-3
+spec_version: 0.3.0
+[meta] gdd/content/relics.md#file_type gdd/content/relics.md:4-4
+file_type: content-schema
+[meta] gdd/content/relics.md#status gdd/content/relics.md:5-5
+status: draft
+[meta] gdd/content/relics.md#last_verified gdd/content/relics.md:6-6
+last_verified: "2026-09-30"
+[meta] gdd/content/relics.md#entity gdd/content/relics.md:7-7
+entity: relics
+[meta] gdd/content/relics.md#schema gdd/content/relics.md:8-12
+schema:
+  required: [id, name]
+  properties:
+    id: { type: string }
+    name: { type: string }
+[meta] gdd/content/relics.md#data_dir gdd/content/relics.md:13-13
+data_dir: ../../content/relics
+[meta] gdd/content/relics.md#count_target gdd/content/relics.md:14-14
+count_target: 2
+[meta] gdd/content/relics.md#balance_refs gdd/content/relics.md:15-15
+balance_refs: ["{balance_targets.focus_per_day}"]
+[gap] gdd/content/relics.md:16-16
+---
+[rationale] gdd/content/relics.md#Schema gdd/content/relics.md:18-20
+## Schema
+
+See frontmatter.
+[rationale] gdd/content/relics.md#Representative Example gdd/content/relics.md:22-24
+## Representative Example
+
+`content/relics/lamp.yaml`.
+[file] content/relics/lamp.yaml content-entity
+[content-entity] {entities.relics.lamp} content/relics/lamp.yaml:1-8 status=draft
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: lamp
+status: draft
+[impl] {entities.relics.lamp} content/relics/lamp.yaml:6-6
+implemented_in: ["src/sim/relics/lamp.py"]
+name: "Lamp"
+grants: "{resources.focus}"
+[file] content/relics/quill.yaml content-entity
+[content-entity] {entities.relics.quill} content/relics/quill.yaml:1-7 status=draft
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: quill
+status: draft
+[impl] {entities.relics.quill} content/relics/quill.yaml:6-6
+implemented_in: ["src/sim/relics/quill.py"]
+name: "Quill"

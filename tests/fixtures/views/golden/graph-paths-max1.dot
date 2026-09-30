@@ -1,0 +1,8 @@
+digraph gdmd {
+  // tree_sha 97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+  "gdd/mechanics.md:9-13" [label="{entities.player}", role="token"];
+  "gdd/mechanics.md:27-34" [label="{verbs.rest}", role="token"];
+  "gdd/loops.md:8-18" [label="{loops.day}", role="token"];
+  "gdd/mechanics.md:27-34" -> "gdd/mechanics.md:9-13" [label="value"];
+  "gdd/loops.md:8-18" -> "gdd/mechanics.md:27-34" [label="value"];
+}

@@ -1,0 +1,120 @@
+{
+  "view": "grep",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "regex": "draft",
+    "ignore_case": false,
+    "flat": true
+  },
+  "blocks": [
+    {
+      "role": "meta",
+      "id": "game-design.md#status",
+      "pointer": "game-design.md:8-8",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#status",
+      "pointer": "gdd/mechanics.md:5-5",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{entities.relics}",
+      "pointer": "gdd/mechanics.md:14-17",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft"
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#status",
+      "pointer": "gdd/loops.md:5-5",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft"
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#status",
+      "pointer": "gdd/architecture-invariants.md:5-5",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#status",
+      "pointer": "gdd/economy-balance.md:5-5",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft"
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#status",
+      "pointer": "gdd/content/relics.md:5-5",
+      "status": null
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft"
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:1-7",
+      "status": "draft"
+    }
+  ]
+}

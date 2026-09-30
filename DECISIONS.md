@@ -1181,6 +1181,10 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
   - **`--from/--to`** counts every shortest path by dynamic programming and enumerates only the first `--max-paths`, depth-first in lexicographic order of (primary, pointer). The count is exact even when enumerating every path would be exponential.
   - **`--cycles`** runs Tarjan's algorithm over edges that carry at least one `value` reference; a self-referencing node is a cycle of one.
   - **In the in-repo trees**, `--cycles` finds 56 components. 50 are the two-way links the format declares by design: 46 verb ↔ rule pairs (a verb's `effects` resolve a rule whose `given.verb` names the verb) and 4 clock ↔ rule pairs (`drives` / `given.driver`, §4.7). One is a `resources` ↔ `balance_targets` pair. Five are larger components that also run through `states` and `events` (up to 22 nodes). Cycles are structure, reported without judgment; no lint rule concerns them.
+- **Tests** (all of D-027's list, in pytest, no model calls):
+  - Properties on the 12 trees: `tests/test_ir.py`, `tests/test_view.py` and `tests/test_graph.py`.
+  - Goldens: `tests/test_views_golden.py` pins every view and graph mode, text and JSON (plus DOT for graph), on the hand-written tree `tests/fixtures/views/tree/`. The tree carries a gap-line reference, resolved / unresolved / context-local references, nested `impl` blocks, an attributed `###` section, a leading comment, a block scalar with a `#` line, two content entities, and two shortest paths between one pair. A guard test checks that these are present. `GDMD_UPDATE_GOLDENS=1` regenerates; the diff is reviewed before it is committed.
+  - Budget: compile + `--full --json` + the whole graph, best of 3, is 12–42 ms per in-repo tree against the 150 ms budget.
 
 ---
 

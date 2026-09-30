@@ -1,0 +1,730 @@
+{
+  "graph": "all",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {},
+  "nodes": [
+    {
+      "role": "meta",
+      "id": "game-design.md#core_loop_ref",
+      "pointer": "game-design.md:16-16",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{entities.relics}",
+      "pointer": "gdd/mechanics.md:14-17",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft"
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale",
+      "pointer": "gdd/mechanics.md:76-86",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale/study",
+      "pointer": "gdd/mechanics.md:84-86",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null
+    },
+    {
+      "role": "invariant",
+      "id": "{invariants.focus_is_integer}",
+      "pointer": "gdd/architecture-invariants.md:8-13",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+      "pointer": "gdd/architecture-invariants.md:18-20",
+      "status": null
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#balance_refs",
+      "pointer": "gdd/content/relics.md:15-15",
+      "status": null
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft"
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:1-7",
+      "status": "draft"
+    },
+    {
+      "role": "gap",
+      "id": null,
+      "pointer": "game-design.md:29-29"
+    }
+  ],
+  "edges": [
+    {
+      "from": "game-design.md#core_loop_ref",
+      "from_pointer": "game-design.md:16-16",
+      "to": "{loops.day}",
+      "to_pointer": "gdd/loops.md:8-18",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "game-design.md:16",
+          "ref": "{loops.day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "core_loop_ref"
+        }
+      ]
+    },
+    {
+      "from": "game-design.md:29",
+      "from_pointer": "game-design.md:29-29",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "game-design.md:29",
+          "ref": "{resources.focus}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "game-design.md#High Concept",
+      "from_pointer": "game-design.md:31-33",
+      "to": "{loops.day}",
+      "to_pointer": "gdd/loops.md:8-18",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "game-design.md:33",
+          "ref": "{loops.day}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "{entities.player}",
+      "from_pointer": "gdd/mechanics.md:9-13",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:12",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "entities.player.properties.focus.from"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.study}",
+      "from_pointer": "gdd/mechanics.md:19-26",
+      "to": "{entities.player}",
+      "to_pointer": "gdd/mechanics.md:9-13",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:20",
+          "ref": "{entities.player}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.actor"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.study}",
+      "from_pointer": "gdd/mechanics.md:19-26",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:21",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.cost.resource"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.study}",
+      "from_pointer": "gdd/mechanics.md:19-26",
+      "to": "{entities.relics}",
+      "to_pointer": "gdd/mechanics.md:14-17",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:22",
+          "ref": "{entities.relics}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.target_schema.type"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.study}",
+      "from_pointer": "gdd/mechanics.md:19-26",
+      "to": "{rules.study_rule}",
+      "to_pointer": "gdd/mechanics.md:49-58",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:24",
+          "ref": "{rules.study_rule}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.effects[0].resolve"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.rest}",
+      "from_pointer": "gdd/mechanics.md:27-34",
+      "to": "{entities.player}",
+      "to_pointer": "gdd/mechanics.md:9-13",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:28",
+          "ref": "{entities.player}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.actor"
+        }
+      ]
+    },
+    {
+      "from": "{verbs.rest}",
+      "from_pointer": "gdd/mechanics.md:27-34",
+      "to": "{rules.rest_rule}",
+      "to_pointer": "gdd/mechanics.md:59-66",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:32",
+          "ref": "{rules.rest_rule}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.effects[0].resolve"
+        }
+      ]
+    },
+    {
+      "from": "{resources.focus}",
+      "from_pointer": "gdd/mechanics.md:36-47",
+      "to": "{balance_targets.focus_per_day}",
+      "to_pointer": "gdd/economy-balance.md:8-13",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:41",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "resources.focus.velocity_target"
+        }
+      ]
+    },
+    {
+      "from": "{rules.study_rule}",
+      "from_pointer": "gdd/mechanics.md:49-58",
+      "to": "{verbs.study}",
+      "to_pointer": "gdd/mechanics.md:19-26",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:50",
+          "ref": "{verbs.study}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.given.verb"
+        }
+      ]
+    },
+    {
+      "from": "{rules.study_rule}",
+      "from_pointer": "gdd/mechanics.md:49-58",
+      "to": "{entities.relics.lamp}",
+      "to_pointer": "content/relics/lamp.yaml:1-8",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:55",
+          "ref": "{entities.relics.lamp}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.do[1].target"
+        }
+      ]
+    },
+    {
+      "from": "{rules.study_rule}",
+      "from_pointer": "gdd/mechanics.md:49-58",
+      "to": "{events.studied}",
+      "to_pointer": "gdd/mechanics.md:68-68",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:56",
+          "ref": "{events.studied}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.outputs[0]"
+        }
+      ]
+    },
+    {
+      "from": "{rules.rest_rule}",
+      "from_pointer": "gdd/mechanics.md:59-66",
+      "to": "{verbs.rest}",
+      "to_pointer": "gdd/mechanics.md:27-34",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:60",
+          "ref": "{verbs.rest}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.rest_rule.given.verb"
+        }
+      ]
+    },
+    {
+      "from": "{rules.rest_rule}",
+      "from_pointer": "gdd/mechanics.md:59-66",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:63",
+          "ref": "{resources.focus.nonexistent}",
+          "kind": "value",
+          "outcome": "unresolved",
+          "field": "rules.rest_rule.do[0].target"
+        }
+      ]
+    },
+    {
+      "from": "{events.studied}",
+      "from_pointer": "gdd/mechanics.md:68-68",
+      "to": "{rules.study_rule}",
+      "to_pointer": "gdd/mechanics.md:49-58",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:68",
+          "ref": "{rules.study_rule}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "events.studied.description"
+        }
+      ]
+    },
+    {
+      "from": "gdd/mechanics.md#Tokens",
+      "from_pointer": "gdd/mechanics.md:72-74",
+      "to": "{verbs.study}",
+      "to_pointer": "gdd/mechanics.md:19-26",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:74",
+          "ref": "{verbs.study}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/mechanics.md#Tokens",
+      "from_pointer": "gdd/mechanics.md:72-74",
+      "to": "{verbs.rest}",
+      "to_pointer": "gdd/mechanics.md:27-34",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:74",
+          "ref": "{verbs.rest}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/mechanics.md#Rationale",
+      "from_pointer": "gdd/mechanics.md:76-86",
+      "to": "{verbs.rest}",
+      "to_pointer": "gdd/mechanics.md:27-34",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:78",
+          "ref": "{verbs.rest}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/mechanics.md#Rationale/study",
+      "from_pointer": "gdd/mechanics.md:84-86",
+      "to": "{entities.relics.lamp}",
+      "to_pointer": "content/relics/lamp.yaml:1-8",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/mechanics.md:86",
+          "ref": "{entities.relics.lamp}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "{loops.day}",
+      "from_pointer": "gdd/loops.md:8-18",
+      "to": "{verbs.study}",
+      "to_pointer": "gdd/mechanics.md:19-26",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:12",
+          "ref": "{verbs.study}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "loops.day.sequence[0].study"
+        }
+      ]
+    },
+    {
+      "from": "{loops.day}",
+      "from_pointer": "gdd/loops.md:8-18",
+      "to": "{verbs.rest}",
+      "to_pointer": "gdd/mechanics.md:27-34",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:13",
+          "ref": "{verbs.rest}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "loops.day.sequence[1].rest"
+        }
+      ]
+    },
+    {
+      "from": "{loops.day}",
+      "from_pointer": "gdd/loops.md:8-18",
+      "to": "{balance_targets.focus_per_day}",
+      "to_pointer": "gdd/economy-balance.md:8-13",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:16",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "loops.day.balance_targets[0]"
+        }
+      ]
+    },
+    {
+      "from": "gdd/loops.md#Rationale",
+      "from_pointer": "gdd/loops.md:21-23",
+      "to": "{loops.day}",
+      "to_pointer": "gdd/loops.md:8-18",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:23",
+          "ref": "{loops.day}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/loops.md#Rationale",
+      "from_pointer": "gdd/loops.md:21-23",
+      "to": "{verbs.study}",
+      "to_pointer": "gdd/mechanics.md:19-26",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:23",
+          "ref": "{verbs.study}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/loops.md#Rationale",
+      "from_pointer": "gdd/loops.md:21-23",
+      "to": "{verbs.rest}",
+      "to_pointer": "gdd/mechanics.md:27-34",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/loops.md:23",
+          "ref": "{verbs.rest}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "{invariants.focus_is_integer}",
+      "from_pointer": "gdd/architecture-invariants.md:8-13",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/architecture-invariants.md:11",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "invariants.focus_is_integer.applies_to[0]"
+        }
+      ]
+    },
+    {
+      "from": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+      "from_pointer": "gdd/architecture-invariants.md:18-20",
+      "to": "{balance_targets.focus_per_day}",
+      "to_pointer": "gdd/economy-balance.md:8-13",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/architecture-invariants.md:20",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "{balance_targets.focus_per_day}",
+      "from_pointer": "gdd/economy-balance.md:8-13",
+      "to": "{loops.day}",
+      "to_pointer": "gdd/loops.md:8-18",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/economy-balance.md:12",
+          "ref": "{loops.day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "balance_targets.focus_per_day.measure"
+        }
+      ]
+    },
+    {
+      "from": "gdd/economy-balance.md#Rationale",
+      "from_pointer": "gdd/economy-balance.md:16-18",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "prose"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/economy-balance.md:18",
+          "ref": "{resources.focus}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "from": "gdd/content/relics.md#balance_refs",
+      "from_pointer": "gdd/content/relics.md:15-15",
+      "to": "{balance_targets.focus_per_day}",
+      "to_pointer": "gdd/economy-balance.md:8-13",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "gdd/content/relics.md:15",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "balance_refs[0]"
+        }
+      ]
+    },
+    {
+      "from": "{entities.relics.lamp}",
+      "from_pointer": "content/relics/lamp.yaml:1-8",
+      "to": "{resources.focus}",
+      "to_pointer": "gdd/mechanics.md:36-47",
+      "kinds": [
+        "value"
+      ],
+      "locations": [
+        {
+          "pointer": "content/relics/lamp.yaml:8",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "grants"
+        }
+      ]
+    }
+  ]
+}

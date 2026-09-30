@@ -1,0 +1,124 @@
+{
+  "view": "ref",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "ref": "{verbs.study}",
+    "hops": 2,
+    "flat": true
+  },
+  "blocks": [
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft",
+      "note": "focus"
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "note": "hop=1 back"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null,
+      "note": "hop=1 back"
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft",
+      "note": "hop=1 back"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null,
+      "note": "hop=1 back"
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#core_loop_ref",
+      "pointer": "game-design.md:16-16",
+      "status": null,
+      "note": "hop=2 back"
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null,
+      "note": "hop=2 back"
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft",
+      "note": "hop=2 back"
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft",
+      "note": "hop=2 back"
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft",
+      "note": "hop=1 forward"
+    },
+    {
+      "role": "token",
+      "id": "{entities.relics}",
+      "pointer": "gdd/mechanics.md:14-17",
+      "status": "draft",
+      "note": "hop=1 forward"
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft",
+      "note": "hop=1 forward"
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "note": "hop=1 forward"
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft",
+      "note": "hop=2 forward"
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft",
+      "note": "hop=2 forward"
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft",
+      "note": "hop=2 forward"
+    }
+  ]
+}

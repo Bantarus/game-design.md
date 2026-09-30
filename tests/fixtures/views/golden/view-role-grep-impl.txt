@@ -1,0 +1,60 @@
+[view grep] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+[file] game-design.md core
+[impl] game-design.md#implementation_pointers game-design.md:23-24
+implementation_pointers:
+  sim: "src/sim/**/*.py"
+[file] gdd/mechanics.md subfile
+[impl] gdd/mechanics.md#implemented_in gdd/mechanics.md:7-7
+implemented_in: ["src/sim/*.py"]
+[gap] gdd/mechanics.md:18-18
+verbs:
+[token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+  study:
+… 6 lines · gdd/mechanics.md:20-25
+[impl] {verbs.study} gdd/mechanics.md:26-26
+    implemented_in: ["src/sim/study.py"]
+[token] {verbs.rest} gdd/mechanics.md:27-34 status=draft
+  rest:
+… 6 lines · gdd/mechanics.md:28-33
+[impl] {verbs.rest} gdd/mechanics.md:34-34
+    implemented_in: ["src/sim/rest.py"]
+[gap] gdd/mechanics.md:35-35
+resources:
+[token] {resources.focus} gdd/mechanics.md:36-47 status=draft
+… 1 line · gdd/mechanics.md:36-36
+  focus:
+… 9 lines · gdd/mechanics.md:38-46
+[impl] {resources.focus} gdd/mechanics.md:47-47
+    implemented_in: ["src/sim/focus.py"]
+[gap] gdd/mechanics.md:48-48
+rules:
+[token] {rules.study_rule} gdd/mechanics.md:49-58 status=draft
+  study_rule:
+… 8 lines · gdd/mechanics.md:50-57
+[impl] {rules.study_rule} gdd/mechanics.md:58-58
+    implemented_in: ["src/sim/rules.py"]
+[token] {rules.rest_rule} gdd/mechanics.md:59-66 status=draft
+  rest_rule:
+… 6 lines · gdd/mechanics.md:60-65
+[impl] {rules.rest_rule} gdd/mechanics.md:66-66
+    implemented_in: ["src/sim/rules.py"]
+[file] gdd/loops.md subfile
+[gap] gdd/loops.md:7-7
+loops:
+[token] {loops.day} gdd/loops.md:8-18 status=draft
+  day:
+… 9 lines · gdd/loops.md:9-17
+[impl] {loops.day} gdd/loops.md:18-18
+    implemented_in: ["src/sim/day.py"]
+[file] content/relics/lamp.yaml content-entity
+[content-entity] {entities.relics.lamp} content/relics/lamp.yaml:1-8 status=draft
+… 5 lines · content/relics/lamp.yaml:1-5
+[impl] {entities.relics.lamp} content/relics/lamp.yaml:6-6
+implemented_in: ["src/sim/relics/lamp.py"]
+… 2 lines · content/relics/lamp.yaml:7-8
+[file] content/relics/quill.yaml content-entity
+[content-entity] {entities.relics.quill} content/relics/quill.yaml:1-7 status=draft
+… 5 lines · content/relics/quill.yaml:1-5
+[impl] {entities.relics.quill} content/relics/quill.yaml:6-6
+implemented_in: ["src/sim/relics/quill.py"]
+… 1 line · content/relics/quill.yaml:7-7

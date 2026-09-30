@@ -1,0 +1,714 @@
+{
+  "view": "full",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {},
+  "blocks": [
+    {
+      "role": "meta",
+      "id": "game-design.md#spec",
+      "pointer": "game-design.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#spec_version",
+      "pointer": "game-design.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#file_type",
+      "pointer": "game-design.md:4-4",
+      "status": null,
+      "source": "file_type: core",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#name",
+      "pointer": "game-design.md:5-5",
+      "status": null,
+      "source": "name: \"Lamplight\"",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#short_pitch",
+      "pointer": "game-design.md:6-6",
+      "status": null,
+      "source": "short_pitch: \"A fixture tree for the gdmd view / graph goldens.\"",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#genre_tags",
+      "pointer": "game-design.md:7-7",
+      "status": null,
+      "source": "genre_tags: [test]",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#status",
+      "pointer": "game-design.md:8-8",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#version",
+      "pointer": "game-design.md:9-9",
+      "status": null,
+      "source": "version: 0.1.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#last_updated",
+      "pointer": "game-design.md:10-10",
+      "status": null,
+      "source": "last_updated: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#target_platforms_neutral",
+      "pointer": "game-design.md:11-11",
+      "status": null,
+      "source": "target_platforms_neutral: [desktop]",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#pillars",
+      "pointer": "game-design.md:12-12",
+      "status": null,
+      "source": "pillars: [\"P1\", \"P2\", \"P3\"]",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#non_goals",
+      "pointer": "game-design.md:13-13",
+      "status": null,
+      "source": "non_goals: [\"NG1\"]",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#player_experience_goals",
+      "pointer": "game-design.md:14-15",
+      "status": null,
+      "source": "player_experience_goals:\n  primary: [discovery]",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#core_loop_ref",
+      "pointer": "game-design.md:16-16",
+      "status": null,
+      "source": "core_loop_ref: \"{loops.day}\"",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#files",
+      "pointer": "game-design.md:17-22",
+      "status": null,
+      "source": "files:\n  mechanics: gdd/mechanics.md\n  loops: gdd/loops.md\n  invariants: gdd/architecture-invariants.md\n  balance: gdd/economy-balance.md\n  relics: gdd/content/relics.md",
+      "children": []
+    },
+    {
+      "role": "impl",
+      "id": "game-design.md#implementation_pointers",
+      "pointer": "game-design.md:23-24",
+      "status": null,
+      "source": "implementation_pointers:\n  sim: \"src/sim/**/*.py\"",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null,
+      "source": "## High Concept\n\nA day of study is `{loops.day}`.",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#Glossary",
+      "pointer": "game-design.md:35-37",
+      "status": null,
+      "source": "## Glossary\n\nNone.",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#spec",
+      "pointer": "gdd/mechanics.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#spec_version",
+      "pointer": "gdd/mechanics.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#file_type",
+      "pointer": "gdd/mechanics.md:4-4",
+      "status": null,
+      "source": "file_type: subfile",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#status",
+      "pointer": "gdd/mechanics.md:5-5",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/mechanics.md#last_verified",
+      "pointer": "gdd/mechanics.md:6-6",
+      "status": null,
+      "source": "last_verified: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "impl",
+      "id": "gdd/mechanics.md#implemented_in",
+      "pointer": "gdd/mechanics.md:7-7",
+      "status": null,
+      "source": "implemented_in: [\"src/sim/*.py\"]",
+      "children": []
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft",
+      "source": "  player:\n    type: actor\n    properties:\n      focus: { from: \"{resources.focus}\" }\n    status: draft",
+      "children": []
+    },
+    {
+      "role": "token",
+      "id": "{entities.relics}",
+      "pointer": "gdd/mechanics.md:14-17",
+      "status": "draft",
+      "source": "  relics:\n    type: content_collection\n    data_source: ../content/relics\n    status: draft",
+      "children": []
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft",
+      "source": "  study:\n    actor: \"{entities.player}\"\n    cost: { resource: \"{resources.focus}\", amount: 1 }\n    target_schema: { type: \"{entities.relics}\" }\n    effects:\n      - resolve: \"{rules.study_rule}\"\n    status: draft\n    implemented_in: [\"src/sim/study.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{verbs.study}",
+          "pointer": "gdd/mechanics.md:26-26",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft",
+      "source": "  rest:\n    actor: \"{entities.player}\"\n    cost: 0\n    target_schema: {}\n    effects:\n      - resolve: \"{rules.rest_rule}\"\n    status: draft\n    implemented_in: [\"src/sim/rest.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{verbs.rest}",
+          "pointer": "gdd/mechanics.md:34-34",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft",
+      "source": "  # Focus is the only resource: every verb spends or restores it.\n  focus:\n    scope: per_turn\n    min: 0\n    max: 5\n    velocity_target: \"{balance_targets.focus_per_day}\"\n    visibility: hud\n    note: |\n      A block scalar.\n      # This line is scalar content, not a YAML comment.\n    status: draft\n    implemented_in: [\"src/sim/focus.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:47-47",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "source": "  study_rule:\n    given: { verb: \"{verbs.study}\" }\n    do:\n      - kind: spend\n        amount: \"{actor.focus_cost}\"\n      - kind: inspect\n        target: \"{entities.relics.lamp}\"\n    outputs: [\"{events.studied}\"]\n    status: draft\n    implemented_in: [\"src/sim/rules.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{rules.study_rule}",
+          "pointer": "gdd/mechanics.md:58-58",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft",
+      "source": "  rest_rule:\n    given: { verb: \"{verbs.rest}\" }\n    do:\n      - kind: restore\n        target: \"{resources.focus.nonexistent}\"\n    outputs: []\n    status: draft\n    implemented_in: [\"src/sim/rules.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{rules.rest_rule}",
+          "pointer": "gdd/mechanics.md:66-66",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft",
+      "source": "  studied: { status: draft, description: \"Emitted by {rules.study_rule}.\" }",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null,
+      "source": "## Tokens\n\n`{verbs.study}` and `{verbs.rest}` are the whole verb set.",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale",
+      "pointer": "gdd/mechanics.md:76-86",
+      "status": null,
+      "source": "## Rationale\n\nFocus is scarce so that `{verbs.rest}` matters.\n\n```yaml\n## not a heading: inside a code fence\n```\n\n### study\n\nStudying the lamp (`{entities.relics.lamp}`) is the core beat.",
+      "children": [
+        {
+          "role": "rationale",
+          "id": "gdd/mechanics.md#Rationale/study",
+          "pointer": "gdd/mechanics.md:84-86",
+          "status": null,
+          "explains": "{verbs.study}"
+        }
+      ]
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#spec",
+      "pointer": "gdd/loops.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#spec_version",
+      "pointer": "gdd/loops.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#file_type",
+      "pointer": "gdd/loops.md:4-4",
+      "status": null,
+      "source": "file_type: subfile",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#status",
+      "pointer": "gdd/loops.md:5-5",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/loops.md#last_verified",
+      "pointer": "gdd/loops.md:6-6",
+      "status": null,
+      "source": "last_verified: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft",
+      "source": "  day:\n    timescale: moment\n    duration: \"~1m\"\n    sequence:\n      - study: \"{verbs.study}\"\n      - rest: \"{verbs.rest}\"\n    intended_dynamics: [\"pacing focus\"]\n    intended_aesthetics: [discovery]\n    balance_targets: [\"{balance_targets.focus_per_day}\"]\n    status: draft\n    implemented_in: [\"src/sim/day.py\"]",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{loops.day}",
+          "pointer": "gdd/loops.md:18-18",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null,
+      "source": "## Rationale\n\n`{loops.day}` alternates `{verbs.study}` and `{verbs.rest}`.",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#spec",
+      "pointer": "gdd/architecture-invariants.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#spec_version",
+      "pointer": "gdd/architecture-invariants.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#file_type",
+      "pointer": "gdd/architecture-invariants.md:4-4",
+      "status": null,
+      "source": "file_type: subfile",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#status",
+      "pointer": "gdd/architecture-invariants.md:5-5",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/architecture-invariants.md#last_verified",
+      "pointer": "gdd/architecture-invariants.md:6-6",
+      "status": null,
+      "source": "last_verified: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "invariant",
+      "id": "{invariants.focus_is_integer}",
+      "pointer": "gdd/architecture-invariants.md:8-13",
+      "status": null,
+      "source": "  focus_is_integer:\n    kind: numeric_domain\n    rule: \"Focus resolves to an integer.\"\n    applies_to: [\"{resources.focus}\"]\n    enforcement: advisory\n    severity: warning",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale",
+      "pointer": "gdd/architecture-invariants.md:16-20",
+      "status": null,
+      "source": "## Rationale\n\n### focus_is_integer\n\nFractional focus would make `{balance_targets.focus_per_day}` unmeasurable.",
+      "children": [
+        {
+          "role": "rationale",
+          "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+          "pointer": "gdd/architecture-invariants.md:18-20",
+          "status": null,
+          "explains": "{invariants.focus_is_integer}"
+        }
+      ]
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#spec",
+      "pointer": "gdd/economy-balance.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#spec_version",
+      "pointer": "gdd/economy-balance.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#file_type",
+      "pointer": "gdd/economy-balance.md:4-4",
+      "status": null,
+      "source": "file_type: subfile",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#status",
+      "pointer": "gdd/economy-balance.md:5-5",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/economy-balance.md#last_verified",
+      "pointer": "gdd/economy-balance.md:6-6",
+      "status": null,
+      "source": "last_verified: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft",
+      "source": "  focus_per_day:\n    target_kind: scalar\n    target: 5\n    tolerance: [4, 5]\n    measure: \"focus available per {loops.day}\"\n    status: draft",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null,
+      "source": "## Rationale\n\nTuned against `{resources.focus}`.",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#spec",
+      "pointer": "gdd/content/relics.md:2-2",
+      "status": null,
+      "source": "spec: game-design.md",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#spec_version",
+      "pointer": "gdd/content/relics.md:3-3",
+      "status": null,
+      "source": "spec_version: 0.3.0",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#file_type",
+      "pointer": "gdd/content/relics.md:4-4",
+      "status": null,
+      "source": "file_type: content-schema",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#status",
+      "pointer": "gdd/content/relics.md:5-5",
+      "status": null,
+      "source": "status: draft",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#last_verified",
+      "pointer": "gdd/content/relics.md:6-6",
+      "status": null,
+      "source": "last_verified: \"2026-09-30\"",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#entity",
+      "pointer": "gdd/content/relics.md:7-7",
+      "status": null,
+      "source": "entity: relics",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#schema",
+      "pointer": "gdd/content/relics.md:8-12",
+      "status": null,
+      "source": "schema:\n  required: [id, name]\n  properties:\n    id: { type: string }\n    name: { type: string }",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#data_dir",
+      "pointer": "gdd/content/relics.md:13-13",
+      "status": null,
+      "source": "data_dir: ../../content/relics",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#count_target",
+      "pointer": "gdd/content/relics.md:14-14",
+      "status": null,
+      "source": "count_target: 2",
+      "children": []
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#balance_refs",
+      "pointer": "gdd/content/relics.md:15-15",
+      "status": null,
+      "source": "balance_refs: [\"{balance_targets.focus_per_day}\"]",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Schema",
+      "pointer": "gdd/content/relics.md:18-20",
+      "status": null,
+      "source": "## Schema\n\nSee frontmatter.",
+      "children": []
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Representative Example",
+      "pointer": "gdd/content/relics.md:22-24",
+      "status": null,
+      "source": "## Representative Example\n\n`content/relics/lamp.yaml`.",
+      "children": []
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft",
+      "source": "spec: game-design.md\nspec_version: 0.3.0\nfile_type: content-entity\nid: lamp\nstatus: draft\nimplemented_in: [\"src/sim/relics/lamp.py\"]\nname: \"Lamp\"\ngrants: \"{resources.focus}\"",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{entities.relics.lamp}",
+          "pointer": "content/relics/lamp.yaml:6-6",
+          "status": null
+        }
+      ]
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:1-7",
+      "status": "draft",
+      "source": "spec: game-design.md\nspec_version: 0.3.0\nfile_type: content-entity\nid: quill\nstatus: draft\nimplemented_in: [\"src/sim/relics/quill.py\"]\nname: \"Quill\"",
+      "children": [
+        {
+          "role": "impl",
+          "id": "{entities.relics.quill}",
+          "pointer": "content/relics/quill.yaml:6-6",
+          "status": null
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "pointer": "game-design.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "game-design.md:25-29",
+      "source": "---\n\n# Lamplight\n\n> Intro text before the first section mentions `{resources.focus}`: a gap-line reference."
+    },
+    {
+      "pointer": "gdd/mechanics.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/mechanics.md:8-8",
+      "source": "entities:"
+    },
+    {
+      "pointer": "gdd/mechanics.md:18-18",
+      "source": "verbs:"
+    },
+    {
+      "pointer": "gdd/mechanics.md:35-35",
+      "source": "resources:"
+    },
+    {
+      "pointer": "gdd/mechanics.md:48-48",
+      "source": "rules:"
+    },
+    {
+      "pointer": "gdd/mechanics.md:67-67",
+      "source": "events:"
+    },
+    {
+      "pointer": "gdd/mechanics.md:69-70",
+      "source": "# trailing comment after the last namespace\n---"
+    },
+    {
+      "pointer": "gdd/loops.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/loops.md:7-7",
+      "source": "loops:"
+    },
+    {
+      "pointer": "gdd/loops.md:19-19",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/architecture-invariants.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/architecture-invariants.md:7-7",
+      "source": "invariants:"
+    },
+    {
+      "pointer": "gdd/architecture-invariants.md:14-14",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/economy-balance.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/economy-balance.md:7-7",
+      "source": "balance_targets:"
+    },
+    {
+      "pointer": "gdd/economy-balance.md:14-14",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/content/relics.md:1-1",
+      "source": "---"
+    },
+    {
+      "pointer": "gdd/content/relics.md:16-16",
+      "source": "---"
+    }
+  ]
+}
