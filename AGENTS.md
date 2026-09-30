@@ -44,6 +44,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Adding a vocabulary item without observed-use evidence.** D-020 added `experimental` + `deferred` because prose markers existed across 4 trees; `blocked` is deferred until live adoption surfaces it.
 - **Imposing new shape engines must conform to.** Name observable shape engines already have. Verify-adapter PASS is then *expected*, not lucky. (Memory: `descriptive-not-prescriptive-vocabulary-extensions`.)
 - **Calibrating defaults against the population you'd use them to validate.** Circular trap. Task 6 grounded `--stale-days` defaults in cadence assumptions, NOT the in-repo `last_verified` distribution.
+- **Editing `docs/spec.md` or format semantics from the card alone.** `CLAUDE.md` imports only the agent card (`docs/spec-card.md`), which excerpts a few sections and indexes the rest. Before editing the spec, the schema, or what a namespace, enum value or lint rule means, read every affected section in full (`gdmd spec --section <id>`). After editing the spec, regenerate the card: `gdmd spec --card > docs/spec-card.md`.
 - **Quietly dropping or silently swapping a validation claim.** Reframes get recorded in DECISIONS.md + spec text (D-021 + §11.2 pattern). Premise-correction is honest only when audit-lineage-preserved. (Memory: `premise-correction-reframe-is-gate-correction`.)
 
 **CLI:** `gdmd spec` (read the spec back); `gdmd export --format schema` (validate the schema parses).
