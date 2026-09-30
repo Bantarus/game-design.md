@@ -1410,6 +1410,40 @@ The user accepted items 1–6 of the Rule C review and the study-2 freeze, then 
 
 The tree, the tooling layer, the import layer and every task file are byte-identical to `e429173`. So Δ, re-probed at `e429173`, stands: 52,645 tokens, and C2's PASS threshold is 26,322.
 
+### Rule V2 result (2026-09-30): **PASS**
+
+- **Run** `rulev2-20260930` at `68b15eb`: 36 runs, CLI 2.1.285, `claude-sonnet-5-5`. The report is [`docs/case-studies/dogfood-02.md`](docs/case-studies/dogfood-02.md), and the data is in `benchmark/dogfood/results/rulev2-20260930*` (`7f2b1b4`).
+- **Verdict:** R = 33.3% ≥ X = 30%, so **PASS**.
+  - With six tasks the median is the mean of the middle two per-task values, +7.4% and +59.3%. The 30% line falls between them.
+  - Non-inferiority holds. Views had 18/18 successes. Baseline had 18/18 completed successes but 17/18 counted, because one run is contaminated under amendment 7 (below). Guarded `e_t` = 0 for both tasks, so no extension ran.
+  - No apparatus NULL: 0 errors, 1/18 contaminated in the baseline arm (5.6%), and a manipulation-check median of 1.
+  - Computed by `analyze.py rule-v2` as committed before any study-2 data (`048fc32`). Nothing was re-run, added or dropped.
+- **The contaminated run** (`s2_lookup_backward` baseline r3):
+  - It is a denied `python3 /tmp/claude-1000/*/2ff46112*/scratchpad/g.py`. The glob sits in the copy-key position and is combined with the run's own session id, so it could only match the run's own directory.
+  - The rule as committed counts it, and it is reported that way. Its effect on the verdict is nil: contamination does not enter `R`, and non-inferiority holds with either classification.
+  - **Proposed for review, not applied:** a slug glob whose session component names the run's own session id counts as own use.
+- **Consequence:** no adoption consequence (D-026).
+  - The PASS licenses a views-cost claim scoped as measured: on a content-heavy tree, on these six tasks, the v0.4 world with the views arm consumed a median 33% fewer consultation bytes than the v0.3 baseline, without loss of success.
+  - Where the claim is stated (README, release notes) is left for review.
+- **Descriptive only:**
+  - `r_t` is +59% to +92% on the three graph-shaped tasks (both impact tasks and the backward lookup), +7.4% on the forward lookup, and −53% and −126% on the guarded tasks, where views added one overview or `--grep` call.
+  - `graph` produced 22.2% of the views arm's consultation bytes; `--full` was never used.
+
+### Rule C2 result (2026-09-30): **PASS**
+
+- **Run** `rulec2-20260930` at `68b15eb`, the same commit as V2: 36 runs. The report is [`docs/case-studies/dogfood-02.md`](docs/case-studies/dogfood-02.md), and the data is in `benchmark/dogfood/results/rulec2-20260930*` (`c2291f2`).
+- **Verdict:** D = 47,158.5 tokens against 0.5 × Δ = 26,322.5 (Δ = 52,645, `import-probe-probe5-20260930`), so **PASS**.
+  - Per-task `d_t` runs from 44,619 to 49,157 tokens, 85–93% of Δ. Study 1's Rule C measured D = 46,769.
+  - Non-inferiority holds: 18/18 successes in each cell, and guarded `e_t` = 0 for both tasks, so no extension ran.
+  - No apparatus NULL: 0 errors and 0 contaminated runs.
+  - Computed by `analyze.py rule-c2` as committed before any study-2 data (`048fc32`). Nothing was re-run, added or dropped.
+- **Consequence (the adoption linkage above):** C2 PASS means the card stays. `CLAUDE.md` has imported the card since `49b53b4`, so nothing changes and there is no commit.
+- **Descriptive:**
+  - No `import-card` run called `gdmd spec --section`, and neither cell read any file under `docs/`.
+  - The card cell consulted more tree text (11.3 vs 8.4 KB per run, median) and cost less ($0.19 vs $0.42).
+  - Both cells used `view` / `graph` without being told to (33 and 22 calls, 12 of 18 runs each). Study 1's Rule C had none.
+- **Limit recorded at the pilot review:** every run succeeded, so non-inferiority was tested only at the ceiling. C2 is a weaker re-test of the card than designed.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
