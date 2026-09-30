@@ -638,7 +638,7 @@ A deterministic token-accounting analysis was offered and declined. It would hav
   - The preflight refuses a copy if the arm's `gdmd` and the judge lint the untouched fixture differently, before or after the fixture patch.
   - Residual: a lint rule added after `v0.3.0` could judge a subject's *new* content differently from what the baseline subject could see. OI-005 / OI-006 rules are scheduled after Checkpoint 3; if one lands before the Rule V matrix, this is reported as a limit.
 - **One commit per matrix.** Every copy in a run is exported from the commit pinned when the run starts. A real run refuses to start if the harness (`benchmark/dogfood/`, `tests/test_dogfood.py`, results excepted) has uncommitted changes. That commit's SHA, the overlay SHA and the judge SHA are on every line.
-- **Flags and isolation:** exactly `run.py::session_argv` at the lock commit:
+- **Flags and isolation:** exactly `run.py::session_argv` at the lock commit (**amended before the pilot: see Amendment 1**, which replaces `--restricted`):
   - `--restricted`;
   - `--tools Read,Grep,Glob,Edit,Write,Bash`, with the Bash allowlist in `run.py::ALLOWED_BASH`;
   - `--permission-mode acceptEdits`, `--strict-mcp-config`, `--disable-slash-commands`;
@@ -760,6 +760,37 @@ Here "treatment" means `views` in Rule V and `import-card` in Rule C; "control" 
 - **(a) Baseline contamination after WS2:** resolved by item 1. The baseline runs the v0.3 world, so it cannot discover v0.4 views.
 - **(b) Thresholds:** X = 30% (Rule V). Rule C's flat 10% is replaced by 0.5 × Δ. Y = 10 points, with the guarded-task mapping above. 3 repeats. Caps as stated.
 - **(c) Logs:** gitignored plus a SHA per line plus an external compressed archive; results and extraction output are committed.
+
+### Amendment 1 (2026-09-30, before the pilot): the locked flags did not load `CLAUDE.md`
+
+- **Found by** the pre-registered import probe, its first run at the lock commit `79a1827`. The raw result is in `benchmark/dogfood/results/import-probe-probe-20260930.json`.
+- **What the probe showed:** turn-1 occupancy was 6,904 tokens with the `spec.md` import and 6,909 without it (v0.3 world), and 6,887 vs 6,888 (matrix world). The ~30k-token spec was absent in both conditions. The transcripts carry no `CLAUDE.md` content.
+- **Cause:** `--restricted` "ignores user, project and local settings files". In practice it also drops project memory (`CLAUDE.md` and its `@`-imports), and `--setting-sources project` does not restore it under `--restricted`.
+- **Why it matters:** the locked text contradicted itself. It pinned `--restricted` **and** asserted the `@docs/spec.md` import is present in both arms (Rule V cells; D-024 §4). Under those flags, no arm saw `CLAUDE.md`, `AGENTS.md` (as an import), the schema or the spec. The Rule C precondition would have read ~0 by construction.
+- **Flag variants probed** (single-turn, matrix world, with the spec import):
+
+  | Variant | Turn-1 occupancy |
+  | --- | --- |
+  | `--restricted` | 6,973 |
+  | `--restricted --setting-sources project` | 6,987 |
+  | no `--restricted`, `--setting-sources ""` | 7,728 |
+  | no `--restricted`, `--setting-sources project,local` | 73,772 |
+  | the same + auto-memory off | 72,927 |
+
+  - The `project` source is what loads `CLAUDE.md`.
+  - Dropping `--restricted` also adds Claude Code's auto-memory section, which offers the subject a writable memory directory outside the copy.
+  - No user skills or plugins appear in any variant.
+- **Change:**
+  - `session_argv` drops `--restricted` and adds `--setting-sources project,local` plus `--settings '{"autoMemoryEnabled": false}'`.
+  - Sessions also run with `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`.
+  - User settings stay excluded. The repo tracks no `.claude/` settings, and there is no user `CLAUDE.md`, so the project source loads exactly the copy's `CLAUDE.md`.
+- **New per-run apparatus check:** `extract.session_context` reads the raw JSONL. A run is an `error` (apparatus) if the `instructions` attachment (the injected `CLAUDE.md`) is absent, or if the auto-memory section is in the system prompt. `claude_md_loaded`, `auto_memory_prompt` and `assistant_models` are on every result line. The import probe refuses to report if the check fails in any of its four calls.
+- **What `--restricted` provided that is now lost:** confinement of the file tools to the copy. The other properties are kept by `--tools` (only the named tools exist) and `--setting-sources` (no user settings). Out-of-copy reads were already detected rather than prevented for Bash (`out_of_copy_access`). That detection now covers the file tools' only remaining escape too, and the contamination rule above is unchanged.
+- **Observation, no change:** `modelUsage` also reports `claude-haiku-4-5` (Claude Code background calls). Only `claude-sonnet-5-5` writes assistant records, so occupancy and consultation metrics are unaffected. Estimated USD, a secondary metric, includes the background calls.
+- **Discipline:**
+  - This is an apparatus correction that makes the harness match the locked text. It does not reframe a rule: no threshold, metric, cell, aggregation or verdict mapping changes.
+  - No pilot or matrix run existed. The only runs before it were the model-id probe and the import probe, whose job is exactly this read.
+  - Premise-genuine (the transcripts and the table above), re-scoping-honest (the rule is unchanged; the harness now does what the rule said), lineage preserved (this amendment, and the unedited locked bullet it supersedes).
 
 ---
 

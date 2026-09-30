@@ -65,6 +65,7 @@ ALLOWED_BASH = [
     "Bash(git show:*)", "Bash(ls:*)", "Bash(cat:*)", "Bash(head:*)", "Bash(tail:*)",
     "Bash(wc:*)", "Bash(grep:*)", "Bash(sort:*)", "Bash(diff:*)",
 ]
+NO_AUTO_MEMORY = json.dumps({"autoMemoryEnabled": False})
 ARM_WORLD = {"baseline": "v0.3", "views": "matrix"}
 ARMS = tuple(ARM_WORLD)
 OUTCOMES = ("success", "fail", "capped", "error")
@@ -103,6 +104,7 @@ def check_pinned_cli() -> str:
 def session_env(base: dict | None = None) -> dict:
     env = dict(os.environ if base is None else base)
     env["DISABLE_AUTOUPDATER"] = "1"
+    env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] = "1"   # D-025 amendment 1 (with --settings)
     return env
 
 
@@ -117,7 +119,10 @@ def session_argv(model: str, effort: str, session_id: str, arm_text: str,
         "--effort", effort,
         "--output-format", "stream-json", "--verbose",
         "--session-id", session_id,
-        "--restricted",
+        # D-025 amendment 1: not --restricted, which also drops CLAUDE.md. Load
+        # the copy's project/local sources only (no user settings), no auto-memory.
+        "--setting-sources", "project,local",
+        "--settings", NO_AUTO_MEMORY,
         "--tools", TOOLS,
         "--allowedTools", *ALLOWED_BASH,
         "--permission-mode", "acceptEdits",
@@ -225,13 +230,14 @@ def run_session(argv: list[str], prompt: str, cwd: Path, env: dict, *, turn_cap:
 
 
 def classify(stop_reason: str, result_event: dict, *, session_found: bool,
-             checker_parsed: bool, checker_success: bool) -> str:
+             checker_parsed: bool, checker_success: bool, context_ok: bool = True) -> str:
     """D-025 outcome of one run: success | fail | capped | error.
 
     - capped: the harness turn cap, the wall-clock timeout, or the CLI's
       budget cap ended the session. Counts as not-success.
     - error: an apparatus failure, meaning no result event, any other CLI
-      error, no session JSONL, or a checker that emitted no report.
+      error, no session JSONL, a checker that emitted no report, or a context
+      check failure (CLAUDE.md not loaded, or auto-memory on; amendment 1).
     - success / fail: the session completed and the checker ran.
     """
     if stop_reason in ("turn_cap", "timeout"):
@@ -239,7 +245,7 @@ def classify(stop_reason: str, result_event: dict, *, session_found: bool,
     if stop_reason.startswith("error:") and "budget" in stop_reason:
         return "capped"
     if (stop_reason != "completed" or not result_event or not session_found
-            or not checker_parsed):
+            or not checker_parsed or not context_ok):
         return "error"
     return "success" if checker_success else "fail"
 
@@ -293,8 +299,9 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
         metrics = extract(stored, load_vcc(cfg.vcc), copy.root, sess_dir / "views")
         (metrics_dir / f"{cell_id}.metrics.json").write_text(json.dumps(metrics, indent=2))
     res = sess["result_event"]
+    context_ok = bool(metrics) and metrics["claude_md_loaded"] and not metrics["auto_memory_prompt"]
     outcome = classify(sess["stop_reason"], res, session_found=stored is not None,
-                       checker_parsed=checker_parsed,
+                       checker_parsed=checker_parsed, context_ok=context_ok,
                        checker_success=chk.returncode == 0 and bool(checker.get("success")))
     line = {
         "run_id": run["run_id"], "cell_id": cell_id, "task_id": task.task_id,
@@ -315,7 +322,8 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
             "turns", "input_tokens", "output_tokens", "cache_read_tokens",
             "cache_creation_tokens", "tool_calls", "files_read", "bytes_read", "re_reads",
             "consultation_bytes", "median_turn_occupancy", "gdmd_view_calls",
-            "gdmd_graph_calls")},
+            "gdmd_graph_calls", "claude_md_loaded", "auto_memory_prompt",
+            "assistant_models")},
         "out_of_copy_access": len(metrics.get("out_of_copy_access", [])) if metrics else None,
     }
     if not cfg.keep_copies:
@@ -397,9 +405,14 @@ def import_probe(cfg: argparse.Namespace, run: dict, work: Path) -> int:
                                session_env(copy.env()), turn_cap=1, timeout_s=300,
                                stderr_path=work / f"{world}-{label}.stderr.txt")
             jsonl = find_session_jsonl(sid)
-            occ = extract(jsonl, load_vcc(cfg.vcc), copy.root, work / "views")[
-                "per_turn_occupancy"] if jsonl else []
+            m = extract(jsonl, load_vcc(cfg.vcc), copy.root, work / "views") if jsonl else {}
+            occ = m.get("per_turn_occupancy") or []
+            if not m.get("claude_md_loaded") or m.get("auto_memory_prompt"):
+                raise SystemExit(f"import probe {world}/{label}: context check failed "
+                                 f"(claude_md_loaded={m.get('claude_md_loaded')}, "
+                                 f"auto_memory_prompt={m.get('auto_memory_prompt')})")
             w_out[label] = {"turn1_occupancy": occ[0] if occ else None, "session_id": sid,
+                            "assistant_models": m.get("assistant_models"),
                             "stop_reason": sess["stop_reason"],
                             "model_reported": sorted(
                                 (sess["result_event"].get("modelUsage") or {}).keys()),

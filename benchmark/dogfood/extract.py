@@ -76,6 +76,30 @@ def _vcc_pointers(vcc, session: Path, views_dir: Path) -> dict[str, str]:
     return out
 
 
+def session_context(session: Path) -> dict:
+    """What the session's context actually contained (D-025 amendment 1):
+    whether the copy's CLAUDE.md was injected (an `instructions` attachment),
+    whether the auto-memory section was in the system prompt, and which
+    models wrote assistant records. Read from the raw JSONL, not VCC."""
+    claude_md, memory, models = False, False, set()
+    with open(session, encoding="utf-8") as f:
+        for line in f:
+            try:
+                r = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            a = r.get("attachment") if isinstance(r.get("attachment"), dict) else {}
+            if a.get("type") == "instructions":
+                claude_md = True
+            if a.get("type") == "prompt_snapshot":
+                memory = memory or any("\n# Memory\n" in f"\n{part}\n"
+                                       for part in a.get("systemPrompt") or [])
+            if r.get("type") == "assistant" and r.get("message", {}).get("model"):
+                models.add(r["message"]["model"])
+    return {"claude_md_loaded": claude_md, "auto_memory_prompt": memory,
+            "assistant_models": sorted(models)}
+
+
 def extract(session: Path, vcc=None, copy_root: Path | None = None,
             views_dir: Path | None = None) -> dict:
     vcc = vcc or load_vcc()
@@ -167,6 +191,7 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
         "gdmd_graph_calls": sum(1 for c in calls.values() if c["name"] == "Bash"
                                 and "gdmd graph" in str(c["input"].get("command", ""))),
         "out_of_copy_access": out_of_copy,
+        **session_context(session),
         "tool_detail": detail,
     }
 

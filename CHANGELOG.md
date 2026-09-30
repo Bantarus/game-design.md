@@ -25,6 +25,11 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - An orchestrator whose `--dry-run` validates every CLI flag against `claude --help`, plus a model-id probe and the D-024 import-size probe.
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
+- **D-025 amendment 1 (before the pilot):** the locked session flags never loaded `CLAUDE.md`. `--restricted` drops project memory too, so the `spec.md` import that D-025 and D-024 assume was absent in every arm.
+  - The import probe caught it: turn-1 occupancy was about 6.9k tokens with or without the ~30k-token spec import.
+  - Sessions now use `--setting-sources project,local` (no user settings), with auto-memory off.
+  - A per-run transcript check turns any run without an injected `CLAUDE.md`, or with auto-memory on, into an apparatus error.
+  - No threshold, metric or verdict mapping changed.
 - **D-025: the dogfood locked rules**, committed before the pilot.
   - **Rule V** (views vs baseline): consultation bytes; the median of per-task ratios; PASS at ≥ 30% reduction.
   - **Rule C** (the card ablation): realized per-turn occupancy reduction ≥ 50% of the probed spec-import delta.

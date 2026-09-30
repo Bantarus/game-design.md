@@ -434,8 +434,46 @@ def test_session_and_probe_argv_flags_exist_in_installed_cli():
     ("completed", {"subtype": "success"}, {"checker_parsed": False}, "error"),
 ])
 def test_classify_outcomes(stop, result, kw, want):
+    # (context_ok defaults to True; its failure is tested below)
     args = {"session_found": True, "checker_parsed": True, "checker_success": True, **kw}
     assert dogfood_run.classify(stop, result, **args) == want
+
+
+def test_classify_context_failure_is_error():
+    assert dogfood_run.classify("completed", {"subtype": "success"}, session_found=True,
+                                checker_parsed=True, checker_success=True,
+                                context_ok=False) == "error"
+
+
+def test_session_argv_loads_claude_md_without_user_settings_or_memory():
+    # D-025 amendment 1: --restricted also dropped CLAUDE.md and its @-imports.
+    argv = dogfood_run.session_argv("m", "high", "sid", "arm", 1.0)
+    assert "--restricted" not in argv
+    assert argv[argv.index("--setting-sources") + 1] == "project,local"
+    assert json.loads(argv[argv.index("--settings") + 1]) == {"autoMemoryEnabled": False}
+    env = dogfood_run.session_env({})
+    assert env["CLAUDE_CODE_DISABLE_AUTO_MEMORY"] == "1" and env["DISABLE_AUTOUPDATER"] == "1"
+
+
+def test_session_context_reads_injected_context(tmp_path):
+    from extract import session_context
+
+    def write(records):
+        f = tmp_path / f"s{len(list(tmp_path.iterdir()))}.jsonl"
+        f.write_text("".join(json.dumps(r) + "\n" for r in records))
+        return f
+    snap = {"type": "attachment", "attachment": {"type": "prompt_snapshot",
+            "systemPrompt": ["\nYou are an agent.\n", "# Memory\n\nYou have a memory at x"]}}
+    asst = {"type": "assistant", "message": {"model": "claude-sonnet-5-5", "id": "m1"}}
+    loaded = write([{"type": "attachment", "attachment": {"type": "instructions"}}, asst])
+    assert dogfood_ctx(session_context(loaded)) == (True, False, ["claude-sonnet-5-5"])
+    missing_with_memory = write([snap, asst])
+    assert dogfood_ctx(session_context(missing_with_memory)) == (False, True,
+                                                                ["claude-sonnet-5-5"])
+
+
+def dogfood_ctx(c):
+    return c["claude_md_loaded"], c["auto_memory_prompt"], c["assistant_models"]
 
 
 def test_archive_sessions_outside_repo_with_member_hashes(tmp_path, monkeypatch):
