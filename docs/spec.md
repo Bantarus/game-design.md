@@ -1026,7 +1026,7 @@ The standard exists because GDDs drift. These four mechanisms keep the doc and t
 
 ## 9. The CLI
 
-Verbs: `lint | diff | export | spec | verify | status | hook | touch | init`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
+Verbs: `lint | diff | export | spec | verify | status | hook | touch | init | view`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
 
 ### 9.1 `lint`
 

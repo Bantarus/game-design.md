@@ -1166,6 +1166,15 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
   - **Line numbers** count lines of the file read in text mode (universal newlines), as the loader reads it.
   - **`tree_sha`'s manifest** ends every line, including the last, with `\n`.
   - **Measured:** compile takes 14–44 ms per in-repo tree. On all 12 trees, the 452 token blocks re-parse to their values, value references equal `walk_refs` in order and path, unresolved references equal `broken-ref` findings, and backlinks agree with `orphaned-entity` for every checked token.
+- **Views** (`src/game_design_md/view_cmd.py`):
+  - **Every verbatim line's number is readable from the output.** A header, a `[gap] <path>:<a>-<b>` marker or an elision marker sets the position, and each following verbatim line is the next line of that file. In `--grep`, an ancestor key line outside the selected block (the namespace key) is therefore printed as a `[gap]` line with its own pointer before the block, once per run of blocks under it; printing it after the header would misnumber it.
+  - **`--grep` selects blocks only**, as §9.9.3 says. A match on a gap line (a namespace key, a comment between tokens, a title) is not shown. This is an open point for review, not a decision to keep it.
+  - **Primary-coordinate matches** select a block with no matching lines; it is shown as its header plus one elision marker.
+  - **`--ref`** lists the forward references of the focus block (with nested blocks), then its backlinks (hop 1). With `--hops N`, each further hop lists the forward and the backward neighbors separately, so every backward entry is a pure reverse chain, as `graph --impact` computes it.
+  - **`--role`** filters what each view selects: overview sections (other roles are listed under `blocks:`), `--full`'s blocks (with no gap lines), `--grep`'s innermost selection, `--ref`'s neighbors (the focus is always shown), and `--flat`'s rows.
+  - **The overview's file list** omits content-entity files, which are counted per kind (Decision 11).
+  - **Headers** append `status=<status>` when the block has one and `explains={ns.id}` for an attributed rationale section. Both are annotations.
+  - **Measured:** `--full` is 23–38% larger than the files it projects (deckbuilder: 68,282 vs 49,343 bytes), mostly block headers; every one-line `meta` key gets its own header. The overview is 4–6 KB.
 
 ---
 

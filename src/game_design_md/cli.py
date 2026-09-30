@@ -1,4 +1,4 @@
-"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch | init.
+"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch | init | view.
 
 Exit-code contract (spec §9):
   lint    : 0 if no errors, 1 otherwise.
@@ -8,10 +8,13 @@ Exit-code contract (spec §9):
   hook    : always 0 (informational; not a gate). See spec §9.7 (Task 4 v0.3).
   touch   : always 0 (idempotent — no-op if last_verified already today).
   init    : 0 on success, 1 on usage/IO error. See spec §9.8 (Task 7 v0.3).
+  view    : 0 on success (including empty selections); 2 for a --ref that
+            does not resolve. Never fails on lint findings. See spec §9.9.
 """
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -19,8 +22,8 @@ import click
 
 from game_design_md import __spec_version__, __version__
 from game_design_md import (
-    diff_cmd, export_cmd, hook_cmd, init_cmd, linter, spec_cmd, status_cmd,
-    verify_cmd,
+    diff_cmd, export_cmd, hook_cmd, init_cmd, ir, linter, spec_cmd, status_cmd,
+    verify_cmd, view_cmd,
 )
 from game_design_md.tree import Tree
 
@@ -248,6 +251,58 @@ def init_cmd_entry(dest: Path | None, genre: str | None,
     click.echo("  gdmd lint .          # confirm the tree is green")
     click.echo("  # then make the tree your own — see the STARTER NOTE")
     click.echo("  # comment block in game-design.md for what to delete.")
+    sys.exit(0)
+
+
+@main.command("view",
+              help="Projected views over a tree (spec §9.9): overview, --full, "
+                   "--grep, --ref. Every block is a verbatim slice with a "
+                   "<path>:<start>-<end> pointer. Computed on every call; "
+                   "nothing is stored.")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
+                                        path_type=Path))
+@click.option("--full", is_flag=True, default=False,
+              help="Every block and gap line of the tree, in canonical order.")
+@click.option("--grep", "grep", metavar="REGEX",
+              help="Blocks containing a match (Python regex), reduced to the "
+                   "matching lines and their ancestor keys.")
+@click.option("--ignore-case", is_flag=True, default=False,
+              help="Case-insensitive --grep.")
+@click.option("--ref", "ref", metavar="{NS.ID}",
+              help="One token in full, its forward references and its backlinks.")
+@click.option("--hops", type=click.IntRange(min=1), default=1, show_default=True,
+              help="With --ref: list neighbors up to N reference hops away.")
+@click.option("--flat", is_flag=True, default=False,
+              help="The selection as one line per block: role, id, pointer, status.")
+@click.option("--role", "roles", multiple=True, type=click.Choice(ir.ROLES),
+              help="Restrict the view to blocks of this role (repeatable).")
+@click.option("--json", "as_json", is_flag=True, default=False,
+              help="Emit JSON (always carries tree_sha).")
+def view_cmd_entry(path: Path, full: bool, grep: str | None, ignore_case: bool,
+                   ref: str | None, hops: int, flat: bool, roles: tuple[str, ...],
+                   as_json: bool) -> None:
+    modes = [m for m, on in (("--full", full), ("--grep", grep is not None),
+                             ("--ref", ref is not None)) if on]
+    if len(modes) > 1:
+        raise click.UsageError(f"{' and '.join(modes)} are mutually exclusive")
+    if ignore_case and grep is None:
+        raise click.UsageError("--ignore-case requires --grep")
+    if hops != 1 and ref is None:
+        raise click.UsageError("--hops requires --ref")
+    if grep is not None:
+        try:
+            re.compile(grep)
+        except re.error as e:
+            raise click.BadParameter(str(e), param_hint="--grep") from e
+    model = ir.compile_tree(path)
+    try:
+        out = view_cmd.run_view(model, str(path), full=full, grep=grep,
+                                ignore_case=ignore_case, ref=ref, hops=hops,
+                                flat=flat, roles=roles, as_json=as_json)
+    except view_cmd.Unresolved as e:
+        click.echo(f"gdmd view: {e.args[0]} does not resolve", err=True)
+        sys.exit(2)
+    click.echo(out)
     sys.exit(0)
 
 
