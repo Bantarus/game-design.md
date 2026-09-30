@@ -10,7 +10,7 @@ This copy's `gdmd` also provides projected views over a tree (spec §9.9). They 
 
 - `gdmd view <tree>`: overview. Each file (type, status, `last_verified`), each namespace's tokens (id, status, pointer), and content entities counted per kind.
 - `gdmd view <tree> --full`: every block and gap line of the tree, in canonical order, each with its pointer.
-- `gdmd view <tree> --grep <regex> [--ignore-case]`: the blocks that contain a match, reduced to the matching lines and their ancestor keys.
+- `gdmd view <tree> --grep <regex> [--ignore-case]`: the blocks that contain a match, reduced to the matching lines and their ancestor keys, and matching lines outside any block, each with its pointer.
 - `gdmd view <tree> --ref <{ns.id}> [--hops N]`: one token in full, its forward references, and the blocks that reference it, out to N hops.
 - `--flat`: any selection, as one line per block (role, id, pointer, status).
 - `--role <role>`: restricts any view to the given roles: `token`, `invariant`, `content-entity`, `rationale`, `impl`, `meta`.

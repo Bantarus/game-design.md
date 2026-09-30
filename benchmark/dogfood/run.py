@@ -59,10 +59,10 @@ CLAUDE_PIN_VERSION = "2.1.285"
 CLAUDE_PIN_SHA256 = "33dad1ec615a2e08cc78b494f05c110e49916de2c79d78ec8799ebf46b233d29"
 CLAUDE_BIN = Path.home() / ".local/share/gdmd-dogfood/claude" / f"claude-{CLAUDE_PIN_VERSION}"
 
-# D-025 amendment 4 (D-027 consequences): the views arm text is pinned by
+# D-025 amendments 4-5 (D-027 consequences): the views arm text is pinned by
 # SHA-256 before the Rule V matrix and reused unchanged for D-026's Rule V2.
 ARM_PIN_SHA256 = {
-    "views": "1db2d1b83c911857612e7de0f0ba3b9af2d9c6ed66caf045ce23e9cab6eadc98",
+    "views": "f77848a6452dcca3d7480cfa1b835e915be2b8846a8960f28f14b01a7d138712",
 }
 TOOLS = "Read,Grep,Glob,Edit,Write,Bash"
 # Bash is limited to read-only inspection plus the gdmd CLI (both arms alike).
@@ -113,7 +113,7 @@ def load_arm(arm: str) -> str:
     pinned = ARM_PIN_SHA256.get(arm)
     if pinned is not None and hashlib.sha256(data).hexdigest() != pinned:
         raise SystemExit(f"arms/{arm}.md does not match its pinned SHA-256 "
-                         "(D-025 amendment 4); a changed arm needs a new amendment")
+                         "(D-025 amendments 4-5); a changed arm needs a new amendment")
     return data.decode("utf-8")
 
 

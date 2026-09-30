@@ -925,6 +925,35 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
   The matrix commit is not chosen yet. The import probe is re-run there, as the lineage note requires.
 - **Not changed:** thresholds, metrics, cells, aggregation, non-inferiority and verdict mapping.
 
+### Amendment 5 (2026-09-30, before any matrix data): review decisions on `--grep`, AGENTS.md and `--full`
+
+- **Decided:** by the user at the WS2 review. The rule applied: **correctness is fixed before the matrix; anything that would only make the views arm score better on the primary waits.**
+- **1. `--grep` shows matches outside blocks (correctness, fixed).**
+  - The first `--grep` selected blocks only, as §9.9.3 then said. It silently missed a namespace key, a comment between tokens, or a title or introduction that plain `grep` finds. A search command that misses text is a trap for any agent. That this also biased the result against views is not the reason for the fix.
+  - `709dee0`: a gap-line match is a `gap` selection, with its pointer, under its file, and with its ancestor key lines; `--role` excludes gap selections. §9.9.3 gains one sentence. A property test on all 12 trees checks that every match is shown exactly once. Goldens were regenerated, and the diff adds exactly the gap selections.
+  - `arms/views.md`'s `--grep` line describes the selection, so it now adds "and matching lines outside any block, each with its pointer".
+  - **The new pin** replaces amendment 4's: `arms/views.md` SHA-256 `f77848a6452dcca3d7480cfa1b835e915be2b8846a8960f28f14b01a7d138712`, at the commit carrying this amendment. `run.ARM_PIN_SHA256` holds it. D-026's Rule V2 reuses these bytes.
+- **2. AGENTS.md lists `view` and `graph` (world, not arm).**
+  - AGENTS.md's own rule requires every new CLI command to land there, and a v0.4 that broke it would be an unrealistic v0.4.
+  - `d7533b8` adds a command-list entry shaped like its neighbours, saying what each command returns, with no when-to-use guidance. It sits in the Operating mode's `**CLI:**` line, beside `gdmd lint <tree>` and `gdmd verify <tree>`.
+  - It is part of the v0.4 world, which the views arm runs in; the baseline's AGENTS.md is v0.3's (overlay). It joins the Rule V limits below.
+- **3. `--full` stays as it is; a non-gating secondary measures it.**
+  - `--full` is 23–38% larger than the files it projects (D-027 implementation notes). Compacting it now would be motivated by a byte count that is Rule V's primary, the one kind of pre-matrix change the locks exist to prevent. `--full` is also not the main consultation path.
+  - `a47080e` adds **consultation bytes by view mode**: `view_mode_bytes` and `view_mode_calls` attribute each Bash call's full result bytes (errors included, as in the primary) to the mode its command runs. The modes are `overview`, `full`, `grep`, `ref`, `graph`, `other` (`--help`) and `mixed` (more than one mode in one call). The report shows it descriptively. It gates nothing, and the locked manipulation check keeps its substring counts.
+  - Any compaction of `--full` is a post-study-1 v0.4.x change, evaluated in study 2.
+- **The verdict computation is committed before the data.** `234d618` adds `benchmark/dogfood/analyze.py rule-v`, which implements this entry's Rule V as locked, with every branch of the verdict table tested on synthetic results. It resolves four points the locked text leaves open:
+  1. A cell's effective line is the last line that `supersedes` it. A second `error` stays not-success.
+  2. A line with no `consultation_bytes` (an `error` with no session) is listed and left out of its task-arm median.
+  3. An apparatus NULL (errors > 10%, contamination > 10% in an arm, or the manipulation check failing) decides the verdict, as the error-handling and manipulation-check bullets say ("that rule's verdict is NULL").
+  4. Contamination is an `out_of_copy_access` entry naming the harness (`benchmark/dogfood`, `test_dogfood.py`). It is counted conservatively, including a denied attempt, and every case is listed.
+- **The Rule V limits, consolidated for the report** (stopping rule 3):
+  - Rule V compares the v0.4 world plus the views arm with the v0.3 world plus the baseline arm, not the view commands in isolation.
+  - The v0.4 world includes `db1950e`'s spec and AGENTS.md fixes, and AGENTS.md's `view` / `graph` entry.
+  - README's verb list names `view | graph` in both arms. `CHANGELOG.md` and `DECISIONS.md` describe the views in both arms.
+  - The standing limits: small n, a single model, tasks written by the format's own author on its own trees, the judge residual, and no comparability with F-009.
+- **Order from here:** full sweep → `git push origin v0.4-views` (plain) → the import probe at this amendment's commit → the Rule V matrix, 30 runs, once, plus the guarded extension only if `analyze.py` reports it pending → report by the rule in `docs/case-studies/dogfood-01.md` → stop.
+- **Not changed:** thresholds, primary metrics, cells, aggregation, non-inferiority and verdict mapping.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design
