@@ -1,0 +1,57 @@
+{
+  "turns": 3,
+  "input_tokens": 6,
+  "output_tokens": 537,
+  "cache_read_tokens": 152582,
+  "cache_creation_tokens": 69262,
+  "tool_calls": 2,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 4678,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 74338,
+  "per_turn_occupancy": [
+    72387,
+    74338,
+    75125
+  ],
+  "tool_counts": {
+    "Bash": 2
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 4678,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "cmBGsa",
+      "result_bytes": 3562,
+      "is_error": false,
+      "vcc": "s2_negative_control__baseline__r2.txt:20-151"
+    },
+    {
+      "tool": "Bash",
+      "id": "pJkqTC",
+      "result_bytes": 1116,
+      "is_error": false,
+      "vcc": "s2_negative_control__baseline__r2.txt:163-198"
+    }
+  ]
+}

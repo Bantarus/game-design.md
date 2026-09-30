@@ -1,0 +1,182 @@
+{
+  "turns": 11,
+  "input_tokens": 22,
+  "output_tokens": 6473,
+  "cache_read_tokens": 817796,
+  "cache_creation_tokens": 83380,
+  "tool_calls": 15,
+  "files_read": 4,
+  "bytes_read": 9332,
+  "re_reads": 1,
+  "consultation_bytes": 20349,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 80829,
+  "per_turn_occupancy": [
+    72612,
+    75576,
+    78001,
+    79535,
+    80297,
+    80829,
+    84049,
+    85363,
+    87421,
+    88272,
+    89243
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Grep": 5,
+    "Read": 5,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 5933,
+  "bash_files_read": 3,
+  "all_files_read": 7,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "answers/s2_impact_tokens.txt",
+    "examples/lanternfall",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-tokens--baseline--r2-repo/886e5fc1-612a-4e82-8e7b-e626d8eba3b1/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-tokens--baseline--r2-repo/886e5fc1-612a-4e82-8e7b-e626d8eba3b1/scratchpad/g.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-tokens--baseline--r2-repo/886e5fc1-612a-4e82-8e7b-e626d8eba3b1/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-tokens--baseline--r2-repo/886e5fc1-612a-4e82-8e7b-e626d8eba3b1/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "MLvsKV",
+      "result_bytes": 5614,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:27-189"
+    },
+    {
+      "tool": "Bash",
+      "id": "EK8pGi",
+      "result_bytes": 1691,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:242-282"
+    },
+    {
+      "tool": "Write",
+      "id": "dkrySm",
+      "result_bytes": 237,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:336-336"
+    },
+    {
+      "tool": "Grep",
+      "id": "SVyWDj",
+      "result_bytes": 440,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:350-356"
+    },
+    {
+      "tool": "Bash",
+      "id": "UMBbam",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:368-368"
+    },
+    {
+      "tool": "Grep",
+      "id": "LRGAym",
+      "result_bytes": 488,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:383-390"
+    },
+    {
+      "tool": "Grep",
+      "id": "sWvvyQ",
+      "result_bytes": 377,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:404-408"
+    },
+    {
+      "tool": "Read",
+      "id": "qEjZfx",
+      "result_bytes": 1772,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:422-471"
+    },
+    {
+      "tool": "Read",
+      "id": "yeyrJh",
+      "result_bytes": 1419,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:484-522"
+    },
+    {
+      "tool": "Read",
+      "id": "hXjVV8",
+      "result_bytes": 2633,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:535-604"
+    },
+    {
+      "tool": "Grep",
+      "id": "v3zBAb",
+      "result_bytes": 1052,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:619-630"
+    },
+    {
+      "tool": "Read",
+      "id": "fjAybX",
+      "result_bytes": 521,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:644-657"
+    },
+    {
+      "tool": "Read",
+      "id": "EB3JDY",
+      "result_bytes": 2987,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:670-744"
+    },
+    {
+      "tool": "Grep",
+      "id": "9DAZ4Q",
+      "result_bytes": 769,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:765-770"
+    },
+    {
+      "tool": "Bash",
+      "id": "UnJCWV",
+      "result_bytes": 319,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r2.txt:782-794"
+    }
+  ]
+}

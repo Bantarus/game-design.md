@@ -1,0 +1,94 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1756,
+  "cache_read_tokens": 523775,
+  "cache_creation_tokens": 82767,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 16017,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 87983,
+  "per_turn_occupancy": [
+    80172,
+    85237,
+    86835,
+    87983,
+    88297,
+    88738,
+    89294
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "overview": 10058
+  },
+  "view_mode_calls": {
+    "overview": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 14962,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/gdd/systems/loot.md",
+    "examples/lanternfall/impl/lanternfall/loot/drop_tables.py"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "KvyVMd",
+      "result_bytes": 10058,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r3.txt:20-196"
+    },
+    {
+      "tool": "Bash",
+      "id": "yFqC5y",
+      "result_bytes": 3070,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r3.txt:208-284"
+    },
+    {
+      "tool": "Bash",
+      "id": "TGQFRj",
+      "result_bytes": 1834,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r3.txt:296-354"
+    },
+    {
+      "tool": "Bash",
+      "id": "AoMTRd",
+      "result_bytes": 197,
+      "is_error": true,
+      "vcc": "s2_maintenance__views__r3.txt:370-373"
+    },
+    {
+      "tool": "Bash",
+      "id": "irkjur",
+      "result_bytes": 568,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r3.txt:385-399"
+    },
+    {
+      "tool": "Bash",
+      "id": "B4fqdk",
+      "result_bytes": 290,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r3.txt:417-427"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 2468,
+  "cache_read_tokens": 431036,
+  "cache_creation_tokens": 80799,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 9745,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 86284.0,
+  "per_turn_occupancy": [
+    80360,
+    84683,
+    86056,
+    86512,
+    86910,
+    87326
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Write": 1
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 8518
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 792,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/content/items/dusk_dirk.yaml",
+    "examples/lanternfall/content/items/umber_ring.yaml",
+    "examples/lanternfall/content/skills/wick_chant.yaml"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "CoFy4f",
+      "result_bytes": 8518,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r3.txt:33-176"
+    },
+    {
+      "tool": "Bash",
+      "id": "LiHEMp",
+      "result_bytes": 792,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r3.txt:188-197"
+    },
+    {
+      "tool": "Bash",
+      "id": "sgCosV",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r3.txt:222-222"
+    },
+    {
+      "tool": "Bash",
+      "id": "3EUnfQ",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r3.txt:234-234"
+    },
+    {
+      "tool": "Write",
+      "id": "Sn5azM",
+      "result_bytes": 195,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r3.txt:260-260"
+    }
+  ]
+}

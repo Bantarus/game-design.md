@@ -1,0 +1,101 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 1820,
+  "cache_read_tokens": 627211,
+  "cache_creation_tokens": 89479,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 30083,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 94248.5,
+  "per_turn_occupancy": [
+    80161,
+    80376,
+    81371,
+    94058,
+    94439,
+    94847,
+    95448,
+    96006
+  ],
+  "tool_counts": {
+    "Bash": 7
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "grep": 26510
+  },
+  "view_mode_calls": {
+    "grep": 1
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 2489,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/impl/lanternfall/loot/drop_tables.py"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "M5qtJn",
+      "result_bytes": 29,
+      "is_error": true,
+      "vcc": "s2_maintenance__views__r1.txt:20-20"
+    },
+    {
+      "tool": "Bash",
+      "id": "rLKxhe",
+      "result_bytes": 1646,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r1.txt:32-74"
+    },
+    {
+      "tool": "Bash",
+      "id": "yoTAGY",
+      "result_bytes": 26510,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r1.txt:88-593"
+    },
+    {
+      "tool": "Bash",
+      "id": "qFZcFx",
+      "result_bytes": 197,
+      "is_error": true,
+      "vcc": "s2_maintenance__views__r1.txt:609-612"
+    },
+    {
+      "tool": "Bash",
+      "id": "nXojHL",
+      "result_bytes": 568,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r1.txt:624-638"
+    },
+    {
+      "tool": "Bash",
+      "id": "FvZoGA",
+      "result_bytes": 843,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r1.txt:650-674"
+    },
+    {
+      "tool": "Bash",
+      "id": "S7RmaA",
+      "result_bytes": 290,
+      "is_error": false,
+      "vcc": "s2_maintenance__views__r1.txt:692-702"
+    }
+  ]
+}

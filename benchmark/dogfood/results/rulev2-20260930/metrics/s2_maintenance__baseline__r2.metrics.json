@@ -1,0 +1,97 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1480,
+  "cache_read_tokens": 460462,
+  "cache_creation_tokens": 72941,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 11718,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 76477,
+  "per_turn_occupancy": [
+    72396,
+    74722,
+    74996,
+    76477,
+    77701,
+    78321,
+    78804
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 8943,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/loot.md",
+    "examples/lanternfall/impl/lanternfall/loot/drop_tables.py"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "SHBXjy",
+      "result_bytes": 4881,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r2.txt:20-146"
+    },
+    {
+      "tool": "Bash",
+      "id": "NHNJh3",
+      "result_bytes": 70,
+      "is_error": true,
+      "vcc": "s2_maintenance__baseline__r2.txt:158-158"
+    },
+    {
+      "tool": "Bash",
+      "id": "HQedy8",
+      "result_bytes": 3062,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r2.txt:170-252"
+    },
+    {
+      "tool": "Bash",
+      "id": "QVW8qj",
+      "result_bytes": 2410,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r2.txt:264-322"
+    },
+    {
+      "tool": "Bash",
+      "id": "ofDhM1",
+      "result_bytes": 1000,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r2.txt:334-358"
+    },
+    {
+      "tool": "Bash",
+      "id": "2VTPL4",
+      "result_bytes": 295,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r2.txt:376-387"
+    }
+  ]
+}

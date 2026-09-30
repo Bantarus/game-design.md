@@ -1,0 +1,71 @@
+{
+  "turns": 4,
+  "input_tokens": 8,
+  "output_tokens": 793,
+  "cache_read_tokens": 226009,
+  "cache_creation_tokens": 68916,
+  "tool_calls": 3,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 3840,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 73881.5,
+  "per_turn_occupancy": [
+    72391,
+    73710,
+    74053,
+    74779
+  ],
+  "tool_counts": {
+    "Bash": 3
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 3649,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/game-design.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "ib4Gpy",
+      "result_bytes": 2581,
+      "is_error": false,
+      "vcc": "s2_negative_control__baseline__r3.txt:20-91"
+    },
+    {
+      "tool": "Bash",
+      "id": "KrG1Cf",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_negative_control__baseline__r3.txt:103-103"
+    },
+    {
+      "tool": "Bash",
+      "id": "FzbtKz",
+      "result_bytes": 1068,
+      "is_error": false,
+      "vcc": "s2_negative_control__baseline__r3.txt:115-149"
+    }
+  ]
+}

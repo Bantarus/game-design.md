@@ -1,0 +1,209 @@
+{
+  "turns": 10,
+  "input_tokens": 20,
+  "output_tokens": 6513,
+  "cache_read_tokens": 728474,
+  "cache_creation_tokens": 82628,
+  "tool_calls": 18,
+  "files_read": 7,
+  "bytes_read": 9543,
+  "re_reads": 0,
+  "consultation_bytes": 18836,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 80828.0,
+  "per_turn_occupancy": [
+    72586,
+    77877,
+    78413,
+    78979,
+    80169,
+    81487,
+    81827,
+    84093,
+    87200,
+    88491
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Grep": 3,
+    "Read": 7,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 1051,
+  "bash_files_read": 3,
+  "all_files_read": 10,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/content/encounters/lich_hollow.yaml",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-forward--baseline--r1-repo/2473c7fa-1022-4657-bcc4-5a6bd269ab26/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-forward--baseline--r1-repo/2473c7fa-1022-4657-bcc4-5a6bd269ab26/scratchpad/g.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-forward--baseline--r1-repo/2473c7fa-1022-4657-bcc4-5a6bd269ab26/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-forward--baseline--r1-repo/2473c7fa-1022-4657-bcc4-5a6bd269ab26/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-forward--baseline--r1-repo/2473c7fa-1022-4657-bcc4-5a6bd269ab26/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "CqSHcc",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:33-117"
+    },
+    {
+      "tool": "Bash",
+      "id": "AArYWz",
+      "result_bytes": 6814,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:129-328"
+    },
+    {
+      "tool": "Bash",
+      "id": "V4oyGd",
+      "result_bytes": 117,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:340-340"
+    },
+    {
+      "tool": "Bash",
+      "id": "Vf7p6R",
+      "result_bytes": 804,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:352-384"
+    },
+    {
+      "tool": "Bash",
+      "id": "r3o2C8",
+      "result_bytes": 34,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:435-435"
+    },
+    {
+      "tool": "Write",
+      "id": "e1Kwjr",
+      "result_bytes": 238,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:506-506"
+    },
+    {
+      "tool": "Bash",
+      "id": "AtcJoP",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:518-518"
+    },
+    {
+      "tool": "Bash",
+      "id": "JUnJeo",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:533-533"
+    },
+    {
+      "tool": "Read",
+      "id": "zsbDV4",
+      "result_bytes": 368,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:545-560"
+    },
+    {
+      "tool": "Read",
+      "id": "Y46Q9R",
+      "result_bytes": 435,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:572-589"
+    },
+    {
+      "tool": "Grep",
+      "id": "rA4TdF",
+      "result_bytes": 100,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:604-605"
+    },
+    {
+      "tool": "Read",
+      "id": "M65HQr",
+      "result_bytes": 491,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:617-635"
+    },
+    {
+      "tool": "Read",
+      "id": "PQYbQY",
+      "result_bytes": 441,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:647-664"
+    },
+    {
+      "tool": "Read",
+      "id": "epkDJ5",
+      "result_bytes": 413,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:676-692"
+    },
+    {
+      "tool": "Read",
+      "id": "yiWJha",
+      "result_bytes": 3914,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:706-835"
+    },
+    {
+      "tool": "Grep",
+      "id": "gpmyib",
+      "result_bytes": 660,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:850-858"
+    },
+    {
+      "tool": "Grep",
+      "id": "9abQ5G",
+      "result_bytes": 219,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:873-875"
+    },
+    {
+      "tool": "Bash",
+      "id": "yoajT2",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:888-897"
+    }
+  ]
+}

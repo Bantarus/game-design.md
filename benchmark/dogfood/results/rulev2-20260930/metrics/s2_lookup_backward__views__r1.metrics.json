@@ -1,0 +1,85 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1606,
+  "cache_read_tokens": 419016,
+  "cache_creation_tokens": 77352,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 4044,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83118.5,
+  "per_turn_occupancy": [
+    80389,
+    82452,
+    83008,
+    83229,
+    83423,
+    83879
+  ],
+  "tool_counts": {
+    "Bash": 3,
+    "Glob": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 3593
+  },
+  "view_mode_calls": {
+    "graph": 1
+  },
+  "bash_read_calls": 0,
+  "bash_read_bytes": 0,
+  "bash_files_read": 0,
+  "all_files_read": 0,
+  "all_re_reads": 0,
+  "all_files_read_paths": [],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "BJhv3V",
+      "result_bytes": 3593,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__views__r1.txt:33-71"
+    },
+    {
+      "tool": "Bash",
+      "id": "du8Nvt",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__views__r1.txt:100-100"
+    },
+    {
+      "tool": "Bash",
+      "id": "dMG3oE",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__views__r1.txt:112-112"
+    },
+    {
+      "tool": "Glob",
+      "id": "ikU7Mx",
+      "result_bytes": 14,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__views__r1.txt:127-127"
+    },
+    {
+      "tool": "Write",
+      "id": "8iWS6n",
+      "result_bytes": 197,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__views__r1.txt:155-155"
+    }
+  ]
+}

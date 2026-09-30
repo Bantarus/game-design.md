@@ -1,0 +1,170 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 3562,
+  "cache_read_tokens": 565480,
+  "cache_creation_tokens": 80892,
+  "tool_calls": 15,
+  "files_read": 9,
+  "bytes_read": 15222,
+  "re_reads": 0,
+  "consultation_bytes": 22110,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81046.0,
+  "per_turn_occupancy": [
+    72588,
+    76991,
+    77246,
+    78003,
+    84089,
+    84757,
+    85959,
+    86755
+  ],
+  "tool_counts": {
+    "Bash": 2,
+    "Glob": 1,
+    "Grep": 2,
+    "Read": 9,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 0,
+  "bash_read_bytes": 0,
+  "bash_files_read": 0,
+  "all_files_read": 9,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/content/encounters/lich_hollow.yaml",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../gdd/content/encounters.md"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "JnvcNP",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:33-117"
+    },
+    {
+      "tool": "Glob",
+      "id": "UBczKp",
+      "result_bytes": 5321,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:130-230"
+    },
+    {
+      "tool": "Bash",
+      "id": "nR41dJ",
+      "result_bytes": 213,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:242-242"
+    },
+    {
+      "tool": "Read",
+      "id": "D6aWdf",
+      "result_bytes": 399,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:254-268"
+    },
+    {
+      "tool": "Read",
+      "id": "irktzX",
+      "result_bytes": 448,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:280-295"
+    },
+    {
+      "tool": "Read",
+      "id": "wqncUk",
+      "result_bytes": 368,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:307-322"
+    },
+    {
+      "tool": "Read",
+      "id": "gLaX2g",
+      "result_bytes": 435,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:334-351"
+    },
+    {
+      "tool": "Read",
+      "id": "6LA9RA",
+      "result_bytes": 8746,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:363-637"
+    },
+    {
+      "tool": "Read",
+      "id": "q8Dgwr",
+      "result_bytes": 491,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:649-667"
+    },
+    {
+      "tool": "Read",
+      "id": "meB6fT",
+      "result_bytes": 441,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:679-696"
+    },
+    {
+      "tool": "Read",
+      "id": "KcZNum",
+      "result_bytes": 413,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:708-724"
+    },
+    {
+      "tool": "Bash",
+      "id": "bYqXPK",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:736-736"
+    },
+    {
+      "tool": "Grep",
+      "id": "HhXnA6",
+      "result_bytes": 849,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:753-761"
+    },
+    {
+      "tool": "Grep",
+      "id": "rCYKnw",
+      "result_bytes": 282,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:776-778"
+    },
+    {
+      "tool": "Write",
+      "id": "1mNNTb",
+      "result_bytes": 198,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r2.txt:802-802"
+    }
+  ]
+}
