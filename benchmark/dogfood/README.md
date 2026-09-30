@@ -71,7 +71,9 @@ The copy sits outside the native installer's `versions/` directory, so auto-upda
 - **Git:** a fresh `git init`, with its own `.git`; not a worktree, so a subject's commit can't reach the real repo. Checkers diff against the `dogfood-base` tag.
 - **CLI under test:** `gdmd` on PATH is a per-cell shim: the copy's own `src/` (`matrix`) or the v0.3 venv (`v0.3`).
 - **Claude Code flags:**
-  - `--restricted`: file tools confined to the copy; user, project and local settings ignored, so the maintainer's plugins, skills, hooks and effort don't leak in.
+  - `--setting-sources project,local`: loads the copy's own `CLAUDE.md` with its `@`-imports, and no user settings, so the maintainer's plugins, hooks and effort don't leak in. (`--restricted` is **not** used: it also drops `CLAUDE.md`; D-025 amendment 1.)
+  - Auto-memory off (`--settings '{"autoMemoryEnabled": false}'` and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`): otherwise the subject is offered a memory directory outside the copy.
+  - Every run is checked from its transcript: `CLAUDE.md` injected, no auto-memory section. A failure makes the run an apparatus `error`.
   - `--strict-mcp-config`: no MCP servers.
   - `--disable-slash-commands`.
   - `--tools Read,Grep,Glob,Edit,Write,Bash`, with Bash allowlisted to read-only inspection plus `gdmd`.
@@ -80,7 +82,7 @@ The copy sits outside the native installer's `versions/` directory, so auto-upda
 - **Caps:** `--max-budget-usd` per run and a wall-clock timeout. The turn cap is enforced by `run.py` on the stream: this CLI has no documented `--max-turns`.
 - **Flag check:** `run.py` validates every flag it passes against `claude --help` before running (including `--dry-run`).
 
-Residual leakage risk: Bash `cat`/`grep` can read absolute paths outside the copy. It isn't prevented, but it is **detected**: `extract.py` reports any tool input path outside the copy as `out_of_copy_access`, and a run with a non-zero count is flagged.
+Residual leakage risk: file tools and Bash `cat`/`grep` can read absolute paths outside the copy. It isn't prevented, but it is **detected**: `extract.py` reports any tool input path outside the copy as `out_of_copy_access`, and a run with a non-zero count is flagged.
 
 ## Outcomes (D-025)
 
