@@ -1473,6 +1473,17 @@ The tree, the tooling layer, the import layer and every task file are byte-ident
 - **Tests:** six new classified paths (the V2 case, a uid glob with the full id, too short a prefix, another session's prefix, `*/*`, and a literal other key with the own id), plus the V2 recomputation.
 - **Counterfactual adoption:** made after the results, but it changes no recorded verdict, and it applies only to runs not yet made.
 
+### Study 2 complete (2026-09-30): the tool freeze and the lint hold end
+
+- **Decided:** by the user at the study-2 review ("freeze and hold end: record it in D-026, study 2 complete").
+- **Study 2 is complete.** Rules V2 and C2 each ran once and were reported (`docs/case-studies/dogfood-02.md`). No re-run, extension or further study-2 cell is pending.
+- **The tool freeze ends** (amendment 3). `gdmd view` and `gdmd graph` may change again, each change with its own D-entry.
+  - Any change to their output is a v0.4.x change. It needs its own measurement before any claim, and it is never retrofitted into study 1's or study 2's result (OI-007, D-032).
+- **The lint hold ends** (amendment 3). Lint-behavior changes may land, each with its own D-entry and a proof of fire: OI-003, OI-005 and OI-006 class A, then the schema-validation rule.
+  - The judge residual that motivated the hold applies to runs, and none is pending.
+- **What stays frozen:** the study-2 fixture. Its tree manifest (`718e52d2…`), answers, prompts, patches and edge list stay pinned, so both matrices remain reproducible and re-analyzable.
+  - **A later lint or view change may change how the tree lints or renders.** The tests that asserted the freeze-time properties are then pinned to what they measured: the tree lints 0/0 under the study-2 commit's `gdmd`, and identically under v0.3's. They do not move with HEAD.
+
 ---
 
 ## D-027 — `gdmd view` + `gdmd graph`: projected views over a tree (WS2)
@@ -1865,7 +1876,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
     - Proof of fire: the pre-D-031 `heroes.md` fails the guard, and an invalid `enforcement:` injected into a class-A file fails the second test.
   - **Remaining, after study 2 (D-026 amendment 3):** the class A decision (spec §4.11's example vs `$defs.TokenRef`), then whether lint runs the schema.
 
-## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; tool freeze)
+## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; the tool freeze ended with study 2)
 
 - **Logged:** 2026-09-30, from study 1's Rule V traces. These are descriptive observations, not evidence. Under D-026 amendment 3 they wait until study 2's matrices complete; none is in code.
 - **Candidates**, each needing observed need and its own D-entry when taken up:
