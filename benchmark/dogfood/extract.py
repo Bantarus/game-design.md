@@ -121,6 +121,49 @@ def bash_reads(command: str, cwd: str) -> tuple[bool, list[str], str]:
     return is_read, paths, cwd
 
 
+# ---- Consultation bytes by view mode (D-025 amendment 5: non-gating) -------------
+# Which `gdmd view` / `gdmd graph` mode a Bash call runs, so the report can show
+# which modes the views arm's consultation bytes came from.
+VIEW_MODES = ("overview", "full", "grep", "ref", "graph", "other", "mixed")
+_GDMD_PROGS = {"gdmd", "game-design.md"}
+_WRAPPERS = {"env", "time", "timeout", "nice", "nohup", "command", "exec", "uv", "run"}
+_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+
+
+def _segment_view_mode(w: list[str]) -> str | None:
+    i = 0
+    while i < len(w) and (_ASSIGNMENT.match(w[i]) or os.path.basename(w[i]) in _WRAPPERS
+                          or w[i].startswith("-") or w[i].isdigit()):
+        i += 1
+    if i >= len(w) or os.path.basename(w[i]) not in _GDMD_PROGS:
+        return None
+    args = w[i + 1:]
+    sub = next((t for t in args if not t.startswith("-")), None)
+    if sub not in ("view", "graph"):
+        return None
+    rest = args[args.index(sub) + 1:]
+    if any(t in ("-h", "--help") for t in rest):
+        return "other"
+    if sub == "graph":
+        return "graph"
+    for flag, mode in (("--full", "full"), ("--grep", "grep"), ("--ref", "ref")):
+        if any(t == flag or t.startswith(flag + "=") for t in rest):
+            return mode
+    return "overview"
+
+
+def view_mode(command: str) -> str | None:
+    """The view mode a Bash command runs: `overview`, `full`, `grep`, `ref`
+    (for `gdmd view`), `graph` (any `gdmd graph`), `other` (`--help`), or
+    `mixed` when one call runs more than one mode. None if it runs neither
+    command. The program may follow env assignments and simple wrappers
+    (`timeout 30`, `uv run`) and may be a path (`.venv/bin/gdmd`)."""
+    modes = {m for w in _segments(command) if (m := _segment_view_mode(w))}
+    if not modes:
+        return None
+    return modes.pop() if len(modes) == 1 else "mixed"
+
+
 def _rel(path: str, root: str | None) -> str:
     if root and (path == root or path.startswith(root + os.sep)):
         return os.path.relpath(path, root)
@@ -275,6 +318,18 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
         detail.append({"tool": c["name"], "id": tid[-6:], "result_bytes": c["result_bytes"],
                        "is_error": c["is_error"], "vcc": pointers.get(tid[-6:])})
 
+    # amendment 5: every call's full result bytes (errors included, as in the
+    # primary) are attributed to the view mode its command runs.
+    mode_bytes: dict[str, int] = {}
+    mode_calls: dict[str, int] = {}
+    for c in calls.values():
+        if c["name"] != "Bash" or not isinstance(c["input"], dict):
+            continue
+        mode = view_mode(str(c["input"].get("command", "")))
+        if mode:
+            mode_bytes[mode] = mode_bytes.get(mode, 0) + c["result_bytes"]
+            mode_calls[mode] = mode_calls.get(mode, 0) + 1
+
     def total(k: str) -> int:
         return sum(int(u.get(k, 0)) for u in usage.values())
 
@@ -299,6 +354,8 @@ def extract(session: Path, vcc=None, copy_root: Path | None = None,
                                and "gdmd view" in str(c["input"].get("command", ""))),
         "gdmd_graph_calls": sum(1 for c in calls.values() if c["name"] == "Bash"
                                 and "gdmd graph" in str(c["input"].get("command", ""))),
+        "view_mode_bytes": {m: mode_bytes[m] for m in VIEW_MODES if m in mode_bytes},
+        "view_mode_calls": {m: mode_calls[m] for m in VIEW_MODES if m in mode_calls},
         "bash_read_calls": bash_calls,
         "bash_read_bytes": bash_bytes,
         "bash_files_read": len(set(bash_paths)),

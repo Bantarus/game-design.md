@@ -339,7 +339,7 @@ def run_cell(task: fixture.Task, arm: str, repeat: int, cfg: argparse.Namespace,
             "consultation_bytes", "median_turn_occupancy", "gdmd_view_calls",
             "gdmd_graph_calls", "claude_md_loaded", "auto_memory_prompt",
             "assistant_models", "bash_read_calls", "bash_read_bytes", "bash_files_read",
-            "all_files_read", "all_re_reads")},
+            "all_files_read", "all_re_reads", "view_mode_bytes", "view_mode_calls")},
         "out_of_copy_access": len(metrics.get("out_of_copy_access", [])) if metrics else None,
     }
     if not cfg.keep_copies:

@@ -529,6 +529,31 @@ def test_bash_reads(command, cwd, want_read, want_paths, want_cwd):
     assert bash_reads(command, cwd) == (want_read, want_paths, want_cwd)
 
 
+@pytest.mark.parametrize("command,want", [
+    ("gdmd view examples/deckbuilder", "overview"),
+    ("gdmd view t --flat --role token --json", "overview"),
+    ("gdmd view t --full | head -50", "full"),
+    ('gdmd view t --grep "energy|mana" --ignore-case', "grep"),
+    (".venv/bin/gdmd view t --grep=x", "grep"),
+    ("gdmd view t --ref {resources.energy} --hops 2", "ref"),
+    ("gdmd graph t --impact {x.y}", "graph"),
+    ("uv run gdmd graph t --cycles --format dot", "graph"),
+    ("PATH=/x:$PATH timeout 30 gdmd view t", "overview"),
+    ("game-design.md view t --full", "full"),
+    ("gdmd view --help", "other"),
+    ("gdmd graph t --help", "other"),
+    ("cd examples && gdmd view deckbuilder --grep x", "grep"),
+    ("gdmd view t; gdmd graph t", "mixed"),
+    ('grep -rn "gdmd view" docs', None),       # quoted: a pattern, not a command
+    ("echo gdmd view", None),
+    ("gdmd lint t", None),
+])
+def test_view_mode(command, want):
+    # D-025 amendment 5: consultation bytes by view mode (non-gating).
+    from extract import view_mode
+    assert view_mode(command) == want
+
+
 def test_archive_sessions_outside_repo_with_member_hashes(tmp_path, monkeypatch):
     import tarfile
     monkeypatch.setattr(dogfood_run, "RESULTS_DIR", tmp_path / "results")
@@ -630,6 +655,38 @@ def test_extract_bash_reads_across_calls(tmp_path):
     assert m["all_files_read_paths"] == ["gdd/loops.md", "gdd/mechanics.md"]
     assert (m["all_files_read"], m["all_re_reads"]) == (2, 1)
     assert (m["files_read"], m["re_reads"]) == (1, 0)          # Read-only secondaries unchanged
+    assert m["view_mode_bytes"] == {} and m["view_mode_calls"] == {}
+
+
+def test_extract_view_mode_bytes(tmp_path):
+    # D-025 amendment 5: each view call's full result bytes, errors included
+    # (as in the primary), go to its mode; other calls are not attributed.
+    from extract import extract, load_vcc
+    try:
+        vcc = load_vcc()
+    except FileNotFoundError:
+        pytest.skip("VCC.py not installed")
+    usage = {"input_tokens": 1, "cache_creation_input_tokens": 0,
+             "cache_read_input_tokens": 0, "output_tokens": 1}
+    calls = [("gdmd view t", "o" * 10, False), ("gdmd view t --full", "f" * 100, False),
+             ("gdmd view t --grep x", "g" * 7, False), ("gdmd view t --grep y", "g" * 3, False),
+             ("gdmd graph t --impact {a.b}", "does not resolve", True),
+             ("cat gdd/loops.md", "c" * 50, False)]
+    recs = [{"type": "user", "message": {"role": "user", "content": "task"}}]
+    for i, (cmd, text, err) in enumerate(calls):
+        tid = f"toolu_{i:06d}"
+        recs += [_rec("assistant", id=f"m{i}", role="assistant", usage=usage,
+                      content=[{"type": "tool_use", "id": tid, "name": "Bash",
+                                "input": {"command": cmd}}]),
+                 {"type": "user", "message": {"role": "user", "content": [
+                     {"type": "tool_result", "tool_use_id": tid, "content": text,
+                      "is_error": err}]}}]
+    session = tmp_path / "s.jsonl"
+    session.write_text("\n".join(json.dumps(r) for r in recs) + "\n")
+    m = extract(session, vcc, Path("/copy"), tmp_path / "views")
+    assert m["view_mode_bytes"] == {"overview": 10, "full": 100, "grep": 10, "graph": 16}
+    assert m["view_mode_calls"] == {"overview": 1, "full": 1, "grep": 2, "graph": 1}
+    assert m["consultation_bytes"] == 10 + 100 + 10 + 16 + 50
 
 
 def test_extract_flags_out_of_copy_bash_paths(tmp_path):
