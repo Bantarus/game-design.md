@@ -60,7 +60,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Working around a bug instead of diagnosing the root cause.** When Task 4's hook check broke under pre-commit's CWD convention, the fix was path normalization in `check_staged`, not a workaround in the renderer.
 - **Fabricating values.** When uncertain, reference an existing token, ask the user, or mark the entity `draft` with empty `implemented_in:`. Never invent numbers, never invent token names.
 
-**CLI:** `gdmd lint <tree>` (verify the tree compiles after every edit); `gdmd verify <tree>` (for trees with adapters); `pytest` (for src/ + tests/ changes).
+**CLI:** `gdmd lint <tree>` (verify the tree compiles after every edit); `gdmd verify <tree>` (for trees with adapters); `gdmd view <tree>` (projected views of a tree: overview, `--full`, `--grep`, `--ref`; spec §9.9); `gdmd graph <tree>` (the tree's reference graph: `--impact`, `--from/--to`, `--cycles`); `pytest` (for src/ + tests/ changes).
 
 ### Maintenance — pre-commit, status hygiene, audit lineage
 
