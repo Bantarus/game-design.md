@@ -2197,6 +2197,30 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - The tree lints 0/0.
 - It is not a study-2 task tree, and no test pins its content.
 
+## D-042 — OI-007: the view-usability candidates are a design note, not a change
+
+- **Status:** decided (2026-10-01), step (g) of the user's post-study-2 order: "OI-007 usability ideas (grep caps, count-only, a lighter overview): design note only for now. Any change to view output needs its own measurement before any claim."
+- **Related:** OI-007, D-025 / D-026 (the studies whose traces motivate it), D-027 (the views), spec §9.9 and §11.3.
+- **The note:** [`docs/design-notes/view-usability.md`](docs/design-notes/view-usability.md). No code, spec or arm text changes.
+
+### What the note records
+
+- **Evidence**, all descriptive:
+  - both studies' consultation bytes by view mode;
+  - today's size of study 1's broad regex on the deckbuilder: 18,142 bytes in 58 blocks, or 4,111 bytes as `--flat`;
+  - the study-2 overview's composition: 8,448 bytes, of which about 6,000 are per-token lines;
+  - `--full`'s +38% on the deckbuilder, unused in either study.
+- **Six candidates,** each with its motivation, its fit with the §9.9.2 lowering rule, its risks, and the measurement it would need: a `--grep` block cap (elided blocks listed as `--flat` lines with pointers), a count-only mode, a lighter overview (the user's addition), `-i`, `--full` header compaction, and the harness usage line.
+- **A correction to OI-007's candidate 4:** an `-i` alias would not have prevented the slip it was logged for.
+  - `--grep` takes a value, so click consumes the next token, `-i`, as the regex whether or not `-i` is an option. Checked with click 8.4: `--grep -i energy` still fails with "unexpected extra argument".
+  - What would address the slip is a usage error for a `--grep` value that is exactly a known option.
+- **An ordering by evidence,** if any of this is taken up: the cap and the lighter overview have observed cost behind them. The count-only mode first needs evidence that subjects size searches at all, since none used `--flat`. `--full` compaction has no observed need.
+
+### Not decided
+
+- Which candidate, if any, is built.
+- Each one needs its own D-entry, the spec §9.9.3 text, goldens, and a pre-registered rule run on a new pinned arm before any claim.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2338,6 +2362,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   4. **`-i` as an alias of `--ignore-case`.** One subject wrote `--grep -i '<pattern>'`, and `-i` became the pattern.
   5. **Cosmetic, harness only:** under the dogfood shim, click's usage line names `python -m game_design_md` instead of `gdmd`.
 - **Evaluation:** any change to view or graph output is a v0.4.x change, evaluated in a later study, never retrofitted into study 1's or study 2's result.
+- **Design note (2026-10-01):** [`docs/design-notes/view-usability.md`](docs/design-notes/view-usability.md) (D-042) records the evidence and a sketch, risk and required measurement for each candidate, plus a lighter overview. Candidate 4 is corrected there: an `-i` alias would not have prevented the logged slip. OI-007 stays open: nothing is built.
 
 ## OI-008 — Survival benchmark: the clock's delta cannot read `sleep_through_night`'s hours-based `time_cost`
 
