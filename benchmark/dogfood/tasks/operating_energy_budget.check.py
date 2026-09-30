@@ -6,6 +6,8 @@ propagation set below (lint can't find the second one; it's a value coupling
 reached through `velocity_target`), with no other token, content-schema or
 content-entity change, only allowed ritual metadata edits, and a 0/0 lint.
 Prose bodies may change (the economy-balance rationale states the old number).
+The task text fixes the intended end state (a fixed budget of exactly 4, still
+a hard target, nothing else retuned), so exactly one token end state is valid.
 """
 import sys
 from pathlib import Path

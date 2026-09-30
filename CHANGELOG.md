@@ -28,6 +28,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
 ### Changed
 
+- **Dogfood operating task:** the task text now states the intended end state. The budget stays a fixed, exact 4 as a hard target, and only tokens that restate it change. "Propagate to every token whose value must change" admitted defensible alternatives, such as a `[3, 4]` band or a retuned `average_card_cost`, that the frozen oracle rejected. Two known-bad tests pin those alternatives as failures.
 - **Qwen help-benchmark archived** to `benchmark/archived/phase5_qwen/` (byte-preserving move; pinned sanitizer and flattener SHAs verified unchanged). It is frozen and not runnable in place; faithful re-execution requires a checkout of trial-zero commit `37c004d`. Its three pure-logic test modules still run from the new import path. The locked pre-registration is left unedited, with the path mapping in `benchmark/archived/README.md`. `benchmark/games/` stays in place.
 
 ### Fixed
