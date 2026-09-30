@@ -1,0 +1,81 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1515,
+  "cache_read_tokens": 143387,
+  "cache_creation_tokens": 32285,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 13848,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 36714,
+  "per_turn_occupancy": [
+    30817,
+    32346,
+    36714,
+    37657,
+    38148
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 2855
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 4,
+  "bash_read_bytes": 13848,
+  "bash_files_read": 5,
+  "all_files_read": 5,
+  "all_re_reads": 4,
+  "all_files_read_paths": [
+    "answers/lookup.txt",
+    "examples/deckbuilder",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/systems/combat.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "38rN1R",
+      "result_bytes": 2855,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r1.txt:27-111"
+    },
+    {
+      "tool": "Bash",
+      "id": "3CXLxL",
+      "result_bytes": 9634,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r1.txt:123-374"
+    },
+    {
+      "tool": "Bash",
+      "id": "f9XAEh",
+      "result_bytes": 1203,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r1.txt:386-418"
+    },
+    {
+      "tool": "Bash",
+      "id": "5GCmrc",
+      "result_bytes": 156,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r1.txt:430-431"
+    }
+  ]
+}

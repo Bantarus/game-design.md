@@ -1,0 +1,85 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1300,
+  "cache_read_tokens": 330211,
+  "cache_creation_tokens": 76826,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 4534,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81973,
+  "per_turn_occupancy": [
+    79466,
+    80657,
+    81973,
+    82262,
+    82689
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 1930
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 4343,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/lookup.txt",
+    "examples/deckbuilder",
+    "examples/deckbuilder/examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "tZmsne",
+      "result_bytes": 1930,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r2.txt:27-57"
+    },
+    {
+      "tool": "Bash",
+      "id": "QbDz9y",
+      "result_bytes": 2257,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r2.txt:69-132"
+    },
+    {
+      "tool": "Bash",
+      "id": "tnarPz",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "lookup_refs__import-full__r2.txt:144-144"
+    },
+    {
+      "tool": "Bash",
+      "id": "PmhJnE",
+      "result_bytes": 156,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r2.txt:156-157"
+    }
+  ]
+}

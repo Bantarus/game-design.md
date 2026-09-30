@@ -1,0 +1,101 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1504,
+  "cache_read_tokens": 494422,
+  "cache_creation_tokens": 77048,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 4477,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81981,
+  "per_turn_occupancy": [
+    79463,
+    80643,
+    81633,
+    81981,
+    82272,
+    82581,
+    82911
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Write": 1
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 1930
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 4024,
+  "bash_files_read": 3,
+  "all_files_read": 3,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/deckbuilder",
+    "examples/deckbuilder/examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "G3r1Pd",
+      "result_bytes": 1930,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r1.txt:27-57"
+    },
+    {
+      "tool": "Bash",
+      "id": "FoMYkg",
+      "result_bytes": 1632,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r1.txt:69-115"
+    },
+    {
+      "tool": "Bash",
+      "id": "xHxkit",
+      "result_bytes": 462,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r1.txt:129-141"
+    },
+    {
+      "tool": "Bash",
+      "id": "d5Cid8",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "lookup_refs__import-full__r1.txt:153-153"
+    },
+    {
+      "tool": "Bash",
+      "id": "PujVat",
+      "result_bytes": 79,
+      "is_error": true,
+      "vcc": "lookup_refs__import-full__r1.txt:165-165"
+    },
+    {
+      "tool": "Write",
+      "id": "71PV3U",
+      "result_bytes": 183,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r1.txt:181-181"
+    }
+  ]
+}

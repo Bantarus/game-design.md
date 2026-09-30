@@ -1,0 +1,73 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1153,
+  "cache_read_tokens": 330117,
+  "cache_creation_tokens": 77081,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 6221,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82030,
+  "per_turn_occupancy": [
+    79277,
+    80409,
+    82030,
+    82548,
+    82944
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 2668,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "WhUNWq",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r2.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "XoS1sN",
+      "result_bytes": 3375,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r2.txt:77-161"
+    },
+    {
+      "tool": "Bash",
+      "id": "CJY3a1",
+      "result_bytes": 676,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r2.txt:173-197"
+    },
+    {
+      "tool": "Bash",
+      "id": "NAWyTx",
+      "result_bytes": 178,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r2.txt:209-218"
+    }
+  ]
+}
