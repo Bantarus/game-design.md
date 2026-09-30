@@ -817,6 +817,16 @@ def test_rule_v_contamination_is_not_success_and_listed():
 
 # ---- Rule C cell construction (D-025, D-024 §3) and analyze.rule_c ---------------
 
+def test_the_judge_carries_the_schema_lint_reads(tmp_path):
+    """D-034: lint validates against schema/game-design.schema.json, so a judge
+    exported with `src/` alone would crash on every tree."""
+    judge = fixture.make_judge(tmp_path / "judge", "HEAD")
+    assert (tmp_path / "judge/schema/game-design.schema.json").is_file()
+    proc = subprocess.run([str(judge), "lint", str(fixture.REPO_ROOT / "examples/deckbuilder")],
+                          capture_output=True, text=True)
+    assert proc.returncode == 0 and json.loads(proc.stdout)["summary"]["errors"] == 0
+
+
 def test_import_card_copy_swaps_only_the_spec_import_in_the_baseline_commit(tmp_path):
     from game_design_md import spec_cmd
     card = fixture.prepare_copy(TASKS["maintenance_drift"], tmp_path / "card", card=True)

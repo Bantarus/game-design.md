@@ -169,11 +169,13 @@ def verify_v03_venv(venv: Path = V03_VENV, scratch: Path | None = None) -> dict:
 
 
 def make_judge(dest: Path, ref: str) -> Path:
-    """The fixed checker judge: `src/` exported at `ref`, behind a `gdmd` shim.
-    Returns the shim path (checkers read it from $DOGFOOD_GDMD)."""
+    """The fixed checker judge: `src/` and `schema/` exported at `ref`, behind a
+    `gdmd` shim. Since D-034 lint reads the JSON Schema, which a source run
+    finds at `<root>/schema/`. Returns the shim path (checkers read it from
+    $DOGFOOD_GDMD)."""
     if dest.exists():
         raise FixtureError(f"{dest} already exists")
-    export_ref(dest, ref, paths=("src",))
+    export_ref(dest, ref, paths=("src", "schema"))
     return write_gdmd_shim(dest / "bin", dest)
 
 
