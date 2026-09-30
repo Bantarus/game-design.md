@@ -2221,6 +2221,37 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - Which candidate, if any, is built.
 - Each one needs its own D-entry, the spec §9.9.3 text, goldens, and a pre-registered rule run on a new pinned arm before any claim.
 
+## D-043 — WS5: decision drift from sessions is a design note, not a build
+
+- **Status:** decided (2026-10-01), step (h) of the user's post-study-2 order: "WS5 design note (session decision drift): no implementation". It is the kickoff's WS5 scope: VCC-compiled Claude Code sessions, flagging `{ns.id}` tokens discussed with no commit touching them; scope, harness dependency and privacy; do not implement.
+- **Related:** D-023 (VCC in the dogfood harness), D-027 (the deferred `decision` role), spec §8.2, §9.2, §9.7 and §9.9.
+- **The note:** [`docs/design-notes/session-decision-drift.md`](docs/design-notes/session-decision-drift.md). No code changes.
+
+### What the note records
+
+- **The gap:** anti-drift watches code → spec (`stale-section`, `hook check`), not decisions reached in conversation that never reach the tree.
+- **Scope:**
+  - literal `{ns.id}` references in user and assistant text only, since tool results and tool inputs are consultation;
+  - resolved with the existing `Tree` semantics;
+  - checked against commits in a window after the session.
+  - The output is a review queue of untouched tokens, with pointers into the VCC view. It is never a finding or a gate.
+- **Out of scope:** the kickoff's constraints (no embeddings, vector stores, LLM summarization or classification), tokens named without braces, other agents' logs, and automatic edits.
+- **Two definitions of "touched",** left open: token values via `gdmd diff` (§9.2), or block overlap via the compiled model (§9.9.1), which also catches edits to rationale only.
+- **Harness dependency:**
+  - VCC is an external offline script.
+  - The session JSONL is Claude Code's internal format, versioned and not a stable contract.
+  - Being agent-specific, the tool cannot be a `gdmd` verb and would live outside the normative CLI.
+- **Privacy:** local and read-only, opt-in per run, ids, pointers and counts only by default, nothing written into the repository, per person in a team, and no retention.
+- **Measure before any build:**
+  - a labeled (session, token) set, with the sessions' owner deciding which may be used;
+  - a rule pre-registered before comparison;
+  - a planted positive control, and a read-only negative control that measures the echo rate.
+
+### Not decided
+
+- Whether to build it, and the note's four open questions: touches before commit, the window, the definition of touched, and the corpus.
+- No incidence of the problem has been measured.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
