@@ -1015,6 +1015,7 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 - **Consequence (D-024 §3):** the repository's `CLAUDE.md` switches to the card, in its own commit citing this result. Per D-026:
   - a C2 FAIL reverts it;
   - study 2's copies force the `@docs/spec.md` import where its cells require the full import.
+- **Addendum (descriptive, non-gating; the user's Rule C review):** a two-call probe at the adoption commit `49b53b4` (`card-probe-cardprobe-20260930`) puts the card import at **3,978 tokens**. That is 68% of the 5,882-token gap between Δ and D. The remaining 1,904 tokens follow the card cell's extra reading per task (23 tokens on the negative control, up to 3,406 on `lookup_refs`). No verdict change. The details are in the report's Rule C addendum.
 
 ---
 

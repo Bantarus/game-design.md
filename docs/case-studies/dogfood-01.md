@@ -350,3 +350,40 @@ The locked design counts the card's own size, and any extra reading the card cau
 - **It says nothing about tasks that need spec text the card leaves out** (for example, §4.8's PRNG reduction rules), beyond this task set. Study 2's C2 re-tests on a larger tree with harder tasks.
 - **It is not a claim about views.** Rule V is NULL.
 - **It is not a claim about the starters.** They carry no agent file (D-024).
+
+### Addendum (2026-09-30): the card import's own size (descriptive, non-gating)
+
+At the Rule C review the question was whether the card's own size accounts for the 5,882-token gap between Δ and `D`. A two-call differential probe answers it (`run.py --card-probe`, `results/card-probe-cardprobe-20260930.json`).
+
+- **Setup:** turn-1 occupancy with and without only the card's `@`-import, in the matrix world, at the adoption commit `49b53b4`.
+- **Construction:** both copies were built exactly like an `import-card` cell. The "without" copy keeps `docs/spec-card.md` and drops only the `@`, as the spec import probe does.
+- **The card** is byte-identical to the one Rule C imported (SHA-256 `7c280fa1…`, 8,491 bytes). Cost: $0.19.
+
+| | Tokens |
+| --- | ---: |
+| Turn-1 occupancy with the card import | 30,511 |
+| Turn-1 occupancy without it | 26,533 |
+| **The card import** | **3,978** |
+| Δ − `D` (the gap on the median task, `maintenance_drift`) | 5,882 |
+| Gap left after the card import | 1,904 |
+
+**Answer: partly.** The card's own import is 3,978 tokens, 68% of the gap. The other 1,904 tokens are not the import.
+
+Per task, the gap left after the card import is ordered almost like the card cell's extra tool output:
+
+| Task | Δ − `d_t` | Minus the card import | Extra consultation bytes in `import-card` (medians) |
+| --- | ---: | ---: | ---: |
+| `negative_control_no_drift` | 4,001 | 23 | 1,370 |
+| `authoring_new_card` | 5,471 | 1,493 | 2,984 |
+| `maintenance_drift` | 5,882 | 1,904 | 2,516 |
+| `operating_energy_budget` | 7,203 | 3,225 | 7,438 |
+| `lookup_refs` | 7,384 | 3,406 | 8,956 |
+
+- Where the two cells read least differently (the negative control), the gap is the card import to within 23 tokens. It grows with the card cell's extra reading, with one swap in order (authoring and maintenance).
+- This is descriptive, over medians of 3 runs. A turn's occupancy only holds the tool output returned before it, so bytes and tokens are not expected to match one for one. No further decomposition is claimed.
+- **Net of the card**, the full import removes 52,651 − 3,978 = 48,673 tokens per turn; `D` is 96% of that.
+- **One small, known contributor.** An `import-card` copy's fixture commit message is seven words longer ("… with CLAUDE.md importing the generated card"), and the probe transcript shows Claude Code puts recent commits into the context. Every `import-card` turn in Rule C carried those few tokens. They reduce `D`, so they work against PASS.
+
+The two probes' "without" copies differ by 99 tokens (26,533 here, 26,434 in probe4). That reflects changes between the two commits' copies (AGENTS.md's card-regeneration line) and the longer commit message. Each probe takes its difference within one commit, so neither result is affected.
+
+The verdict stays as recorded: **PASS**.
