@@ -100,6 +100,16 @@ def test_copy_strips_harness_and_lives_outside_repo(tmp_path):
     assert REPO not in copy.root.resolve().parents
 
 
+def test_copy_gdmd_resolves_to_its_own_shim(tmp_path):
+    # Regression: the shim *file* was once put on PATH, so `gdmd` silently fell
+    # through to whatever install was on the caller's PATH (the real repo's).
+    copy = make_copy("lookup_refs", tmp_path)
+    found = subprocess.run(["sh", "-c", "command -v gdmd"], env=copy.env(),
+                           capture_output=True, text=True).stdout.strip()
+    assert Path(found) == copy.shim_dir / "gdmd"
+    assert str(copy.root / "src") in Path(found).read_text()
+
+
 def test_maintenance_fixture_makes_exactly_mechanics_stale(tmp_path):
     copy = make_copy("maintenance_drift", tmp_path)
     res = json.loads(gdmd(copy, "lint", "examples/tick-combat").stdout)

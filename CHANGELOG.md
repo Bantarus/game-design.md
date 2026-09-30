@@ -33,6 +33,7 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
 
 ### Fixed
 
+- **Dogfood copies ran the wrong `gdmd`.** `fixture.prepare_copy` put the shim *file* on `PATH` instead of its directory. So `gdmd` inside a copy fell through to whatever install was on the caller's `PATH`: during development, the real repository's editable install. Tests and the commit-5 dry run passed only because that install was the same code. No model session had run. A regression test pins resolution to the cell's own shim.
 - `tests/test_lint.py::test_prototyped_without_pointer_silent_on_fresh_baseline` injected no `now` and read the wall clock against a fixture dated 2026-05-21, so it began failing once that date was more than 30 days old. It now injects `now` like its sibling anti-staleness tests. Test-only; no rule change.
 
 ## [0.3.0] — 2026-05-29
