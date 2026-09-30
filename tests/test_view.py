@@ -343,3 +343,26 @@ def test_views_are_deterministic_and_write_nothing(tmp_path: Path):
         b = r.invoke(main, ["view", str(t), *args])
         assert a.exit_code == 0 and a.output == b.output
     assert {p: p.stat().st_mtime_ns for p in t.rglob("*")} == before
+
+
+# ---- D-033: whole-namespace references ------------------------------------------
+
+def test_whole_namespace_refs_are_shown_as_namespace_and_draw_no_edge():
+    """The deckbuilder starter's invariants govern `{resources}`, `{entities}`,
+    `{rules}` and `{distributions}`: each is an occurrence with outcome
+    `namespace` and no target, `view --ref` lists it, and `graph` has no edge
+    for it. `--ref {resources}` names no token, so it does not resolve."""
+    from game_design_md.graph_cmd import build
+    root = REPO_ROOT / "templates/starters/deckbuilder"
+    model = compile_tree(root)
+    ns = [o for o in model.occurrences if o.outcome == "namespace"]
+    assert sorted(o.ref for o in ns) == ["distributions", "entities", "resources", "rules"]
+    assert all(o.target is None and o.field.endswith("]") and ".applies_to[" in o.field
+               for o in ns)
+    _, edges = build(model)
+    assert not [o for occs in edges.values() for o in occs if o.outcome == "namespace"]
+    r = CliRunner()
+    out = r.invoke(main, ["view", str(root), "--ref", "{invariants.damage_is_integer}"]).output
+    assert re.search(r"^  \{resources\} namespace invariants\.damage_is_integer\.applies_to\[0\] ",
+                     out, re.M), out
+    assert r.invoke(main, ["view", str(root), "--ref", "{resources}"]).exit_code == 2

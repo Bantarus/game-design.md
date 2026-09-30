@@ -8,7 +8,8 @@ algorithms in `graph_cmd.py`.
 
 Reference semantics are the linter's, exactly (D-027 decision 4):
 extraction is `walk_refs` over frontmatter values and `TOKEN_REF_RE` over
-bodies, resolution is `Tree.has_token`, the context-local prefixes are
+bodies, resolution is `Tree.resolves` (`has_token`, or `has_namespace` for a
+whole-namespace reference, D-033), the context-local prefixes are
 `linter.CONTEXT_LOCAL_PREFIXES`, and a token's backlinks are the
 `orphaned-entity` predicate (`backlink_matches`).
 
@@ -25,7 +26,7 @@ import yaml
 
 from . import loader
 from .linter import CONTEXT_LOCAL_PREFIXES
-from .refs import TOKEN_REF_RE
+from .refs import TOKEN_REF_RE, is_namespace_ref, string_refs
 from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
 
 ROLES = ("token", "invariant", "content-entity", "rationale", "impl", "meta")
@@ -72,7 +73,7 @@ class Occurrence:
     line: int              # 1-based file line
     kind: str              # "value" (frontmatter) | "prose" (body)
     field: str | None      # frontmatter field path, e.g. "rules.draw.do[0].sample"
-    outcome: str           # "resolved" | "unresolved" | "context-local"
+    outcome: str           # "resolved" | "unresolved" | "context-local" | "namespace"
     target: str | None     # longest-prefix token id ("ns.id"), or None
     source: int | None     # index of the containing block; None on a gap line
 
@@ -260,6 +261,8 @@ def longest_prefix_target(tree: Tree, ref: str) -> str | None:
 def _outcome(tree: Tree, ref: str) -> str:
     if ref.split(".", 1)[0] in CONTEXT_LOCAL_PREFIXES:
         return "context-local"
+    if is_namespace_ref(ref):          # D-033: resolves to a namespace, not a token
+        return "namespace" if tree.has_namespace(ref) else "unresolved"
     return "resolved" if tree.has_token(ref) else "unresolved"
 
 
@@ -497,7 +500,8 @@ class _FileBuilder:
         # rationale section. A reference on a gap line has no block.
         src = (self.sf.outermost if kind == "value" else self.sf.innermost)[line - 1]
         outcome = _outcome(self.tree, ref)
-        target = None if outcome == "context-local" else longest_prefix_target(self.tree, ref)
+        target = (None if outcome == "context-local" or is_namespace_ref(ref)
+                  else longest_prefix_target(self.tree, ref))
         return Occurrence(ref=ref, path=self.path, line=line, kind=kind, field=fld,
                           outcome=outcome, target=target, source=src)
 
@@ -510,8 +514,11 @@ class _FileBuilder:
             for i, v in enumerate(node.value):
                 yield from self._node_refs(v, path + (f"[{i}]",))
         elif isinstance(node, yaml.ScalarNode) and node.tag == "tag:yaml.org,2002:str":
-            refs = [m.group(1) for m in TOKEN_REF_RE.finditer(node.value)]
+            refs = string_refs(node.value, path)
             if not refs:
+                return
+            if is_namespace_ref(refs[0]):  # D-033: the whole item, on its first line
+                yield refs[0], path, self.fm_line(node.start_mark.line)
                 return
             span = self.sf.fm_text[node.start_mark.index:node.end_mark.index]
             found = [(m.group(1), m.start()) for m in TOKEN_REF_RE.finditer(span)]

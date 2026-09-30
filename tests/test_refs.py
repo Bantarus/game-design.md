@@ -39,3 +39,20 @@ def test_body_regex_rejects_invalid_chars():
     """Wildcards like {distributions.*} must not match — they would yield
     bogus broken-refs in prose."""
     assert TOKEN_REF_RE.search("{distributions.*}") is None
+
+
+# ---- D-033: whole-namespace references ------------------------------------------
+
+def test_whole_namespace_ref_only_as_an_applies_to_item():
+    inv = {"invariants": {"x": {"applies_to": ["{resources}", "{rules.r}"],
+                                "rule": "see {resources} and {rules}",
+                                "notes": ["{states}"]}}}
+    assert list(walk_refs(inv)) == [
+        ("resources", ("invariants", "x", "applies_to", "[0]")),
+        ("rules.r", ("invariants", "x", "applies_to", "[1]")),
+    ]
+
+
+def test_whole_namespace_ref_is_the_whole_item():
+    assert list(walk_refs({"applies_to": ["{resources} and more", " {resources}"]})) == []
+    assert list(walk_refs({"applies_to": "{resources}"})) == []   # not a list item

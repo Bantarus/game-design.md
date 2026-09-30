@@ -1806,6 +1806,81 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - V1 alone reads as "views do nothing".
 - The spec is normative. An empirical number there would present a measured, scoped, small-n result as a property of the format.
 
+## D-033 — OI-006 class A: `applies_to` accepts whole-namespace references (schema fix; lint and views change together)
+
+- **Status:** decided (2026-09-30).
+  - The user's lean at the study-2 review: "schema, scoped to `applies_to` accepting whole-namespace refs; views and lint change together per D-027".
+  - The proposal below confirms it, and it is implemented in this entry's commit.
+- **Related:** OI-006 (class A), D-027 decision 4 (views use the linter's reference semantics), D-020 and the descriptive-vocabulary discipline, spec §3, §4.11, §9.9.1 and §10.
+
+### The contradiction
+
+- **The grammar and prose admit no whole-namespace form:**
+  - §3's grammar is `{namespace.id}`, with 2–6 segments;
+  - §4.11's prose calls `applies_to` "an array of `{namespace.id}` refs";
+  - `$defs.TokenRef` enforces 2–6 segments.
+- **But the use exists:**
+  - §4.11's own example uses `{resources}`, `{entities}`, `{rules}`, `{states}` and `{distributions}`;
+  - 8 trees do the same: `{rules}` in both benchmark games, and `{resources}`, `{entities}` and `{distributions}` in all six starters.
+- **The tools ignored it.** A one-segment `{word}` never matched the reference pattern, so:
+  - `broken-ref` never checked those items;
+  - §9.9.1 declared them non-references;
+  - a `numeric_domain` invariant over `{resources}` with `enforcement: lint` checked no resource at all. That includes §4.11's own example and five starters' integer invariants.
+
+### Options
+
+| | What changes | Verdict |
+| --- | --- | --- |
+| **A. Schema fix** | `applies_to` items may be `{namespace}`. The spec defines what it means, and lint and views implement it. | **Chosen.** It names the shape the spec's example and 8 trees already use (descriptive, not prescriptive). A whole-namespace ref also stays correct as tokens are added: the party-rpg starter governs `{resources}` before declaring any resource. |
+| B. Tree fix | The spec example and the 8 files enumerate `{namespace.id}` refs. | Rejected. It imposes a shape on observed use. An enumeration goes stale as a tree grows (a starter's scaffolded tree above all). And it would still leave the question of what "applies to all resources" means unanswered. |
+
+### Decisions
+
+1. **Schema:** a new `$defs.NamespaceRef`, `^\{[a-z_][a-z0-9_]*\}$`. `Invariant.applies_to` items are `anyOf [TokenRef, NamespaceRef]`. Every other `TokenRef` field is unchanged.
+2. **Grammar scope** (§3): an `applies_to:` list item whose **entire** string is `{namespace}`. Anywhere else, `{word}` stays plain text: in prose, in other fields, and inside a longer string.
+   - Why: observed use is only there, and elsewhere braces around a word can be ordinary text.
+   - `refs.namespace_ref` / `string_refs` implement it once. `walk_refs` and the views' positional scan both use them.
+3. **Resolution:** the name must be one of the 12 subfile namespaces the tree indexes (`SUBFILE_NAMESPACES`), **whether or not a token is declared in it yet**. Otherwise it is `broken-ref`.
+   - Why: the party-rpg starter has no resources yet and governs `{resources}`.
+   - §3 names four more namespaces that are not indexed: `verify_targets`, `adapters`, `pillars`, `player_experience_goals`. A whole-namespace ref to one of them does not resolve. Whether they should be indexed is OI-004's question.
+4. **Not a backlink:** `orphaned-entity` and `unreferenced-verb` are unchanged. An invariant that governs every resource does not use any one of them.
+5. **`numeric_domain` reads it:** `{resources}` checks every resource's bounds, and `{entities}` every content collection's integer fields.
+   - Why: otherwise a lint-enforced invariant over a namespace is a silent no-op.
+6. **Views** (D-027 decision 4, the same semantics):
+   - Extracted by `walk_refs`, and located on the item's line.
+   - Outcome `namespace`: no target, no edge, and no backlink.
+   - `view --ref {resources}` does not resolve (exit 2), because a namespace is not a block.
+   - `graph` output is unchanged on every tree. `view --ref <invariant>` now lists the item as a forward reference. That is a v0.4.x output change, and no claim is attached to it (D-026's post-study note).
+
+### Effect
+
+- **Lint:** the 12 trees still lint 0/0, with unchanged output. Every whole-namespace ref names an indexed namespace, and every governed resource bound is already an integer.
+- **Schema:** the one-off pass over the 12 trees goes from 8 failing blocks to **0 of 158**. Class A was the last class.
+- **The six strict xfails are retired in this commit.** They XPASSed as designed ("the day one validates, the xfail fails and must be removed"). `tests/test_starter_schema.py` now requires every starter to validate, and adds two tests:
+  - the class-A files still exercise `NamespaceRef`;
+  - `{namespace}` stays invalid outside `applies_to`.
+- **The study-2 fixture:** it has no whole-namespace ref, and its lint output is unchanged.
+
+### Tests and proof of fire
+
+- `tests/test_refs.py`: extraction only for a whole `applies_to` item, never in prose, other fields, a longer string or a scalar `applies_to`.
+- `tests/test_lint.py`:
+  - resolution and `broken-ref` (`{clocks}` with no clock token resolves, and `{resourcez}` fires at its field);
+  - a whole-namespace ref is no token's backlink;
+  - the numeric expansion.
+- **Proof of fire on real-shaped content:** a copy of the survival starter with one resource `max` set to 2.5 fires `invariant-violation` through `meters_are_integer: applies_to ["{resources}"]`. Both expansion tests fail on the pre-D-033 code.
+- `tests/test_view.py`: the deckbuilder starter's four whole-namespace refs are `namespace` occurrences with no target; `graph` has no edge for them; `view --ref` lists them; `--ref {resources}` exits 2.
+- The D-027 property tests on all 12 trees still hold, including the views' value refs equalling `walk_refs` and `unresolved` equalling `broken-ref`.
+
+### Spec
+
+- **§3:** a new "Whole-namespace references" paragraph.
+- **§4.11:** the `applies_to` prose and what the linter's checks read.
+- **§9.9.1:** extraction, and the `namespace` outcome.
+- **§10:** `NamespaceRef` joins the `$defs` list.
+- **Appendix B:** the reference-syntax row.
+- The card is regenerated. It only changed its source hash, because its §3 excerpt does not include the new paragraph.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -1875,6 +1950,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
     - A second test pins that whole-namespace `applies_to` is their only error, so the xfail cannot hide another defect.
     - Proof of fire: the pre-D-031 `heroes.md` fails the guard, and an invalid `enforcement:` injected into a class-A file fails the second test.
   - **Remaining, after study 2 (D-026 amendment 3):** the class A decision (spec §4.11's example vs `$defs.TokenRef`), then whether lint runs the schema.
+- **Progress (2026-09-30): class A is fixed** by D-033, in the schema's favour: `applies_to` accepts whole-namespace refs, and lint and views implement them. The one-off pass is now **0 of 158** blocks failing. The starter guard's strict xfails are retired. What remains is whether lint runs the schema (next entry).
 
 ## OI-007 — `gdmd view` / `gdmd graph` usability ideas from study 1 (queued; the tool freeze ended with study 2)
 

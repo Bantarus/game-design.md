@@ -169,6 +169,11 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 **Nesting / depth.** Maximum reference depth is 6 dot-separated segments. References inside references (`{foo.{bar.baz}}`) are not supported in v0.1.
 
+**Whole-namespace references (v0.4, D-033).** An item of an invariant's `applies_to:` list (§4.11) whose entire string is `{namespace}` is a **whole-namespace reference**: it names every token of that namespace, including tokens added later. This is the only place a one-segment reference is recognized; anywhere else, `{word}` is plain text.
+
+- It resolves when `namespace` is one of the subfile namespaces in the table above (`entities` … `clocks`, `invariants`), whether or not the tree declares a token in it yet. Otherwise it fires `broken-ref`.
+- It is not a use of any individual token. It does not count as a reference for `orphaned-entity` or `unreferenced-verb`.
+
 **Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
 
 **Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time:
@@ -794,7 +799,7 @@ invariants:
     severity: error
 ```
 
-**Required keys per invariant:** `kind`, `rule`, `enforcement`, `severity`. `applies_to` is optional (an array of `{namespace.id}` refs the invariant governs).
+**Required keys per invariant:** `kind`, `rule`, `enforcement`, `severity`. `applies_to` is optional: an array of the tokens the invariant governs, each a `{namespace.id}` reference or a whole-namespace `{namespace}` reference (§3), which governs every token of the namespace. The linter's static checks read it that way: a `numeric_domain` invariant over `{resources}` checks every resource's bounds, and one over `{entities}` checks every content collection.
 
 - `kind` enum: `numeric_domain | architectural_pattern | layer_boundary | communication | determinism`.
 - `enforcement` enum: `lint` (statically checkable now), `verify` (checked at runtime by `gdmd verify` — §9.5), `advisory` (declared, human/agent-reviewed, never auto-failed).
@@ -1490,10 +1495,11 @@ Every other block is outermost. A block's **ancestors** are the blocks that cont
 - **Extraction:**
   - Frontmatter references are every `{…}` occurrence in any string value of any file (`walk_refs`).
   - Body references are every occurrence in a Markdown body.
-  - A whole-namespace string such as `"{resources}"` does not match the reference syntax, so it is not a reference.
+  - A whole-namespace reference (`"{resources}"` as an `applies_to:` item, §3) is extracted like any other. The same string anywhere else is not a reference.
 - **Resolution** follows §3 as implemented by the linter (`has_token`). A reference's **target** is the longest prefix naming a top-level token or content entity; the remainder is its sub-path.
   - A reference that does not resolve is shown as `unresolved`, the `broken-ref` predicate.
   - `{actor.*}` and `{target.*}` (D-012) are shown as `context-local` and are not edges.
+  - A whole-namespace reference that resolves is shown as `namespace`. It has no target and is not an edge, and it is no token's backlink (§3).
 - **Backlinks.** The backlinks of token `T` are every reference `r` with `r == T` or `r` starting with `T.`. This is exactly the `orphaned-entity` predicate. For every token that rule checks (it exempts `verbs`, `invariants`, `cut` tokens and `actor` entities), the token has no backlinks if and only if `orphaned-entity` reports it.
 - **Edges.** An edge runs from the block containing a reference to the reference's target. It carries the field path (frontmatter) or line (body) where the reference occurs, and its kind: `value` (frontmatter) or `prose` (body).
 
@@ -1586,7 +1592,7 @@ A view is a projection of the tree. **Views select, truncate, or annotate; they 
 
 The normative frontmatter schema lives at `schema/game-design.schema.json`. It is the machine-readable companion to §4–§6 and is what editors validate against live.
 
-The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `Clock`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
+The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `NamespaceRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `Clock`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
 
 VS Code's YAML extension picks up the schema via the YAML language server's standard mapping. Add this to a workspace `.vscode/settings.json`:
 
@@ -1669,7 +1675,7 @@ Rules for claims:
 | Aspect | Inherited verbatim | Extended / new |
 | --- | --- | --- |
 | Two-layer file (YAML + prose) | ✓ | |
-| `{namespace.id}` reference syntax | ✓ | depth ≤ 6; refs into `content/*/*.yaml` via `data_source` |
+| `{namespace.id}` reference syntax | ✓ | depth ≤ 6; refs into `content/*/*.yaml` via `data_source`; whole-namespace `{namespace}` in `applies_to` (§3) |
 | Canonical `##` order, linter-enforced | ✓ | per-file-type orders (§7.1) |
 | Unknown-content handling | ✓ | + `status-regression`, `inline-content-over-threshold` |
 | CLI verb set | ✓ | `diff` exit-codes balance regressions |

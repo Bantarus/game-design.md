@@ -121,6 +121,18 @@ class Tree:
 
     # ---- Reference resolution ------------------------------------------------
 
+    @staticmethod
+    def has_namespace(ns: str) -> bool:
+        """D-033: a whole-namespace reference `{ns}` resolves iff `ns` is a
+        namespace the tree indexes, whether or not the tree declares a token
+        in it yet (a starter's invariant may govern tokens still to come)."""
+        return ns in SUBFILE_NAMESPACES
+
+    def resolves(self, ref: str) -> bool:
+        """The `broken-ref` predicate for any reference body walk_refs yields:
+        a one-segment body is a whole-namespace reference (D-033)."""
+        return self.has_namespace(ref) if "." not in ref else self.has_token(ref)
+
     def has_token(self, ref: str) -> bool:
         """True iff `ref` (e.g. "verbs.play_card", "entities.cards.ember_strike",
         "states.card_lifecycle.in_hand") resolves to a defined token or a

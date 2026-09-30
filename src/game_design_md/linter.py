@@ -123,7 +123,7 @@ def rule_broken_ref(tree: Tree) -> list[Finding]:
         for ref, path in walk_refs(pf.frontmatter or {}):
             if _is_context_local(ref):
                 continue
-            if not tree.has_token(ref):
+            if not tree.resolves(ref):
                 findings.append(Finding(
                     rule="broken-ref", severity="error", file=pf.rel_str,
                     location="frontmatter:" + ".".join(path),
@@ -940,9 +940,11 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
          effect kind is `damage` or `gain_block`).
       2. For each `{entities.<kind>}` referenced in `applies_to:`, every content
          entity in that collection has integer values for every field that the
-         content-schema declares `type: integer`.
+         content-schema declares `type: integer`. `{entities}` (D-033) names
+         every collection.
       3. For each `{resources.<id>}` referenced in `applies_to:`, the resource's
-         `min:` and `max:` bounds are integers.
+         `min:` and `max:` bounds are integers. `{resources}` (D-033) names
+         every resource.
     """
     kind = inv.get("kind")
     if kind == "numeric_domain":
@@ -970,6 +972,8 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
         for ref in applies_to:
             if not isinstance(ref, str):
                 continue
+            if ref == "{entities}":   # D-033: the whole namespace, every collection
+                entity_kinds.update(tree.content_schemas)
             m = re.match(r"^\{entities\.([a-z_][a-z0-9_]*)\}$", ref)
             if m:
                 entity_kinds.add(m.group(1))
@@ -997,6 +1001,8 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
         for ref in applies_to:
             if not isinstance(ref, str):
                 continue
+            if ref == "{resources}":  # D-033: the whole namespace, every resource
+                resource_refs.update(tree.tokens.get("resources", {}))
             m = re.match(r"^\{(resources\.[a-z_][a-z0-9_]*)\}$", ref)
             if m:
                 resource_refs.add(m.group(1))

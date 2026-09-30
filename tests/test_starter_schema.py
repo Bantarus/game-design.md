@@ -2,12 +2,10 @@
 (spec §10; OI-006). `gdmd init` copies a starter into every new tree, so a
 starter defect is inherited by every tree scaffolded from it (D-031).
 
-Class A (OI-006: whole-namespace `applies_to` refs such as `"{resources}"`,
-which `$defs.TokenRef` rejects while spec §4.11's own example uses them) is
-a spec/schema decision held until after dogfood study 2 (D-026 amendment 3).
-Those files are strict xfails: the day one validates, the xfail fails and
-must be removed. A second test pins that class A is *all* that is wrong with
-them, so the xfail cannot hide another defect.
+Class A (OI-006: whole-namespace `applies_to` refs such as `"{resources}"`)
+was decided in the schema's favour by D-033: `applies_to` items may be
+`$defs.NamespaceRef`. The six class-A starter files, strict xfails until
+then, now validate like every other starter.
 """
 from __future__ import annotations
 
@@ -56,28 +54,38 @@ def test_every_starter_is_covered():
     assert sum(1 for _, rel in FILES if rel == CLASS_A) == 6
 
 
-@pytest.mark.parametrize("starter,rel", [
-    pytest.param(s, r, id=f"{s}/{r}", marks=pytest.mark.xfail(
-        strict=True, reason="OI-006 class A: whole-namespace applies_to refs; the "
-                            "spec/schema decision waits until after study 2"))
-    if r == CLASS_A else pytest.param(s, r, id=f"{s}/{r}")
-    for s, r in FILES])
+@pytest.mark.parametrize("starter,rel", [pytest.param(s, r, id=f"{s}/{r}") for s, r in FILES])
 def test_starter_frontmatter_validates_against_the_schema(starter, rel):
     errors = [f"{list(e.absolute_path)}: {e.message}"
               for e in VALIDATOR.iter_errors(_frontmatter(starter, rel))]
     assert errors == []
 
 
-@pytest.mark.parametrize("starter", sorted({s for s, r in FILES if r == CLASS_A}))
-def test_class_a_files_fail_only_on_whole_namespace_applies_to(starter):
-    """Validated against their own file_type branch, the class-A files'
-    only errors are `applies_to` items of the form `{namespace}`."""
-    fm = _frontmatter(starter, CLASS_A)
-    branch = {"$schema": SCHEMA["$schema"], "$defs": SCHEMA["$defs"],
-              "$ref": f"#/$defs/{BRANCH[fm['file_type']]}"}
-    errors = list(jsonschema.Draft202012Validator(branch).iter_errors(fm))
-    assert errors, "validates now: remove the xfail and update OI-006"
-    for e in errors:
-        path = list(e.absolute_path)
-        assert path[0] == "invariants" and path[2] == "applies_to", (path, e.message)
-        assert e.validator == "pattern" and WHOLE_NAMESPACE_REF.match(e.instance), e.instance
+def test_class_a_files_use_whole_namespace_refs():
+    """The files D-033 was decided on still exercise NamespaceRef."""
+    for starter in sorted({s for s, r in FILES if r == CLASS_A}):
+        items = [ref for inv in _frontmatter(starter, CLASS_A)["invariants"].values()
+                 for ref in inv.get("applies_to") or []]
+        assert any(WHOLE_NAMESPACE_REF.match(r) for r in items), starter
+
+
+def _branch_validator(name: str) -> jsonschema.Draft202012Validator:
+    return jsonschema.Draft202012Validator(
+        {"$schema": SCHEMA["$schema"], "$defs": SCHEMA["$defs"], "$ref": f"#/$defs/{name}"})
+
+
+def test_whole_namespace_refs_are_valid_only_in_applies_to():
+    """D-033 scopes NamespaceRef to an invariant's applies_to; every other
+    TokenRef field still rejects `{namespace}`."""
+    inv = {"kind": "numeric_domain", "rule": "integers", "enforcement": "lint",
+           "severity": "error", "applies_to": ["{resources}", "{rules.x}"]}
+    assert not list(_branch_validator("Invariant").iter_errors(inv))
+    bad = dict(inv, applies_to=["{resources.}"])
+    assert list(_branch_validator("Invariant").iter_errors(bad))
+    rule = {"given": {"verb": "{verbs}"}, "do": [{"x": 1}], "outputs": [], "status": "draft",
+            "implemented_in": []}
+    assert list(_branch_validator("Rule").iter_errors(rule))
+    loop = {"timescale": "moment", "duration": "1s", "sequence": ["{verbs.a}"],
+            "intended_dynamics": ["x"], "intended_aesthetics": ["challenge"], "status": "draft",
+            "implemented_in": [], "balance_targets": ["{balance_targets}"]}
+    assert list(_branch_validator("Loop").iter_errors(loop))

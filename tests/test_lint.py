@@ -146,6 +146,72 @@ def test_inline_content_over_threshold(make_tree):
     assert any(f.rule == "inline-content-over-threshold" for f in res.findings)
 
 
+# ---- D-033: whole-namespace references in applies_to ----------------------------
+
+def _with_applies_to(make_tree, items: str, **extra):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'applies_to: ["{resources.energy}"]', f"applies_to: {items}")
+    return make_tree({"gdd/architecture-invariants.md": inv, **extra})
+
+
+def test_whole_namespace_ref_resolves_or_is_broken(make_tree):
+    res = _lint(_with_applies_to(make_tree, '["{resources}", "{clocks}"]'))
+    assert not [f for f in res.findings if f.rule == "broken-ref"]   # {clocks}: no token yet
+    res = _lint(_with_applies_to(make_tree, '["{resourcez}"]'))
+    assert [(f.rule, f.location, f.message) for f in res.findings if f.rule == "broken-ref"] == [
+        ("broken-ref", "frontmatter:invariants.damage_int.applies_to.[0]",
+         "reference {resourcez} does not resolve")]
+
+
+def test_a_whole_namespace_string_elsewhere_is_not_a_reference(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'rule: "amounts are integers"', 'rule: "all {resourcez} are integers"')
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    assert not [f for f in res.findings if f.rule == "broken-ref"]
+
+
+def test_a_whole_namespace_ref_is_no_tokens_backlink(make_tree):
+    """`{resources}` governs every resource but uses none: a resource nothing
+    else names is still orphaned."""
+    mech = (make_tree() / "gdd/mechanics.md").read_text()
+    spare = mech.replace("resources:\n", "resources:\n  spare:\n    scope: per_run\n"
+                         "    min: 0\n    max: 1\n    visibility: hud\n"
+                         "    status: draft\n    implemented_in: []\n", 1)
+    assert spare != mech
+    res = _lint(_with_applies_to(make_tree, '["{resources}"]',
+                                 **{"gdd/mechanics.md": spare}))
+    assert "resources.spare" in {f.location for f in res.findings
+                                 if f.rule == "orphaned-entity"}
+
+
+def test_numeric_domain_whole_namespace_checks_every_resource(make_tree):
+    """Proof of fire: before D-033, `{resources}` checked nothing."""
+    mech = (make_tree() / "gdd/mechanics.md").read_text().replace("max: 1", "max: 1.5")
+    res = _lint(_with_applies_to(make_tree, '["{resources}"]', **{"gdd/mechanics.md": mech}))
+    assert any(f.rule == "invariant-violation" and "resources.energy.max" in f.location
+               for f in res.findings)
+
+
+def test_numeric_domain_whole_namespace_proof_of_fire_on_a_starter(tmp_path):
+    """Real-shaped content: the survival starter's `meters_are_integer` governs
+    `{resources}`; one non-integer bound now fires, and the starter as shipped
+    is clean."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "survival"
+    shutil.copytree(REPO_ROOT / "templates/starters/survival", root)
+    assert not [f for f in _lint(root).findings
+                if f.rule == "invariant-violation" and f.severity != "info"]
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    new = re.sub(r"(resources:\n(?:.*\n)*?\s+max: )(\d+)", r"\g<1>2.5", text, count=1)
+    assert new != text
+    mech.write_text(new)
+    assert any(f.rule == "invariant-violation" and f.location.startswith("resources.")
+               and f.location.endswith(".max") for f in _lint(root).findings)
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):
