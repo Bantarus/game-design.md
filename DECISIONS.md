@@ -1433,7 +1433,7 @@ The tree, the tooling layer, the import layer and every task file are byte-ident
 - **The contaminated run** (`s2_lookup_backward` baseline r3):
   - It is a denied `python3 /tmp/claude-1000/*/2ff46112*/scratchpad/g.py`. The glob sits in the copy-key position and is combined with the run's own session id, so it could only match the run's own directory.
   - The rule as committed counts it, and it is reported that way. Its effect on the verdict is nil: contamination does not enter `R`, and non-inferiority holds with either classification.
-  - **Proposed for review, not applied:** a slug glob whose session component names the run's own session id counts as own use.
+  - **Refined afterwards by amendment 8,** for future runs. Recomputed with the refined detector, V2 counts 0 contaminated runs and baseline 18/18, with the verdict unchanged. This recorded result stands as committed.
 - **Consequence:** no adoption consequence (D-026).
   - The PASS licenses a views-cost claim scoped as measured: on a content-heavy tree, on these six tasks, the v0.4 world with the views arm consumed a median 33% fewer consultation bytes than the v0.3 baseline, without loss of success.
   - Where the claim is stated (README, release notes) is left for review.
@@ -1455,6 +1455,23 @@ The tree, the tooling layer, the import layer and every task file are byte-ident
   - The card cell consulted more tree text (11.3 vs 8.4 KB per run, median) and cost less ($0.19 vs $0.42).
   - Both cells used `view` / `graph` without being told to (33 and 22 calls, 12 of 18 runs each). Study 1's Rule C had none.
 - **Limit recorded at the pilot review:** every run succeeded, so non-inferiority was tested only at the ceiling. C2 is a weaker re-test of the card than designed.
+
+### Amendment 8 (2026-09-30, after study 2's results; effective for future runs): the scratchpad detector recognizes a glob that names the run's own session
+
+- **Decided:** by the user at the study-2 review: "apply the own-session-id glob fix with tests, as an amendment effective for future runs. V2's recorded result stays as committed."
+- **The defect:**
+  - Amendment 7 counts any scratchpad path whose copy-key component is not the run's own as another session's.
+  - In V2 one subject ran `python3 /tmp/claude-1000/*/2ff46112*/scratchpad/g.py`: a glob in the copy-key position followed by the first 8 characters of its own session id. Claude Code refused it.
+  - That pattern can only match the run's own session directory, but the rule counted it as contamination.
+- **The change** (`analyze.scratchpad_access`): a glob in the copy-key position is own use when the next component names the run's own session id.
+  - Its literal prefix, before the first glob character, must be at least 8 characters of that id (32 bits of a UUIDv4), and the whole pattern must match the id.
+  - Everything else amendment 7 counts is unchanged: a literal other copy key, the root, globs that stop short of 8 characters or name another id, and `*/*`.
+- **Effect on recorded results: none.**
+  - V2's result above stands as committed.
+  - Recomputed with the refined detector, V2 gives PASS with R unchanged, 0 contaminated runs and baseline 18/18 (a pinned test).
+  - C2 and both study-1 verdicts recompute byte-identical.
+- **Tests:** six new classified paths (the V2 case, a uid glob with the full id, too short a prefix, another session's prefix, `*/*`, and a literal other key with the own id), plus the V2 recomputation.
+- **Counterfactual adoption:** made after the results, but it changes no recorded verdict, and it applies only to runs not yet made.
 
 ---
 

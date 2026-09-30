@@ -104,7 +104,8 @@ Residual leakage risk: file tools and Bash `cat`/`grep` can read absolute paths 
 
 **Scratchpads (D-026 amendment 7).** Claude Code gives each session a scratchpad outside the copy, at `/tmp/claude-<uid>/<cwd slug>/<session id>/`, and the directories outlive their sessions. A run's cwd is its copy, whose path is single-use, so the directory keyed by the copy holds only that run's sessions. `analyze.scratchpad_access` classifies each out-of-copy path:
 - inside that directory: own use, listed and not penalized;
-- anywhere else under `/tmp/claude-<uid>/`, or the root itself (another cell, another run, the operator's session): contamination, as reading the harness is.
+- anywhere else under `/tmp/claude-<uid>/`, or the root itself (another cell, another run, the operator's session): contamination, as reading the harness is;
+- except a glob in the copy-key position followed by the run's own session id (its literal prefix at least 8 characters of that id): own use (amendment 8).
 
 ## Outcomes (D-025)
 

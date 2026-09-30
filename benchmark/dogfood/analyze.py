@@ -35,10 +35,16 @@ Resolutions of points the locked text leaves open (recorded in amendment 5):
   copy holds only this run's sessions. Any other path into the scratchpad
   root, the root itself included, reaches other sessions' files. Own-session
   use stays listed, not penalized (`scratchpad_access`).
+- Amendment 8 (after study 2's results, for future runs): a glob in the
+  copy-key position is own use when the next component names the run's own
+  session id, i.e. its literal prefix spells at least the first 8 characters
+  of that id and the pattern matches it. Such a path can only reach the
+  run's own session directory.
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import re
 import statistics
@@ -88,16 +94,40 @@ def _cwd_slug(path: str) -> str:
     return re.sub(r"[^A-Za-z0-9]", "-", path)
 
 
+_GLOB = re.compile(r"[*?\[]")
+OWN_SESSION_PREFIX_MIN = 8     # amendment 8: 32 bits of a UUIDv4
+
+
+def _names_own_session(component: str, session_id: str | None) -> bool:
+    """A session-directory glob that can only match this run's session: its
+    literal prefix is at least OWN_SESSION_PREFIX_MIN characters of the run's
+    own session id, and the whole pattern matches that id."""
+    if not session_id:
+        return False
+    g = _GLOB.search(component)
+    prefix = component[:g.start()] if g else component
+    return (len(prefix) >= OWN_SESSION_PREFIX_MIN and session_id.startswith(prefix)
+            and fnmatch.fnmatchcase(session_id, component))
+
+
 def scratchpad_access(line: dict, path: str) -> str | None:
     """None if `path` is not in a Claude Code scratchpad; "own" if it is inside
-    the directory keyed by this run's copy (<workdir>/<run_id>/<cell_id>/repo);
-    "other" for any other session's directory or the root that holds them."""
+    the directory keyed by this run's copy (<workdir>/<run_id>/<cell_id>/repo),
+    or (amendment 8) a glob in that position followed by the run's own
+    session id; "other" for any other session's directory or the root that
+    holds them."""
     m = _SCRATCH_ROOT.search(path)
     if not m:
         return None
-    slug = path[m.end():].split("/")[0]
+    parts = path[m.end():].split("/")
+    slug = parts[0]
     own = _cwd_slug(f"/{line.get('run_id')}/{line.get('cell_id')}/repo")
-    return "own" if slug and slug.endswith(own) else "other"
+    if slug and slug.endswith(own):
+        return "own"
+    if _GLOB.search(slug) and len(parts) > 1 and _names_own_session(parts[1],
+                                                                     line.get("session_id")):
+        return "own"
+    return "other"
 
 
 def contaminated(line: dict, metrics: dict | None) -> list[str]:

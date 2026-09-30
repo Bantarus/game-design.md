@@ -613,6 +613,13 @@ OWN = "/tmp/claude-1000/-tmp-gdmd-dogfood-s2-s2-lookup-forward--views--r1-repo"
     ("/tmp/claude-1000/", "other"),
     ("/tmp/claude-1000/*/scratchpad", "other"),
     ("/tmp/claude-*/", "other"),
+    # amendment 8: a copy-key glob followed by the run's own session id is own use
+    (f"/tmp/claude-1000/*/{SID[:8]}*/scratchpad/g.py", "own"),     # study 2's V2 case
+    (f"/tmp/claude-*/*/{SID}/scratchpad/g.py", "own"),
+    (f"/tmp/claude-1000/*/{SID[:7]}*/scratchpad/g.py", "other"),   # too short to name it
+    ("/tmp/claude-1000/*/51022e8c*/scratchpad", "other"),          # another session's id
+    ("/tmp/claude-1000/*/*/scratchpad/g.py", "other"),
+    (f"/tmp/claude-1000/-tmp-gdmd-dogfood-s1-x-repo/{SID}/g.py", "other"),  # literal other key
     ("../../claude-1000/-tmp-gdmd-dogfood-s1-x-repo/y", "other"),
     ("/tmp/gdmd-dogfood/s2/judge/src", None),
     ("/home/u/.claude/projects/x.jsonl", None),
@@ -636,6 +643,15 @@ def test_other_session_scratchpad_is_not_success_and_listed():
     assert res["apparatus"]["contaminated"]["s2_lookup_forward/views/r1"] == [
         leak["out_of_copy_access"][0]["file_path"]]                 # own use is not listed there
     assert res["non_inferiority"]["successes"]["views"] == 17
+
+
+def test_amendment_8_recomputes_v2_with_no_contamination_and_the_same_verdict():
+    """V2's recorded result (1 contaminated, baseline 17/18 counted) stands as
+    committed; the refined detector, recomputed on the same lines, counts 0."""
+    res = analyze.rule_v2(analyze.load([analyze.RESULTS_DIR / "rulev2-20260930.jsonl"]))
+    assert res["apparatus"]["contaminated"] == {}
+    assert res["non_inferiority"]["successes"] == {"baseline": 18, "views": 18}
+    assert res["verdict"] == "PASS" and round(res["R"], 4) == 0.3332
 
 
 def test_the_pilots_scratchpad_use_was_all_own_session():

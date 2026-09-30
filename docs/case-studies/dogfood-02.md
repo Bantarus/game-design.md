@@ -93,7 +93,7 @@ Every answer in both arms was exact. Every question's Jaccard similarity was 1.0
   - Contamination does not enter the primary: `R` is 33.3% either way.
   - Non-inferiority holds either way: baseline 17 or 18 of 18, views 18 of 18.
   - One run in 18 (5.6%) is below the 10% apparatus threshold.
-- **Proposed for review, not applied:** a slug glob whose session component names the run's own session id counts as own use.
+- **Refined afterwards (D-026 amendment 8, for future runs):** the refined detector, recomputed on these runs, counts 0 contaminated (baseline 18/18) with the verdict unchanged. The result above stands as recorded.
 
 ### Manipulation check and adoption (descriptive)
 
