@@ -1175,6 +1175,12 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
   - **The overview's file list** omits content-entity files, which are counted per kind (Decision 11).
   - **Headers** append `status=<status>` when the block has one and `explains={ns.id}` for an attributed rationale section. Both are annotations.
   - **Measured:** `--full` is 23–38% larger than the files it projects (deckbuilder: 68,282 vs 49,343 bytes), mostly block headers; every one-line `meta` key gets its own header. The overview is 4–6 KB.
+- **Graph** (`src/game_design_md/graph_cmd.py`):
+  - **One step definition for both directions.** `graph` and `view --ref` call the same `Model.targets` (forward: an occurrence's longest-prefix target) and `Model.referrers` (backward: the backlink predicate). The two directions are not mirror images: a reference to `{entities.cards.ember_strike}` is an edge to the entity, and it is also a backlink of `{entities.cards}`, because the predicate is a prefix match. `--impact` follows the predicate, so it contains every `--ref` backlink.
+  - **Edges** exist only for references whose target is a registered token. A `broken-ref` with a valid token prefix is on the edge to that token and keeps its `unresolved` outcome; a reference with no token prefix has no edge.
+  - **`--from/--to`** counts every shortest path by dynamic programming and enumerates only the first `--max-paths`, depth-first in lexicographic order of (primary, pointer). The count is exact even when enumerating every path would be exponential.
+  - **`--cycles`** runs Tarjan's algorithm over edges that carry at least one `value` reference; a self-referencing node is a cycle of one.
+  - **In the in-repo trees**, `--cycles` finds 56 components. 50 are the two-way links the format declares by design: 46 verb ↔ rule pairs (a verb's `effects` resolve a rule whose `given.verb` names the verb) and 4 clock ↔ rule pairs (`drives` / `given.driver`, §4.7). One is a `resources` ↔ `balance_targets` pair. Five are larger components that also run through `states` and `events` (up to 22 nodes). Cycles are structure, reported without judgment; no lint rule concerns them.
 
 ---
 

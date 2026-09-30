@@ -1,4 +1,4 @@
-"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch | init | view.
+"""game-design.md CLI: lint | diff | export | spec | verify | status | hook | touch | init | view | graph.
 
 Exit-code contract (spec §9):
   lint    : 0 if no errors, 1 otherwise.
@@ -10,6 +10,8 @@ Exit-code contract (spec §9):
   init    : 0 on success, 1 on usage/IO error. See spec §9.8 (Task 7 v0.3).
   view    : 0 on success (including empty selections); 2 for a --ref that
             does not resolve. Never fails on lint findings. See spec §9.9.
+  graph   : 0 on success (including no path); 2 for an --impact / --from /
+            --to argument that does not resolve. See spec §9.9.4.
 """
 from __future__ import annotations
 
@@ -22,8 +24,8 @@ import click
 
 from game_design_md import __spec_version__, __version__
 from game_design_md import (
-    diff_cmd, export_cmd, hook_cmd, init_cmd, ir, linter, spec_cmd, status_cmd,
-    verify_cmd, view_cmd,
+    diff_cmd, export_cmd, graph_cmd, hook_cmd, init_cmd, ir, linter, spec_cmd,
+    status_cmd, verify_cmd, view_cmd,
 )
 from game_design_md.tree import Tree
 
@@ -301,6 +303,46 @@ def view_cmd_entry(path: Path, full: bool, grep: str | None, ignore_case: bool,
                                 flat=flat, roles=roles, as_json=as_json)
     except view_cmd.Unresolved as e:
         click.echo(f"gdmd view: {e.args[0]} does not resolve", err=True)
+        sys.exit(2)
+    click.echo(out)
+    sys.exit(0)
+
+
+@main.command("graph",
+              help="The reference graph of a tree (spec §9.9.4): --impact, "
+                   "--from/--to shortest paths, --cycles, or the whole graph. "
+                   "Same graph as `gdmd view`; nothing is stored.")
+@click.argument("path", type=click.Path(exists=True, file_okay=False, dir_okay=True,
+                                        path_type=Path))
+@click.option("--impact", "impact_arg", metavar="{NS.ID}",
+              help="Every block that references the token, directly or transitively.")
+@click.option("--from", "from_arg", metavar="{NS.ID}", help="Path source (with --to).")
+@click.option("--to", "to_arg", metavar="{NS.ID}", help="Path target (with --from).")
+@click.option("--max-paths", type=click.IntRange(min=1), default=20, show_default=True,
+              help="With --from/--to: emit at most N shortest paths.")
+@click.option("--cycles", "want_cycles", is_flag=True, default=False,
+              help="Reference cycles over value edges.")
+@click.option("--format", "fmt", type=click.Choice(["text", "json", "dot"]),
+              default="text", show_default=True)
+def graph_cmd_entry(path: Path, impact_arg: str | None, from_arg: str | None,
+                    to_arg: str | None, max_paths: int, want_cycles: bool,
+                    fmt: str) -> None:
+    if (from_arg is None) != (to_arg is None):
+        raise click.UsageError("--from and --to must be given together")
+    modes = [m for m, on in (("--impact", impact_arg is not None),
+                             ("--from/--to", from_arg is not None),
+                             ("--cycles", want_cycles)) if on]
+    if len(modes) > 1:
+        raise click.UsageError(f"{' and '.join(modes)} are mutually exclusive")
+    if max_paths != 20 and from_arg is None:
+        raise click.UsageError("--max-paths requires --from/--to")
+    model = ir.compile_tree(path)
+    try:
+        out = graph_cmd.run_graph(model, str(path), impact_arg=impact_arg,
+                                  from_arg=from_arg, to_arg=to_arg, max_paths=max_paths,
+                                  want_cycles=want_cycles, fmt=fmt)
+    except graph_cmd.Unresolved as e:
+        click.echo(f"gdmd graph: {e.args[0]} does not resolve", err=True)
         sys.exit(2)
     click.echo(out)
     sys.exit(0)
