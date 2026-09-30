@@ -995,6 +995,22 @@ The pilot is run `pilot-20260930`: baseline arm (v0.3 world), one run per task, 
 - **Order from here:** full sweep → `git push origin v0.4-views` (plain) → the import probe at this amendment's commit → the Rule C matrix, 30 runs, once, plus the guarded extension only if `analyze.py rule-c` reports it pending → report by the rule in `docs/case-studies/dogfood-01.md` (Rule C section) → D-024's adoption consequence, only on PASS, in its own commit → stop.
 - **Not changed:** thresholds, the primary, cells, aggregation, non-inferiority and verdict mapping.
 
+### Rule C result (2026-09-30): **PASS**
+
+- **Run** `rulec-20260930` at the Rule C commit `b4b1596`: 30 runs. The report is [`docs/case-studies/dogfood-01.md`](docs/case-studies/dogfood-01.md) (Rule C section), and the data is in `benchmark/dogfood/results/rulec-20260930*`.
+- **Verdict:** D = 46,769 tokens, against 0.5 × Δ = 26,326 (Δ = 52,651 from `import-probe-probe4-20260930`), so **PASS**.
+  - The per-task `d_t` ran from 45,267 to 48,650 tokens, 86–92% of Δ.
+  - Non-inferiority holds: 15/15 successes in each cell, and guarded `e_t` = 0 for both tasks, so no extension ran.
+  - No apparatus NULL: 0 errors and 0 contaminated runs.
+  - Computed by `analyze.py rule-c` as committed before the data (`0b8419d`). Nothing was re-run, added or dropped.
+- **Descriptive:**
+  - No `import-card` run called `gdmd spec --section`, and none read `docs/spec.md` directly.
+  - The card cell consulted slightly more tree text (13.0 vs 9.3 KB per run) and cost less ($0.17 vs $0.42 per run, median).
+  - Every run succeeded, so non-inferiority was held on easy tasks. Study 2's C2 is the harder re-test.
+- **Consequence (D-024 §3):** the repository's `CLAUDE.md` switches to the card, in its own commit citing this result. Per D-026:
+  - a C2 FAIL reverts it;
+  - study 2's copies force the `@docs/spec.md` import where its cells require the full import.
+
 ---
 
 ## D-026 — Dogfood study 2 (consultation at scale): locked design

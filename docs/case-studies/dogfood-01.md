@@ -1,6 +1,6 @@
 # Dogfood study 1: projected views (Rule V) and the card ablation (Rule C)
 
-> **Status: Rule V reported (2026-09-30). Rule C pending**, after the WS4 card build.
+> **Status: both rules reported (2026-09-30).** Rule V: **NULL**. Rule C: **PASS**; the adoption consequence (D-024) is applied in its own commit.
 >
 > The locked rules are [`DECISIONS.md`](../../DECISIONS.md) D-025 and its amendments 1–5, all committed before this data existed. Results are reported by the rule, including NULL and FAIL (spec §11.3). The protocol is D-023, and the harness is [`benchmark/dogfood/`](../../benchmark/dogfood/).
 
@@ -214,4 +214,139 @@ The verdict stays as recorded: **NULL**.
 
 ## Rule C: card-import ablation
 
-Pending: runs after the WS4 build (D-024, D-025 amendment 2).
+### Verdict: **PASS**
+
+| Condition (D-025) | Result |
+| --- | --- |
+| Primary: `D` = median over the 5 tasks of `d_t = M_full,t − M_card,t` (median per-turn occupancy, tokens) | **D = 46,769**, against the PASS threshold 0.5 × Δ = 26,326 |
+| Δ: the matrix-world `spec.md` import, probed at the Rule C commit | 52,651 tokens (`import-probe-probe4-20260930`) |
+| Non-inferiority clause 1 | Holds: 15/15 vs 15/15 |
+| Guarded tasks: `e_t` | 0 and 0: the clause holds, and the extension was not triggered |
+| Precondition (D-024 §2) | Met at the pilot: 59.3% ≥ 20% |
+| Apparatus: errors, contamination | None: 0 errors, 0 contaminated runs |
+
+The verdict was computed by `analyze.py rule-c`, committed and tested before any Rule C data (D-025 amendment 6).
+
+**What PASS means here.**
+- On study 1's five tasks, importing the generated card instead of the full spec cut median per-turn context occupancy by about 47k tokens. That is 86–92% of the probed import size on every task, with no loss of success.
+- By D-024 this switches the repository's `CLAUDE.md` to the card. The switch is its own commit, citing this result, and it is reversible.
+- Study 2 re-tests it as C2 (D-026): a C2 FAIL reverts it, and a C2 NULL leaves it as it is.
+- The claim this licenses (§11.3) is the one measured: lower per-turn occupancy with success unchanged, under this rule, on these tasks. Nothing more.
+
+**How strongly non-inferiority was tested.** Every run in both cells succeeded, so the clause held on tasks that did not separate the cells. A missing normative rule would show as a failure only on a task that needs it. D-024 chose the maintenance and negative-control tasks as guards for that reason, and both held. Study 2's content-heavy tasks are the harder re-test.
+
+### What was compared
+
+- **Matrix:** 5 tasks × {`import-full`, `import-card`} × 3 repeats = 30 runs, run `rulec-20260930`.
+  - Commit: `b4b1596` for every run.
+  - Subject: `claude-sonnet-5-5`, `--effort high`, CLI 2.1.285.
+  - Timing: runs started between 17:50:59 and 17:59:25 UTC.
+  - Context check: all 30 runs passed.
+- **Both cells:** the v0.4 world with `arms/baseline.md` (D-025 amendment 2).
+- **The only difference between the cells** is `CLAUDE.md`'s format-definition import:
+  - `@docs/spec.md` in `import-full`, a 139,852-byte file;
+  - `@docs/spec-card.md` in `import-card`, where the copy's own `gdmd spec --card` generated the card before the copy's baseline commit. It is 8,491 bytes, and every `import-card` line carries its SHA-256 `7c280fa1…a99f`.
+
+  The schema, AGENTS.md and deckbuilder imports are identical in both cells.
+
+### Primary: median per-turn occupancy
+
+| Task | `M_full` | `M_card` | `d_t` | `d_t` / Δ | Relative reduction |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `authoring_new_card` | 84,029 | 36,849 | 47,180 | 89.6% | 56.1% |
+| `lookup_refs` | 81,981 | 36,714 | 45,267 | 86.0% | 55.2% |
+| `maintenance_drift` | 83,584 | 36,815 | 46,769 | 88.8% | 56.0% |
+| `negative_control_no_drift` | 80,643 | 31,994 | 48,650 | 92.4% | 60.3% |
+| `operating_energy_budget` | 85,380 | 39,931 | 45,448 | 86.3% | 53.2% |
+| **D (median of `d_t`)** | | | **46,769** | 88.8% | |
+
+The locked design counts the card's own size, and any extra reading the card causes, against `D`. The realized reduction is 5,882 tokens short of Δ on the median task. The card's own 8,491 bytes and the card cell's extra tree reading (below) both contribute, but this study does not separate them.
+
+### Non-inferiority
+
+| | Success | Fail | Capped | Error |
+| --- | ---: | ---: | ---: | ---: |
+| `import-full` | 15 | 0 | 0 | 0 |
+| `import-card` | 15 | 0 | 0 | 0 |
+
+### Secondaries (descriptive, not gating)
+
+| Median per run | `import-full` | `import-card` |
+| --- | ---: | ---: |
+| Per-turn occupancy (tokens) | 83,125 | 36,762 |
+| Cache-read tokens | 419,876 | 173,760 |
+| Cache-creation tokens | 78,868 | 32,285 |
+| Output tokens | 1,589 | 1,817 |
+| Turns | 6 | 6 |
+| Tool calls | 6 | 7 |
+| Consultation bytes | 9,305 | 13,012 |
+| Distinct files read | 4 | 5 |
+| Wall-clock (s) | 16 | 17 |
+| Estimated USD | 0.42 | 0.17 |
+
+- **`gdmd spec --section` calls: 0 in all 15 `import-card` runs.** The locked reading of this secondary is that a high rate means the card is missing content. Zero means these tasks never reached for spec text beyond the card. It cannot distinguish "the card sufficed" from "the subject did not look".
+- **Direct reads of `docs/spec.md`:** none in either cell.
+- **More tree reading in the card cell:** 13.0 KB vs 9.3 KB of consultation per run, and 5 vs 4 distinct files. That reading is already counted inside the occupancy primary.
+- **Cost:** $2.79 for the 15 `import-card` runs, $6.17 for the 15 `import-full` runs, and $8.96 for the matrix.
+- **`gdmd view` / `graph` calls:** 0 in both cells. Their arm text is the baseline's.
+
+### Raw results (one row per run)
+
+| Task | Cell | Rep | Outcome | Median occupancy | Turns | Tool calls | `--section` calls | Consultation bytes | Wall (s) | USD |
+| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `authoring_new_card` | import-card | 1 | success | 36,849 | 7 | 8 | 0 | 13,012 | 24 | 0.20 |
+| `authoring_new_card` | import-card | 2 | success | 37,362 | 7 | 11 | 0 | 12,755 | 22 | 0.20 |
+| `authoring_new_card` | import-card | 3 | success | 36,469 | 7 | 7 | 0 | 12,380 | 17 | 0.19 |
+| `authoring_new_card` | import-full | 1 | success | 83,125 | 6 | 7 | 0 | 7,622 | 16 | 0.42 |
+| `authoring_new_card` | import-full | 2 | success | 84,176 | 7 | 7 | 0 | 10,204 | 18 | 0.44 |
+| `authoring_new_card` | import-full | 3 | success | 84,029 | 6 | 7 | 0 | 9,771 | 16 | 0.42 |
+| `lookup_refs` | import-card | 1 | success | 36,714 | 5 | 4 | 0 | 13,848 | 18 | 0.17 |
+| `lookup_refs` | import-card | 2 | success | 34,777 | 6 | 7 | 0 | 7,553 | 14 | 0.17 |
+| `lookup_refs` | import-card | 3 | success | 36,762 | 5 | 5 | 0 | 13,490 | 13 | 0.17 |
+| `lookup_refs` | import-full | 1 | success | 81,981 | 7 | 6 | 0 | 4,477 | 14 | 0.42 |
+| `lookup_refs` | import-full | 2 | success | 81,973 | 5 | 4 | 0 | 4,534 | 12 | 0.39 |
+| `lookup_refs` | import-full | 3 | success | 82,018 | 4 | 3 | 0 | 9,305 | 18 | 0.38 |
+| `maintenance_drift` | import-card | 1 | success | 35,505 | 5 | 5 | 0 | 10,743 | 12 | 0.16 |
+| `maintenance_drift` | import-card | 2 | success | 36,815 | 5 | 5 | 0 | 15,213 | 13 | 0.17 |
+| `maintenance_drift` | import-card | 3 | success | 37,430 | 8 | 9 | 0 | 13,459 | 22 | 0.21 |
+| `maintenance_drift` | import-full | 1 | success | 83,584 | 7 | 6 | 0 | 10,943 | 17 | 0.44 |
+| `maintenance_drift` | import-full | 2 | success | 82,030 | 5 | 4 | 0 | 6,221 | 12 | 0.39 |
+| `maintenance_drift` | import-full | 3 | success | 84,881 | 6 | 6 | 0 | 12,711 | 15 | 0.42 |
+| `negative_control_no_drift` | import-card | 1 | success | 31,994 | 4 | 3 | 0 | 3,633 | 8 | 0.14 |
+| `negative_control_no_drift` | import-card | 2 | success | 33,835 | 3 | 3 | 0 | 7,800 | 6 | 0.13 |
+| `negative_control_no_drift` | import-card | 3 | success | 31,712 | 4 | 4 | 0 | 4,382 | 12 | 0.14 |
+| `negative_control_no_drift` | import-full | 1 | success | 80,159 | 3 | 3 | 0 | 1,254 | 8 | 0.34 |
+| `negative_control_no_drift` | import-full | 2 | success | 80,643 | 5 | 4 | 0 | 3,012 | 10 | 0.38 |
+| `negative_control_no_drift` | import-full | 3 | success | 80,832 | 4 | 3 | 0 | 3,162 | 12 | 0.36 |
+| `operating_energy_budget` | import-card | 1 | success | 39,790 | 8 | 14 | 0 | 18,906 | 25 | 0.24 |
+| `operating_energy_budget` | import-card | 2 | success | 39,931 | 9 | 13 | 0 | 21,173 | 24 | 0.25 |
+| `operating_energy_budget` | import-card | 3 | success | 41,562 | 8 | 15 | 0 | 20,506 | 23 | 0.24 |
+| `operating_energy_budget` | import-full | 1 | success | 84,827 | 7 | 11 | 0 | 12,721 | 30 | 0.46 |
+| `operating_energy_budget` | import-full | 2 | success | 89,299 | 6 | 11 | 0 | 22,623 | 23 | 0.47 |
+| `operating_energy_budget` | import-full | 3 | success | 85,380 | 6 | 9 | 0 | 13,068 | 25 | 0.44 |
+
+### Apparatus
+
+- **Errors, re-runs, extension:** no `error` or `capped` outcome, so nothing was re-run and no extension ran.
+- **Out-of-copy access:** 12 entries, listed and not penalized. None names the harness, so no run is contaminated. They are the detector's known false positives:
+  - `sed` / `grep` patterns beginning with `/` (`/last_updated:`, `/energy_per_turn`);
+  - `../..` or `../../src` issued from a tree directory, which resolves to the copy's own root.
+- **Files:**
+  - Results: `benchmark/dogfood/results/rulec-20260930.jsonl`, with metrics under `results/rulec-20260930/metrics/`.
+  - Import probe: `results/import-probe-probe4-20260930.json`.
+  - Session logs: archived at `~/.local/share/gdmd-dogfood/archive/rulec-20260930.tar.xz`, SHA-256 `701d4361…fb49`. The archive holds 120 members, each with its own SHA-256 in `results/rulec-20260930/archive.json`.
+
+### Limits
+
+- Small n (3 repeats per cell) and a single model.
+- Tasks written by the format's own author. They are easy: every run succeeded, so non-inferiority was not stressed.
+- The completeness test covers uppercase RFC-2119 requirements only; lowercase normative "must" is not machine-identifiable (D-024).
+- Both cells ran in the v0.4 world. There, `view` / `graph` exist and AGENTS.md lists them. The card's §9.9 synopsis names them only in `import-card`, while `import-full` carries all of §9.9. Neither cell used them.
+- The precondition was read in the v0.3 world at the pilot. Δ was re-probed in the matrix world.
+- The judge residual, and no comparability with F-009.
+
+### What this does not say
+
+- **It says nothing about tasks that need spec text the card leaves out** (for example, §4.8's PRNG reduction rules), beyond this task set. Study 2's C2 re-tests on a larger tree with harder tasks.
+- **It is not a claim about views.** Rule V is NULL.
+- **It is not a claim about the starters.** They carry no agent file (D-024).
