@@ -15,6 +15,8 @@ schema:
     attack:   { type: integer, minimum: 0 }
     defense:  { type: integer, minimum: 0 }
     speed:    { type: integer, minimum: 1 }
+data_dir: ../../content/heroes
+count_target: 8
 ---
 
 ## Schema

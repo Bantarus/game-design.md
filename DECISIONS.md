@@ -1457,6 +1457,38 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 
 **Observed, not changed:** the file's `## Tokens` counts are stale. For example, it says "11 verbs", and the file declares 9.
 
+## D-031 — OI-006 class C: the party-rpg starter's heroes content-schema gets `data_dir` and `count_target`
+
+- **Status:** decided (2026-09-30). A tree-only fix, which D-026 amendment 3 lets land before study 2.
+- **Decided:** by the user at the Rule C review: "tree fix in the party-rpg starter's `heroes.md`: add `data_dir` and `count_target`, mirroring the canonical party-rpg example", with a release-notes line for scaffolded trees.
+- **Related:** OI-006 (class C), OI-005 (the unlinked entity), spec §6.1, §9.8 and §11 item 4; `$defs.ContentSchemaFile`.
+
+### The defect
+
+- **What was missing:** `templates/starters/party-rpg/gdd/content/heroes.md` had no `data_dir` and no `count_target`. `$defs.ContentSchemaFile` requires both.
+- **Consequences:**
+  - `content/heroes/example_hero.yaml` was linked to no content-schema. It was OI-005's one unlinked entity.
+  - §11 item 4 failed for the starter and for every tree `gdmd init --genre party-rpg` scaffolded from it.
+
+### The fix
+
+- **The change:** `data_dir: ../../content/heroes` and `count_target: 8`, placed after `schema:`.
+- **What "mirroring the canonical example" means here.** `examples/party-rpg` has no heroes collection. Its one content-schema, `items.md`, restates its mechanics entity:
+  - `data_dir` is the entity's `data_source`;
+  - `count_target` is the entity's own (50 in both);
+  - both sit after `schema:`.
+
+  The starter's `heroes.md` now does the same for the starter's own `entities.heroes` (`data_source: ../../content/heroes`, `count_target: 8`). So no value is new. The starter's `items.md` already follows this pattern (30 in both files).
+- **Split threshold:** 8 is below §6's mandatory-split threshold of 20. The split is still allowed, and the starter already uses it.
+- **Verification:**
+  - `heroes.md` now validates against the JSON Schema.
+  - `data_dir` resolves to `content/heroes/`. There, `example_hero.yaml` validates against the `schema:`, its `id` equals the file stem, and it has `status` and `implemented_in`.
+  - Lint stays 0/0, and its output is unchanged: lint does not read `data_dir` (OI-001).
+- **Ritual:**
+  - The starter's root `version` stays 0.1.0. A starter's version is the starting version of every tree scaffolded from it, not a revision counter, and all six starters share it.
+  - `last_verified` is not touched, because no code changed.
+- **Release notes:** the v0.3 correction note gains a section for trees already scaffolded from the v0.3 party-rpg starter, with the fix.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
