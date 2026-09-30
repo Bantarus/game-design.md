@@ -64,7 +64,7 @@ v0.4's dogfood studies (locked rules, headless coding-agent sessions) found proj
 
 ## Tree validation at a glance
 
-All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean at v0.3 — 0 errors, 0 warnings — under default thresholds. Lint-clean is weaker than §11 conformance: see the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md).
+All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean — 0 errors, 0 warnings — under default thresholds. At v0.3 lint-clean was weaker than §11 conformance (see the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md)); from v0.4 lint also validates every file against the §10 JSON Schema and every content entity against its content-schema.
 
 | Tree | Genre | v0.3 vocab carried |
 | --- | --- | --- |

@@ -276,6 +276,57 @@ def test_schema_violation_proof_of_fire_on_the_real_oi006_defects(tmp_path):
     assert {("data_dir" in f.message) or ("count_target" in f.message) for f in found} == {True}
 
 
+# ---- content-entity-invalid (D-035, OI-005) -------------------------------------------
+
+def _entity_findings(res):
+    return sorted((f.file, f.location) for f in res.findings if f.rule == "content-entity-invalid")
+
+
+def test_content_entity_invalid_fixture(fixture_overlay):
+    """Proof of fire on the on-disk fixture: each §6.2 failure, and an entity
+    no content-schema covers."""
+    res = _lint(fixture_overlay("content_entity_invalid"))
+    assert _entity_findings(res) == [
+        ("content/cards/bad_cost.yaml", "cost"),
+        ("content/cards/no_name.yaml", "frontmatter"),
+        ("content/cards/renamed.yaml", "id"),
+        ("content/relics/lonely.yaml", "file"),
+    ]
+    msgs = {f.file: f.message for f in res.findings if f.rule == "content-entity-invalid"}
+    assert "(schema: gdd/content/cards.md)" in msgs["content/cards/bad_cost.yaml"]
+    assert "'name' is a required property" in msgs["content/cards/no_name.yaml"]
+    assert "does not match the file name 'renamed'" in msgs["content/cards/renamed.yaml"]
+    assert res.exit_code == 1
+
+
+def test_content_entity_header_keys_are_schema_violations_not_duplicated(make_tree):
+    """§6.2 (c), status and implemented_in, is the §10 schema's job (D-034)."""
+    card = (make_tree() / "content/cards/test_card.yaml").read_text().replace(
+        "status: prototyped\n", "")
+    res = _lint(make_tree({"content/cards/test_card.yaml": card}))
+    assert _entity_findings(res) == []
+    assert any(f.rule == "schema-violation" and f.file == "content/cards/test_card.yaml"
+               for f in res.findings)
+
+
+def test_content_entity_invalid_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: the deckbuilder's enemies schema with the mangled key it
+    carried until 1bcfc01 is reported once, on the content-schema; a card with
+    a wrong-typed field is reported at the field."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    assert _entity_findings(_lint(root)) == []
+    enemies = root / "gdd/content/enemies.md"
+    enemies.write_text(enemies.read_text().replace("targets_burn: { type: boolean }",
+                                                   "targets_burn:{ type: boolean }"))
+    card = root / "content/cards/ember_strike.yaml"
+    card.write_text(card.read_text().replace("cost: 1", "cost: one", 1))
+    assert _entity_findings(_lint(root)) == [("content/cards/ember_strike.yaml", "cost"),
+                                             ("gdd/content/enemies.md", "schema")]
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):

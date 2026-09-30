@@ -1099,6 +1099,77 @@ def rule_schema_violation(tree: Tree) -> list[Finding]:
     return findings
 
 
+# ---- content-entity-invalid (D-035, OI-005, spec §6.2 / §11 item 4) -----------
+
+def _content_dir(pf: ParsedFile) -> Path | None:
+    """The directory a content-schema file's `data_dir:` names, resolved against
+    the file's own directory (§6.1)."""
+    d = pf.frontmatter.get("data_dir")
+    if not isinstance(d, str) or not d.strip():
+        return None
+    return (pf.abs_path.parent / d).resolve()
+
+
+def rule_content_entity_invalid(tree: Tree) -> list[Finding]:
+    """§6.2 (a) and (b) for every content-entity file:
+      (a) it validates against the `schema:` of each content-schema whose
+          `data_dir:` contains it; an entity no `data_dir:` covers is
+          validated against nothing, which §11 item 4 does not allow;
+      (b) its `id` equals its file name's stem.
+    §6.2 (c), `status` and `implemented_in` present, is the §10 schema's
+    ContentEntityFile branch, so `schema-violation` reports it (D-034)."""
+    rule = "content-entity-invalid"
+    by_dir: dict[Path, list[ParsedFile]] = defaultdict(list)
+    for pf in tree.files:
+        if pf.file_type == "content-schema":
+            d = _content_dir(pf)
+            if d is not None:
+                by_dir[d].append(pf)
+    findings: list[Finding] = []
+    validators: dict[str, Any] = {}
+    bad_schema: set[str] = set()
+    cls = jsonschema.Draft202012Validator
+    for pf in tree.files:
+        if pf.file_type != "content-entity":
+            continue
+        fm = pf.frontmatter
+        eid = fm.get("id")
+        if isinstance(eid, str) and eid != pf.abs_path.stem:
+            findings.append(Finding(
+                rule=rule, severity="error", file=pf.rel_str, location="id",
+                message=f"id '{eid}' does not match the file name '{pf.abs_path.stem}'"))
+        schemas = by_dir.get(pf.abs_path.parent.resolve(), [])
+        if not schemas:
+            findings.append(Finding(
+                rule=rule, severity="error", file=pf.rel_str, location="file",
+                message=(f"no content-schema's data_dir covers "
+                         f"{pf.rel_path.parent.as_posix()}/, so this entity is "
+                         f"validated against no schema (§6.2, §11 item 4)")))
+            continue
+        for spf in schemas:
+            block = spf.frontmatter.get("schema")
+            if not isinstance(block, dict) or spf.rel_str in bad_schema:
+                continue      # a missing or non-mapping schema: is schema-violation's
+            if spf.rel_str not in validators:
+                try:
+                    cls.check_schema(block)
+                except jsonschema.exceptions.SchemaError as e:
+                    bad_schema.add(spf.rel_str)
+                    findings.append(Finding(
+                        rule=rule, severity="error", file=spf.rel_str, location="schema",
+                        message=f"schema: is not a valid JSON Schema: {_schema_message(e)}"))
+                    continue
+                validators[spf.rel_str] = cls(block)
+            errors = sorted(validators[spf.rel_str].iter_errors(fm),
+                            key=lambda e: ([str(x) for x in e.absolute_path], e.message))
+            for e in errors:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str,
+                    location=_schema_location(e.absolute_path),
+                    message=f"{_schema_message(e)} (schema: {spf.rel_str})"))
+    return findings
+
+
 # ---- Dispatch -----------------------------------------------------------------
 
 ALL_RULES: list[Callable[..., list[Finding]]] = [
@@ -1121,6 +1192,7 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_prototyped_without_pointer,     # v0.3 Task 6: NEW
     rule_shipped_stale_doc,              # v0.3 Task 6: NEW
     rule_schema_violation,               # v0.4 D-034
+    rule_content_entity_invalid,         # v0.4 D-035 (OI-005)
 ]
 
 

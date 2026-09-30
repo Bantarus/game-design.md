@@ -1930,6 +1930,50 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **AGENTS.md:** the rule joins the "keep green" list.
 - The card is regenerated (hash line only).
 
+## D-035 — Lint validates content entities against their content-schema: rule `content-entity-invalid` (OI-005)
+
+- **Status:** decided (2026-09-30), step (c) of the user's post-study-2 order ("OI-005: the content-entity validation lint rule, with proof-of-fire on a fixture").
+- **Related:** OI-005, D-034, OI-001 (how entities link to schemas), spec §6.2 and §11 item 4.
+
+### Decisions
+
+1. **The rule:** `content-entity-invalid`, severity **error**, covering §6.2:
+   - **(a)** each content entity validates against the `schema:` of the content-schema that covers it;
+   - **(b)** its `id` equals its file name's stem.
+   - §11 item 4 makes (a) a conformance item, hence error.
+2. **§6.2 (c)** (`status` and `implemented_in` present) is already the §10 schema's `ContentEntityFile` branch, so `schema-violation` reports it (D-034). It is not reported twice.
+3. **Linking:** an entity belongs to the content-schema whose `data_dir:`, resolved against the schema file's own directory, contains it.
+   - This is §6.1's field, and the link the one-off OI-005 pass and D-031 used.
+   - It does **not** use the code's parent-directory registration (`Tree.content_entities`). Whether the spec follows that code is OI-001's question, for the user's decision at step (e). On all 13 trees both links agree.
+4. **An entity that no `data_dir:` covers** is a finding: it is validated against nothing, which §11 item 4 does not allow. The party-rpg starter's heroes were such a case until D-031.
+5. **A content-schema whose `schema:` is not a valid JSON Schema** is reported once, on that content-schema file at `schema`. Its entities are not validated against it.
+   - Why: validating an instance against an invalid schema fails only when the broken part happens to be exercised. That is how the defect below went unseen.
+6. **Messages** carry the schema file (`(schema: gdd/content/cards.md)`) and the same 200-character cap and best-match rule as `schema-violation`.
+
+### Proof of fire
+
+- **On a real tree, before any fixture:** the rule's first run found a defect in the canonical deckbuilder.
+  - Since the initial commit, `gdd/content/enemies.md` declared `targets_burn:{ type: boolean }`, with no space after the colon. YAML read that as a key `targets_burn:{ type` with the string value `boolean }`.
+  - So `targets_burn`, which `kindling_imp` uses, was validated against nothing, and the `schema:` block was not a valid JSON Schema.
+  - The one-off OI-005 pass had missed it: no entity carries the mangled key, and the pass never checked the schema itself.
+  - Fixed in its own commit, first (`1bcfc01`), so every commit lints clean.
+- **On the fixture** `tests/fixtures/content_entity_invalid/`: a wrong-typed field (reported at `cost`), a missing required field, an `id` that is not the stem, and a relic no content-schema covers. Each is one finding.
+- **On a copy of the deckbuilder:** the old mangled key is reported once, on `enemies.md`, and a card with `cost: one` is reported at `cost`.
+- **Header keys:** a missing `status` is a `schema-violation`, not a `content-entity-invalid` finding.
+
+### Effect
+
+- The 12 in-repo trees stay 0/0, after the deckbuilder fix.
+- The study-2 tree's 320 entities all validate, and its lint output is unchanged.
+- **With D-034, every §11 conformance item now has a lint rule behind it:** items 2–3 through the schema and `section-order`, item 4 through this rule, and item 5 through `undefined-distribution`. The v0.3 gap the correction note describes (schema and content validity never checked) is closed for v0.4, and the README and the correction note say so. How completely each rule covers its item, for example randomness described only in prose, is not claimed.
+
+### Spec
+
+- **§6.2:** names the two rules and the `data_dir:` link.
+- **§9.1:** a new row.
+- **AGENTS.md:** the rule joins the "keep green" list.
+- The card is regenerated.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -1978,6 +2022,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - One entity is linked to no schema. `templates/starters/party-rpg/gdd/content/heroes.md` has no `data_dir`, so `content/heroes/example_hero.yaml` is unchecked (it would validate if linked).
   - A correction note for v0.3's §11 conformance claim is at [`docs/release-notes/v0.3-conformance-correction.md`](docs/release-notes/v0.3-conformance-correction.md). No lint rule is added yet.
   - **Update (2026-09-30):** D-031 links the entity. A re-run at `326cd50` finds 30 linked entities, all passing, and none unlinked (OI-006 progress). The lint rule itself still waits until after study 2.
+- **Resolved (2026-09-30):** rule `content-entity-invalid` (D-035, error). Its first run found the deckbuilder's mangled enemies schema (fixed in `1bcfc01`). OI-005 is closed.
 
 ## OI-006 — Lint does not validate frontmatter against the normative JSON Schema (spec §10); 10 blocks in 8 trees fail it
 

@@ -937,7 +937,7 @@ effects:
   - { kind: apply_state, state: "{states.enemies.burning}", duration: 2 }
 ```
 
-The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`.
+The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`. From v0.4, (a) and (b) are rule `content-entity-invalid` and (c) is rule `schema-violation` (§9.1). An entity belongs to the content-schema whose resolved `data_dir:` contains it; an entity that no `data_dir:` covers is itself a finding, since it is validated against nothing.
 
 ---
 
@@ -1080,6 +1080,7 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | `write-to-template-field` | error | A `do:` step declares `field: <name>` where `<name>` is not present in any instance_container's `per_instance_state` schema. Writes are restricted to per_instance_state fields per D-019; templates are immutable per §6, and container properties are read-only. The check is opt-in (fires only when `field:` is declared on the step); ratchet to required-`field:` on mutation steps is a v0.4 concern. See spec §3 + §4.5 D-019 paragraphs. |
 | `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
 | `schema-violation` | error (v0.4+) | A game-design.md file's frontmatter does not validate against the §10 JSON Schema: the branch for its `file_type:`, or the whole schema when `file_type:` is missing or unknown. One finding per schema error, located at the offending field. Files that neither declare `spec: game-design.md` nor carry a `file_type:` (other YAML under the tree) are not validated. See `DECISIONS.md` D-034. |
+| `content-entity-invalid` | error (v0.4+) | §6.2 (a) and (b): a content entity does not validate against the `schema:` of the content-schema whose `data_dir:` contains it, its `id` differs from its file name's stem, or no content-schema's `data_dir:` covers it. A content-schema whose `schema:` is not a valid JSON Schema is reported once, on that file. §6.2 (c) is `schema-violation`'s. See `DECISIONS.md` D-035. |
 | `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
 | `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning at v0.2.0-alpha, error in v0.3 — transition `event:` is a bare string instead of a `{events.<id>}` token). |
 | `verify-result-regression` | error/warning | A prior `verify` axis result regressed. `build_health` and `behavioral_alignment` regressions are error; `presentation_usability` regressions are warning. Emitted only by `gdmd verify` (§9.5), not by `lint`. |
