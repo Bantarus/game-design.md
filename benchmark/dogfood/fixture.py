@@ -206,6 +206,25 @@ SPEC_IMPORT_LINE = "- Format definition: @docs/spec.md"
 CARD_IMPORT_LINE = "- Format definition: @docs/spec-card.md"
 
 
+def force_spec_import(root: Path) -> None:
+    """Matrix-world copies start from the full `@docs/spec.md` import, whatever
+    the repo's own `CLAUDE.md` imports (D-026: "both arms' copies force the
+    CLAUDE.md import line to @docs/spec.md"; D-024 §4 holds the import
+    constant in the views comparison). After a card adoption the repo imports
+    the card, so the line is switched back here; `import-card` then swaps it
+    to the card again. Refuses unless exactly one of the two lines exists."""
+    cm = root / "CLAUDE.md"
+    text = cm.read_text(encoding="utf-8")
+    n_spec, n_card = text.count(SPEC_IMPORT_LINE), text.count(CARD_IMPORT_LINE)
+    if (n_spec, n_card) == (1, 0):
+        return
+    if (n_spec, n_card) == (0, 1):
+        cm.write_text(text.replace(CARD_IMPORT_LINE, SPEC_IMPORT_LINE), encoding="utf-8")
+        return
+    raise FixtureError(f"CLAUDE.md has {n_spec} spec and {n_card} card import lines; "
+                       "expected exactly one of them")
+
+
 def swap_in_card(root: Path) -> str:
     """Rule C `import-card` cell construction (D-024 §3, D-025): generate
     `docs/spec-card.md` with the copy's own `src/` from the copy's own spec
@@ -286,6 +305,8 @@ def prepare_copy(task: Task, cell_dir: Path, ref: str = "HEAD", world: str = "ma
     strip_excluded(root)
     if card and world != "matrix":
         raise FixtureError("the card swap needs the matrix world (D-025 amendment 2)")
+    if world == "matrix":
+        force_spec_import(root)
     card_sha = swap_in_card(root) if card else None
     normalize_mtimes(root)
     init_repo(root, f"fixture: game-design.md at {sha[:12]}"

@@ -923,3 +923,26 @@ def test_extract_counts_spec_section_calls(tmp_path):
     session = tmp_path / "s.jsonl"
     session.write_text("\n".join(json.dumps(r) for r in recs) + "\n")
     assert extract(session, vcc, Path("/copy"), tmp_path / "v")["gdmd_spec_section_calls"] == 2
+
+
+def test_force_spec_import(tmp_path):
+    # D-026 / D-024 §4: matrix copies start from the full import even after
+    # the repo's CLAUDE.md adopts the card.
+    cm = tmp_path / "CLAUDE.md"
+    cm.write_text("# x\n" + fixture.CARD_IMPORT_LINE + "\n- Schema: @schema/x.json\n")
+    fixture.force_spec_import(tmp_path)
+    assert cm.read_text() == "# x\n" + fixture.SPEC_IMPORT_LINE + "\n- Schema: @schema/x.json\n"
+    fixture.force_spec_import(tmp_path)                      # idempotent
+    assert fixture.SPEC_IMPORT_LINE in cm.read_text()
+    cm.write_text("# no import line\n")
+    with pytest.raises(fixture.FixtureError, match="exactly one"):
+        fixture.force_spec_import(tmp_path)
+    cm.write_text(fixture.SPEC_IMPORT_LINE + "\n" + fixture.CARD_IMPORT_LINE + "\n")
+    with pytest.raises(fixture.FixtureError, match="exactly one"):
+        fixture.force_spec_import(tmp_path)
+
+
+def test_matrix_copies_import_the_full_spec(tmp_path):
+    for task in ("lookup_refs", "maintenance_drift"):
+        c = fixture.prepare_copy(TASKS[task], tmp_path / task)
+        assert (c.root / "CLAUDE.md").read_text().count(fixture.SPEC_IMPORT_LINE) == 1
