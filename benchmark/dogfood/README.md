@@ -19,8 +19,37 @@ checklib.py                   shared checker helpers
 extract.py                    trace metrics via VCC
 run.py                        orchestrator
 results/<run_id>.jsonl        one line per run (committed)
-results/sessions/             session JSONLs, VCC views, per-run metrics (gitignored; SHA-256 in each line)
+results/<run_id>/metrics/     per-cell extraction output (committed)
+results/<run_id>/archive.json where the session logs were archived, with per-file SHA-256 (committed)
+results/import-probe-*.json   import-size probe results (committed)
+results/sessions/             session JSONLs, stderr, VCC views (gitignored; compressed into
+                              ~/.local/share/gdmd-dogfood/archive/<run_id>.tar.xz after each run)
 ```
+
+## Arms and worlds (D-025)
+
+| Arm | World: tooling-and-instructions layer | `gdmd` | Appended text |
+| --- | --- | --- | --- |
+| `baseline` | `v0.3`: `CLAUDE.md`, `AGENTS.md`, `docs/spec.md`, `schema/`, `src/`, `pyproject.toml` from tag `v0.3.0` | the v0.3 venv | `arms/baseline.md` |
+| `views` | `matrix`: the matrix commit as-is | the copy's own `src/` | `arms/views.md` |
+
+Everything else in a copy, including every task tree, comes from the matrix commit in both arms, so task content is identical by construction. The D-024 card ablation (Rule C) runs in the `matrix` world with `arms/baseline.md` (D-024 puts it on the baseline tool arm; the card needs v0.4 tooling).
+
+**The judge.** Checkers never use the arm's own `gdmd`. `run.py` exports the matrix commit's `src/` once per run as the fixed judge and passes it as `$DOGFOOD_GDMD`. The preflight refuses a copy if the arm's `gdmd` and the judge lint the untouched fixture differently, before or after the fixture patch.
+
+## One-time setup (outside the repo)
+
+```bash
+# the v0.3 world's gdmd, installed from the tag; run.py hash-checks it against the tag
+python3 -m venv ~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0
+~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0/bin/pip install "git+file://$PWD@v0.3.0"   # from the repo root
+
+# the pinned Claude Code CLI (run.py checks its SHA-256 and version; see CLAUDE_PIN_* in run.py)
+mkdir -p ~/.local/share/gdmd-dogfood/claude
+cp -p ~/.local/share/claude/versions/2.1.285 ~/.local/share/gdmd-dogfood/claude/claude-2.1.285
+```
+
+The copy sits outside the native installer's `versions/` directory, so auto-update pruning can't remove it. Sessions also run with `DISABLE_AUTOUPDATER=1`, and each cell re-checks `--version` against the run's first value.
 
 ## Tasks
 
@@ -36,11 +65,11 @@ results/sessions/             session JSONLs, VCC views, per-run metrics (gitign
 
 ## Isolation (per run)
 
-- **Copy:** a `git archive HEAD` export, extracted **outside** the repo. That way Claude Code's parent-directory `CLAUDE.md` discovery sees only the copy's own `CLAUDE.md`, and so both arms pay the same `@`-imports.
+- **Copy:** a `git archive` export of the run's pinned commit (HEAD when the run starts; a real run refuses to start with uncommitted harness changes), extracted **outside** the repo. That way Claude Code's parent-directory `CLAUDE.md` discovery sees only the copy's own `CLAUDE.md`, and so both arms pay the same `@`-imports.
 - **Excluded from the copy:** `benchmark/dogfood/` and `tests/test_dogfood.py` (tasks, checkers, answers).
 - **mtimes:** normalized to a fixed date, so `stale-section` reads the copy like the working tree. The fixture patch is the only fresh mtime, and so the only drift signal.
 - **Git:** a fresh `git init`, with its own `.git`; not a worktree, so a subject's commit can't reach the real repo. Checkers diff against the `dogfood-base` tag.
-- **CLI under test:** `gdmd` on PATH is a shim that runs the copy's own `src/`.
+- **CLI under test:** `gdmd` on PATH is a per-cell shim: the copy's own `src/` (`matrix`) or the v0.3 venv (`v0.3`).
 - **Claude Code flags:**
   - `--restricted`: file tools confined to the copy; user, project and local settings ignored, so the maintainer's plugins, skills, hooks and effort don't leak in.
   - `--strict-mcp-config`: no MCP servers.
@@ -52,6 +81,14 @@ results/sessions/             session JSONLs, VCC views, per-run metrics (gitign
 - **Flag check:** `run.py` validates every flag it passes against `claude --help` before running (including `--dry-run`).
 
 Residual leakage risk: Bash `cat`/`grep` can read absolute paths outside the copy. It isn't prevented, but it is **detected**: `extract.py` reports any tool input path outside the copy as `out_of_copy_access`, and a run with a non-zero count is flagged.
+
+## Outcomes (D-025)
+
+Each run is exactly one of:
+- `success`: the session completed and the checker passed.
+- `fail`: the session completed and the checker failed.
+- `capped`: the turn cap, the wall-clock timeout or the budget cap ended the session. It counts as not-success.
+- `error`: an apparatus failure, meaning no result event, another CLI error, no session JSONL, or a checker that emitted no report. D-025 governs re-runs.
 
 ## Metrics
 
@@ -67,12 +104,13 @@ These are the two pre-registered primaries: consultation bytes for views vs base
 ```bash
 python run.py --dry-run                    # validate flags + build every fixture; no model calls
 python run.py --probe                      # 1 call: is the pinned model id served?
-python run.py --import-probe               # 2 calls: spec.md @-import size (D-024 precondition)
+python run.py --import-probe               # 4 calls: spec.md @-import size in both worlds (D-024)
 python run.py --pilot                      # baseline x every task x 1 (not evidence)
 python run.py --task lookup_refs --arm views --repeats 3
+python run.py --task maintenance_drift --arm baseline --arm views --repeats 2 --repeat-start 4   # D-025 extension
 ```
 
-Order of operations (D-023 / D-025): dry run → probe → pilot (validates checkers, isolation and extraction; estimates cost) → **stop for approval** → full matrix.
+Order of operations (D-023 / D-025): dry run → probe → import probe → pilot (validates checkers, isolation and extraction; estimates cost) → **stop for approval** → full matrix.
 
 ## Limits (state them in every report)
 

@@ -110,6 +110,41 @@ def test_copy_gdmd_resolves_to_its_own_shim(tmp_path):
     assert str(copy.root / "src") in Path(found).read_text()
 
 
+needs_v03 = pytest.mark.skipif(not (fixture.V03_VENV / "bin" / "gdmd").is_file(),
+                               reason="v0.3 venv not installed (see benchmark/dogfood/README)")
+
+
+@needs_v03
+def test_v03_world_replaces_only_the_tooling_layer(tmp_path):
+    fixture.verify_v03_venv(scratch=tmp_path)
+    sha = fixture.git(REPO, "rev-parse", "HEAD")
+    judge = fixture.make_judge(tmp_path / "judge", sha)
+    task = TASKS["maintenance_drift"]
+    old = fixture.prepare_copy(task, tmp_path / "v03", ref=sha, world="v0.3", judge=judge)
+    new = fixture.prepare_copy(task, tmp_path / "mat", ref=sha, world="matrix", judge=judge)
+    tag = fixture.V03_TAG
+    for rel in ("docs/spec.md", "CLAUDE.md", "AGENTS.md", "src/game_design_md/cli.py"):
+        at_tag = subprocess.run(["git", "-C", str(REPO), "show", f"{tag}:{rel}"],
+                                capture_output=True, check=True).stdout
+        assert (old.root / rel).read_bytes() == at_tag, rel
+    diff = subprocess.run(["diff", "-r", "-q", "--exclude=.git",
+                           str(old.root / task.tree), str(new.root / task.tree)],
+                          capture_output=True, text=True)
+    assert diff.returncode == 0, diff.stdout
+    found = subprocess.run(["sh", "-c", "command -v gdmd"], env=old.env(),
+                           capture_output=True, text=True).stdout.strip()
+    assert str(fixture.V03_VENV / "bin" / "gdmd") in Path(found).read_text()
+    assert old.overlay_sha == fixture.git(REPO, "rev-parse", f"{tag}^{{commit}}")
+
+
+def test_judge_disagreement_is_a_fixture_error(tmp_path):
+    fake = tmp_path / "fake-judge"
+    fake.write_text('#!/bin/sh\necho \'{"findings": [], "summary": {"errors": 0}}\'\n')
+    fake.chmod(0o755)
+    with pytest.raises(fixture.FixtureError, match="disagree"):
+        fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "c", judge=fake)
+
+
 def test_maintenance_fixture_makes_exactly_mechanics_stale(tmp_path):
     copy = make_copy("maintenance_drift", tmp_path)
     res = json.loads(gdmd(copy, "lint", "examples/tick-combat").stdout)
@@ -379,12 +414,55 @@ def test_listed_flags_reads_option_lines_not_descriptions():
                                       FAKE_HELP) == ["--max-turns"]
 
 
-@pytest.mark.skipif(shutil.which("claude") is None, reason="claude CLI not installed")
+@pytest.mark.skipif(not dogfood_run.CLAUDE_BIN.is_file(), reason="pinned claude CLI not installed")
 def test_session_and_probe_argv_flags_exist_in_installed_cli():
     help_text = dogfood_run.claude_help()
     argv = dogfood_run.session_argv("m", "high", "sid", "arm", 1.0)
     assert dogfood_run.validate_flags(argv, help_text) == []
     assert dogfood_run.validate_flags(dogfood_run.probe_argv("m"), help_text) == []
+
+
+@pytest.mark.parametrize("stop, result, kw, want", [
+    ("completed", {"subtype": "success"}, {}, "success"),
+    ("completed", {"subtype": "success"}, {"checker_success": False}, "fail"),
+    ("turn_cap", {}, {}, "capped"),
+    ("timeout", {}, {"session_found": False}, "capped"),
+    ("error:error_max_budget_usd", {"is_error": True}, {}, "capped"),
+    ("error:error_during_execution", {"is_error": True}, {}, "error"),
+    ("completed", {}, {}, "error"),                       # no result event
+    ("completed", {"subtype": "success"}, {"session_found": False}, "error"),
+    ("completed", {"subtype": "success"}, {"checker_parsed": False}, "error"),
+])
+def test_classify_outcomes(stop, result, kw, want):
+    args = {"session_found": True, "checker_parsed": True, "checker_success": True, **kw}
+    assert dogfood_run.classify(stop, result, **args) == want
+
+
+def test_archive_sessions_outside_repo_with_member_hashes(tmp_path, monkeypatch):
+    import tarfile
+    monkeypatch.setattr(dogfood_run, "RESULTS_DIR", tmp_path / "results")
+    monkeypatch.setattr(dogfood_run, "ARCHIVE_DIR", tmp_path / "archive")
+    sess = tmp_path / "results" / "sessions" / "r1"
+    (sess / "views").mkdir(parents=True)
+    (sess / "a.jsonl").write_text('{"x": 1}\n')
+    (sess / "views" / "a.txt").write_text("view\n")
+    info = dogfood_run.archive_sessions("r1")
+    assert Path(info["archive"]).parent == tmp_path / "archive"
+    assert set(info["members"]) == {"a.jsonl", "views/a.txt"}
+    assert info["members"]["a.jsonl"] == dogfood_run.sha256(sess / "a.jsonl")
+    with tarfile.open(info["archive"]) as tar:
+        assert sorted(tar.getnames()) == ["r1/a.jsonl", "r1/views/a.txt"]
+    recorded = json.loads((tmp_path / "results" / "r1" / "archive.json").read_text())
+    assert recorded["sha256"] == dogfood_run.sha256(Path(info["archive"]))
+
+
+def test_harness_dirty_ignores_results_only(tmp_path):
+    marker = DOGFOOD / "results" / "_pytest_marker.jsonl"
+    marker.write_text("{}\n")
+    try:
+        assert not any("_pytest_marker" in ln for ln in dogfood_run.harness_dirty())
+    finally:
+        marker.unlink()
 
 
 # ---- extract.py on a synthetic session ------------------------------------------------

@@ -20,6 +20,18 @@ v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/r
   - An orchestrator whose `--dry-run` validates every CLI flag against `claude --help`, plus a model-id probe and the D-024 import-size probe.
 
   `tests/test_dogfood.py` shows that every checker passes known-good and fails known-bad solutions on the targeted criterion, and cross-checks the frozen lookup answers once against code. No model has been invoked; the locked rule (D-025) is committed before the pilot.
+- **D-025: the dogfood locked rules**, committed before the pilot.
+  - **Rule V** (views vs baseline): consultation bytes; the median of per-task ratios; PASS at ≥ 30% reduction.
+  - **Rule C** (the card ablation): realized per-turn occupancy reduction ≥ 50% of the probed spec-import delta.
+  - **Shared non-inferiority:** at most a 10-point overall success drop. On the maintenance and negative-control tasks, one extra failure gives NULL plus one pre-registered extension to 5 repeats; two or more give FAIL.
+  - **Outcomes:** success, fail, capped (not-success) or error; caps are identical across arms.
+- **Dogfood harness, the apparatus D-025 locks:**
+  - The baseline arm runs the **v0.3 world**: its tooling-and-instructions layer comes from `v0.3.0`, and its `gdmd` is a venv installed from the tag and hash-checked against it. The views arm runs the matrix commit.
+  - Checkers use one fixed judge, the matrix commit's `src/`, and a preflight asserts judge/arm lint equivalence.
+  - Every copy of a run is pinned to one commit, and real runs refuse a dirty harness.
+  - The Claude Code CLI is a pinned 2.1.285 binary (SHA-256 checked), run with `DISABLE_AUTOUPDATER=1` and a per-cell version check.
+  - Session logs are archived compressed outside the repo; results, extraction output and archive manifests are committed.
+  - The import probe covers both worlds (4 calls).
 - **`DECISIONS.md` Open items** (OI-001…OI-005): logged spec↔code drifts and a lint-rule vs schema mismatch, each to be resolved in its own D-entry.
 - **[v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md) + OI-006.** A read-only jsonschema pass (OI-005) finds lint-clean weaker than §11 conformance.
   - All 29 linked content entities validate. The party-rpg starter's `heroes` content-schema lacks `data_dir`, leaving its entity unlinked.

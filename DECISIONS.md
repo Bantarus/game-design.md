@@ -607,6 +607,162 @@ A deterministic token-accounting analysis was offered and declined. It would hav
 
 ---
 
+## D-025 — Dogfood locked rules: views vs baseline (Rule V) and the card-import ablation (Rule C)
+
+- **Status:** locked (2026-09-30). Committed **before the pilot**, so no threshold can be calibrated on pilot numbers. The draft was reviewed at the combined Checkpoint 2 / Annex checkpoint A, and the review's ten amendments are incorporated below.
+- **Scope:** two independent rules.
+  - **Rule V** evaluates the WS2 claim "projected views reduce consultation cost without hurting success".
+  - **Rule C** is the D-024 adoption gate for the compact agent card.
+
+  They share the apparatus but **no metric definition**. Each rule has its own primary, and neither definition carries over into the other.
+- **Related:** D-023 (protocol), D-024 (card gate; its 20% precondition is locked there), spec §11.3, OI-005 / OI-006.
+
+### Shared apparatus (the pinned bundle)
+
+- **Subject:** `claude-sonnet-5-5` via headless Claude Code, `--effort high`.
+- **CLI (pinned):**
+  - Version `2.1.285`, as a native binary copied outside the installer's reach (`run.py::CLAUDE_BIN`), SHA-256 `33dad1ec…b233d29` (`run.py::CLAUDE_PIN_SHA256`). `run.py` refuses to run on a SHA or version mismatch.
+  - Sessions run with `DISABLE_AUTOUPDATER=1`. Each cell re-checks `--version` against the run's first value and stops the run on a change.
+  - `claude --version` is recorded on every result line.
+  - Why: the CLI auto-updated from 2.1.280 to 2.1.285 during the session that drafted this entry.
+- **Worlds (the arms differ in the tooling-and-instructions layer):**
+  - **`baseline` = the v0.3 world.**
+    - `CLAUDE.md`, `AGENTS.md`, `docs/spec.md`, `schema/`, `src/` and `pyproject.toml` come from tag `v0.3.0` (`fixture.V03_OVERLAY`).
+    - `gdmd` is a separate venv installed from the tag. `fixture.verify_v03_venv` checks it byte-for-byte against the tag's `src/game_design_md` plus the two force-included data files.
+  - **`views` = the matrix-commit world**, with `gdmd` running the copy's own `src/`.
+  - **Everything else, including every task tree, comes from the matrix commit in both arms,** so task content is identical by construction.
+  - Why more than `gdmd` and `spec.md` are overlaid: a "v0.3" copy with v0.4 `src/` or v0.4 workflow docs would let the baseline read or run v0.4 tooling.
+  - The spec-import size difference between the worlds is recorded: bytes per copy, and tokens from the import probe run in both worlds. It does not enter Rule V's primary (consultation bytes). At `3f035cf` the difference is 121,539 vs 122,948 bytes (§11.3); it grows with WS2's §9.9.
+- **The judge:**
+  - Checkers never use the arm's own `gdmd`. The judge is the matrix commit's `src/`, exported once per run (`fixture.make_judge`, `$DOGFOOD_GDMD`).
+  - The preflight refuses a copy if the arm's `gdmd` and the judge lint the untouched fixture differently, before or after the fixture patch.
+  - Residual: a lint rule added after `v0.3.0` could judge a subject's *new* content differently from what the baseline subject could see. OI-005 / OI-006 rules are scheduled after Checkpoint 3; if one lands before the Rule V matrix, this is reported as a limit.
+- **One commit per matrix.** Every copy in a run is exported from the commit pinned when the run starts. A real run refuses to start if the harness (`benchmark/dogfood/`, `tests/test_dogfood.py`, results excepted) has uncommitted changes. That commit's SHA, the overlay SHA and the judge SHA are on every line.
+- **Flags and isolation:** exactly `run.py::session_argv` at the lock commit:
+  - `--restricted`;
+  - `--tools Read,Grep,Glob,Edit,Write,Bash`, with the Bash allowlist in `run.py::ALLOWED_BASH`;
+  - `--permission-mode acceptEdits`, `--strict-mcp-config`, `--disable-slash-commands`;
+  - a stream-json session with a pinned `--session-id`;
+  - a per-run isolated copy (`fixture.py`), with the task prompt on stdin and the arm text via `--append-system-prompt`.
+- **Tasks:** the five in `benchmark/dogfood/tasks/tasks.yaml` at the lock commit.
+  - The operating task states its intended end state explicitly (review item 8, commit `3f035cf`).
+  - The maintenance fixture's Rust refactor was compile-checked once (review item 9): in a scratch export with the patch applied, `cargo check --offline --all-targets` and `cargo test --offline` pass, all 7 tests including `golden_trajectory_seed_12345`. So the teammate's change really preserves behavior.
+- **Repeats:** **3 per cell.** This is small and says so: results are descriptive, and no significance test is claimed.
+- **Caps:**
+  - A turn cap of 60 (enforced by the harness on the stream), 1200 s of wall-clock, and `--max-budget-usd 3.00` per run.
+  - They are **identical across arms and rules**.
+  - A cap may be raised **at most once, only upward**, after the pilot and only if the pilot shows it binding. The change is recorded as an amendment to this entry before any full matrix runs.
+- **Outcomes:** every run is exactly one of four (`run.py::classify`).
+  - `success`: the session completed and the checker passed.
+  - `fail`: the session completed and the checker failed.
+  - `capped`: the turn cap, the timeout or the budget cap ended the session. **It counts as not-success.** Capped runs are never retried or excluded, because a cap binding can depend on the arm.
+  - `error`: an apparatus failure, meaning no result event, a CLI error other than the budget cap, no session JSONL, or a checker that emitted no report.
+- **Error handling:**
+  - An `error` cell is re-run **once**, after a harness fix is committed if the cause is in the harness. The original line is kept unchanged. The re-run's line records `supersedes: <run_id>/<cell_id>` (`run.py --supersedes`).
+  - A second `error` counts as not-success.
+  - If more than 10% of a rule's runs end in `error` after re-runs, that rule's verdict is **NULL (apparatus)**.
+- **Contamination:**
+  - A run that reads anything under the real repository's `benchmark/dogfood/` or `tests/test_dogfood.py` (as `out_of_copy_access` reports) counts as not-success and is listed.
+  - If more than 10% of the runs in any arm are contaminated, that rule's verdict is **NULL (apparatus)**.
+  - Other out-of-copy reads, such as the v0.3 venv behind the baseline shim, are listed but not penalized.
+- **Logs:**
+  - Session JSONLs, stderr and VCC views are gitignored. Each result line carries its session's SHA-256.
+  - After each run they are compressed to `~/.local/share/gdmd-dogfood/archive/<run_id>.tar.xz`, outside the repo.
+  - Committed: the results JSONL, the per-cell extraction output (`results/<run_id>/metrics/`), `results/<run_id>/archive.json` (archive path and SHA-256, plus a SHA-256 per member), and the import-probe JSON.
+
+### Non-inferiority (both rules)
+
+Here "treatment" means `views` in Rule V and `import-card` in Rule C; "control" means `baseline` and `import-full`.
+
+1. **Overall:** the treatment's success rate (pooled over all tasks, repeats 1–3; 15 runs) is at most **10 points** below the control's. At n = 15 that means at most one fewer success.
+2. **Guarded tasks** (`maintenance_drift`, `negative_control_no_drift`), per task: `e_t` = not-success count of the treatment minus that of the control, over repeats 1–3.
+   - `e_t ≤ 0`: the clause holds.
+   - `e_t ≥ 2`: **FAIL**.
+   - `e_t = 1`: **NULL pending the extension.** The pre-registered extension runs **once**: repeats 4 and 5 of both guarded tasks, in both cells (8 runs), whenever any guarded task has `e_t = 1`. `e_t` is then recomputed over repeats 1–5. `≤ 0` holds; `= 1` is **NULL** (final, no further extension); `≥ 2` is **FAIL**.
+   - Extension repeats enter only this clause. The primary metric and clause 1 always use repeats 1–3; the extension runs are reported descriptively.
+
+### Rule V — views vs baseline
+
+- **Cells:** 5 tasks × {`baseline` (v0.3 world), `views` (matrix world)} × 3 = 30 runs. `CLAUDE.md`'s `@docs/spec.md` import is present in both arms, each world's own version (the D-024 §4 amendment).
+- **Primary metric: consultation bytes per run.** The UTF-8 byte count of every raw `tool_result` content returned to the model in the session (`extract.py::consultation_bytes`), summed over all tools.
+- **Aggregation:**
+  1. Per task and arm, take the median over repeats 1–3.
+  2. The per-task ratio is `ρ_t = median_views / median_baseline`, and the reduction is `r_t = 1 − ρ_t`. If `median_baseline = 0`, then `r_t = 0` when `median_views = 0` too, and `r_t = −1` otherwise.
+  3. The headline is `R = median over the 5 tasks of r_t`, i.e. 1 − the median of the per-task ratios.
+  4. The per-task `r_t` values are reported **descriptively** and gate nothing individually.
+- **Manipulation check:**
+  - The median of `gdmd_view_calls + gdmd_graph_calls` per views-arm run must be ≥ 1. Otherwise the arm manipulation did not take, and the verdict is **NULL (apparatus)**.
+  - In the baseline arm those commands don't exist (v0.3 `gdmd`). Attempts to call them are counted and reported as a covariate.
+- **Verdict:**
+
+  | Verdict | Condition |
+  | --- | --- |
+  | **FAIL** | `R ≤ 0` (views consult more), **or** non-inferiority clause 1 violated, **or** a guarded task ends at `e_t ≥ 2`. |
+  | **PASS** | `R ≥ X = 30%`, **and** both non-inferiority clauses hold, with no guarded task left at `e_t = 1`. |
+  | **NULL** | Otherwise: `0 < R < 30%` with no FAIL condition; a guarded task at `e_t = 1` after the extension; or any apparatus NULL. |
+
+- **Secondaries** (reported, not gating): median per-turn occupancy; input, output, cache-read and cache-creation tokens; turns; tool calls; files read; re-reads; wall-clock; estimated USD; outcome counts per arm.
+- **What Rule V measures.** Given item 1, it compares **the v0.4 tooling with view instructions against the v0.3 tooling**, not the view commands in isolation. The report says so.
+- **Why X = 30%, Y = 10 points.** Both were set a priori, not from pilot data.
+  - X is the smallest reduction worth changing the documented workflow for. At n = 3 per cell, smaller effects would not be separable from the run-to-run variance of agentic sessions anyway.
+  - Y allows at most one extra failure in 15 runs.
+
+### Rule C — card-import ablation (D-024 adoption gate)
+
+- **World:** the matrix world with `arms/baseline.md`. D-024 (locked) puts the ablation on the baseline *tool arm*, and the card needs v0.4 tooling (`gdmd spec --card` / `--section`), so it cannot run in the v0.3 world.
+- **Precondition** (threshold locked in D-024):
+  - `spec_import_tokens` is the import probe's **v0.3-world** value, because the pilot runs in that world.
+  - M is the median per-turn occupancy, pooled over **all turns of all baseline pilot runs**.
+  - If `spec_import_tokens / M < 20%`, record NULL and do not run the ablation. This is reported as a gating read, never as evidence.
+- **Cells:** 5 tasks × {`import-full`, `import-card`} × 3 = 30 runs, at one commit. They are run fresh, not reused from Rule V.
+  - The cell construction (the swap below) lands with the WS4 build, in its own commit, before any Rule C run. `session_argv` stays unchanged.
+- **Swap:** in each `import-card` copy, `CLAUDE.md`'s `- Format definition: @docs/spec.md` becomes `- Format definition: @docs/spec-card.md`. `docs/spec-card.md` is `gdmd spec --card` output, generated in that copy from the copy's own `src/`. Nothing else changes; the schema, `AGENTS.md` and deckbuilder-root imports stay.
+- **Probed delta Δ (review item 3):**
+  - Δ = the import probe's **matrix-world** `spec_import_tokens`: turn-1 occupancy with the `spec.md` import minus without it.
+  - It is re-probed at the Rule C matrix commit, immediately before the Rule C cells, because WS2 grows the spec after the pilot.
+  - What is fixed here is the measurement procedure, not a number read after results.
+- **Primary metric: median per-turn context occupancy per run.** Occupancy is `input + cache_creation + cache_read` tokens per assistant message id, deduplicated (`extract.py::per_turn_occupancy`).
+- **Aggregation:**
+  1. Per task and cell, take the median over repeats 1–3: `M_full,t` and `M_card,t`.
+  2. The realized reduction is `d_t = M_full,t − M_card,t`, in tokens.
+  3. The headline is `D = median over tasks of d_t`.
+  4. The card's own size and any extra `--section` calls count against `D`, by design: the target is the spec import's weight actually removed from every turn.
+  5. Per-task `d_t / Δ` and relative reductions `1 − M_card,t / M_full,t` are reported descriptively.
+- **Verdict:**
+
+  | Verdict | Condition |
+  | --- | --- |
+  | **FAIL** | Non-inferiority clause 1 violated, **or** a guarded task ends at `e_t ≥ 2`. |
+  | **PASS** | `D ≥ 0.5 × Δ`, **and** both non-inferiority clauses hold, with no guarded task left at `e_t = 1`. |
+  | **NULL** | Otherwise: `D < 0.5 × Δ` with no FAIL condition; a guarded task at `e_t = 1` after the extension; the precondition not met; or any apparatus NULL. |
+
+- **Secondaries:** estimated USD per run; the `gdmd spec --section` call rate (Bash calls containing `gdmd spec --section`), where a high rate means the card is missing content; plus the Rule V secondaries.
+- **On PASS:** a separate commit switches the repo's `CLAUDE.md` to the card and cites this result. The starters are unaffected (they carry no agent file; see D-024).
+
+### Stopping and reporting
+
+1. **Order of operations.**
+   1. Dry run → model-id probe → import probe (both worlds) → pilot (baseline arm, one run per task).
+   2. Stop with the cost estimate and the Rule C precondition read, **and wait for approval**.
+   3. Rule V's full matrix runs once WS2 is implemented (after Checkpoint 3); Rule C's, after the WS4 build if the precondition holds.
+
+   Pilot results are **not evidence**. They are reported only as apparatus validation, as a cost estimate, and as the precondition read.
+2. **Each rule's full matrix runs once.** Beyond the one `error` re-run and the pre-registered guarded-task extension, nothing is re-run, added or dropped after results are seen.
+3. **Reporting.** Results are reported **by the rule** in `docs/case-studies/dogfood-01.md`, including NULL and FAIL. The report contains:
+   - the raw results table, one row per run, with its outcome;
+   - the per-task values;
+   - each rule's verdict;
+   - the limits: small n; a single model; tasks designed by the format's own author on its own trees; a possible awareness effect from reading `DECISIONS.md`; the world difference in Rule V; the judge residual; no comparability with F-009.
+4. **No post-hoc metric switching.** Any reframe of a rule faces the counterfactual-adoption test and gets its own DECISIONS entry. The spec, README and release notes state no cost or success claim beyond what a verdict here supports (§11.3).
+
+### Resolved at review (from the draft's open points)
+
+- **(a) Baseline contamination after WS2:** resolved by item 1. The baseline runs the v0.3 world, so it cannot discover v0.4 views.
+- **(b) Thresholds:** X = 30% (Rule V). Rule C's flat 10% is replaced by 0.5 × Δ. Y = 10 points, with the guarded-task mapping above. 3 repeats. Caps as stated.
+- **(c) Logs:** gitignored plus a SHA per line plus an external compressed archive; results and extraction output are committed.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
