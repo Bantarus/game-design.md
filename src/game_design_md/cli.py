@@ -94,9 +94,27 @@ def export_cmd_entry(path: Path | None, fmt: str) -> None:
     click.echo(export_cmd.export_tokens(tree))
 
 
-@main.command("spec", help="Print docs/spec.md to stdout (frontmatter stripped).")
-def spec_cmd_entry() -> None:
-    click.echo(spec_cmd.spec_text(), nl=False)
+@main.command("spec", help="Print docs/spec.md to stdout (frontmatter stripped); "
+                            "--card prints the generated agent card, --section one "
+                            "numbered section. See spec §9.4.")
+@click.option("--card", is_flag=True, default=False,
+              help="The agent card: verbatim excerpts selected by the spec's "
+                   "structure, plus a --section pointer for every section.")
+@click.option("--section", "section", metavar="ID",
+              help="The full text of one section, e.g. 4.8, §9.9.2 or A.")
+def spec_cmd_entry(card: bool, section: str | None) -> None:
+    if card and section is not None:
+        raise click.UsageError("--card and --section are mutually exclusive")
+    if card:
+        click.echo(spec_cmd.card(), nl=False)
+    elif section is not None:
+        body = spec_cmd.section_text(section)
+        if body is None:
+            click.echo(f"gdmd spec: no section {section!r}", err=True)
+            sys.exit(2)
+        click.echo(body)
+    else:
+        click.echo(spec_cmd.spec_text(), nl=False)
 
 
 @main.command("verify",

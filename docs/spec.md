@@ -1133,10 +1133,26 @@ gdmd export <path> --format {schema|tokens}
 ### 9.4 `spec`
 
 ```
-gdmd spec
+gdmd spec [--card | --section <id>]
 ```
 
 Prints this document (`docs/spec.md`) to stdout, with frontmatter stripped, for injection into an agent prompt.
+
+- **`--section <id>` (v0.4)** prints one section verbatim: its heading through the line before the next heading of the same or a higher level, so its subsections are included.
+  - Ids are the section numbers (`4.8`, `9.9.2`; a leading `§` is accepted) and the appendix letters (`A`).
+  - Headings inside fenced code blocks are not sections.
+  - An unknown id exits 2.
+- **`--card` (v0.4)** prints the **agent card**, a short digest **generated from this document's structure**, never hand-written (`DECISIONS.md` D-024, D-029). It contains verbatim excerpts, each selected by section number and the spec's own lead-in labels:
+  - §3's opening sentence, its namespace-ownership table, and its resolution, unresolved-reference and context-local paragraphs;
+  - §8.1's status table;
+  - §8.2's maintenance ritual;
+  - §9.9's command synopsis.
+
+  It then gives an index of every section, each with its RFC-2119 keyword count and its `--section` pointer.
+  - The card carries the sha256 prefix of the text it was generated from.
+  - Generation fails if a selected anchor disappears, so an edit to the spec cannot silently empty the card.
+  - **Completeness:** every sentence carrying an uppercase RFC-2119 keyword (`MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, `SHALL NOT`) is in the card or inside a section the card points to (tested). Lowercase normative "must" / "required" is not machine-identifiable, so the test does not cover it.
+  - Whether an agent file imports the card instead of this document is an adoption decision under a locked rule (D-024, D-025 Rule C), not a default.
 
 ### 9.5 `verify`
 

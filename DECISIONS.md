@@ -1301,6 +1301,52 @@ Choices the spec leaves to the implementation, recorded as they land. None chang
 
 ---
 
+## D-029 — `gdmd spec --card` / `--section`: the WS4 build
+
+- **Status:** built (2026-09-30), as D-024 §1's ungated build. Adoption stays gated by D-025 Rule C; nothing in the repo imports the card.
+- **Spec:** §9.4.
+- **Related:** D-024 (the gate, the contents, the completeness test), D-025 (Rule C, whose `import-card` cells generate the card in each copy), D-027 (the card points at `view` / `graph`), D-028.
+
+### Decisions
+
+1. **Selected by structure, copied verbatim.** Every excerpt is chosen by section number plus one of the spec's own lead-in labels. Examples: §3's `**Namespace ownership.**` paragraph with its table, or §8.2's `4. **The session-end agent ritual.**` item. The excerpt is then copied line for line. The card's only fixed text is its labels, its provenance line and its pointers.
+2. **Contents** are D-024's list:
+   - §3: the opening sentence, the namespace-ownership table, and the resolution, unresolved-reference and context-local paragraphs;
+   - §8.1: the status table;
+   - §8.2: mechanism 4, the ritual;
+   - §9.9: the synopsis of `view` and `graph`.
+
+   Then comes an **index of every numbered section and appendix**, each with its uppercase RFC-2119 keyword count (subsections included) and its `gdmd spec --section <id>` pointer.
+   - §1's principles, including "tokens win on conflict", are not excerpted, because D-024's list does not name them. They are reachable through `--section 1`, and both Rule C cells import AGENTS.md, which states them.
+3. **Completeness reduces to the index.** Because the index points to every section, D-024's test checks three things:
+   - every keyword line lies inside some section the card points to, and that section's `--section` output contains the line;
+   - any keyword line outside every section (the preamble has none today) must be in the card itself, or the test fails;
+   - the index lists every section, once, in order.
+4. **A keyword inside an inline code span is a mention, not a requirement.** An example is §9.4's own sentence listing `` `MUST` ``. It is not counted and is not subject to the test.
+5. **Fail loudly.** A missing anchor raises `CardAnchorMissing`, so a spec edit cannot silently empty the card (tested by removing one label).
+6. **Provenance:** the card names the sha256 prefix of the spec text it was generated from.
+7. **`--section`:**
+   - It prints the heading through the line before the next heading of the same or a higher level, trailing blank lines trimmed.
+   - Ids are section numbers (with or without `§` or a trailing dot) and appendix letters.
+   - Headings inside fenced code blocks, such as the `## High Concept` lines in §5.2 and §7.1, are not sections.
+   - An unknown id exits 2.
+8. **Not a committed file.** The card is generated on demand. Rule C's `import-card` cells generate it inside each copy from that copy's own `src/` and spec, as D-025 locks.
+9. **Size:** 8,500 bytes, against the spec's 139,743 (about 6%).
+
+### Tests
+
+`tests/test_spec_card.py`:
+- **Completeness:** all 29 keywords, on 27 lines.
+- **Code-span mentions** are skipped.
+- **Every excerpt paragraph** is a verbatim substring of the spec.
+- **The index** lists every section once, in order.
+- **Fence-aware sections;** id forms; subsections are included.
+- **A missing anchor** raises.
+- **Size under 10% of the spec,** with the provenance hash.
+- **CLI:** `--card`, `--section`, exit 2, and mutual exclusion.
+
+---
+
 # Open items
 
 Known issues that are **logged, not decided**. Each one gets its own D-entry when it is resolved; the fix lands in its own commit. Ids are stable (`OI-NNN`) and are never reused.
