@@ -2407,6 +2407,33 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - No code or lint change, and the 12 trees stay 0/0.
 - **The register:** R7 moves to "Closed".
 
+## D-048 — Lint rule `trajectory-sort-by-missing`: every trajectory array declares `sort_by` (R11a, §9.5.5)
+
+- **Status:** decided (2026-10-01) by the user on the ratchet audit: "R11: apply the static check now (every array in `trajectory.schema` declares `sort_by`, as a lint rule, 0 findings). Reschedule full trajectory validation as trigger-based."
+- **Related:** §9.5.5 (the MUST), D-009 (the cross-engine byte-identity bar), the Ratchet Register (OI-010, R11a closed here; R11b stays open).
+
+### Decisions
+
+1. **The rule:** `trajectory-sort-by-missing`, severity **error**, because §9.5.5 says every array "MUST declare a `sort_by:` key list".
+2. **What it checks:** every field of a subfile's `trajectory.schema:` whose `type` is `array` (or a type list containing `array`), recursively under each array's `items:` field map. The field must declare `sort_by:` as a non-empty list of strings.
+   - It reports at the field's path, such as `trajectory.schema.units` or `trajectory.schema.units.items.buffs`.
+3. **What it does not check:**
+   - whether the keys name fields of the items, or give a total order, which §9.5.5 asks for but which cannot be known statically;
+   - trajectory lines against the schema. That is R11b, trigger-based: an engine's first run that has to be diagnosed without a golden.
+4. **Why lint:** `$defs.TrajectorySpec.schema` is a free object, so `schema-violation` cannot see it. Before this rule, nothing checked the MUST.
+
+### Tests and proof of fire (`tests/test_lint.py`)
+
+- **Unit:** a top-level array, an array nested under `items:` and an empty `sort_by: []` are each reported. The same schema with key lists is silent.
+- **Real content:** tick-combat, the one tree with a trajectory, lints clean. With its `sort_by: [side, deploy_order]` line removed it gives exactly one error, at `trajectory.schema.units`, and no `schema-violation`.
+- Both tests fail on the pre-D-048 code.
+
+### Effect
+
+- 0 findings: the 12 trees stay 0/0, and the study-2 tree declares no trajectory.
+- **Spec:** §9.5.5 states the check, and §9.1 gains a row. AGENTS.md adds the rule to its "keep green" list.
+- **The register:** R11a moves to "Closed".
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2599,7 +2626,6 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | R8 | A tree requests `pcg32` or `pcg64` → pin the variant (constants, output function, seeding) by a D-entry, with reference vectors | D-015 | — |
 | R9 | R10 is done, so a closed `do[]` `kind:` vocabulary tells mutation steps apart → `field:` is required on mutation steps | D-019 | — |
 | R10 | A second engine-backed tree: one other than tick-combat with a working verify adapter → close the `do[]` `kind:` vocabulary to the kinds the engine-backed trees share | D-011, §4.5 | — |
-| R11a | **Decided, apply now** → a lint rule: every array in `trajectory.schema` declares `sort_by:` | §9.5.5 | 0.4.0 (its own commit) |
 | R11b | An engine's first run has to be diagnosed without a golden (a new engine, or a trajectory with no golden yet) → `verify` checks each trajectory line against `trajectory.schema` (field shapes; the body is not JSON Schema) | §9.5.5 | — |
 | R12 | The project's YAML loaders are YAML-1.2-only (no implicit `on`/`off`/`yes`/`no` booleans) → revisit `event:` vs `on:` | D-001 | — |
 | R13 | v1.0 preparation → remove `data_source` from the schema and the spec | D-037 | before v1.0 (decided by D-037) |
@@ -2633,6 +2659,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | R5 | `output_domain` / `round_mode` required, plus `distribution-output-undeclared` (D-010) | Dropped, D-044: void, superseded by D-016 |
 | R3 | `undefined-event` → error, and the schema requires `{events.<id>}` (D-005) | Applied, D-046: the schema pattern; `undefined-event` retired |
 | R7 | The context-local prefix set closes (D-012) | Applied, D-047: the spec states the closed set `{actor, target}` |
+| R11a | A static `trajectory.schema` check (§9.5.5) | Applied, D-048: lint rule `trajectory-sort-by-missing` |
 
 ### Review log
 

@@ -1239,6 +1239,46 @@ def rule_content_entity_invalid(tree: Tree) -> list[Finding]:
     return findings
 
 
+# ---- trajectory-sort-by-missing (D-048, spec §9.5.5) ----------------------------
+
+def _array_fields_without_sort_by(fields: Any, path: str) -> Iterable[str]:
+    """Field paths in a `trajectory.schema` field map whose `type` is array
+    and which declare no non-empty `sort_by:` list, including arrays nested
+    under an array's `items:` field map."""
+    if not isinstance(fields, dict):
+        return
+    for name, spec in fields.items():
+        if not isinstance(spec, dict):
+            continue
+        here = f"{path}.{name}"
+        t = spec.get("type")
+        if t == "array" or (isinstance(t, list) and "array" in t):
+            keys = spec.get("sort_by")
+            if not (isinstance(keys, list) and keys and all(isinstance(k, str) for k in keys)):
+                yield here
+            yield from _array_fields_without_sort_by(spec.get("items"), f"{here}.items")
+
+
+def rule_trajectory_sort_by_missing(tree: Tree) -> list[Finding]:
+    """§9.5.5: every array in a `trajectory.schema` MUST declare a `sort_by:`
+    key list, so two engines serialize its elements in the same order. The
+    static part of that MUST: the declaration is present and is a non-empty
+    list of keys. Whether the keys give a total order is not checked."""
+    findings: list[Finding] = []
+    for pf in tree.files:
+        traj = pf.frontmatter.get("trajectory") if pf.file_type == "subfile" else None
+        if not isinstance(traj, dict):
+            continue
+        for loc in _array_fields_without_sort_by(traj.get("schema"), "trajectory.schema"):
+            findings.append(Finding(
+                rule="trajectory-sort-by-missing", severity="error",
+                file=pf.rel_str, location=loc,
+                message=(f"array field {loc} declares no sort_by: key list; §9.5.5 "
+                         f"requires one that totally orders its elements"),
+            ))
+    return findings
+
+
 # ---- Dispatch -----------------------------------------------------------------
 
 ALL_RULES: list[Callable[..., list[Finding]]] = [
@@ -1262,6 +1302,7 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_schema_violation,               # v0.4 D-034
     rule_content_entity_invalid,         # v0.4 D-035 (OI-005)
     rule_implementation_pointer_outside_repo,  # v0.4 D-038 (OI-002)
+    rule_trajectory_sort_by_missing,     # v0.4 D-048 (R11a)
 ]
 
 

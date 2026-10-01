@@ -100,7 +100,7 @@ Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are 
 
 - Language: **Python ≥3.10** (Hatchling build backend). Install with `pip install -e ".[dev]"` (or `uv pip install -e ".[dev]"`), test with `pytest`.
 - After install, both `game-design.md` and the short alias `gdmd` are on `$PATH`. Either works.
-- Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`, `schema-violation` (the §10 JSON Schema, v0.4), `content-entity-invalid` (§6.2, v0.4), `implementation-pointer-outside-repo` (§2.3, v0.4).
+- Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`, `schema-violation` (the §10 JSON Schema, v0.4), `content-entity-invalid` (§6.2, v0.4), `implementation-pointer-outside-repo` (§2.3, v0.4), `trajectory-sort-by-missing` (§9.5.5, v0.4).
 - `lint` must emit structured JSON (`{ findings: [...], summary: {...} }`) so an agent can self-correct.
 - Before committing CLI changes, run `gdmd lint examples/deckbuilder` and confirm it passes clean.
 - Before committing changes to README.md, AGENTS.md, docs/spec.md, or the CLI verb set, run `python scripts/docs_lint.py` — it drift-lints the docs themselves (version agreement, §9 verb list vs the click registry, the four-field stability guarantee, namespace validity of taught refs). CI runs it on every push.

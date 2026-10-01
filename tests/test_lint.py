@@ -461,6 +461,75 @@ def test_implementation_pointer_outside_repo_ignores_status_and_needs_a_reposito
     assert _outside(_lint(root)) == [("gdd/extra.md", "implemented_in[0]")]
 
 
+# ---- trajectory-sort-by-missing (D-048, R11a, spec §9.5.5) -------------------------
+
+_TRAJ_SUBFILE = """\
+---
+spec: game-design.md
+spec_version: 0.3.0
+file_type: subfile
+status: draft
+last_verified: "2026-10-01"
+trajectory:
+  unit: tick
+  schema:
+    tick:   {{ type: integer, minimum: 0 }}
+    units:
+      type: array
+{units_sort}      items:
+        id:   {{ type: string }}
+        buffs:
+          type: array
+{buffs_sort}          items:
+            kind: {{ type: string }}
+    tags:   {{ type: [array, "null"], sort_by: [] }}
+---
+
+## Notes
+"""
+
+
+def _sort_findings(res):
+    return [(f.file, f.location, f.severity) for f in res.findings
+            if f.rule == "trajectory-sort-by-missing"]
+
+
+def test_trajectory_sort_by_missing_covers_every_array(make_tree):
+    """Every array in trajectory.schema, nested ones under items included,
+    needs a non-empty sort_by list (§9.5.5's MUST)."""
+    text = _TRAJ_SUBFILE.format(units_sort="", buffs_sort="")
+    found = _sort_findings(_lint(make_tree({"gdd/verification.md": text})))
+    assert found == [
+        ("gdd/verification.md", "trajectory.schema.units", "error"),
+        ("gdd/verification.md", "trajectory.schema.units.items.buffs", "error"),
+        ("gdd/verification.md", "trajectory.schema.tags", "error"),   # empty list
+    ]
+    ok = _TRAJ_SUBFILE.format(units_sort="      sort_by: [id]\n",
+                              buffs_sort="          sort_by: [kind]\n").replace(
+        "sort_by: [] }", "sort_by: [name] }")
+    assert _sort_findings(_lint(make_tree({"gdd/verification.md": ok}))) == []
+
+
+def test_trajectory_sort_by_missing_proof_of_fire_on_tick_combat(tmp_path):
+    """Real content: tick-combat declares `units` with sort_by: [side,
+    deploy_order] and lints clean; without the line, one error at that array.
+    No other rule caught it before D-048 (the TrajectorySpec schema body is a
+    free object)."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "tick-combat"
+    shutil.copytree(REPO_ROOT / "examples/tick-combat", root, ignore=shutil.ignore_patterns("impl"))
+    ver = root / "gdd/verification.md"
+    assert _sort_findings(_lint(root)) == []
+    text = ver.read_text()
+    line = "      sort_by: [side, deploy_order]\n"
+    assert text.count(line) == 1
+    ver.write_text(text.replace(line, ""))
+    res = _lint(root)
+    assert _sort_findings(res) == [("gdd/verification.md", "trajectory.schema.units", "error")]
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):
