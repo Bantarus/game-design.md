@@ -77,6 +77,13 @@ def check_versions() -> None:
     if not conformance or conformance.group(1) != f"v{version}":
         fail(f"docs/spec.md §11: conformance sentence names "
              f"{conformance.group(1) if conformance else 'no version'}, not v{version}")
+    init = (ROOT / "src" / "game_design_md" / "__init__.py").read_text(encoding="utf-8")
+    for name, want in (("__version__", m.group(1)), ("__spec_version__", version)):
+        im = re.search(rf'^{name}\s*=\s*"([^"]*)"', init, re.M)
+        if not im or im.group(1) != want:
+            fail(f"src/game_design_md/__init__.py: {name} is "
+                 f"{im.group(1) if im else 'missing'}, not {want} "
+                 f"(`gdmd --version` printed 0.1.0 through all of v0.3)")
     schema = (ROOT / "schema" / "game-design.schema.json").read_text(encoding="utf-8")
     for key in ("$id", "title"):
         sm = re.search(rf'^\s*"{re.escape(key)}":\s*"([^"]*)"', schema, re.M)

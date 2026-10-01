@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import subprocess
 
 import pytest
@@ -53,17 +54,20 @@ def test_the_spec_and_schema_state_current_behavior_only():
         assert len({line for line, _ in mod.dated_promises(pre.stdout)}) == 17
 
 
-def _versions_findings(tmp_path, spec_text=None, schema_text=None):
+def _versions_findings(tmp_path, spec_text=None, schema_text=None, init_text=None):
     """check_versions() over a copy of the version carriers, optionally with
     the spec or the schema replaced."""
     mod = _docs_lint()
-    for rel in ("pyproject.toml", "README.md", "docs/spec.md", "schema/game-design.schema.json"):
+    for rel in ("pyproject.toml", "README.md", "docs/spec.md", "schema/game-design.schema.json",
+                "src/game_design_md/__init__.py"):
         (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
         (tmp_path / rel).write_text((REPO_ROOT / rel).read_text(encoding="utf-8"), encoding="utf-8")
     if spec_text is not None:
         (tmp_path / "docs/spec.md").write_text(spec_text, encoding="utf-8")
     if schema_text is not None:
         (tmp_path / "schema/game-design.schema.json").write_text(schema_text, encoding="utf-8")
+    if init_text is not None:
+        (tmp_path / "src/game_design_md/__init__.py").write_text(init_text, encoding="utf-8")
     mod.ROOT = tmp_path
     mod.check_versions()
     return mod.findings
@@ -88,3 +92,22 @@ def test_stale_schema_id_is_found(tmp_path):
     found = _versions_findings(tmp_path, schema_text=schema.replace(
         '"$id": "https://game-design.md/schema/v', '"$id": "https://game-design.md/schema/vX', 1))
     assert len(found) == 1 and "$id" in found[0]
+
+
+def test_stale_package_version_is_found(tmp_path):
+    """`gdmd --version` printed 0.1.0 through all of v0.3 (__init__.py at 5efbf92)."""
+    pre = subprocess.run(["git", "show", "5efbf92:src/game_design_md/__init__.py"],
+                         cwd=REPO_ROOT, capture_output=True, text=True)
+    if pre.returncode != 0:
+        pytest.skip("history not available")
+    found = _versions_findings(tmp_path, init_text=pre.stdout)
+    assert len(found) == 2 and all("0.1.0" in f for f in found)
+
+
+def test_cli_version_is_the_package_version():
+    from click.testing import CliRunner
+    from game_design_md.cli import main
+    pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    want = re.search(r'^version\s*=\s*"([^"]+)"', pyproject, re.M).group(1)
+    out = CliRunner().invoke(main, ["--version"]).output
+    assert out.strip() == f"game-design.md, version {want}"
