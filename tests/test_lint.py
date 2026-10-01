@@ -566,27 +566,42 @@ def test_untyped_balance_target_proof_of_fire_on_the_deckbuilder(tmp_path):
     assert res.exit_code == 1
 
 
-# ---- undefined-event (D-005) -------------------------------------------------
+# ---- bare-string transition events: schema-violation (D-005, D-046) ---------------
 
-def test_undefined_event_on_bare_string(fixture_overlay):
-    """The deliberately-broken undefined_event fixture has event: go (bare).
-    state-machine-coverage should fire undefined-event at warning severity."""
+def test_bare_string_event_is_a_schema_violation(fixture_overlay):
+    """The undefined_event fixture's transition says `event: go` (bare). Since
+    D-046 that is one schema-violation error at the transition; the retired
+    undefined-event warning no longer fires."""
     res = _lint(fixture_overlay("undefined_event"))
-    sm_findings = [f for f in res.findings if f.rule == "state-machine-coverage"]
-    ue_findings = [f for f in sm_findings if "undefined-event" in f.message]
-    assert ue_findings, (
-        "expected undefined-event sub-finding on bare-string transition event; got: "
-        + ", ".join(f.message for f in sm_findings)
-    )
-    assert all(f.severity == "warning" for f in ue_findings)
+    found = [(f.rule, f.severity, f.location) for f in res.findings
+             if f.location.endswith(".event")]
+    assert found == [("schema-violation", "error", "states.thing_state.transitions[0].event")], found
+    assert not [f for f in res.findings if "undefined-event" in f.message]
 
 
 def test_token_event_is_silent(make_tree):
-    """The baseline uses event: \"{events.go}\" — no undefined-event finding."""
+    """The baseline uses event: \"{events.go}\": no finding on the transition."""
     res = _lint(make_tree())
-    findings = [f for f in res.findings
-                if f.rule == "state-machine-coverage" and "undefined-event" in f.message]
-    assert findings == []
+    assert not [f for f in res.findings if f.location.endswith(".event")]
+
+
+def test_bare_string_event_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: one deckbuilder transition event made bare is one
+    schema-violation error at that transition. Before D-046 it was only the
+    undefined-event warning, and the tree could lint without errors."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    m = re.search(r'event: "\{events\.([a-z0-9_]+)\}"', text)
+    mech.write_text(text.replace(m.group(0), f"event: {m.group(1)}", 1))
+    res = _lint(root)
+    assert [(f.rule, f.location) for f in res.findings if f.severity == "error"] == [
+        ("schema-violation", "states.card_lifecycle.transitions[0].event")]
+    assert not [f for f in res.findings if f.rule == "state-machine-coverage"]
 
 
 def test_broken_event_ref_is_error(make_tree):

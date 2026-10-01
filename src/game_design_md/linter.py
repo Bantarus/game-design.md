@@ -301,28 +301,6 @@ def rule_state_machine_coverage(tree: Tree) -> list[Finding]:
                                  f"outgoing transition"),
                     ))
 
-            # D-005: undefined-event — transition `event:` values must be
-            # {events.<id>} token refs. Bare strings are the v0.1.1 legacy
-            # shape; flag them as warnings during the migration window. (A
-            # {events.<id>} ref that does NOT resolve is already an error via
-            # broken-ref.)
-            for i, t in enumerate(transitions):
-                if not isinstance(t, dict):
-                    continue
-                ev = t.get("event")
-                if not isinstance(ev, str):
-                    continue
-                m = re.match(r"^\{(events\.[a-z0-9_][a-z0-9_-]*)\}$", ev)
-                if m is None:
-                    findings.append(Finding(
-                        rule="state-machine-coverage", severity="warning",
-                        file=pf.rel_str,
-                        location=f"{loc_base}.transitions[{i}].event",
-                        message=(f"undefined-event: event={ev!r} is a bare "
-                                 f"string; promote to a {{events.<id>}} token "
-                                 f"reference. Ratchets to error in v0.3."),
-                    ))
-
             reachable = {initial}
             frontier = [initial]
             while frontier:

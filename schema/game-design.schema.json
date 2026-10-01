@@ -209,7 +209,7 @@
       "required": ["from", "event", "to"],
       "properties": {
         "from":         { "type": "string", "minLength": 1 },
-        "event":        { "type": "string", "minLength": 1 },
+        "event":        { "type": "string", "pattern": "^\\{events\\.[a-z0-9_][a-z0-9_-]*\\}$", "description": "D-005 / D-046: an {events.<id>} reference. A bare string is schema-invalid." },
         "to":           { "type": "string", "minLength": 1 },
         "side_effects": { "type": "array", "items": { "type": "string" } }
       },

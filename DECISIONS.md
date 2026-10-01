@@ -92,7 +92,7 @@ The deeper cross-check the v0.1.1 deferral worried about — "every event a stat
 
 **v0.3 ratchet:** `undefined-event` becomes `error`; schema requires `event:` to match the `{events.<id>}` TokenRef pattern (currently it accepts any string for the migration window). Optionally, introduce an `emits:` field on `verbs` and `rules` and add the v0.1.1-deferred event-production cross-check then.
 
-**Register (D-044):** the v0.3 date passed unapplied. The schema pattern and the retirement of `undefined-event` are R3 (applied now, its own D-entry). The optional `emits:` cross-check is R4, trigger → action: an engine needs event-production checking → optional `emits:` on verbs and rules plus a lint cross-check.
+**Register (D-044):** the v0.3 date passed unapplied. The schema pattern and the retirement of `undefined-event` are R3, applied by D-046. The optional `emits:` cross-check is R4, trigger → action: an engine needs event-production checking → optional `emits:` on verbs and rules plus a lint cross-check.
 
 ---
 
@@ -2352,6 +2352,33 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - The §9.5 synopsis and the §9.1 row already named the option and the finding.
 - The card is regenerated.
 
+## D-046 — Bare-string transition events are a schema error; `undefined-event` is retired (R3, D-005)
+
+- **Status:** decided (2026-10-01) by the user on the ratchet audit: "R3: apply now. Add the `{events.<id>}` schema pattern and retire the undefined-event sub-finding (as D-040 did)."
+- **Related:** D-005 (which scheduled both for v0.3), D-034 (`schema-violation`), D-040 (the same shape for balance targets), the Ratchet Register (OI-010, R3), spec §4.4 and §9.1.
+
+### Decisions
+
+1. **`$defs.StateTransition.event`** gains the pattern `^\{events\.[a-z0-9_][a-z0-9_-]*\}$`. A bare-string event is now a `schema-violation` error at `states.<machine>.transitions[i].event`.
+2. **`state-machine-coverage`'s `undefined-event` sub-finding is removed.**
+   - It is subsumed: ratcheting it to error too would report one defect twice.
+   - Its message ("Ratchets to error in v0.3.") goes with it, the last dated promise in `src/` (D-044).
+3. **Spec:**
+   - §4.4 says a bare-string event is a `schema-violation` error, and records the retired warning.
+   - The §9.1 `state-machine-coverage` row drops the sub-finding and points to §4.4.
+   - The card is regenerated.
+
+### Tests and proof of fire
+
+- **The fixture `tests/fixtures/undefined_event`** (`event: go`): exactly one finding on the transition, `schema-violation` at error. No `undefined-event` finding. The fixture's prose is updated.
+- **Real content:** a deckbuilder copy with one transition event made bare gives one error, at `states.card_lifecycle.transitions[0].event`, and no `state-machine-coverage` finding. Before D-046 it gave only a warning.
+- Both tests fail on the pre-D-046 code. `test_token_event_is_silent` now checks that a token event draws no finding at all.
+
+### Effect
+
+- **The 12 trees stay 0/0,** and the study-2 tree is unchanged. All 89 transitions in the 12 trees, and the study-2 tree's 11, already use tokens. That is the audit's prototype, confirmed on the commit.
+- **The register:** R3 moves to "Closed".
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2539,7 +2566,6 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 | ID | Trigger → action | Source | Target (not binding) |
 | --- | --- | --- | --- |
-| R3 | **Decided, apply now** → `$defs.StateTransition.event` must be `{events.<id>}`; the `undefined-event` sub-finding retires (as D-040 did) | D-005 | 0.4.0 (its own commit) |
 | R4 | An engine needs event-production checking (an engine-backed tree hits a gap that "every event a machine reacts to is emitted by some verb or rule" would catch) → optional `emits:` on verbs and rules, plus a lint cross-check | D-005 | — |
 | R6 | A working silence mechanism exists: a structured key that marks a bare-string step as deliberate (not a YAML comment, which the loader drops) → raise `determinism-undetermined-rule` from info to warning. Error is a later, separate decision. | D-011 | — |
 | R7 | **Decided, apply now** → the spec states that the context-local prefix set is closed at `{actor, target}` (the code already enforces it) | D-012 | 0.4.0 (its own commit) |
@@ -2578,6 +2604,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | R1 | `balance-target-untyped` → error (D-003) | Retired, D-040 |
 | R2 | `target_kind` required by the loader (D-003) | Dropped, D-044 |
 | R5 | `output_domain` / `round_mode` required, plus `distribution-output-undeclared` (D-010) | Dropped, D-044: void, superseded by D-016 |
+| R3 | `undefined-event` → error, and the schema requires `{events.<id>}` (D-005) | Applied, D-046: the schema pattern; `undefined-event` retired |
 
 ### Review log
 
