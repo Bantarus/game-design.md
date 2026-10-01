@@ -351,9 +351,17 @@ def _naming_files(base: Path, skip: tuple[str, ...] = ()) -> dict[str, set[str]]
     pat = re.compile("|".join([re.escape(n) for n in sorted(ids, key=len, reverse=True)]
                               + [rf"\b{re.escape(b)}\b" for b in sorted(bare)]))
     hits: dict[str, set[str]] = {}
-    for p in sorted(base.rglob("*")):
+    # Prune .git rather than list it: a copy's detached `git gc --auto` can
+    # remove a loose-object directory mid-walk (D-051's first CI run), and
+    # .git is never read anyway. As fixture.normalize_mtimes does.
+    files = []
+    for dirpath, dirnames, filenames in os.walk(base):
+        if ".git" in dirnames:
+            dirnames.remove(".git")
+        files += [Path(dirpath) / n for n in filenames]
+    for p in sorted(files):
         rel = p.relative_to(base).as_posix()
-        if not p.is_file() or rel.split("/")[0] == ".git" or rel.startswith(skip):
+        if not p.is_file() or rel.startswith(skip):
             continue
         for m in pat.findall(p.read_bytes().decode("utf-8", "ignore")):
             hits.setdefault(rel, set()).add(bare.get(m, m))

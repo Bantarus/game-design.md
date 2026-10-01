@@ -2524,6 +2524,12 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - Two tests in `tests/test_docs_lint.py` need history ("history not available"). The full fetch makes them run in CI, but without history they still skip. Applying the same rule to them is open.
 - The tests that need the pinned Claude CLI or VCC still skip in CI; those tools live outside the repository.
 
+### After the first CI run
+
+- PR #3's first `pull_request` run failed one newly running test on 3.10: `test_no_copy_file_outside_the_tree_names_a_question` raised `FileNotFoundError` on a copy's `.git/objects/23`. The `push` run of the same commit passed on both versions.
+- **Cause:** a race. The test's walker listed `.git` through `rglob("*")`, though it never reads it, and the copy's detached `git gc --auto` removed a loose-object directory during the listing. The test had never run in CI before D-051.
+- **Fix (test only):** the walker prunes `.git` from `os.walk`, as `fixture.normalize_mtimes` already does. The files read are unchanged; the repository and the copies have no symlinks, so `os.walk` sees what `rglob` saw.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
