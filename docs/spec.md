@@ -1631,13 +1631,21 @@ VS Code's YAML extension picks up the schema via the YAML language server's stan
 
 ## 11. Conformance
 
-A `game-design.md` tree is **conformant at v0.2.0-alpha** if:
+A `game-design.md` tree is **conformant at v0.3.0** if:
 
-1. `gdmd lint <tree>` returns exit code `0` (no findings of severity `error`).
+1. `gdmd lint <tree>` returns exit code `0`: it reports no finding of severity `error`. Findings at `warning` or `info` do not change the exit code. Every error-severity rule in §9.1 counts, including rules that enforce MUSTs outside items 2–5, such as `trajectory-sort-by-missing` (§9.5.5).
 2. The root `game-design.md` has all required frontmatter keys (§5.1) and the canonical prose section order (§5.2).
+   - `schema-violation` validates the root frontmatter against the schema's `CoreFile` branch (§10): every required key present, no key outside the branch, every value of its declared shape. `missing-pillars` and `missing-core-loop` also report fewer than three pillars and a `core_loop_ref` that does not resolve.
+   - `section-order` reports a canonical `##` heading that is out of order, follows a non-canonical heading, or is repeated. It does not report a canonical heading that is absent.
 3. Every subfile has `spec`, `spec_version`, `file_type`, `status`, `last_verified` in its frontmatter.
-4. Every `content/*/*.yaml` validates against its referencing content-schema file's `schema:`.
+   - `schema-violation` validates each subfile against the schema's `Subfile` branch, which requires these five keys. It validates every file in the tree whose frontmatter declares `spec: game-design.md` or a `file_type`: against its `file_type`'s branch, or against the whole schema when the `file_type` is missing or unknown. A file that declares neither is not a `game-design.md` file, and lint reports nothing about it.
+4. Every content entity validates against the `schema:` of the content-schema whose `data_dir` contains it (§6.2).
+   - `content-entity-invalid` validates each file that declares `file_type: content-entity` against the `schema:` of every content-schema whose `data_dir` contains it. It also reports an entity whose `id` is not its file stem, an entity that no `data_dir` contains, and a `data_dir` that does not name a directory called its content-schema's `entity:`. `schema-violation` checks that each entity has `id`, `status` and `implemented_in`.
+   - A YAML file in a `data_dir` that declares neither `spec: game-design.md` nor a `file_type` is not checked.
 5. Every random outcome resolves to a named `distributions.<id>`.
+   - `undefined-distribution` reports a stochastic step in a rule's `do:` list (`sample:`, `roll:` or `random:`) that is not a `{distributions.<id>}` reference, and `broken-ref` reports one that does not resolve. Randomness written anywhere else, such as a stochastic step in a verb's `effects:` or in prose, is not checked.
+
+Items 2–5 are checked only as far as the rules named under each go. The parts marked "not checked" or "does not report" are conditions of conformance that `gdmd lint` does not verify.
 
 ### 11.1 Success benchmark
 

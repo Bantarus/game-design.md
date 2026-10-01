@@ -51,3 +51,40 @@ def test_the_spec_and_schema_state_current_behavior_only():
                          capture_output=True, text=True)
     if pre.returncode == 0:   # proof of fire, where the history is available
         assert len({line for line, _ in mod.dated_promises(pre.stdout)}) == 17
+
+
+def _versions_findings(tmp_path, spec_text=None, schema_text=None):
+    """check_versions() over a copy of the version carriers, optionally with
+    the spec or the schema replaced."""
+    mod = _docs_lint()
+    for rel in ("pyproject.toml", "README.md", "docs/spec.md", "schema/game-design.schema.json"):
+        (tmp_path / rel).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / rel).write_text((REPO_ROOT / rel).read_text(encoding="utf-8"), encoding="utf-8")
+    if spec_text is not None:
+        (tmp_path / "docs/spec.md").write_text(spec_text, encoding="utf-8")
+    if schema_text is not None:
+        (tmp_path / "schema/game-design.schema.json").write_text(schema_text, encoding="utf-8")
+    mod.ROOT = tmp_path
+    mod.check_versions()
+    return mod.findings
+
+
+def test_version_carriers_agree(tmp_path):
+    assert _versions_findings(tmp_path) == []
+
+
+def test_stale_conformance_version_is_found(tmp_path):
+    """§11 read "conformant at v0.2.0-alpha" through all of v0.3 (5efbf92)."""
+    pre = subprocess.run(["git", "show", "5efbf92:docs/spec.md"], cwd=REPO_ROOT,
+                         capture_output=True, text=True)
+    if pre.returncode != 0:
+        pytest.skip("history not available")
+    found = _versions_findings(tmp_path, spec_text=pre.stdout)
+    assert len(found) == 1 and "§11" in found[0] and "v0.2.0-alpha" in found[0]
+
+
+def test_stale_schema_id_is_found(tmp_path):
+    schema = (REPO_ROOT / "schema/game-design.schema.json").read_text(encoding="utf-8")
+    found = _versions_findings(tmp_path, schema_text=schema.replace(
+        '"$id": "https://game-design.md/schema/v', '"$id": "https://game-design.md/schema/vX', 1))
+    assert len(found) == 1 and "$id" in found[0]

@@ -67,6 +67,22 @@ def check_versions() -> None:
             f"(pyproject says {m.group(1)}): {status_line.strip()!r}"
         )
 
+    # The other carriers the release procedure bumps (AGENTS.md). §11 read
+    # "conformant at v0.2.0-alpha" through all of v0.3.
+    fm = re.search(r"^spec_version:\s*(\S+)", spec, re.M)
+    if not fm or fm.group(1) != version:
+        fail(f"docs/spec.md: frontmatter spec_version is "
+             f"{fm.group(1) if fm else 'missing'}, not {version}")
+    conformance = re.search(r"\*\*conformant at (v[^*]+)\*\*", spec)
+    if not conformance or conformance.group(1) != f"v{version}":
+        fail(f"docs/spec.md §11: conformance sentence names "
+             f"{conformance.group(1) if conformance else 'no version'}, not v{version}")
+    schema = (ROOT / "schema" / "game-design.schema.json").read_text(encoding="utf-8")
+    for key in ("$id", "title"):
+        sm = re.search(rf'^\s*"{re.escape(key)}":\s*"([^"]*)"', schema, re.M)
+        if not sm or f"v{version}" not in sm.group(1):
+            fail(f"schema/game-design.schema.json: {key} does not mention v{version}")
+
 
 def check_cli_verbs() -> None:
     """Spec §9's opening verb list and the README's verb list must equal the

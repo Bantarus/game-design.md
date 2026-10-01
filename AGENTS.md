@@ -110,7 +110,7 @@ Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are 
 
 1. **Review the Ratchet Register** (`DECISIONS.md` OI-010). Check every open row's trigger against the trees and the code. A trigger that has been observed gets its own D-entry and commit before the bump. Log the review in the register: the date, the version, and whether each row's trigger was observed.
 2. **Propose the bump; never decide it alone.**
-3. **Bump everything that carries the version together:** `pyproject.toml`, the spec's frontmatter `spec_version` and its status line, the schema's `$id` and `title`, the README, the CHANGELOG (`[Unreleased]` becomes the version and date) and the release notes. `python scripts/docs_lint.py` checks that the pyproject, README and spec status line agree.
+3. **Bump everything that carries the version together:** `pyproject.toml`, the spec's frontmatter `spec_version`, its status line and §11's conformance sentence, the schema's `$id` and `title`, the README, the CHANGELOG (`[Unreleased]` becomes the version and date) and the release notes. `python scripts/docs_lint.py` checks that the pyproject, README, spec (frontmatter, status line, §11) and schema (`$id`, `title`) agree.
 
 ## Universal practice (across all three modes)
 

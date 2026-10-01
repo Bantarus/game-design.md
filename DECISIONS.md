@@ -2434,6 +2434,31 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - **Spec:** §9.5.5 states the check, and §9.1 gains a row. AGENTS.md adds the rule to its "keep green" list.
 - **The register:** R11a moves to "Closed".
 
+## D-049 — §11 names the current version and, for each conformance item, the rules that check it
+
+- **Status:** decided (2026-10-01) by the user at the 0.4.0 bump approval: "the conformance heading says the current version (no 'v0.2.0-alpha'). Items 1–5 are reviewed against what lint now enforces (schema-violation, content-entity-invalid, trajectory-sort-by-missing), stating current behavior only."
+- **Related:** D-034 (`schema-violation`), D-035 and D-037 (`content-entity-invalid`), D-044 (current behavior only), D-048 (`trajectory-sort-by-missing`), the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md).
+
+### Decisions
+
+1. **The version.** §11 read "conformant at v0.2.0-alpha" through all of v0.3. It now names the spec's own version: v0.3.0 at this commit, and v0.4.0 from the bump commit, which changes it with every other carrier.
+2. **Item 1** (lint exits 0) keeps its condition and now says that `warning` and `info` findings do not change the exit code, and that every error rule counts, including rules for MUSTs outside items 2–5, such as `trajectory-sort-by-missing`.
+3. **Items 2–5 keep their conditions** and each names the rules that check it and what those rules do not check. Item 4's condition is restated by `data_dir` (D-037), in place of the `content/*/*.yaml` path pattern.
+
+   | Item | Checked by | Not checked (proof on a deckbuilder copy) |
+   | --- | --- | --- |
+   | 2. Root keys and section order | `schema-violation` (`CoreFile`), `missing-pillars`, `missing-core-loop`, `section-order` | An absent canonical heading: with `## High Concept` deleted, 0 errors. |
+   | 3. Subfile keys | `schema-violation` (`Subfile`; the whole schema when `file_type` is missing) | A file that declares neither `spec: game-design.md` nor a `file_type`: a `gdd/notes.md` without frontmatter, 0 findings. |
+   | 4. Content entities | `content-entity-invalid`, `schema-violation` (`ContentEntityFile`) | A YAML file in a `data_dir` that declares neither: `content/cards/bogus.yaml` with only `id` and a string `cost`, 0 findings. |
+   | 5. Named distributions | `undefined-distribution`, `broken-ref` | Randomness outside a rule's `do:` list: `sample: "1d6"` in a verb's `effects:`, 0 findings. In a rule's `do:` the same step is `undefined-distribution`, and `{distributions.nope}` is `broken-ref`. |
+
+4. **A closing sentence** says that items 2–5 are checked only as far as the named rules go, and that the parts marked "not checked" are conditions of conformance that lint does not verify.
+5. **The version can no longer go stale unseen.** `scripts/docs_lint.py` checks the spec's frontmatter `spec_version`, the §11 conformance version and the schema's `$id` and `title` against `pyproject.toml`, beside the README and status-line checks it had. AGENTS.md's release procedure lists §11 among the carriers. Proof of fire (`tests/test_docs_lint.py`): the spec at `5efbf92` gives exactly one finding, naming `v0.2.0-alpha`; a schema `$id` without the version gives one.
+
+### Not decided here
+
+- The four unchecked parts are stated, not scheduled. None is a rule change in this entry. The item-4 gap is the one a tree could hit unseen: an entity file that omits `file_type: content-entity` is not loaded, so neither its schema nor its `id` is checked. Whether any of the four becomes a Ratchet Register row is open.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
