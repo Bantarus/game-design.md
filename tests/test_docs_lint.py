@@ -78,12 +78,16 @@ def test_version_carriers_agree(tmp_path):
 
 
 def test_stale_conformance_version_is_found(tmp_path):
-    """§11 read "conformant at v0.2.0-alpha" through all of v0.3 (5efbf92)."""
+    """§11 read "conformant at v0.2.0-alpha" through all of v0.3 (5efbf92). Only
+    that phrase is put back, so the test holds at any later version."""
     pre = subprocess.run(["git", "show", "5efbf92:docs/spec.md"], cwd=REPO_ROOT,
                          capture_output=True, text=True)
     if pre.returncode != 0:
         pytest.skip("history not available")
-    found = _versions_findings(tmp_path, spec_text=pre.stdout)
+    phrase = re.search(r"\*\*conformant at [^*]+\*\*", pre.stdout).group(0)
+    spec = (REPO_ROOT / "docs/spec.md").read_text(encoding="utf-8")
+    found = _versions_findings(tmp_path, spec_text=re.sub(
+        r"\*\*conformant at [^*]+\*\*", phrase, spec, count=1))
     assert len(found) == 1 and "§11" in found[0] and "v0.2.0-alpha" in found[0]
 
 
