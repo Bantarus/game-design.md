@@ -53,6 +53,23 @@ def pytest_runtest_setup(item):
     pytest.skip(reason)
 
 
+def git_show(spec: str, *, partial: bool = False) -> str | None:
+    """`git show <rev>:<path>` for tests that need git history (marked
+    git_history). Without the history (a shallow clone): fail under CI, as the
+    v0.3-world tests do (D-051); locally skip, or with `partial=True` return
+    None so the test keeps the checks that need no history."""
+    res = subprocess.run(["git", "-C", str(REPO_ROOT), "show", spec],
+                         capture_output=True, text=True)
+    if res.returncode == 0:
+        return res.stdout
+    reason = f"history not available ({spec})"
+    if os.environ.get("CI"):
+        pytest.fail(f"{reason}: the history-needing tests must run in CI (D-051)", pytrace=False)
+    if partial:
+        return None
+    pytest.skip(reason)
+
+
 # The 12 in-repo trees: 4 canonical examples, 2 benchmark games, 6 starters.
 IN_REPO_TREES: tuple[str, ...] = (
     "examples/deckbuilder", "examples/tick-combat", "examples/party-rpg",

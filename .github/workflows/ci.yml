@@ -29,11 +29,12 @@ jobs:
           python -m venv ~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0
           ~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0/bin/pip install --quiet "git+file://$PWD@v0.3.0"
       - name: Test suite
-        run: pytest --ignore=tests/test_packaging.py -m "not v03_world"
-      # D-051: a separate, verbose step so the log names each v0.3-world test and its
-      # result. Under CI a missing tag or venv fails them instead of skipping.
-      - name: v0.3-world tests (tag + venv)
-        run: pytest -v -m v03_world --ignore=tests/test_packaging.py
+        run: pytest --ignore=tests/test_packaging.py -m "not v03_world and not git_history"
+      # D-051: a separate, verbose step so the log names each test that needs the
+      # v0.3.0 tag, the v0.3 venv or git history, and its result. Under CI a
+      # missing tag, venv or history fails them instead of skipping.
+      - name: v0.3-world and git-history tests (tag + venv + history)
+        run: pytest -v -m "v03_world or git_history" --ignore=tests/test_packaging.py
       # D-050: a separate, verbose step so the log names each packaging test and
       # its result. `build` comes from the [dev] extra; without it they fail here.
       - name: Packaging (wheel build, install, run outside the source tree)

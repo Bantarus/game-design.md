@@ -69,6 +69,7 @@ testpaths = ["tests"]
 addopts = "-ra --strict-markers"
 markers = [
     "v03_world(venv=False): needs the v0.3.0 tag, and with venv=True the v0.3 venv; skips locally without them, fails under CI (D-051)",
+    "git_history: needs git history (tests.conftest.git_show); skips locally without it, fails under CI (D-051)",
 ]
 
 [tool.ruff]

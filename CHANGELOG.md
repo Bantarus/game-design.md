@@ -8,7 +8,7 @@ All notable changes to `game-design.md` are recorded here. Format follows [Keep 
 
 ### Changed
 
-- **CI runs on every branch push and runs the v0.3-world tests** (D-051). Before, it ran only on `main` and on PRs, with a one-commit checkout and no tags, so the eight tests that build the dogfood v0.3 world always skipped there. Now the checkout fetches all history and tags, a step builds the v0.3 venv from the `v0.3.0` tag, and the eight tests carry a `v03_world` marker: they skip locally when the tag or the venv is missing and fail under CI, as D-050 does for `build`. A separate, verbose CI step runs them. Study 2's judge test is split by world, and one test that needed the venv but was gated on the tag alone is corrected.
+- **CI runs on every branch push and runs the v0.3-world tests** (D-051). Before, it ran only on `main` and on PRs, with a one-commit checkout and no tags, so the eight tests that build the dogfood v0.3 world always skipped there. Now the checkout fetches all history and tags, a step builds the v0.3 venv from the `v0.3.0` tag, and the eight tests carry a `v03_world` marker: they skip locally when the tag or the venv is missing and fail under CI, as D-050 does for `build`. A separate, verbose CI step runs them. Study 2's judge test is split by world, and one test that needed the venv but was gated on the tag alone is corrected. The three tests that read git history follow the same rule (`git_history` marker). Both triggers are kept: the `pull_request` run tests the merge result with `main`.
 
 ## [0.4.0] — 2026-10-01
 

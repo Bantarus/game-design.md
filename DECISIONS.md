@@ -2500,7 +2500,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 ### Decisions
 
-1. **Triggers:** `push` to every branch (`branches: ["**"]`), plus `pull_request`. A PR from a branch of this repository runs twice, once per event.
+1. **Triggers:** `push` to every branch (`branches: ["**"]`), plus `pull_request`. A PR from a branch of this repository runs twice, once per event, and both are kept (the user, at the PR #3 review): the `push` run tests the branch as committed, and the `pull_request` run tests the merge result with `main` (GitHub's `refs/pull/<n>/merge`). The second is what lands, and it can fail where the branch passes, when `main` has moved.
 2. **Checkout:** `fetch-depth: 0`, so all history and tags. The tag alone is not enough: the v0.3 world exports the tag's tree, which a shallow fetch does not carry.
 3. **The v0.3 venv.** A CI step creates it with the command `benchmark/dogfood/README.md` gives (`pip install "git+file://$PWD@v0.3.0"`), and `fixture.verify_v03_venv` checks it against the tag. Five of the eight v0.3-world tests also run the v0.3 `gdmd`, so with the tag alone they would still skip. This goes one step beyond the user's wording (the tag), so that all eight run.
 4. **The rule, as D-050's.** The eight tests carry `@pytest.mark.v03_world`, with `venv=True` on the five that need the venv. A conftest hook skips them locally when the tag or the venv is missing, and fails them under CI (`$CI` set). The marker replaces three ad-hoc gates (`needs_v03`, `needs_v03_tag`, `_has_v03_tag`).
@@ -2521,7 +2521,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 ### Not changed
 
-- Two tests in `tests/test_docs_lint.py` need history ("history not available"). The full fetch makes them run in CI, but without history they still skip. Applying the same rule to them is open.
+- ~~Two tests in `tests/test_docs_lint.py` need history; without it they still skip.~~ Closed by the amendment below.
 - The tests that need the pinned Claude CLI or VCC still skip in CI; those tools live outside the repository.
 
 ### After the first CI run
@@ -2529,6 +2529,20 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - PR #3's first `pull_request` run failed one newly running test on 3.10: `test_no_copy_file_outside_the_tree_names_a_question` raised `FileNotFoundError` on a copy's `.git/objects/23`. The `push` run of the same commit passed on both versions.
 - **Cause:** a race. The test's walker listed `.git` through `rglob("*")`, though it never reads it, and the copy's detached `git gc --auto` removed a loose-object directory during the listing. The test had never run in CI before D-051.
 - **Fix (test only):** the walker prunes `.git` from `os.walk`, as `fixture.normalize_mtimes` already does. The files read are unchanged; the repository and the copies have no symlinks, so `os.walk` sees what `rglob` saw.
+
+### Amendment: the git-history tests follow the same rule (the user, at the PR #3 review)
+
+- **What:** the tests that need git history call `tests.conftest.git_show` and carry `@pytest.mark.git_history`. Without the history they skip locally and fail under CI, as the v0.3-world tests do.
+- **Which tests:**
+  - `test_stale_conformance_version_is_found` and `test_stale_package_version_is_found` (they read `5efbf92`), the two the user named;
+  - `test_the_spec_and_schema_state_current_behavior_only`, whose 17-line proof of fire (it reads `4d95ec4`) was silently left out without the history. Locally it still checks the current spec and schema, with `partial=True`; under CI the proof is required.
+- **The CI step** "v0.3-world and git-history tests" runs `-m "v03_world or git_history"` verbosely, and the Test suite step excludes both markers.
+- **Proof of fire** (`-m git_history`, on clones of the commit):
+
+  | Clone | `$CI` set | `$CI` unset |
+  | --- | --- | --- |
+  | shallow, no tags | 3 failed | 1 passed, 2 skipped |
+  | full | 3 passed | 3 passed |
 
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
