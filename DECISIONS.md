@@ -2458,6 +2458,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 ### Not decided here
 
 - The four unchecked parts are stated, not scheduled. None is a rule change in this entry. The item-4 gap is the one a tree could hit unseen: an entity file that omits `file_type: content-entity` is not loaded, so neither its schema nor its `id` is checked. Whether any of the four becomes a Ratchet Register row is open.
+- **Logged (2026-10-01):** as OI-013, unscheduled, in the register's unscheduled items, by the user at the PR #2 review.
 
 ## D-050 — `gdmd init` works from a wheel: the starters ship as package data (OI-012)
 
@@ -2667,7 +2668,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
   1. A ratchet fires when its trigger is observed, not when a version arrives.
   2. When it fires, the change gets its own D-entry and commit, and its row moves to "Closed".
   3. A new planned change is added here with its trigger, never as a dated promise in the spec. `scripts/docs_lint.py` rejects version-dated promises in the spec and the schema.
-  4. **Before any version bump, this register is reviewed** (AGENTS.md, "Release procedure"): every open row's trigger is checked, and the review is logged below.
+  4. **Before any version bump, this register is reviewed** (AGENTS.md, "Release procedure"): every open row's trigger is checked, every unscheduled item is read, and the review is logged below.
 - **Logged:** 2026-10-01, as the ratchet audit. It became the register by D-044; the audit itself is kept as history at the end of this entry.
 
 ### Open ratchets
@@ -2691,6 +2692,17 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | R20 | `hook check` exceeds its 1 s budget on a real tree → cache the inverted index, invalidated by spec mtime | §9.7 | — |
 | R21 | Observed use asks for it → richer `status` aggregations (what's next, per-namespace drill-downs, cross-tree) | §9.6 | — |
 | R22 | A tree needs to reference one pillar where lint resolves references (frontmatter), not only in prose → id-keyed pillars and an indexed `pillars` namespace | D-039 | — |
+
+### Unscheduled items
+
+Known gaps with no trigger and no decided action. The review reads them with the open rows, and one that gains an observed need gets a trigger (a row above) or its own D-entry.
+
+| Item | Gap | Source |
+| --- | --- | --- |
+| OI-013 (a) | §11 item 2: lint does not report an absent canonical `##` heading. 25 starter files lack one. | D-049 |
+| OI-013 (b) | §11 item 3: lint does not see a file that declares neither `spec: game-design.md` nor a `file_type`. | D-049 |
+| OI-013 (c) | §11 item 4: lint does not see a YAML file in a `data_dir` without `file_type: content-entity`. | D-049 |
+| OI-013 (d) | §11 item 5: lint does not check randomness outside a rule's `do:` list. 1 such step, conformant. | D-049 |
 
 ### Observed-need evidence
 
@@ -2718,7 +2730,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 Each version bump adds a line: the date, the version, and, for every open row, whether its trigger was observed.
 
-**2026-10-01, proposed 0.4.0 (step (i)): no trigger observed. The bump is not blocked.** The review checked each open row against the trees and the code at `e74d5c5`, the first under AGENTS.md's release procedure.
+**2026-10-01, proposed 0.4.0 (step (i)): no trigger observed. The bump is not blocked.** The review checked each open row against the trees and the code at `e74d5c5`, the first under AGENTS.md's release procedure. The unscheduled items (OI-013) were added after this review, at the PR #2 review; the next review reads them.
 
 | Row | Trigger observed? | Evidence |
 | --- | --- | --- |
@@ -2861,3 +2873,18 @@ The audit as it was logged, before the user's decisions (D-044). Its proposals a
 - **Impact:** an install from a git URL or a wheel runs every command except `init`. No test caught it: D-006's wheel test checked only `spec` and `export`, and it skipped in CI, which had no `build`. Every other test, and the dogfood harness, runs from the editable install or a source copy. The dry run ran v0.3.0's `init` from an archive of the tag (`git archive v0.3.0`), which is the tag's own code and starters.
 - **Resolution (with its own D-entry):** the user decides whether it is fixed before v0.4.0 or later. A likely fix: force-include `templates/starters` into the wheel under `game_design_md/_data/starters`, look there in `_starters_root()`, and add a test that builds a wheel and runs `gdmd init --list`. Until then the v0.4 release notes list it as a known issue.
 - **Resolved (2026-10-01):** fixed before the v0.4.0 merge, as the user decided at the PR #2 review: D-050. OI-012 is closed.
+
+## OI-013 — §11: four conformance conditions that lint does not check (unscheduled)
+
+- **Logged:** 2026-10-01, by the user at the PR #2 review: "Log the four unchecked §11 gaps as an open item (unscheduled) so the register review sees them." Found by the §11 review (D-049), which proved each on a deckbuilder copy (0 findings).
+- **Spec says:** §11 items 2–5 are conditions of conformance, and §11 states which parts `gdmd lint` does not verify.
+- **The four gaps, with what the in-repo trees show** (the 12 trees and the study-2 tree, measured at `4c09f51`):
+
+  | Gap | §11 item | Not checked | Observed |
+  | --- | --- | --- | --- |
+  | (a) | 2 | A canonical `##` heading that is absent. `section-order` checks order, repeats, and canonical headings after non-canonical ones, not presence. | 25 files, all in the six starters, lack a heading that §5.2 / §7.1 do not mark optional: `Universal Surface` in 6 root files, `Rationale` in 12 subfiles, `Balance Notes` in 7 content-schemas. The examples, the benchmark games and the study-2 tree lack none. |
+  | (b) | 3 | A file that declares neither `spec: game-design.md` nor a `file_type`. It is not loaded as a `game-design.md` file, so no rule sees it. | 0 files under `gdd/` or at the root. |
+  | (c) | 4 | A YAML file in a `data_dir` without `file_type: content-entity`. It is not loaded as an entity, so neither its schema nor its `id` is checked. Of the four, the one a tree could hit unseen: an entity file that omits the key. | 0 files. |
+  | (d) | 5 | Randomness outside a rule's `do:` list: a stochastic step in a verb's `effects:`, or in prose. | 1 step: tcg's `verbs.start_game.effects[0].sample`, which names `{distributions.first_player}`. It is conformant, and `broken-ref` would catch an unresolved one; `undefined-distribution` would not catch a bare value there. |
+
+- **Status: unscheduled.** No trigger and no action is decided. The Ratchet Register lists the four under "Unscheduled items", which every register review reads (OI-010, rule 4). An item that gains an observed need gets a trigger, as a register row, or its own D-entry.

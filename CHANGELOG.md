@@ -121,6 +121,7 @@ v0.4 adds projected views over a tree (`gdmd view` / `gdmd graph`) and the agent
   - The import probe covers both worlds (4 calls).
 - **`DECISIONS.md` Open items** (OI-001…OI-005): logged spec↔code drifts and a lint-rule vs schema mismatch, each to be resolved in its own D-entry.
 - **Upgrade dry run:** the six v0.3.0 starters, scaffolded by v0.3.0's `gdmd init` and upgraded with the release notes' checklist, all lint 0/0. The dry run found OI-012, fixed by D-050 (see Fixed).
+- **OI-013 logged, unscheduled:** the four §11 conditions that lint does not check (D-049). They are listed in the Ratchet Register's new "Unscheduled items", which every release review reads (OI-010 rule 4, AGENTS.md). Today: 25 starter files lack a canonical heading, and one tcg verb samples a named distribution outside a rule.
 - **[v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md) + OI-006.** A read-only jsonschema pass (OI-005) finds lint-clean weaker than §11 conformance.
   - All 29 linked content entities validate. The party-rpg starter's `heroes` content-schema lacks `data_dir`, leaving its entity unlinked.
   - 10 of 158 frontmatter blocks, in 8 trees (both benchmark games and all six starters), fail the normative JSON Schema. One class, whole-namespace `applies_to` refs, is used by spec §4.11's own example.
