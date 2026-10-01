@@ -6,7 +6,7 @@ All notable changes to `game-design.md` are recorded here. Format follows [Keep 
 
 ## [Unreleased]
 
-v0.4 vocabulary growth is gated on observed need from live adoption (see [docs/release-notes/v0.3.md](docs/release-notes/v0.3.md) "Queued for v0.4+"). v0.4 work in progress is tooling and evidence, not format. This section also carries the post-v0.3 documentation-drift sweep (external review findings, merged to `main` as #1).
+v0.4 adds projected views over a tree (`gdmd view` / `gdmd graph`) and the agent card. It makes lint enforce what the spec already claimed: the normative JSON Schema, the content-entity rules, and MUSTs that v0.3 only stated. Its evidence comes from the dogfood harness (two pre-registered studies). The format changes little (see Deprecated and Removed). Planned changes now live in the Ratchet Register (`DECISIONS.md` OI-010), not in the spec. Release notes, in draft until the bump: [docs/release-notes/v0.4.md](docs/release-notes/v0.4.md). This section also carries the post-v0.3 documentation-drift sweep (external review findings, merged to `main` as #1).
 
 ### Added
 
