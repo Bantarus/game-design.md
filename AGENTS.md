@@ -47,6 +47,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Editing `docs/spec.md` or format semantics from the card alone.** `CLAUDE.md` imports only the agent card (`docs/spec-card.md`), which excerpts a few sections and indexes the rest. Before editing the spec, the schema, or what a namespace, enum value or lint rule means, read every affected section in full (`gdmd spec --section <id>`). After editing the spec, regenerate the card: `gdmd spec --card > docs/spec-card.md`.
 - **Quietly dropping or silently swapping a validation claim.** Reframes get recorded in DECISIONS.md + spec text (D-021 + §11.2 pattern). Premise-correction is honest only when audit-lineage-preserved. (Memory: `premise-correction-reframe-is-gate-correction`.)
 
+- **Writing future behavior into the spec.** `docs/spec.md` and the schema state current behavior only. A planned change is a row in the Ratchet Register (`DECISIONS.md` OI-010) written as trigger → action, with an optional target version that is not binding. Never write "ratchets to error in v0.N" into the spec: the dates lapse and the spec ends up describing behavior the code does not have (D-044). `docs_lint` rejects such phrases.
 **CLI:** `gdmd spec` (read the spec back); `gdmd export --format schema` (validate the schema parses).
 
 ### Operating — implementing the design (CLI, lint rules, example trees, cross-engine adapters)
@@ -104,6 +105,12 @@ Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are 
 - Before committing CLI changes, run `gdmd lint examples/deckbuilder` and confirm it passes clean.
 - Before committing changes to README.md, AGENTS.md, docs/spec.md, or the CLI verb set, run `python scripts/docs_lint.py` — it drift-lints the docs themselves (version agreement, §9 verb list vs the click registry, the four-field stability guarantee, namespace validity of taught refs). CI runs it on every push.
 - After editing `docs/spec.md`, regenerate the agent card that `CLAUDE.md` imports: `gdmd spec --card > docs/spec-card.md`. A test fails while they differ.
+
+## Release procedure (before any version bump)
+
+1. **Review the Ratchet Register** (`DECISIONS.md` OI-010). Check every open row's trigger against the trees and the code. A trigger that has been observed gets its own D-entry and commit before the bump. Log the review in the register: the date, the version, and whether each row's trigger was observed.
+2. **Propose the bump; never decide it alone.**
+3. **Bump everything that carries the version together:** `pyproject.toml`, the spec's frontmatter `spec_version` and its status line, the schema's `$id` and `title`, the README, the CHANGELOG (`[Unreleased]` becomes the version and date) and the release notes. `python scripts/docs_lint.py` checks that the pyproject, README and spec status line agree.
 
 ## Universal practice (across all three modes)
 

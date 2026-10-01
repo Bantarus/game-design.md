@@ -128,11 +128,39 @@ def check_agents_namespaces() -> None:
             fail(f"AGENTS.md: reference uses unknown namespace {{{ns}.…}}")
 
 
+# A version-dated promise about future behavior ("ratchets to error in v0.3",
+# "a v0.4+ concern", "deferred to v0.4+"). The spec and the schema state
+# current behavior only; planned changes live in DECISIONS.md's Ratchet
+# Register as trigger -> action (D-044). Seventeen spec lines and one schema
+# description had gone stale by v0.4, several promising behavior never shipped.
+DATED_PROMISE_RE = re.compile("|".join(f"(?:{p})" for p in (
+    r"\bratchets?\b[^.;()]{0,60}?\bin\s+v\d",                     # ratchets (to X) in v0.3
+    r"\bv\d+(?:\.\d+)*\+?\s+(?:spec-)?(?:concern|ratchet|follow-on|[\w-]+\s+question)",
+    r"\b(?:info|warning|error)\s+in\s+v\d",                         # warning in v0.3
+    r"\bdeferred\s+to\s+v\d",
+    r"\bcandidates?\s+for\s+v\d",
+)), re.I)
+
+
+def dated_promises(text: str) -> list[tuple[int, str]]:
+    """(line number, matched text) for every version-dated promise in `text`."""
+    return [(i, m.group(0)) for i, line in enumerate(text.splitlines(), 1)
+            for m in DATED_PROMISE_RE.finditer(line)]
+
+
+def check_spec_states_current_behavior() -> None:
+    for rel in ("docs/spec.md", "schema/game-design.schema.json"):
+        for line, hit in dated_promises((ROOT / rel).read_text(encoding="utf-8")):
+            fail(f"{rel}:{line}: version-dated promise {hit!r}; state current behavior and "
+                 f"put the plan in DECISIONS.md's Ratchet Register (D-044)")
+
+
 def main() -> int:
     check_versions()
     check_cli_verbs()
     check_stability_guarantee()
     check_agents_namespaces()
+    check_spec_states_current_behavior()
     if findings:
         print(f"docs-lint: {len(findings)} finding(s)")
         for f in findings:

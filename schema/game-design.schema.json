@@ -269,7 +269,7 @@
     },
 
     "TrajectorySpec": {
-      "description": "Spec §9.5.5. Per-game canonical trajectory declaration. The schema body is advisory at v0.2.0-alpha and ratchets to JSON Schema validation in v0.3; trajectory equality is checked byte-for-byte against the golden fixture.",
+      "description": "Spec §9.5.5. Per-game canonical trajectory declaration. The schema body is the canonical human reference; verify does not validate trajectory lines against it. Trajectory equality is checked byte-for-byte against the golden fixture.",
       "type": "object",
       "required": ["unit"],
       "properties": {

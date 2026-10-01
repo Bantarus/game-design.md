@@ -1,6 +1,6 @@
 # DECISIONS
 
-Explicit, dated calls made during `game-design.md` development. Each entry: what we decided, why, and when it ratchets. **This file is normative for the project, not the spec** — spec changes live in `docs/spec.md`.
+Explicit, dated calls made during `game-design.md` development. Each entry: what we decided, why, and, for a planned change, its trigger. Planned changes are kept as **trigger → action** in the Ratchet Register (OI-010, D-044), never as dated promises in the spec. **This file is normative for the project, not the spec** — spec changes live in `docs/spec.md`.
 
 ---
 
@@ -13,6 +13,8 @@ Explicit, dated calls made during `game-design.md` development. Each entry: what
 The transition trigger key in a `states.<machine>.transitions[*]` entry is `event:`, not `on:`. YAML 1.1 (still the default loader behavior in PyYAML and many other libraries) implicitly coerces unquoted `on`, `off`, `yes`, `no` to booleans, so `{ from: x, on: draw, to: y }` parses as `{ 'from': 'x', True: 'draw', 'to': 'y' }` and silently breaks every downstream check. `event:` is foolproof regardless of YAML mode and semantically clearer.
 
 **Ratchet plan:** revisit if/when the ecosystem moves to YAML 1.2-only loaders. Until then `event:` is normative; `on:` is rejected by the schema.
+
+**Register (D-044):** R12, trigger → action: the project's YAML loaders are YAML-1.2-only → revisit `event:` vs `on:`.
 
 ---
 
@@ -51,7 +53,7 @@ Migration: the four examples are migrated; the deckbuilder demonstrates all thre
 
 **v0.3 ratchet:** `balance-target-untyped` becomes `error`; `target_kind` becomes structurally required by the loader (a tree without it fails to load instead of merely linting at warning). Schema is already strict — only the lint rule's severity is the soft path.
 
-**v0.4 (D-040):** the v0.3 ratchet was never applied (OI-009). The rule is retired, subsumed by `schema-violation` (D-034), which reports a missing `target_kind` as an error. The loader clause was never implemented either; it is listed in the ratchet audit (OI-010) for the user's decision.
+**v0.4 (D-040):** the v0.3 ratchet was never applied (OI-009). The rule is retired, subsumed by `schema-violation` (D-034), which reports a missing `target_kind` as an error. The loader clause was never implemented either; it is listed in the ratchet audit (OI-010) for the user's decision. **Dropped by D-044 (R2):** lint's `schema-violation` error is the mechanism, and a load failure would block `view`, `graph` and `status` on malformed trees.
 
 ---
 
@@ -89,6 +91,8 @@ Transition `event:` values are now `{events.<id>}` token references. Events live
 The deeper cross-check the v0.1.1 deferral worried about — "every event a state reacts to must be *emitted* somewhere by a verb's effects or rule's outputs" — remains deferred. The v0.1.1 verb/rule shapes still don't have a normative "emits" field, so adding it now would still be premature. We picked the shape that's useful immediately (typed token tracking + orphan detection) and left the verb→event production cross-check for v0.3 once a real implementation (Phase 2 onwards) exercises which fields the engines actually need.
 
 **v0.3 ratchet:** `undefined-event` becomes `error`; schema requires `event:` to match the `{events.<id>}` TokenRef pattern (currently it accepts any string for the migration window). Optionally, introduce an `emits:` field on `verbs` and `rules` and add the v0.1.1-deferred event-production cross-check then.
+
+**Register (D-044):** the v0.3 date passed unapplied. The schema pattern and the retirement of `undefined-event` are R3 (applied now, its own D-entry). The optional `emits:` cross-check is R4, trigger → action: an engine needs event-production checking → optional `emits:` on verbs and rules plus a lint cross-check.
 
 ---
 
@@ -175,6 +179,8 @@ The rounding happens **at the point of application**, not at sample time — sam
 
 **Ratchet plan in v0.3:** promote `output_domain` and `round_mode` to *required* schema fields on `Distribution` for `type: gaussian` and `type: uniform`; add a lint rule `distribution-output-undeclared` (warning, then error) that fires when a real-valued sampling distribution lacks the declaration. The current schema's permissive `additionalProperties: true` becomes a discriminated union once the field semantics are exercised in two engines.
 
+**Register (D-044): void, R5 dropped.** D-016 superseded this plan: integer-native distributions are normative for state, and the two fields are a deprecated cosmetic-only path.
+
 ---
 
 ## D-011 — Rules on deterministic loop paths require computable procedures, not prose labels
@@ -194,6 +200,8 @@ The rounding happens **at the point of application**, not at sample time — sam
 - **v0.3:** warning. Authors must either restructure to a typed step or add a `# determinism-ok: <justification>` inline comment to silence (TBD comment syntax).
 - **v0.4:** error. The current bare-string syntax becomes a hard-fail for any rule reachable from a deterministic loop.
 
+**Register (D-044):** neither date was applied, and the dates are withdrawn. R6, trigger → action: a working silence mechanism exists (a structured key, not a YAML comment, which the loader drops) → raise the rule from info. The closed `do[]` `kind:` vocabulary is R10, trigger → action: a second engine-backed tree → close the vocabulary to the kinds the engine-backed trees share.
+
 **Out of scope for v0.2.0-alpha:** declaring the closed normative vocabulary of `do[]` step `kind:` values (e.g. `sample`, `select_target`, `apply_damage`, `gain_resource`, …). Each project defines its own vocabulary at v0.2.0-alpha; v0.3 ratchets one based on what the examples have actually used.
 
 ---
@@ -206,7 +214,7 @@ The rounding happens **at the point of application**, not at sample time — sam
 - **Spec footprint:** §3 (context-local prefixes + binding-moment paragraph), §4.7 (templated parameters subsection + apply-time clause).
 - **Schema footprint:** `Distribution.params_from: { type: object, additionalProperties: { type: string } }`.
 
-`params_from:` lets a distribution declare which parameters are sourced from context (the acting unit, the target, the world tick number) rather than fixed in the YAML. Keys are parameter names of the distribution; values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the consuming rule binds. At v0.2.0-alpha the vocabulary is project-defined; v0.3 closes a normative set.
+`params_from:` lets a distribution declare which parameters are sourced from context (the acting unit, the target, the world tick number) rather than fixed in the YAML. Keys are parameter names of the distribution; values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the consuming rule binds. At v0.2.0-alpha the vocabulary is project-defined; v0.3 closes a normative set. (D-044: the code closed the prefix set at `{actor, target}`; the spec says so as R7.)
 
 **Cross-engine implication.** Without templated parameters, every implementation would need to invent the actor-stat-to-damage mapping locally. The cross-engine bar requires this mapping in the spec.
 
@@ -268,7 +276,7 @@ Two shapes coexist: bare numbers (probability only, the v0.1 form) and `{ weight
 
 - `xoshiro256_starstar` (default) — Blackman & Vigna 2018. 4×u64 state, output `rotl(s1 * 5, 7) * 9`. Bit-identical-friendly: a handful of shifts/rotates/xors on u64s, no math-library dependency. Trivially portable across Rust, GDScript, and (importantly for D-008's Phase-4-Unreal aspiration) a Blueprint visual graph, where implementing ChaCha20's quarter-rounds would be miserable and error-prone.
 - `chacha20` — D. J. Bernstein 2008. Per-game *override* for trees that need unpredictability (e.g. a 2-player TCG where seed prediction could become an exploit). The `prng: { algorithm: chacha20, ... }` declaration locks the choice in the spec; determinism holds regardless of which algorithm is chosen as long as it's pinned.
-- `pcg32` / `pcg64` — reserved for v0.3 per-game opt-in; not the default because "PCG" is a family with multiple variants whose constants vary by library.
+- `pcg32` / `pcg64` — reserved for v0.3 per-game opt-in (D-044: R8, trigger → action: a tree requests one → pin the variant by a D-entry); not the default because "PCG" is a family with multiple variants whose constants vary by library.
 
 **Seeding.** `splitmix64` (Blackman & Vigna's reference) maps a single `u64` seed to four `u64`s that fill xoshiro256**'s state. All arithmetic is wrapping `u64`. The canonical `seed: deterministic_per_run` field on a distribution is the input to this procedure.
 
@@ -389,7 +397,7 @@ D-019 specifies the binding semantics of existing context-local refs (`{actor.<f
 
 **Descriptive-not-prescriptive (see memory `descriptive-not-prescriptive-vocabulary-extensions`).** The verify-adapter PASS was expected because the new vocab DESCRIBES existing engine reality (xtreme's ECS components already carry per-instance `hp` / `lifecycle`; the spec just hadn't had words for what was there). No engine refactor required.
 
-**No further ratchet at v0.3.** Required-`field:` on mutation steps is a v0.4 concern.
+**No further ratchet at v0.3.** Required-`field:` on mutation steps is a v0.4 concern. (D-044: R9, trigger → action: R10 is done → `field:` required on mutation steps.)
 
 ---
 
@@ -2252,6 +2260,59 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - Whether to build it, and the note's four open questions: touches before commit, the window, the definition of touched, and the corpus.
 - No incidence of the problem has been measured.
 
+## D-044 — Ratchets are trigger → action; the spec states current behavior only; OI-010 becomes the Ratchet Register
+
+- **Status:** decided (2026-10-01) by the user on the ratchet audit (OI-010): the per-item decisions and a process fix, which lands before the apply-now items.
+- **Related:** OI-010, D-001, D-003, D-005, D-010, D-011, D-012, D-015, D-019, D-039; `scripts/docs_lint.py`; AGENTS.md.
+
+### The problem
+
+- **Dated promises:** before this commit, 17 spec lines and one schema description promised behavior by version ("ratchets to error in v0.3", "a v0.4+ concern", "deferred to v0.4+").
+- **Most had passed their date unapplied** by v0.4: D-003's loader clause, D-005's error and schema pattern, D-010's required fields, D-011's warning and error, D-019's required `field:`, and the trajectory lint rule.
+- So the spec described behavior the code did not have, and a reader could not tell a plan from a fact.
+
+### Decisions
+
+1. **A ratchet is written as trigger → action.** The trigger is an observed-need condition. A target version is optional and explicitly not binding.
+2. **The spec states current behavior only.**
+   - The 17 spec lines and the `$defs.TrajectorySpec` description are rewritten as what the code does today.
+     - Example: §4.5 says `determinism-undetermined-rule` is severity info, with no date (the user's R6 instruction).
+     - Example: §9.7 says `hook check` has no cache and no spec → code direction.
+   - One sentence after "The rest of this document is normative" says the spec states current behavior, and that planned changes are in the Ratchet Register.
+   - Code docstrings with dated promises are rewritten the same way: three in `linter.py`, one in `hook_cmd.py`. The `undefined-event` message ("Ratchets to error in v0.3.") goes with R3.
+   - **Kept:**
+     - past facts and since-version markers, such as "(added v0.3 per D-020)", "error (v0.4+)" in §9.1 and "D-005 ratchet at v0.2";
+     - §11.2's queued validation claims, which are evidence questions, not format changes.
+3. **A guard:** `docs_lint` gains `check_spec_states_current_behavior`.
+   - It rejects version-dated promises (`DATED_PROMISE_RE`) in `docs/spec.md` and the schema. CI runs it.
+   - `tests/test_docs_lint.py` covers nine promise phrasings, five past-fact phrasings that must pass, and the clean spec.
+   - **Proof of fire:** 19 hits on 17 lines in the pre-D-044 spec (`4d95ec4`).
+4. **OI-010 becomes the permanent Ratchet Register:** one row per open ratchet, with its trigger and source, plus the observed-need evidence, the closed rows and a review log.
+   - The register now includes D-039's `{pillars}` prose observation (7 uses in 4 trees) as evidence for R22.
+   - The source D-entries (D-001, D-003, D-005, D-010, D-011, D-012, D-015, D-019) point at their rows; their original text stays as history.
+5. **AGENTS.md:**
+   - **A release procedure:** before any version bump, review the register (each open trigger checked, the review logged) and only then bump.
+   - **A new Authoring prohibition:** writing future behavior into the spec.
+   - The DECISIONS.md header now describes the trigger format.
+
+### The audit decisions recorded here
+
+| Item | Decision |
+| --- | --- |
+| R2, D-003's loader clause | **Dropped.** Lint's `schema-violation` error is the mechanism; a load failure would block `view`, `graph` and `status` on malformed trees. |
+| R5, D-010 | **Dropped.** The ratchet is void, superseded by D-016. |
+| R6, D-011 | **Trigger-based:** no ratchet until a working silence mechanism exists (a structured key, not a YAML comment). §4.5 now states severity info. |
+| R4, R8, R9, R10 | **Trigger-based,** each with an observed-need condition (the register's rows). |
+| R11 | **Split.** The static check (every array in `trajectory.schema` declares `sort_by`) applies now. Full trajectory validation becomes trigger-based (R11b). |
+| R3, R7, R11a | **Apply now,** each with its own D-entry and commit, after this one. |
+
+The register also takes the items the audit listed as not versioned (R12–R21) and R22.
+
+### Effect
+
+- No lint behavior changes, and the 12 trees stay 0/0.
+- The card is regenerated (its source hash).
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2424,7 +2485,72 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 - **Resolved (2026-09-30):** the user chose option 3. D-040 retires the rule and updates §4.10 and the §9.1 row. D-003's loader clause is left to the ratchet audit (OI-010). OI-009 is closed.
 
 
-## OI-010 — Ratchet audit: every scheduled ratchet, its due version and its state in code (for the user's decision)
+## OI-010 — Ratchet Register (permanent)
+
+- **What it is:** the one list of planned changes to the format and the tools (D-044). The spec states current behavior only; the plan lives here.
+- **Format:** each open ratchet is one row, **trigger → action**, with its source. A target version is optional and **not binding**.
+- **Rules:**
+  1. A ratchet fires when its trigger is observed, not when a version arrives.
+  2. When it fires, the change gets its own D-entry and commit, and its row moves to "Closed".
+  3. A new planned change is added here with its trigger, never as a dated promise in the spec. `scripts/docs_lint.py` rejects version-dated promises in the spec and the schema.
+  4. **Before any version bump, this register is reviewed** (AGENTS.md, "Release procedure"): every open row's trigger is checked, and the review is logged below.
+- **Logged:** 2026-10-01, as the ratchet audit. It became the register by D-044; the audit itself is kept as history at the end of this entry.
+
+### Open ratchets
+
+| ID | Trigger → action | Source | Target (not binding) |
+| --- | --- | --- | --- |
+| R3 | **Decided, apply now** → `$defs.StateTransition.event` must be `{events.<id>}`; the `undefined-event` sub-finding retires (as D-040 did) | D-005 | 0.4.0 (its own commit) |
+| R4 | An engine needs event-production checking (an engine-backed tree hits a gap that "every event a machine reacts to is emitted by some verb or rule" would catch) → optional `emits:` on verbs and rules, plus a lint cross-check | D-005 | — |
+| R6 | A working silence mechanism exists: a structured key that marks a bare-string step as deliberate (not a YAML comment, which the loader drops) → raise `determinism-undetermined-rule` from info to warning. Error is a later, separate decision. | D-011 | — |
+| R7 | **Decided, apply now** → the spec states that the context-local prefix set is closed at `{actor, target}` (the code already enforces it) | D-012 | 0.4.0 (its own commit) |
+| R8 | A tree requests `pcg32` or `pcg64` → pin the variant (constants, output function, seeding) by a D-entry, with reference vectors | D-015 | — |
+| R9 | R10 is done, so a closed `do[]` `kind:` vocabulary tells mutation steps apart → `field:` is required on mutation steps | D-019 | — |
+| R10 | A second engine-backed tree: one other than tick-combat with a working verify adapter → close the `do[]` `kind:` vocabulary to the kinds the engine-backed trees share | D-011, §4.5 | — |
+| R11a | **Decided, apply now** → a lint rule: every array in `trajectory.schema` declares `sort_by:` | §9.5.5 | 0.4.0 (its own commit) |
+| R11b | An engine's first run has to be diagnosed without a golden (a new engine, or a trajectory with no golden yet) → `verify` checks each trajectory line against `trajectory.schema` (field shapes; the body is not JSON Schema) | §9.5.5 | — |
+| R12 | The project's YAML loaders are YAML-1.2-only (no implicit `on`/`off`/`yes`/`no` booleans) → revisit `event:` vs `on:` | D-001 | — |
+| R13 | v1.0 preparation → remove `data_source` from the schema and the spec | D-037 | before v1.0 (decided by D-037) |
+| R14 | Content with mid-firing mutations needs action-start values → a snapshot step kind with local references, by a D-entry | D-012 | — |
+| R15 | A distribution's range width makes modulo bias material → a per-distribution reduction field (an unbiased reduction) | D-018 | — |
+| R16 | A live tree needs to mark "waiting on a dependency" and no status says so → add `blocked` | D-020 | — |
+| R17 | A tree needs time passage the two clock modes cannot express (a wave timer, day and night, a scripted event) → add a clock mode | F-010, §4.7 | — |
+| R18 | `prototyped-without-pointer` keeps firing on deliberate no-code prototyping in adoption → lifecycle vocabulary for it | §9.1 | — |
+| R19 | Adoption needs "a spec edit means the code may need updating" signals → a spec → code workflow | §9.7 | — |
+| R20 | `hook check` exceeds its 1 s budget on a real tree → cache the inverted index, invalidated by spec mtime | §9.7 | — |
+| R21 | Observed use asks for it → richer `status` aggregations (what's next, per-namespace drill-downs, cross-tree) | §9.6 | — |
+| R22 | A tree needs to reference one pillar where lint resolves references (frontmatter), not only in prose → id-keyed pillars and an indexed `pillars` namespace | D-039 | — |
+
+### Observed-need evidence
+
+- **`{pillars}` in prose (R22, D-039):** 7 uses in 4 trees.
+  - the deckbuilder: `gdd/content/cards.md`, `gdd/glossary.md`;
+  - party-rpg: `gdd/systems/distributions.md`, and `{pillars}[2]` in `gdd/economy-balance.md`;
+  - tcg: `{pillars}[2]` in `gdd/economy-balance.md`;
+  - the platformer benchmark: `gdd/mechanics.md`, `gdd/systems/distributions.md`.
+  - They point readers at the pillars list, and the tools read them as plain text.
+- **`determinism-undetermined-rule` (R6):** 4 info findings in 2 trees (party-rpg `rules.end_of_turn`, tcg `rules.card_play_resolution`), and 0 on tick-combat.
+- **`do[]` `kind:` (R9, R10):** 89 distinct kinds in 169 steps across the 12 trees, of which the one engine-backed tree, tick-combat, uses 4. 2 steps declare `field:`.
+
+### Closed
+
+| ID | Was | Closed by |
+| --- | --- | --- |
+| R1 | `balance-target-untyped` → error (D-003) | Retired, D-040 |
+| R2 | `target_kind` required by the loader (D-003) | Dropped, D-044 |
+| R5 | `output_domain` / `round_mode` required, plus `distribution-output-undeclared` (D-010) | Dropped, D-044: void, superseded by D-016 |
+
+### Review log
+
+Each version bump adds a line: the date, the version, and, for every open row, whether its trigger was observed.
+
+### Not ratchets
+
+§11.2's queued validation claims (cost amortization, the longitudinal living-doc property) and the v0.3 notes' cross-agent transfer and M1/M2 watch-items are evidence questions, not planned format or tool changes. They stay where they are.
+
+### History: the ratchet audit of 2026-10-01
+
+The audit as it was logged, before the user's decisions (D-044). Its proposals are kept verbatim; the register above is current.
 
 - **Logged:** 2026-10-01, at the user's request (item 5 of the step-(e) decisions: "list every ratchet scheduled in DECISIONS.md and the spec … propose apply now / reschedule / drop … decide nothing yet"). **Nothing below is decided or changed.**
 - **Method:**
@@ -2432,7 +2558,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - Impacts are measured on the 12 in-repo trees and the study-2 tree.
   - "Apply now" impacts come from in-memory prototypes, with nothing committed (`proto_d005.py`, `ratchet_data.py` in the session scratchpad; each is reproducible from this entry).
 
-### Due at ≤ v0.4, with a proposal each
+#### Due at ≤ v0.4, with a proposal each
 
 | # | Ratchet (source) | Scheduled | State in code | Proposal |
 | --- | --- | --- | --- | --- |
@@ -2448,7 +2574,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
 | R10 | A closed `do[].kind` vocabulary (D-011: "v0.3 ratchets one"; §4.5: "a v0.4+ concern") | v0.3 / v0.4+ | Project-defined. | **Reschedule** (unversioned). |
 | R11 | A `trajectory-schema-validation` lint rule (§9.5.5; `$defs.TrajectorySpec`: "ratchets to JSON Schema validation in v0.3") | v0.3 | Not implemented. `verify` checks byte-identity to the golden. | **Reschedule** line validation. An optional narrower static check could apply now. |
 
-### Reasons, impact and proof of fire
+#### Reasons, impact and proof of fire
 
 - **R2, drop.**
   - D-034 and D-040 already make a missing `target_kind` an error, with its location.
@@ -2494,7 +2620,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - The `schema:` body is not JSON Schema (`sort_by`, field-map `items`), so "JSON Schema validation" needs rewording either way.
   - **A narrower check could apply now:** "every array in `trajectory.schema:` declares `sort_by:`" is a §9.5.5 MUST that nothing checks statically. Impact: 0, since tick-combat's one array, `units`, declares it.
 
-### Not due, or not versioned (listed for completeness)
+#### Not due, or not versioned (listed for completeness)
 
 - **Closed:** D-002 (applied at v0.2), R1 (D-040).
 - **Conditional:** D-001's `on:` revisit, if the ecosystem moves to YAML-1.2-only loaders.
@@ -2507,7 +2633,7 @@ Known issues that are **logged, not decided**. Each one gets its own D-entry whe
   - §9.1's "no-code prototyping" vocabulary;
   - §9.7's spec → code direction and index caching.
 
-### Found while auditing (not ratchets)
+#### Found while auditing (not ratchets)
 
 - **`gdmd verify --baseline` and its `verify-result-regression` finding** are specified (§9.5, and a §9.1 row) but not implemented: the CLI has no `--baseline` option. Logged as OI-011.
 - **Stale version text that follows the decisions above:**

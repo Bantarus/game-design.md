@@ -25,9 +25,9 @@ pre-commit framework convention (a `local` hook entry invoking
 idempotent.
 
 Spec → code direction (spec edit implies impl may need updating) is a
-separate workflow shape (closer to design-doc-driven-development) and
-deferred to v0.4+ per the minimum-extension discipline — ship what's
-demanded by the observed problem (code→spec), don't preempt.
+separate workflow shape (closer to design-doc-driven-development) and is
+not provided, per the minimum-extension discipline — ship what's demanded
+by the observed problem (code→spec), don't preempt (Ratchet Register, D-044).
 
 Performance budget: pre-commit hooks that take >1s get disabled by
 developers. The inverted index is O(N) over spec files at build time;

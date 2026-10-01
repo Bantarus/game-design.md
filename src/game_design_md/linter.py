@@ -678,9 +678,8 @@ def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None
         `["docs/sketches/foo.md"]`) when the section is being actively
         prototyped without code yet. The lint then doesn't fire.
       - Accept the warning as a real workflow signal (the spec lacks
-        vocabulary for "actively prototyping without code yet" — that's a
-        v0.4+ vocabulary-extension question to surface, not a rule to
-        silence).
+        vocabulary for "actively prototyping without code yet" — an open
+        vocabulary question, not a rule to silence).
 
     Tokens at status `draft | cut | deferred` are exempt (code may
     legitimately not exist at those states per STATUS_LEVELS), and so are
@@ -795,8 +794,8 @@ def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
          clock's `drives:` list.
       4. For each such rule, flag every `do[]` item that is a string (not a dict).
 
-    Severity is `info` (advisory) at v0.2.0-alpha — visibility, not gate.
-    Ratchets to `warning` in v0.3, `error` in v0.4 (per D-011).
+    Severity is `info` (advisory) — visibility, not gate. It is raised only
+    when a structured silence mechanism exists (Ratchet Register R6, D-044).
     """
     # (1) Verbs referenced from moment loops.
     moment_verbs: set[str] = set()
@@ -896,9 +895,9 @@ def rule_write_to_template_field(tree: Tree) -> list[Finding]:
           per_instance_state schema or it's not contracted.
 
     The check is opt-in (fires only when `field:` is declared on a do[] step).
-    Authors not declaring `field:` on mutation steps escape the check; that's
-    the v0.3 / v0.4 ratchet path — declared-field becomes required in v0.4 once
-    the discipline settles.
+    Authors not declaring `field:` on mutation steps escape the check. Making
+    `field:` required needs a closed do[].kind vocabulary first (Ratchet
+    Register R9, D-044).
     """
     # Collect all writable per_instance_state field names across all
     # instance_containers in the tree.
