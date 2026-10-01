@@ -118,6 +118,7 @@ v0.4 adds projected views over a tree (`gdmd view` / `gdmd graph`) and the agent
   - Session logs are archived compressed outside the repo; results, extraction output and archive manifests are committed.
   - The import probe covers both worlds (4 calls).
 - **`DECISIONS.md` Open items** (OI-001…OI-005): logged spec↔code drifts and a lint-rule vs schema mismatch, each to be resolved in its own D-entry.
+- **OI-012 logged, a known issue:** `gdmd init` fails outside an editable install, at v0.3.0 and v0.4, because the package does not include `templates/starters/`. Found by the pre-bump upgrade dry run, which scaffolded the six v0.3.0 starters, upgraded them with the release notes' checklist and linted all six 0/0.
 - **[v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md) + OI-006.** A read-only jsonschema pass (OI-005) finds lint-clean weaker than §11 conformance.
   - All 29 linked content entities validate. The party-rpg starter's `heroes` content-schema lacks `data_dir`, leaving its entity unlinked.
   - 10 of 158 frontmatter blocks, in 8 trees (both benchmark games and all six starters), fail the normative JSON Schema. One class, whole-namespace `applies_to` refs, is used by spec §4.11's own example.

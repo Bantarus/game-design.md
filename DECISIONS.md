@@ -2820,3 +2820,15 @@ The audit as it was logged, before the user's decisions (D-044). Its proposals a
 - **Impact today:** none. No workflow in the repository passes `--baseline`, and tick-combat's gate is byte-identity to the golden.
 - **Resolution (later, with its own D-entry):** implement it, or mark it reserved in §9.5 and §9.1 until a tree needs regression tracking. The observed-need discipline applies.
 - **Resolved (2026-10-01):** implemented in one commit with tests, as the user allowed: D-045. OI-011 is closed.
+
+## OI-012 — `gdmd init` fails outside an editable install: the package does not include `templates/starters/`
+
+- **Logged:** 2026-10-01, found by the pre-bump upgrade dry run (the user's item 5 at the 0.4.0 bump approval).
+- **Spec says:** §9.8: `gdmd init` "scaffolds a new `game-design.md` tree from one of six bundled per-genre starters."
+- **Code does:** `init_cmd._starters_root()` looks for `templates/starters/` two directories above the package, which exists only in a source checkout, and then beside the installed package. The wheel target in `pyproject.toml` packages `src/game_design_md` and force-includes only `docs/spec.md` and the schema, so no built package carries the starters.
+- **Observed:**
+  - The v0.3.0 dogfood venv, installed non-editable from the `v0.3.0` tag: `gdmd init --list` exits 1 with `could not locate templates/starters/`.
+  - A non-editable install of this branch at `eef7609`: the same.
+  - An editable install from a clone (`pip install -e .`), the only install README, AGENTS.md and CLAUDE.md document, works.
+- **Impact:** an install from a git URL or a wheel runs every command except `init`. No test caught it, because the tests and the dogfood harness run from the editable install or a source copy. The dry run ran v0.3.0's `init` from an archive of the tag (`git archive v0.3.0`), which is the tag's own code and starters.
+- **Resolution (with its own D-entry):** the user decides whether it is fixed before v0.4.0 or later. A likely fix: force-include `templates/starters` into the wheel under `game_design_md/_data/starters`, look there in `_starters_root()`, and add a test that builds a wheel and runs `gdmd init --list`. Until then the v0.4 release notes list it as a known issue.
