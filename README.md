@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml/badge.svg)](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml)
 
-> **A living game design document that stays current with the code, maintained by an AI coding agent over the lifetime of a project.** Pre-stable (v0.3.0); v1.0 is the planned stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **A living game design document that stays current with the code, maintained by an AI coding agent over the lifetime of a project.** Pre-stable (v0.4.0); v1.0 is the planned stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is what `CLAUDE.md` or `AGENTS.md` is for a software project, applied to a video game: a structured plain-text artifact the AI agent reads first, writes back to, and keeps coherent over weeks and months of development. The format is **LLM-first, engine-neutral, genre-agnostic**: the primary consumer is a coding agent; a human is the second reader; no engine, framework, or genre is privileged at the schema level.
 
@@ -12,7 +12,7 @@ The closer analog isn't a one-shot specification handed off to a contractor. It 
 
 | Path | Purpose |
 | --- | --- |
-| [`docs/spec.md`](docs/spec.md) | The formal specification (v0.3.0). |
+| [`docs/spec.md`](docs/spec.md) | The formal specification (v0.4.0). |
 | [`schema/game-design.schema.json`](schema/game-design.schema.json) | JSON Schema for frontmatter (editor / CI validation). |
 | [`DECISIONS.md`](DECISIONS.md) | Locked engineering decisions + ratchet plans (D-001 through D-021). |
 | [`CHANGELOG.md`](CHANGELOG.md) | What landed when, Keep-a-Changelog format. |
@@ -38,7 +38,7 @@ gdmd lint my-game                            # validate (exit 0, structured JSON
 gdmd status my-game                          # project dashboard view
 gdmd spec                                    # the spec itself, frontmatter stripped — ready for agent prompt injection
 
-pytest                                       # the test suite (161 tests at v0.3)
+pytest                                       # the test suite (854 tests at v0.4.0)
 ```
 
 For an existing tree, the anti-drift ritual is the rhythm:

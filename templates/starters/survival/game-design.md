@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: core
 name: "Untitled Survival"
 short_pitch: "A short pitch for your action-economy survival game — one sentence, ≤280 chars."

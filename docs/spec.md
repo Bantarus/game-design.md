@@ -1,14 +1,14 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 status: draft
-last_updated: 2026-05-29
+last_updated: 2026-10-01
 license: Apache-2.0
 ---
 
 # The `game-design.md` Specification
 
-> **Status: pre-stable (v0.3.0).** Expect the format to change as it matures. v0.x is pre-stable; v1.0 is the stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **Status: pre-stable (v0.4.0).** Expect the format to change as it matures. v0.x is pre-stable; v1.0 is the stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is a plain-text, LLM-first, engine-neutral, genre-agnostic standard for describing a video game to an AI coding agent as a living source of truth. A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). The primary reader is an AI coding agent; a human is the second reader.
 
@@ -828,7 +828,7 @@ The root `game-design.md`. Under ~200 lines, llms.txt-style navigation.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: core
 name: "Ember Ascent"
 short_pitch: "A 30-minute deckbuilder roguelike about reshaping your hand each turn."
@@ -905,7 +905,7 @@ For `count_target < 20`, the split is recommended but optional.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: content-schema
 status: balanced
 last_verified: 2026-05-18
@@ -933,7 +933,7 @@ balance_refs:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: content-entity
 id: ember_strike
 status: balanced
@@ -1631,7 +1631,7 @@ VS Code's YAML extension picks up the schema via the YAML language server's stan
 
 ## 11. Conformance
 
-A `game-design.md` tree is **conformant at v0.3.0** if:
+A `game-design.md` tree is **conformant at v0.4.0** if:
 
 1. `gdmd lint <tree>` returns exit code `0`: it reports no finding of severity `error`. Findings at `warning` or `info` do not change the exit code. Every error-severity rule in §9.1 counts, including rules that enforce MUSTs outside items 2–5, such as `trajectory-sort-by-missing` (§9.5.5).
 2. The root `game-design.md` has all required frontmatter keys (§5.1) and the canonical prose section order (§5.2).

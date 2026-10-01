@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-22"
@@ -34,7 +34,7 @@ The canonical unit is `content/units/volt_marine.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: content-entity
 id: volt_marine
 status: draft
