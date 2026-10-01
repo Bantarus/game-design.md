@@ -202,7 +202,7 @@ def test_lints_clean_under_the_matrix_gdmd(tmp_path):
     assert (res["summary"]["errors"], res["summary"]["warnings"]) == (0, 0), res["findings"]
 
 
-@pytest.mark.skipif(not V03_GDMD.is_file(), reason="v0.3 venv not installed")
+@pytest.mark.v03_world(venv=True)
 def test_lints_identically_under_the_v03_gdmd(tmp_path):
     root = _normalized_copy(tmp_path)
     v03 = _lint([str(V03_GDMD)], root)
@@ -236,12 +236,7 @@ def test_every_frontmatter_block_is_schema_valid_and_content_validates():
 
 # ---- D-026 §7: no leak from the in-context spec ---------------------------------------
 
-def _has_v03_tag() -> bool:
-    return subprocess.run(["git", "-C", str(REPO_ROOT), "rev-parse", "-q", "--verify",
-                           "v0.3.0^{commit}"], capture_output=True).returncode == 0
-
-
-@pytest.mark.skipif(not _has_v03_tag(), reason="needs the v0.3.0 tag")
+@pytest.mark.v03_world
 def test_no_tree_token_id_in_what_claude_md_imports():
     res = gen.leak_check(REPO_ROOT, EDGES)
     assert res["hits"] == {}
@@ -253,9 +248,8 @@ def test_no_tree_token_id_in_what_claude_md_imports():
             assert not set(q["answer"]) & gen.LEAK_EXEMPT
 
 
+@pytest.mark.v03_world
 def test_imported_files_cover_both_worlds_and_the_card():
-    if not _has_v03_tag():
-        pytest.skip("needs the v0.3.0 tag")
     v03 = gen.imported_files(REPO_ROOT, "v0.3")
     mat = gen.imported_files(REPO_ROOT, "matrix")
     for world in (v03, mat):
@@ -382,7 +376,7 @@ COINCIDENT = {"benchmark/games/platformer/game-design.md": {"loops.expedition"},
               "examples/party-rpg/gdd/mechanics.md": {"rules.spawn_encounter"}}
 
 
-@pytest.mark.skipif(not _has_v03_tag(), reason="needs the v0.3.0 tag")
+@pytest.mark.v03_world(venv=True)   # the baseline cell's preflight lint runs the v0.3 gdmd
 def test_no_copy_file_outside_the_tree_names_a_question(tmp_path):
     """Every study-2 cell type (baseline in the v0.3 world; views and
     import-full in the matrix world; import-card with its card): no file of the
@@ -408,16 +402,24 @@ def test_reading_the_real_decisions_file_is_contamination():
             {"tool": "Read", "file_path": path}]}) == [path]
 
 
-def test_judge_agrees_in_both_worlds_before_and_after_the_patches(tmp_path):
+def _judge_agrees(tmp_path, world: str) -> object:
     sha = fixture.git(REPO_ROOT, "rev-parse", "HEAD")
     judge = fixture.make_judge(tmp_path / "judge", sha)
-    worlds = ["matrix"] + (["v0.3"] if V03_GDMD.is_file() and _has_v03_tag() else [])
-    for world in worlds:
-        for t in ("s2_lookup_forward", "s2_maintenance", "s2_negative_control"):
-            c = _copy(t, tmp_path, world=world, judge=judge)   # raises on disagreement
-            assert c.world == world
+    for t in ("s2_lookup_forward", "s2_maintenance", "s2_negative_control"):
+        c = _copy(t, tmp_path, world=world, judge=judge)   # raises on disagreement
+        assert c.world == world
+    return judge
+
+
+def test_judge_agrees_in_the_matrix_world_before_and_after_the_patches(tmp_path):
+    judge = _judge_agrees(tmp_path, "matrix")
     c = _copy("s2_impact_tokens", tmp_path, judge=judge, card=True)
     assert (c.root / "docs/spec-card.md").is_file()
+
+
+@pytest.mark.v03_world(venv=True)
+def test_judge_agrees_in_the_v03_world_before_and_after_the_patches(tmp_path):
+    _judge_agrees(tmp_path, "v0.3")
 
 
 def test_maintenance_fixture_makes_exactly_the_two_subfiles_stale(tmp_path):

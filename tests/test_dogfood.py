@@ -145,17 +145,9 @@ def test_copy_gdmd_resolves_to_its_own_shim(tmp_path):
     assert str(copy.root / "src") in Path(found).read_text()
 
 
-# The v0.3 world is built from the v0.3.0 tag, which a shallow clone (CI's
-# checkout) does not have, and runs the v0.3 venv's gdmd.
-_HAS_V03_TAG = subprocess.run(["git", "-C", str(REPO), "rev-parse", "-q", "--verify",
-                               f"{fixture.V03_TAG}^{{commit}}"], capture_output=True).returncode == 0
-needs_v03_tag = pytest.mark.skipif(not _HAS_V03_TAG, reason="needs the v0.3.0 tag")
-needs_v03 = pytest.mark.skipif(not ((fixture.V03_VENV / "bin" / "gdmd").is_file() and _HAS_V03_TAG),
-                               reason="v0.3 venv not installed, or no v0.3.0 tag "
-                                      "(see benchmark/dogfood/README)")
 
 
-@needs_v03
+@pytest.mark.v03_world(venv=True)
 def test_v03_world_replaces_only_the_tooling_layer(tmp_path):
     fixture.verify_v03_venv(scratch=tmp_path)
     sha = fixture.git(REPO, "rev-parse", "HEAD")
@@ -869,7 +861,7 @@ def test_import_card_copy_swaps_only_the_spec_import_in_the_baseline_commit(tmp_
     assert rc == 0 and not failed(report), report
 
 
-@needs_v03_tag
+@pytest.mark.v03_world
 def test_card_swap_refuses_the_v03_world(tmp_path):
     with pytest.raises(fixture.FixtureError, match="matrix world"):
         fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "c", world="v0.3", card=True)
@@ -995,7 +987,7 @@ def test_only_import_card_copies_carry_the_card_file(tmp_path):
         assert (c.root / "docs/spec-card.md").exists() == imports_card, arm
 
 
-@needs_v03
+@pytest.mark.v03_world(venv=True)
 def test_v03_world_copy_has_no_card_file(tmp_path):
     c = fixture.prepare_copy(TASKS["lookup_refs"], tmp_path / "b",
                              world=dogfood_run.ARM_WORLD["baseline"])

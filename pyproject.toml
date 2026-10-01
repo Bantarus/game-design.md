@@ -67,6 +67,9 @@ packages = ["src/game_design_md"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+markers = [
+    "v03_world(venv=False): needs the v0.3.0 tag, and with venv=True the v0.3 venv; skips locally without them, fails under CI (D-051)",
+]
 
 [tool.ruff]
 target-version = "py310"
