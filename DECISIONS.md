@@ -2665,6 +2665,28 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 Each version bump adds a line: the date, the version, and, for every open row, whether its trigger was observed.
 
+**2026-10-01, proposed 0.4.0 (step (i)): no trigger observed. The bump is not blocked.** The review checked each open row against the trees and the code at `e74d5c5`, the first under AGENTS.md's release procedure.
+
+| Row | Trigger observed? | Evidence |
+| --- | --- | --- |
+| R4 | No | tick-combat verifies 3/3, and no engine has reported a missing-emitter gap. |
+| R6 | No | No structured silence key exists. The rule is at info, with 4 hits in 2 trees. |
+| R8 | No | Trees declare `xoshiro256_starstar` (6) and `chacha20` (1, the tcg starter); none declares `pcg32` or `pcg64`. |
+| R9 | No | Waits on R10. |
+| R10 | No | tick-combat is still the only tree with a working adapter. The deckbuilder, party-rpg and tcg declare `adapters: default: ./tools/verify-adapter`, but none ships a `tools/` executable. |
+| R11b | No | No new engine or new trajectory. tick-combat's golden passes byte-for-byte. |
+| R12 | No | The loader is still PyYAML (YAML 1.1). |
+| R13 | No | 0.4.0 is not v1.0 preparation. |
+| R14 | No | No tree has mid-firing mutations that need action-start values. |
+| R15 | No | The ranges stay small (w ≤ 100 in tick-combat). |
+| R16 | No | No live tree. |
+| R17 | No | The trees use only `continuous` (4) and `per_verb_delta` (2). |
+| R18 | No | No adoption data. |
+| R19 | No | No adoption data. |
+| R20 | No | `hook check` takes 0.11 s on tick-combat and 0.24 s on the 340-file study-2 tree, against the 1 s budget. |
+| R21 | No | No requests. |
+| R22 | No | The 7 prose `{pillars}` uses remain, and no tree references a pillar from frontmatter. |
+
 ### Not ratchets
 
 §11.2's queued validation claims (cost amortization, the longitudinal living-doc property) and the v0.3 notes' cross-agent transfer and M1/M2 watch-items are evidence questions, not planned format or tool changes. They stay where they are.
