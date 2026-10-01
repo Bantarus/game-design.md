@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -218,7 +219,7 @@ def test_lookup_expected_matches_code_derivation():
 
 KINDLE = """\
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: ROOT_SPEC_VERSION
 file_type: content-entity
 id: kindle
 status: draft
@@ -239,7 +240,12 @@ effects:
 
 
 def _write_card(copy, text=KINDLE):
-    (copy.root / "examples/deckbuilder/content/cards/kindle.yaml").write_text(text)
+    """The checker wants the card's spec_version to equal the tree root's, so the
+    known-good card takes it from the copy (it read a fixed 0.3.0 until v0.4.0)."""
+    root = (copy.root / "examples/deckbuilder/game-design.md").read_text()
+    version = re.search(r"(?m)^spec_version:\s*(\S+)", root).group(1)
+    (copy.root / "examples/deckbuilder/content/cards/kindle.yaml").write_text(
+        text.replace("ROOT_SPEC_VERSION", version))
 
 
 def test_authoring_good(tmp_path):
@@ -256,6 +262,7 @@ def test_authoring_good(tmp_path):
     (lambda t: t.replace("rarity: uncommon", "rarity: epic"), "validates_against_schema"),
     (lambda t: t.replace("status: draft", "status: prototyped"), "status_draft"),
     (lambda t: t.replace("id: kindle", "id: kindle_card"), "entity_header"),
+    (lambda t: t.replace("ROOT_SPEC_VERSION", "0.0.1"), "entity_header"),
 ])
 def test_authoring_bad_card(tmp_path, mutate, criterion):
     copy = make_copy("authoring_new_card", tmp_path)
