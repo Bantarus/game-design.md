@@ -411,7 +411,7 @@ def test_reading_the_real_decisions_file_is_contamination():
 def test_judge_agrees_in_both_worlds_before_and_after_the_patches(tmp_path):
     sha = fixture.git(REPO_ROOT, "rev-parse", "HEAD")
     judge = fixture.make_judge(tmp_path / "judge", sha)
-    worlds = ["matrix"] + (["v0.3"] if V03_GDMD.is_file() else [])
+    worlds = ["matrix"] + (["v0.3"] if V03_GDMD.is_file() and _has_v03_tag() else [])
     for world in worlds:
         for t in ("s2_lookup_forward", "s2_maintenance", "s2_negative_control"):
             c = _copy(t, tmp_path, world=world, judge=judge)   # raises on disagreement

@@ -10,6 +10,8 @@ invariant-violation).
 """
 from __future__ import annotations
 
+import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -338,4 +340,11 @@ def tick_combat_out_of_tree(tmp_path: Path) -> tuple[Path, Path]:
     shutil.copy(src / "impl/xtreme/Cargo.toml", repo / "impl/xtreme/Cargo.toml")
     for f in (tree / "game-design.md", *tree.glob("gdd/**/*.md")):
         f.write_text(f.read_text().replace('"impl/', '"../../impl/'))
+    # Pin every mtime before the tree's earliest last_verified (2026-05-22), so
+    # `stale-section` does not depend on when the checkout was made (a fresh
+    # CI checkout gave 12 warnings).
+    pinned = datetime(2026, 5, 1, tzinfo=timezone.utc).timestamp()
+    for p in repo.rglob("*"):
+        if p.is_file():
+            os.utime(p, (pinned, pinned))
     return repo, tree
