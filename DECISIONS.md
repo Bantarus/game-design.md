@@ -2488,6 +2488,62 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - v0.3.0 had the same defect. The v0.4.0 CHANGELOG lists the fix under Fixed, and the release notes' known-issue entry is gone.
 - OI-012 is closed.
 
+## D-051 — CI runs on every branch, fetches history and tags, and runs the v0.3-world tests
+
+- **Status:** decided (2026-10-01) by the user after the v0.4.0 release: "CI runs on push to every branch, plus PRs; CI checkout fetches tags; under CI, tests needing the `v0.3.0` tag fail instead of skipping (mirror the D-050 `build` rule); confirm in the CI log that the v0.3-world tests ran."
+- **Related:** D-050 (the `build` rule this mirrors), D-025 (the v0.3 world: the baseline arm's tooling layer from `v0.3.0`, and its venv), `4c205bb` (the tests that failed only on PR #2's CI).
+
+### Why
+
+- CI ran only on pushes to `main` and on PRs. A branch's tests therefore first met CI when its PR opened: on `v0.4-views` that was 98 commits in, and two tests that assumed the dev checkout failed there.
+- `actions/checkout` fetched one commit and no tags, so every test that builds the v0.3 world skipped in CI. A skip in a green run is not read.
+
+### Decisions
+
+1. **Triggers:** `push` to every branch (`branches: ["**"]`), plus `pull_request`. A PR from a branch of this repository runs twice, once per event, and both are kept (the user, at the PR #3 review): the `push` run tests the branch as committed, and the `pull_request` run tests the merge result with `main` (GitHub's `refs/pull/<n>/merge`). The second is what lands, and it can fail where the branch passes, when `main` has moved.
+2. **Checkout:** `fetch-depth: 0`, so all history and tags. The tag alone is not enough: the v0.3 world exports the tag's tree, which a shallow fetch does not carry.
+3. **The v0.3 venv.** A CI step creates it with the command `benchmark/dogfood/README.md` gives (`pip install "git+file://$PWD@v0.3.0"`), and `fixture.verify_v03_venv` checks it against the tag. Five of the eight v0.3-world tests also run the v0.3 `gdmd`, so with the tag alone they would still skip. This goes one step beyond the user's wording (the tag), so that all eight run.
+4. **The rule, as D-050's.** The eight tests carry `@pytest.mark.v03_world`, with `venv=True` on the five that need the venv. A conftest hook skips them locally when the tag or the venv is missing, and fails them under CI (`$CI` set). The marker replaces three ad-hoc gates (`needs_v03`, `needs_v03_tag`, `_has_v03_tag`).
+5. **Two corrections the marker forced:**
+   - Study 2's judge test added the v0.3 world only when the venv existed, so a run without it passed on the matrix world alone. It is split into a matrix-world test and a marked v0.3-world test.
+   - `test_no_copy_file_outside_the_tree_names_a_question` was gated on the tag alone, but its baseline cell's preflight lint runs the v0.3 `gdmd`. With the tag and no venv it failed (`errors: -1`). It now needs the venv.
+6. **A separate, verbose CI step** runs `pytest -v -m v03_world`, so the log names each test and its result. The Test suite step runs `-m "not v03_world"`, so nothing runs twice.
+
+### Proof of fire (clones of this commit, a fresh venv, an empty `HOME`)
+
+| Clone | v0.3 venv | `$CI` | The 8 v0.3-world tests |
+| --- | --- | --- | --- |
+| shallow, no tags | none | set | 8 errors: "needs the v0.3.0 tag: the v0.3-world tests must run in CI (D-051)" |
+| shallow, no tags | none | unset | 8 skipped |
+| full | none | set | 3 passed, 5 errors |
+| full | none | unset | 3 passed, 5 skipped |
+| full | built as the CI step builds it | set | 8 passed; the Test suite step 838 passed, 8 skipped; packaging 2/2 |
+
+### Not changed
+
+- ~~Two tests in `tests/test_docs_lint.py` need history; without it they still skip.~~ Closed by the amendment below.
+- The tests that need the pinned Claude CLI or VCC still skip in CI; those tools live outside the repository.
+
+### After the first CI run
+
+- PR #3's first `pull_request` run failed one newly running test on 3.10: `test_no_copy_file_outside_the_tree_names_a_question` raised `FileNotFoundError` on a copy's `.git/objects/23`. The `push` run of the same commit passed on both versions.
+- **Cause:** a race. The test's walker listed `.git` through `rglob("*")`, though it never reads it, and the copy's detached `git gc --auto` removed a loose-object directory during the listing. The test had never run in CI before D-051.
+- **Fix (test only):** the walker prunes `.git` from `os.walk`, as `fixture.normalize_mtimes` already does. The files read are unchanged; the repository and the copies have no symlinks, so `os.walk` sees what `rglob` saw.
+
+### Amendment: the git-history tests follow the same rule (the user, at the PR #3 review)
+
+- **What:** the tests that need git history call `tests.conftest.git_show` and carry `@pytest.mark.git_history`. Without the history they skip locally and fail under CI, as the v0.3-world tests do.
+- **Which tests:**
+  - `test_stale_conformance_version_is_found` and `test_stale_package_version_is_found` (they read `5efbf92`), the two the user named;
+  - `test_the_spec_and_schema_state_current_behavior_only`, whose 17-line proof of fire (it reads `4d95ec4`) was silently left out without the history. Locally it still checks the current spec and schema, with `partial=True`; under CI the proof is required.
+- **The CI step** "v0.3-world and git-history tests" runs `-m "v03_world or git_history"` verbosely, and the Test suite step excludes both markers.
+- **Proof of fire** (`-m git_history`, on clones of the commit):
+
+  | Clone | `$CI` set | `$CI` unset |
+  | --- | --- | --- |
+  | shallow, no tags | 3 failed | 1 passed, 2 skipped |
+  | full | 3 passed | 3 passed |
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).

@@ -3,11 +3,10 @@ from __future__ import annotations
 
 import importlib.util
 import re
-import subprocess
 
 import pytest
 
-from tests.conftest import REPO_ROOT
+from tests.conftest import REPO_ROOT, git_show
 
 
 def _docs_lint():
@@ -43,15 +42,15 @@ def test_current_behavior_and_history_are_not_promises(text):
     assert _docs_lint().dated_promises(text) == []
 
 
+@pytest.mark.git_history
 def test_the_spec_and_schema_state_current_behavior_only():
     """D-044: the pre-D-044 spec carried 17 such lines; the spec must carry none."""
     mod = _docs_lint()
     for rel in ("docs/spec.md", "schema/game-design.schema.json"):
         assert mod.dated_promises((REPO_ROOT / rel).read_text(encoding="utf-8")) == [], rel
-    pre = subprocess.run(["git", "show", "4d95ec4:docs/spec.md"], cwd=REPO_ROOT,
-                         capture_output=True, text=True)
-    if pre.returncode == 0:   # proof of fire, where the history is available
-        assert len({line for line, _ in mod.dated_promises(pre.stdout)}) == 17
+    pre = git_show("4d95ec4:docs/spec.md", partial=True)
+    if pre is not None:   # proof of fire; under CI the history is required (D-051)
+        assert len({line for line, _ in mod.dated_promises(pre)}) == 17
 
 
 def _versions_findings(tmp_path, spec_text=None, schema_text=None, init_text=None):
@@ -77,14 +76,12 @@ def test_version_carriers_agree(tmp_path):
     assert _versions_findings(tmp_path) == []
 
 
+@pytest.mark.git_history
 def test_stale_conformance_version_is_found(tmp_path):
     """§11 read "conformant at v0.2.0-alpha" through all of v0.3 (5efbf92). Only
     that phrase is put back, so the test holds at any later version."""
-    pre = subprocess.run(["git", "show", "5efbf92:docs/spec.md"], cwd=REPO_ROOT,
-                         capture_output=True, text=True)
-    if pre.returncode != 0:
-        pytest.skip("history not available")
-    phrase = re.search(r"\*\*conformant at [^*]+\*\*", pre.stdout).group(0)
+    pre = git_show("5efbf92:docs/spec.md")
+    phrase = re.search(r"\*\*conformant at [^*]+\*\*", pre).group(0)
     spec = (REPO_ROOT / "docs/spec.md").read_text(encoding="utf-8")
     found = _versions_findings(tmp_path, spec_text=re.sub(
         r"\*\*conformant at [^*]+\*\*", phrase, spec, count=1))
@@ -98,13 +95,11 @@ def test_stale_schema_id_is_found(tmp_path):
     assert len(found) == 1 and "$id" in found[0]
 
 
+@pytest.mark.git_history
 def test_stale_package_version_is_found(tmp_path):
     """`gdmd --version` printed 0.1.0 through all of v0.3 (__init__.py at 5efbf92)."""
-    pre = subprocess.run(["git", "show", "5efbf92:src/game_design_md/__init__.py"],
-                         cwd=REPO_ROOT, capture_output=True, text=True)
-    if pre.returncode != 0:
-        pytest.skip("history not available")
-    found = _versions_findings(tmp_path, init_text=pre.stdout)
+    pre = git_show("5efbf92:src/game_design_md/__init__.py")
+    found = _versions_findings(tmp_path, init_text=pre)
     assert len(found) == 2 and all("0.1.0" in f for f in found)
 
 

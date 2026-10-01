@@ -11,6 +11,7 @@ invariant-violation).
 from __future__ import annotations
 
 import os
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,6 +20,55 @@ import pytest
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# ---- the v0.3 world (D-051) -------------------------------------------------------
+# The dogfood baseline world is built from the v0.3.0 tag, and some tests also
+# run that world's gdmd from the v0.3 venv (benchmark/dogfood/README). Tests
+# that need them carry @pytest.mark.v03_world (venv=True for the venv). Locally
+# a missing tag or venv skips them; under CI ($CI set) it fails them, as D-050
+# does for `build`, so a CI run cannot pass them by skipping.
+V03_TAG = "v0.3.0"
+V03_GDMD = Path.home() / ".local/share/gdmd-dogfood/venvs/gdmd-v0.3.0/bin/gdmd"
+
+
+def v03_missing(venv: bool = False) -> str | None:
+    """Why the v0.3 world is unavailable here, or None."""
+    if subprocess.run(["git", "-C", str(REPO_ROOT), "rev-parse", "-q", "--verify",
+                       f"{V03_TAG}^{{commit}}"], capture_output=True).returncode != 0:
+        return f"needs the {V03_TAG} tag"
+    if venv and not V03_GDMD.is_file():
+        return "v0.3 venv not installed (see benchmark/dogfood/README)"
+    return None
+
+
+def pytest_runtest_setup(item):
+    marker = item.get_closest_marker("v03_world")
+    if marker is None:
+        return
+    reason = v03_missing(venv=marker.kwargs.get("venv", False))
+    if reason is None:
+        return
+    if os.environ.get("CI"):
+        pytest.fail(f"{reason}: the v0.3-world tests must run in CI (D-051)", pytrace=False)
+    pytest.skip(reason)
+
+
+def git_show(spec: str, *, partial: bool = False) -> str | None:
+    """`git show <rev>:<path>` for tests that need git history (marked
+    git_history). Without the history (a shallow clone): fail under CI, as the
+    v0.3-world tests do (D-051); locally skip, or with `partial=True` return
+    None so the test keeps the checks that need no history."""
+    res = subprocess.run(["git", "-C", str(REPO_ROOT), "show", spec],
+                         capture_output=True, text=True)
+    if res.returncode == 0:
+        return res.stdout
+    reason = f"history not available ({spec})"
+    if os.environ.get("CI"):
+        pytest.fail(f"{reason}: the history-needing tests must run in CI (D-051)", pytrace=False)
+    if partial:
+        return None
+    pytest.skip(reason)
+
 
 # The 12 in-repo trees: 4 canonical examples, 2 benchmark games, 6 starters.
 IN_REPO_TREES: tuple[str, ...] = (

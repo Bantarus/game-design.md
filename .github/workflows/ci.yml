@@ -1,8 +1,10 @@
 name: CI
 
+# D-051: every branch push, plus PRs (a branch's tests used to meet CI only
+# when its PR opened).
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
 
 jobs:
@@ -13,13 +15,26 @@ jobs:
         python-version: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # D-051: all history and tags; the v0.3 world is built from v0.3.0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
         run: pip install -e ".[dev]"
+      # D-051: the dogfood baseline world's gdmd, installed from the v0.3.0 tag as
+      # benchmark/dogfood/README says; fixture.verify_v03_venv checks it against the tag.
+      - name: v0.3 venv (from the v0.3.0 tag)
+        run: |
+          python -m venv ~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0
+          ~/.local/share/gdmd-dogfood/venvs/gdmd-v0.3.0/bin/pip install --quiet "git+file://$PWD@v0.3.0"
       - name: Test suite
-        run: pytest --ignore=tests/test_packaging.py
+        run: pytest --ignore=tests/test_packaging.py -m "not v03_world and not git_history"
+      # D-051: a separate, verbose step so the log names each test that needs the
+      # v0.3.0 tag, the v0.3 venv or git history, and its result. Under CI a
+      # missing tag, venv or history fails them instead of skipping.
+      - name: v0.3-world and git-history tests (tag + venv + history)
+        run: pytest -v -m "v03_world or git_history" --ignore=tests/test_packaging.py
       # D-050: a separate, verbose step so the log names each packaging test and
       # its result. `build` comes from the [dev] extra; without it they fail here.
       - name: Packaging (wheel build, install, run outside the source tree)
