@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml/badge.svg)](https://github.com/bantarus/game-design.md/actions/workflows/ci.yml)
 
-> **A living game design document that stays current with the code, maintained by an AI coding agent over the lifetime of a project.** Pre-stable (v0.3.0); v1.0 is the planned stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **A living game design document that stays current with the code, maintained by an AI coding agent over the lifetime of a project.** Pre-stable (v0.4.0); v1.0 is the planned stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is what `CLAUDE.md` or `AGENTS.md` is for a software project, applied to a video game: a structured plain-text artifact the AI agent reads first, writes back to, and keeps coherent over weeks and months of development. The format is **LLM-first, engine-neutral, genre-agnostic**: the primary consumer is a coding agent; a human is the second reader; no engine, framework, or genre is privileged at the schema level.
 
@@ -12,7 +12,7 @@ The closer analog isn't a one-shot specification handed off to a contractor. It 
 
 | Path | Purpose |
 | --- | --- |
-| [`docs/spec.md`](docs/spec.md) | The formal specification (v0.3.0). |
+| [`docs/spec.md`](docs/spec.md) | The formal specification (v0.4.0). |
 | [`schema/game-design.schema.json`](schema/game-design.schema.json) | JSON Schema for frontmatter (editor / CI validation). |
 | [`DECISIONS.md`](DECISIONS.md) | Locked engineering decisions + ratchet plans (D-001 through D-021). |
 | [`CHANGELOG.md`](CHANGELOG.md) | What landed when, Keep-a-Changelog format. |
@@ -38,7 +38,7 @@ gdmd lint my-game                            # validate (exit 0, structured JSON
 gdmd status my-game                          # project dashboard view
 gdmd spec                                    # the spec itself, frontmatter stripped — ready for agent prompt injection
 
-pytest                                       # the test suite (161 tests at v0.3)
+pytest                                       # the test suite (855 tests at v0.4.0)
 ```
 
 For an existing tree, the anti-drift ritual is the rhythm:
@@ -52,7 +52,7 @@ gdmd lint my-game && gdmd status my-game     # close the loop
 
 ## The idea in one paragraph
 
-A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). Every game — any genre — reduces to seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`), plus `events` (first-class since v0.2) and `clocks` (the v0.3 time-passage primitive distinct from player verbs), plus two cross-cutting (`feel`, `balance_targets`), plus an architecture-level namespace (`invariants` — engine-neutral contracts on the codebase). Tokens cross-reference each other as `{namespace.id}`. Content-heavy data (cards, enemies, items, levels) lives in sibling `content/*/*.yaml` files referenced by `data_source`, so the agent's context stays lean at 200+ entities. A CLI (`lint | diff | export | spec | verify | status | hook | touch | init`) enforces structure, detects drift, supports dynamic verification through project-supplied adapters, and automates the maintenance ritual.
+A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). Every game — any genre — reduces to seven core namespaces (`entities`, `verbs`, `resources`, `states`, `rules`, `loops`, `distributions`), plus `events` (first-class since v0.2) and `clocks` (the v0.3 time-passage primitive distinct from player verbs), plus two cross-cutting (`feel`, `balance_targets`), plus an architecture-level namespace (`invariants` — engine-neutral contracts on the codebase). Tokens cross-reference each other as `{namespace.id}`. Content-heavy data (cards, enemies, items, levels) lives in sibling `content/<kind>/*.yaml` files, found through each content-schema's `data_dir`, so the agent's context stays lean at 200+ entities. A CLI (`lint | diff | export | spec | verify | status | hook | touch | init | view | graph`) enforces structure, detects drift, supports dynamic verification through project-supplied adapters, and automates the maintenance ritual.
 
 ## What's been demonstrated
 
@@ -60,9 +60,11 @@ The v0.2 cross-engine pass demonstrated that the spec drives byte-identical inte
 
 The v0.2 help-benchmark (F-009) reported NULL on success-lift and FAIL on cost-lift under the locked rule on a single-subject Qwen-Coder configuration. The result was reported by the rule that had been locked before the trial fired. The reading of what that meant — and the reframe into the longitudinal living-doc proposition v0.3 ships under — is the worked example at [`docs/case-studies/F-009.md`](docs/case-studies/F-009.md). The methodology that produced both the locked rule and the reframe lives at [`docs/methodology/README.md`](docs/methodology/README.md). The validation surface v0.3 ships under is scoped in [`docs/spec.md`](docs/spec.md) §11.2.
 
+v0.4's dogfood studies (locked rules, headless coding-agent sessions) found projected views NULL on this repo's own small trees ([study 1](docs/case-studies/dogfood-01.md)) and PASS on a content-heavy synthetic tree ([study 2](docs/case-studies/dogfood-02.md): a median 33% fewer consultation bytes, driven by graph-shaped tasks; not a session-cost claim). The two are always cited together, and both found the agent card cuts about 47k tokens per turn, with non-inferiority tested only at the ceiling.
+
 ## Tree validation at a glance
 
-All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean at v0.3 — 0 errors, 0 warnings — under default thresholds.
+All 12 in-repo trees (6 canonical/benchmark + 6 starters) lint clean — 0 errors, 0 warnings — under default thresholds. At v0.3 lint-clean was weaker than §11 conformance (see the [v0.3 conformance correction](docs/release-notes/v0.3-conformance-correction.md)); from v0.4 lint also validates every file against the §10 JSON Schema and every content entity against its content-schema.
 
 | Tree | Genre | v0.3 vocab carried |
 | --- | --- | --- |

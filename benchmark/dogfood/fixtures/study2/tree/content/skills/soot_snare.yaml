@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_snare
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot Snare
+school: umbral
+focus_cost: 5
+roll: "{distributions.fenmurk_roll}"
+inflicts: "{states.affliction.dazed}"
+description: "An umbral snare; it costs a breath of lamp-smoke."

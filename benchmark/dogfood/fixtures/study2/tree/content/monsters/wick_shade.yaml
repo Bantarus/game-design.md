@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: wick_shade
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Wick Shade
+tier: minion
+max_vigor: 11
+skills:
+  - "{entities.skills.grave_sear}"
+  - "{entities.skills.pale_veil}"
+drops:
+  - "{entities.items.moth_gauntlet}"
+description: A minion that follows the smell of lamp oil.

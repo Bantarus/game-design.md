@@ -1,0 +1,116 @@
+{
+  "turns": 9,
+  "input_tokens": 18,
+  "output_tokens": 1604,
+  "cache_read_tokens": 281848,
+  "cache_creation_tokens": 31796,
+  "tool_calls": 9,
+  "files_read": 1,
+  "bytes_read": 3481,
+  "re_reads": 0,
+  "consultation_bytes": 11456,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 35402,
+  "per_turn_occupancy": [
+    30865,
+    31069,
+    33720,
+    35095,
+    35402,
+    35798,
+    36874,
+    37180,
+    37659
+  ],
+  "tool_counts": {
+    "Bash": 8,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 4,
+  "bash_read_bytes": 6691,
+  "bash_files_read": 3,
+  "all_files_read": 4,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/loot.md",
+    "examples/lanternfall/impl/lanternfall/loot/drop_tables.py"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "2YWeR4",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_maintenance__import-card__r2.txt:20-20"
+    },
+    {
+      "tool": "Bash",
+      "id": "U12TkN",
+      "result_bytes": 1646,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:32-74"
+    },
+    {
+      "tool": "Read",
+      "id": "6ZmwQs",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:86-170"
+    },
+    {
+      "tool": "Bash",
+      "id": "uHr3CM",
+      "result_bytes": 2792,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:182-259"
+    },
+    {
+      "tool": "Bash",
+      "id": "JZ9cZP",
+      "result_bytes": 235,
+      "is_error": true,
+      "vcc": "s2_maintenance__import-card__r2.txt:276-280"
+    },
+    {
+      "tool": "Bash",
+      "id": "N8HCas",
+      "result_bytes": 568,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:292-306"
+    },
+    {
+      "tool": "Bash",
+      "id": "YoUxhG",
+      "result_bytes": 1876,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:320-384"
+    },
+    {
+      "tool": "Bash",
+      "id": "Ax3f9q",
+      "result_bytes": 377,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:396-408"
+    },
+    {
+      "tool": "Bash",
+      "id": "tnQNy5",
+      "result_bytes": 290,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-card__r2.txt:420-430"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "card_import_tokens": 3978,
+  "card_md_bytes": 8491,
+  "card_sha256": "7c280fa1dbf1f4631438fff238347d7e5c564fda88d0248062c515f82184a99f",
+  "cli_version": "2.1.285 (Claude Code)",
+  "effort": "high",
+  "harness_sha": "20b8299025e6e077ad11f4d04f31d478a72bbce0",
+  "model_requested": "claude-sonnet-5-5",
+  "source_sha": "49b53b47cce43260c7cfb8d37db83ec5a5bd8046",
+  "with_card_import": {
+    "assistant_models": [
+      "claude-sonnet-5-5"
+    ],
+    "cost_usd": 0.1007572,
+    "model_reported": [
+      "claude-haiku-4-5-20251001",
+      "claude-sonnet-5-5"
+    ],
+    "session_id": "a3208910-af50-4f3f-a2ae-4799bb60cb3d",
+    "stop_reason": "completed",
+    "turn1_occupancy": 30511
+  },
+  "without_card_import": {
+    "assistant_models": [
+      "claude-sonnet-5-5"
+    ],
+    "cost_usd": 0.0848502,
+    "model_reported": [
+      "claude-haiku-4-5-20251001",
+      "claude-sonnet-5-5"
+    ],
+    "session_id": "c57cc2e4-9272-459b-abeb-591c3a2700b1",
+    "stop_reason": "completed",
+    "turn1_occupancy": 26533
+  },
+  "world": "matrix"
+}

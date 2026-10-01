@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-21"
@@ -23,7 +23,7 @@ schema:
           kind:        { enum: [attack, defend, buff, debuff, ramp] }
           damage:      { type: integer, minimum: 0 }
           block:       { type: integer, minimum: 0 }
-          targets_burn:{ type: boolean }
+          targets_burn: { type: boolean }
 data_dir: ../../content/enemies
 count_target: 30
 balance_refs:
@@ -42,7 +42,7 @@ The canonical enemy is `content/enemies/kindling_imp.yaml`:
 
 ```yaml
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: content-entity
 id: kindling_imp
 status: draft

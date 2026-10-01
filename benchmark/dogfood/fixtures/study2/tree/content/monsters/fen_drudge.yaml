@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_drudge
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Drudge
+tier: minion
+max_vigor: 17
+skills:
+  - "{entities.skills.gloam_cleave}"
+drops:
+  - "{entities.items.briny_sigil}"
+  - "{entities.items.gloam_flask}"
+  - "{entities.items.tallow_torc}"
+description: A minion that gathers where the stairs turn.

@@ -1,0 +1,86 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1298,
+  "cache_read_tokens": 331980,
+  "cache_creation_tokens": 76754,
+  "tool_calls": 5,
+  "files_read": 1,
+  "bytes_read": 896,
+  "re_reads": 0,
+  "consultation_bytes": 5698,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81842,
+  "per_turn_occupancy": [
+    79276,
+    81514,
+    81842,
+    82831,
+    83281
+  ],
+  "tool_counts": {
+    "Bash": 3,
+    "Grep": 1,
+    "Read": 1
+  },
+  "gdmd_view_calls": 2,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {
+    "ref": 4241
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 156,
+  "bash_files_read": 1,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/lookup.txt",
+    "examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "VyA57D",
+      "result_bytes": 4241,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r2.txt:27-94"
+    },
+    {
+      "tool": "Bash",
+      "id": "CRMXjx",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "lookup_refs__views__r2.txt:106-106"
+    },
+    {
+      "tool": "Grep",
+      "id": "DEeAJN",
+      "result_bytes": 380,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r2.txt:120-123"
+    },
+    {
+      "tool": "Read",
+      "id": "ToFyru",
+      "result_bytes": 896,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r2.txt:137-164"
+    },
+    {
+      "tool": "Bash",
+      "id": "AE7Vso",
+      "result_bytes": 156,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r2.txt:176-177"
+    }
+  ]
+}

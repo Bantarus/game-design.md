@@ -1,0 +1,30 @@
+[view overview] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+files:
+  game-design.md core status=draft last_verified=- game-design.md:1-37
+  gdd/mechanics.md subfile status=draft last_verified=2026-09-30 gdd/mechanics.md:1-86
+  gdd/loops.md subfile status=draft last_verified=2026-09-30 gdd/loops.md:1-23
+  gdd/architecture-invariants.md subfile status=draft last_verified=2026-09-30 gdd/architecture-invariants.md:1-20
+  gdd/economy-balance.md subfile status=draft last_verified=2026-09-30 gdd/economy-balance.md:1-18
+  gdd/content/relics.md content-schema status=draft last_verified=2026-09-30 gdd/content/relics.md:1-24
+entities:
+  {entities.player} draft gdd/mechanics.md:9-13
+  {entities.relics} draft gdd/mechanics.md:14-17
+verbs:
+  {verbs.study} draft gdd/mechanics.md:19-26
+  {verbs.rest} draft gdd/mechanics.md:27-34
+resources:
+  {resources.focus} draft gdd/mechanics.md:36-47
+rules:
+  {rules.study_rule} draft gdd/mechanics.md:49-58
+  {rules.rest_rule} draft gdd/mechanics.md:59-66
+loops:
+  {loops.day} draft gdd/loops.md:8-18
+balance_targets:
+  {balance_targets.focus_per_day} draft gdd/economy-balance.md:8-13
+invariants:
+  {invariants.focus_is_integer} - gdd/architecture-invariants.md:8-13
+events:
+  {events.studied} draft gdd/mechanics.md:68-68
+content entities:
+  relics: 2 (draft 2) schema gdd/content/relics.md:1-24
+… 2 content entities · gdmd view tree --flat --role content-entity

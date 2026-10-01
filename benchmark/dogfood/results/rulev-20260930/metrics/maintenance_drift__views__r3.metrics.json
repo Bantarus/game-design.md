@@ -1,0 +1,84 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1262,
+  "cache_read_tokens": 331540,
+  "cache_creation_tokens": 77532,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 8524,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82099,
+  "per_turn_occupancy": [
+    79089,
+    80215,
+    82099,
+    83620,
+    84059
+  ],
+  "tool_counts": {
+    "Bash": 5
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {
+    "grep": 3624
+  },
+  "view_mode_calls": {
+    "grep": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 4722,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat/gdd/mechanics.md",
+    "examples/tick-combat/impl/xtreme/src/rules.rs"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "H9x6oS",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r3.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "RTbjmy",
+      "result_bytes": 3624,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r3.txt:77-141"
+    },
+    {
+      "tool": "Bash",
+      "id": "VG5DWN",
+      "result_bytes": 1361,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r3.txt:153-198"
+    },
+    {
+      "tool": "Bash",
+      "id": "uYdinV",
+      "result_bytes": 1369,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r3.txt:210-247"
+    },
+    {
+      "tool": "Bash",
+      "id": "nFCrSd",
+      "result_bytes": 178,
+      "is_error": false,
+      "vcc": "maintenance_drift__views__r3.txt:259-268"
+    }
+  ]
+}

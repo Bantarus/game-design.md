@@ -1,0 +1,146 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 3069,
+  "cache_read_tokens": 400934,
+  "cache_creation_tokens": 79002,
+  "tool_calls": 13,
+  "files_read": 2,
+  "bytes_read": 4326,
+  "re_reads": 0,
+  "consultation_bytes": 20577,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81358.5,
+  "per_turn_occupancy": [
+    72421,
+    76242,
+    80984,
+    81733,
+    83703,
+    84865
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Edit": 5,
+    "Grep": 2,
+    "Read": 2
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 1,
+  "bash_read_bytes": 717,
+  "bash_files_read": 6,
+  "all_files_read": 8,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder/content",
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/economy-balance.md",
+    "examples/deckbuilder/gdd/glossary.md",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/systems/combat.md",
+    "examples/deckbuilder/gdd/verification.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Grep",
+      "id": "2hW67e",
+      "result_bytes": 7862,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:25-82"
+    },
+    {
+      "tool": "Grep",
+      "id": "a9rLrm",
+      "result_bytes": 5638,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:98-117"
+    },
+    {
+      "tool": "Read",
+      "id": "WWGKPs",
+      "result_bytes": 399,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:131-144"
+    },
+    {
+      "tool": "Read",
+      "id": "GfyPu2",
+      "result_bytes": 3927,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:157-230"
+    },
+    {
+      "tool": "Bash",
+      "id": "WmPcv8",
+      "result_bytes": 717,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:242-261"
+    },
+    {
+      "tool": "Edit",
+      "id": "tSqdAk",
+      "result_bytes": 227,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:280-280"
+    },
+    {
+      "tool": "Edit",
+      "id": "4Ro9aS",
+      "result_bytes": 227,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:295-295"
+    },
+    {
+      "tool": "Edit",
+      "id": "rg9iZ3",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:314-314"
+    },
+    {
+      "tool": "Edit",
+      "id": "zvGPU3",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:329-329"
+    },
+    {
+      "tool": "Edit",
+      "id": "akuArZ",
+      "result_bytes": 151,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:348-348"
+    },
+    {
+      "tool": "Bash",
+      "id": "GB2MJ4",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "operating_energy_budget__baseline__r2.txt:360-360"
+    },
+    {
+      "tool": "Bash",
+      "id": "Mnd2zY",
+      "result_bytes": 715,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:376-401"
+    },
+    {
+      "tool": "Bash",
+      "id": "L7R1sF",
+      "result_bytes": 217,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r2.txt:406-409"
+    }
+  ]
+}

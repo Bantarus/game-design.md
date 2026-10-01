@@ -1,0 +1,139 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 3528,
+  "cache_read_tokens": 546924,
+  "cache_creation_tokens": 78645,
+  "tool_calls": 12,
+  "files_read": 5,
+  "bytes_read": 14004,
+  "re_reads": 1,
+  "consultation_bytes": 18398,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 77435.5,
+  "per_turn_occupancy": [
+    72566,
+    74601,
+    75214,
+    75819,
+    79052,
+    80090,
+    83735,
+    84508
+  ],
+  "tool_counts": {
+    "Bash": 1,
+    "Grep": 5,
+    "Read": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 1,
+  "bash_read_bytes": 79,
+  "bash_files_read": 1,
+  "all_files_read": 6,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "Be1SgY",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:27-111"
+    },
+    {
+      "tool": "Grep",
+      "id": "FXKEsc",
+      "result_bytes": 260,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:125-127"
+    },
+    {
+      "tool": "Grep",
+      "id": "Ts9tUf",
+      "result_bytes": 540,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:141-146"
+    },
+    {
+      "tool": "Grep",
+      "id": "1Jr85b",
+      "result_bytes": 818,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:160-168"
+    },
+    {
+      "tool": "Read",
+      "id": "5byRn7",
+      "result_bytes": 1128,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:182-211"
+    },
+    {
+      "tool": "Read",
+      "id": "xt1LVQ",
+      "result_bytes": 1419,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:224-262"
+    },
+    {
+      "tool": "Read",
+      "id": "cogkzu",
+      "result_bytes": 3254,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:275-353"
+    },
+    {
+      "tool": "Grep",
+      "id": "jmARBj",
+      "result_bytes": 1257,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:368-378"
+    },
+    {
+      "tool": "Read",
+      "id": "vhyqWk",
+      "result_bytes": 2470,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:393-462"
+    },
+    {
+      "tool": "Read",
+      "id": "fc1h4G",
+      "result_bytes": 2252,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:475-544"
+    },
+    {
+      "tool": "Grep",
+      "id": "QP1PMD",
+      "result_bytes": 1440,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:558-570"
+    },
+    {
+      "tool": "Bash",
+      "id": "6HGcYg",
+      "result_bytes": 79,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r3.txt:582-586"
+    }
+  ]
+}

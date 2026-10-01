@@ -1,0 +1,173 @@
+{
+  "turns": 13,
+  "input_tokens": 26,
+  "output_tokens": 4311,
+  "cache_read_tokens": 445323,
+  "cache_creation_tokens": 35571,
+  "tool_calls": 13,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 11158,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37696,
+  "per_turn_occupancy": [
+    31064,
+    33213,
+    34038,
+    35231,
+    35435,
+    35697,
+    37696,
+    38207,
+    38794,
+    39138,
+    40201,
+    40772,
+    41434
+  ],
+  "tool_counts": {
+    "Bash": 11,
+    "Grep": 2
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 2797,
+    "graph": 89
+  },
+  "view_mode_calls": {
+    "ref": 1,
+    "graph": 1
+  },
+  "bash_read_calls": 6,
+  "bash_read_bytes": 6614,
+  "bash_files_read": 10,
+  "all_files_read": 10,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/content/encounters/lich_hollow.yaml",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-card--r3-repo/b214c4c9-05da-41cb-914c-32ab5ab49215/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-card--r3-repo/b214c4c9-05da-41cb-914c-32ab5ab49215/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-card--r3-repo/b214c4c9-05da-41cb-914c-32ab5ab49215/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "r2Psjs",
+      "result_bytes": 3657,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:33-192"
+    },
+    {
+      "tool": "Bash",
+      "id": "uuk5sV",
+      "result_bytes": 1102,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:204-261"
+    },
+    {
+      "tool": "Bash",
+      "id": "fHFtNV",
+      "result_bytes": 237,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:319-319"
+    },
+    {
+      "tool": "Bash",
+      "id": "RQ9yoV",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:331-331"
+    },
+    {
+      "tool": "Bash",
+      "id": "e6QtCK",
+      "result_bytes": 89,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:343-343"
+    },
+    {
+      "tool": "Bash",
+      "id": "tZSyJH",
+      "result_bytes": 2797,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:359-406"
+    },
+    {
+      "tool": "Bash",
+      "id": "XYEpWk",
+      "result_bytes": 718,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:411-442"
+    },
+    {
+      "tool": "Bash",
+      "id": "qamaAq",
+      "result_bytes": 473,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:454-470"
+    },
+    {
+      "tool": "Bash",
+      "id": "icM7mB",
+      "result_bytes": 417,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:482-493"
+    },
+    {
+      "tool": "Bash",
+      "id": "jB6Fv7",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:507-507"
+    },
+    {
+      "tool": "Grep",
+      "id": "G35JsK",
+      "result_bytes": 1350,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:522-529"
+    },
+    {
+      "tool": "Grep",
+      "id": "inbrRs",
+      "result_bytes": 16,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:543-543"
+    },
+    {
+      "tool": "Bash",
+      "id": "pesjDL",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r3.txt:555-564"
+    }
+  ]
+}

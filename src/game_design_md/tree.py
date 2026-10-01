@@ -26,6 +26,17 @@ SUBFILE_NAMESPACES = (
 )
 
 
+def find_repo_root(path: Path) -> Path | None:
+    """The git work tree containing `path`: the nearest ancestor (or `path`
+    itself) holding a `.git` entry, a directory or, for a worktree or a
+    submodule, a file. None when `path` is in no git repository (D-038)."""
+    p = Path(path).resolve()
+    for d in (p, *p.parents):
+        if (d / ".git").exists():
+            return d
+    return None
+
+
 @dataclass
 class ParsedFile:
     abs_path: Path
@@ -59,13 +70,20 @@ class Tree:
     parse_errors: list[tuple[Path, str]] = field(default_factory=list)
 
     @classmethod
-    def load(cls, root: Path) -> "Tree":
+    def load(cls, root: Path, reader=None) -> "Tree":
+        """Load every `.md` / `.yaml` file under `root`.
+
+        `reader(path) -> (frontmatter, body)` defaults to `loader.read`. The
+        views compiler (`ir.py`) passes a reader that also keeps positions,
+        so each file is still parsed once.
+        """
+        reader = reader or loader.read
         tree = cls(root=Path(root))
         for p in sorted(tree.root.rglob("*")):
             if not p.is_file() or p.suffix not in (".md", ".yaml", ".yml"):
                 continue
             try:
-                fm, body = loader.read(p)
+                fm, body = reader(p)
             except Exception as e:  # noqa: BLE001
                 tree.parse_errors.append((p, str(e)))
                 continue
@@ -113,6 +131,18 @@ class Tree:
                     )
 
     # ---- Reference resolution ------------------------------------------------
+
+    @staticmethod
+    def has_namespace(ns: str) -> bool:
+        """D-033: a whole-namespace reference `{ns}` resolves iff `ns` is a
+        namespace the tree indexes, whether or not the tree declares a token
+        in it yet (a starter's invariant may govern tokens still to come)."""
+        return ns in SUBFILE_NAMESPACES
+
+    def resolves(self, ref: str) -> bool:
+        """The `broken-ref` predicate for any reference body walk_refs yields:
+        a one-segment body is a whole-namespace reference (D-033)."""
+        return self.has_namespace(ref) if "." not in ref else self.has_token(ref)
 
     def has_token(self, ref: str) -> bool:
         """True iff `ref` (e.g. "verbs.play_card", "entities.cards.ember_strike",

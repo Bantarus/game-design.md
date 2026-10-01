@@ -1,0 +1,5 @@
+[graph paths] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+path 1 (2 hops): {loops.day} -> {verbs.rest} -> {entities.player}
+  {loops.day} -> {verbs.rest} gdd/loops.md:13 value loops.day.sequence[1].rest
+  {verbs.rest} -> {entities.player} gdd/mechanics.md:28 value verbs.rest.actor
+… 1 of 2 shortest paths

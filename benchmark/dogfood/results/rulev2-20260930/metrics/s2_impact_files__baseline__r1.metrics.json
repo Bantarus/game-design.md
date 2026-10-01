@@ -1,0 +1,179 @@
+{
+  "turns": 12,
+  "input_tokens": 24,
+  "output_tokens": 5940,
+  "cache_read_tokens": 900087,
+  "cache_creation_tokens": 81685,
+  "tool_calls": 12,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 19313,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83296.0,
+  "per_turn_occupancy": [
+    72564,
+    75525,
+    77085,
+    79344,
+    81358,
+    82565,
+    84027,
+    84276,
+    84875,
+    85761,
+    86868,
+    87548
+  ],
+  "tool_counts": {
+    "Bash": 11,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 8,
+  "bash_read_bytes": 18958,
+  "bash_files_read": 10,
+  "all_files_read": 10,
+  "all_re_reads": 11,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall",
+    "examples/lanternfall/content",
+    "examples/lanternfall/content/monsters/briny_wisp.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/g.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-files--baseline--r1-repo/79da117b-2f8e-4068-916c-de1f5ea078a9/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-files--baseline--r1-repo/79da117b-2f8e-4068-916c-de1f5ea078a9/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-impact-files--baseline--r1-repo/79da117b-2f8e-4068-916c-de1f5ea078a9/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "../../answers"
+    },
+    {
+      "tool": "Bash",
+      "path": "../../answers/s2_impact_files.txt"
+    },
+    {
+      "tool": "Bash",
+      "path": "../../answers/s2_impact_files.txt"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "Ca8htp",
+      "result_bytes": 5610,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:27-189"
+    },
+    {
+      "tool": "Bash",
+      "id": "6k1BNC",
+      "result_bytes": 1948,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:201-264"
+    },
+    {
+      "tool": "Bash",
+      "id": "mLh8oA",
+      "result_bytes": 4097,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:276-326"
+    },
+    {
+      "tool": "Bash",
+      "id": "8wowJJ",
+      "result_bytes": 3709,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:338-444"
+    },
+    {
+      "tool": "Bash",
+      "id": "WtBCg1",
+      "result_bytes": 59,
+      "is_error": true,
+      "vcc": "s2_impact_files__baseline__r1.txt:495-495"
+    },
+    {
+      "tool": "Write",
+      "id": "8wDDwW",
+      "result_bytes": 236,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:573-573"
+    },
+    {
+      "tool": "Bash",
+      "id": "NxXLye",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_impact_files__baseline__r1.txt:585-585"
+    },
+    {
+      "tool": "Bash",
+      "id": "eEt8B4",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_impact_files__baseline__r1.txt:597-597"
+    },
+    {
+      "tool": "Bash",
+      "id": "EddnkB",
+      "result_bytes": 488,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:609-613"
+    },
+    {
+      "tool": "Bash",
+      "id": "1ppXD7",
+      "result_bytes": 1219,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:625-661"
+    },
+    {
+      "tool": "Bash",
+      "id": "BmBpvJ",
+      "result_bytes": 1808,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:675-714"
+    },
+    {
+      "tool": "Bash",
+      "id": "ZVq15L",
+      "result_bytes": 79,
+      "is_error": false,
+      "vcc": "s2_impact_files__baseline__r1.txt:726-730"
+    }
+  ]
+}

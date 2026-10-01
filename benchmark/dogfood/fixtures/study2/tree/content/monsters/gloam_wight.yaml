@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: gloam_wight
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Gloam Wight
+tier: brute
+max_vigor: 28
+skills:
+  - "{entities.skills.tallow_pulse}"
+drops:
+  - "{entities.items.dusk_charm}"
+  - "{entities.items.tallow_torc}"
+  - "{entities.items.wick_phial}"
+description: A brute that avoids direct light.

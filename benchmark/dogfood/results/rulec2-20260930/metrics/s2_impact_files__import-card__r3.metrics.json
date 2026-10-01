@@ -1,0 +1,90 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1691,
+  "cache_read_tokens": 148108,
+  "cache_creation_tokens": 33229,
+  "tool_calls": 5,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 14313,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37164,
+  "per_turn_occupancy": [
+    31047,
+    35357,
+    37164,
+    38687,
+    39092
+  ],
+  "tool_counts": {
+    "Bash": 5
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 9363
+  },
+  "view_mode_calls": {
+    "graph": 1
+  },
+  "bash_read_calls": 5,
+  "bash_read_bytes": 14313,
+  "bash_files_read": 7,
+  "all_files_read": 7,
+  "all_re_reads": 2,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "LLkwXg",
+      "result_bytes": 9363,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r3.txt:27-400"
+    },
+    {
+      "tool": "Bash",
+      "id": "SyRw6E",
+      "result_bytes": 3055,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r3.txt:412-450"
+    },
+    {
+      "tool": "Bash",
+      "id": "SCX2H2",
+      "result_bytes": 1079,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r3.txt:462-471"
+    },
+    {
+      "tool": "Bash",
+      "id": "uLdBRw",
+      "result_bytes": 737,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r3.txt:483-491"
+    },
+    {
+      "tool": "Bash",
+      "id": "JyFQ6n",
+      "result_bytes": 79,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r3.txt:503-507"
+    }
+  ]
+}

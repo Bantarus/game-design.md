@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: umber_den
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Umber Den
+depth: 3
+monsters:
+  - "{entities.monsters.lich_lurker}"
+  - "{entities.monsters.yew_hound}"
+spawn_roll: "{distributions.undercroft_pack}"
+description: "Umber Den: an ossuary shelf that shifts when touched."

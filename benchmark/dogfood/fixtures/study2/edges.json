@@ -1,0 +1,4452 @@
+{
+ "edges": [
+  {
+   "dst": "entities.skills.wick_cleave",
+   "path": "content/items/ashen_censer.yaml",
+   "ref": "entities.skills.wick_cleave",
+   "src": "entities.items.ashen_censer"
+  },
+  {
+   "dst": "entities.skills.hollow_chant",
+   "path": "content/items/barrow_charm.yaml",
+   "ref": "entities.skills.hollow_chant",
+   "src": "entities.items.barrow_charm"
+  },
+  {
+   "dst": "entities.skills.hollow_chant",
+   "path": "content/items/dusk_buckler.yaml",
+   "ref": "entities.skills.hollow_chant",
+   "src": "entities.items.dusk_buckler"
+  },
+  {
+   "dst": "entities.skills.fen_wail",
+   "path": "content/items/dusk_censer.yaml",
+   "ref": "entities.skills.fen_wail",
+   "src": "entities.items.dusk_censer"
+  },
+  {
+   "dst": "entities.skills.grave_rite",
+   "path": "content/items/dusk_phial.yaml",
+   "ref": "entities.skills.grave_rite",
+   "src": "entities.items.dusk_phial"
+  },
+  {
+   "dst": "entities.skills.knell_lash",
+   "path": "content/items/fen_censer.yaml",
+   "ref": "entities.skills.knell_lash",
+   "src": "entities.items.fen_censer"
+  },
+  {
+   "dst": "entities.skills.knell_pulse",
+   "path": "content/items/fen_dirk.yaml",
+   "ref": "entities.skills.knell_pulse",
+   "src": "entities.items.fen_dirk"
+  },
+  {
+   "dst": "entities.skills.umber_veil",
+   "path": "content/items/fen_flask.yaml",
+   "ref": "entities.skills.umber_veil",
+   "src": "entities.items.fen_flask"
+  },
+  {
+   "dst": "entities.skills.ashen_ward",
+   "path": "content/items/fen_mantle.yaml",
+   "ref": "entities.skills.ashen_ward",
+   "src": "entities.items.fen_mantle"
+  },
+  {
+   "dst": "entities.skills.candle_hex",
+   "path": "content/items/hollow_buckler.yaml",
+   "ref": "entities.skills.candle_hex",
+   "src": "entities.items.hollow_buckler"
+  },
+  {
+   "dst": "entities.skills.knell_lash",
+   "path": "content/items/hollow_gauntlet.yaml",
+   "ref": "entities.skills.knell_lash",
+   "src": "entities.items.hollow_gauntlet"
+  },
+  {
+   "dst": "entities.skills.lich_ward",
+   "path": "content/items/hollow_lens.yaml",
+   "ref": "entities.skills.lich_ward",
+   "src": "entities.items.hollow_lens"
+  },
+  {
+   "dst": "entities.skills.candle_wail",
+   "path": "content/items/lich_hood.yaml",
+   "ref": "entities.skills.candle_wail",
+   "src": "entities.items.lich_hood"
+  },
+  {
+   "dst": "entities.skills.murk_chant",
+   "path": "content/items/lich_phial.yaml",
+   "ref": "entities.skills.murk_chant",
+   "src": "entities.items.lich_phial"
+  },
+  {
+   "dst": "entities.skills.sable_snare",
+   "path": "content/items/lich_torc.yaml",
+   "ref": "entities.skills.sable_snare",
+   "src": "entities.items.lich_torc"
+  },
+  {
+   "dst": "entities.skills.ashen_wail",
+   "path": "content/items/moth_censer.yaml",
+   "ref": "entities.skills.ashen_wail",
+   "src": "entities.items.moth_censer"
+  },
+  {
+   "dst": "entities.skills.wick_chant",
+   "path": "content/items/moth_phial.yaml",
+   "ref": "entities.skills.wick_chant",
+   "src": "entities.items.moth_phial"
+  },
+  {
+   "dst": "entities.skills.sable_snare",
+   "path": "content/items/moth_torc.yaml",
+   "ref": "entities.skills.sable_snare",
+   "src": "entities.items.moth_torc"
+  },
+  {
+   "dst": "entities.skills.pale_veil",
+   "path": "content/items/murk_buckler.yaml",
+   "ref": "entities.skills.pale_veil",
+   "src": "entities.items.murk_buckler"
+  },
+  {
+   "dst": "entities.skills.pale_veil",
+   "path": "content/items/pale_buckler.yaml",
+   "ref": "entities.skills.pale_veil",
+   "src": "entities.items.pale_buckler"
+  },
+  {
+   "dst": "entities.skills.yew_wail",
+   "path": "content/items/pale_charm.yaml",
+   "ref": "entities.skills.yew_wail",
+   "src": "entities.items.pale_charm"
+  },
+  {
+   "dst": "entities.skills.wick_rite",
+   "path": "content/items/rust_brand.yaml",
+   "ref": "entities.skills.wick_rite",
+   "src": "entities.items.rust_brand"
+  },
+  {
+   "dst": "entities.skills.candle_pulse",
+   "path": "content/items/rust_hood.yaml",
+   "ref": "entities.skills.candle_pulse",
+   "src": "entities.items.rust_hood"
+  },
+  {
+   "dst": "entities.skills.sable_rite",
+   "path": "content/items/rust_torc.yaml",
+   "ref": "entities.skills.sable_rite",
+   "src": "entities.items.rust_torc"
+  },
+  {
+   "dst": "entities.skills.candle_cleave",
+   "path": "content/items/sable_phial.yaml",
+   "ref": "entities.skills.candle_cleave",
+   "src": "entities.items.sable_phial"
+  },
+  {
+   "dst": "entities.skills.wick_cleave",
+   "path": "content/items/soot_brand.yaml",
+   "ref": "entities.skills.wick_cleave",
+   "src": "entities.items.soot_brand"
+  },
+  {
+   "dst": "entities.skills.gloam_snare",
+   "path": "content/items/soot_ring.yaml",
+   "ref": "entities.skills.gloam_snare",
+   "src": "entities.items.soot_ring"
+  },
+  {
+   "dst": "entities.skills.lich_ward",
+   "path": "content/items/tallow_buckler.yaml",
+   "ref": "entities.skills.lich_ward",
+   "src": "entities.items.tallow_buckler"
+  },
+  {
+   "dst": "entities.skills.umber_veil",
+   "path": "content/items/tallow_dirk.yaml",
+   "ref": "entities.skills.umber_veil",
+   "src": "entities.items.tallow_dirk"
+  },
+  {
+   "dst": "entities.skills.murk_sear",
+   "path": "content/items/tallow_mantle.yaml",
+   "ref": "entities.skills.murk_sear",
+   "src": "entities.items.tallow_mantle"
+  },
+  {
+   "dst": "entities.skills.hollow_hex",
+   "path": "content/items/tallow_phial.yaml",
+   "ref": "entities.skills.hollow_hex",
+   "src": "entities.items.tallow_phial"
+  },
+  {
+   "dst": "entities.skills.pale_hex",
+   "path": "content/items/tallow_sigil.yaml",
+   "ref": "entities.skills.pale_hex",
+   "src": "entities.items.tallow_sigil"
+  },
+  {
+   "dst": "entities.skills.wick_cleave",
+   "path": "content/items/umber_brand.yaml",
+   "ref": "entities.skills.wick_cleave",
+   "src": "entities.items.umber_brand"
+  },
+  {
+   "dst": "entities.skills.moth_chant",
+   "path": "content/items/umber_mantle.yaml",
+   "ref": "entities.skills.moth_chant",
+   "src": "entities.items.umber_mantle"
+  },
+  {
+   "dst": "entities.skills.fen_chant",
+   "path": "content/items/umber_ring.yaml",
+   "ref": "entities.skills.fen_chant",
+   "src": "entities.items.umber_ring"
+  },
+  {
+   "dst": "entities.skills.fen_snare",
+   "path": "content/items/vesper_phial.yaml",
+   "ref": "entities.skills.fen_snare",
+   "src": "entities.items.vesper_phial"
+  },
+  {
+   "dst": "entities.skills.yew_bolt",
+   "path": "content/items/wick_phial.yaml",
+   "ref": "entities.skills.yew_bolt",
+   "src": "entities.items.wick_phial"
+  },
+  {
+   "dst": "entities.skills.yew_bolt",
+   "path": "content/items/yew_gauntlet.yaml",
+   "ref": "entities.skills.yew_bolt",
+   "src": "entities.items.yew_gauntlet"
+  },
+  {
+   "dst": "entities.skills.pale_pulse",
+   "path": "content/items/yew_ring.yaml",
+   "ref": "entities.skills.pale_pulse",
+   "src": "entities.items.yew_ring"
+  },
+  {
+   "dst": "entities.skills.candle_wail",
+   "path": "content/items/yew_sigil.yaml",
+   "ref": "entities.skills.candle_wail",
+   "src": "entities.items.yew_sigil"
+  },
+  {
+   "dst": "entities.skills.pale_hex",
+   "path": "content/items/yew_torc.yaml",
+   "ref": "entities.skills.pale_hex",
+   "src": "entities.items.yew_torc"
+  },
+  {
+   "dst": "distributions.ossuary_dust_roll",
+   "path": "content/skills/ashen_chant.yaml",
+   "ref": "distributions.ossuary_dust_roll",
+   "src": "entities.skills.ashen_chant"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/ashen_chant.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.ashen_chant"
+  },
+  {
+   "dst": "distributions.gravetide_roll",
+   "path": "content/skills/ashen_cleave.yaml",
+   "ref": "distributions.gravetide_roll",
+   "src": "entities.skills.ashen_cleave"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/ashen_cleave.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.ashen_cleave"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/ashen_wail.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.ashen_wail"
+  },
+  {
+   "dst": "distributions.barrowchill_roll",
+   "path": "content/skills/ashen_ward.yaml",
+   "ref": "distributions.barrowchill_roll",
+   "src": "entities.skills.ashen_ward"
+  },
+  {
+   "dst": "distributions.palecoil_roll",
+   "path": "content/skills/barrow_hex.yaml",
+   "ref": "distributions.palecoil_roll",
+   "src": "entities.skills.barrow_hex"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/barrow_hex.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.barrow_hex"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/barrow_veil.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.barrow_veil"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/briny_cleave.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.briny_cleave"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/briny_cleave.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.briny_cleave"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/briny_pulse.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.briny_pulse"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/briny_snare.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.briny_snare"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/briny_snare.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.briny_snare"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/briny_veil.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.briny_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/briny_veil.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.briny_veil"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/candle_cleave.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.candle_cleave"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/candle_hex.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.candle_hex"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/candle_hex.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.candle_hex"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/candle_pulse.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.candle_pulse"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/candle_wail.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.candle_wail"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/dusk_chant.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.dusk_chant"
+  },
+  {
+   "dst": "distributions.hollowknell_roll",
+   "path": "content/skills/dusk_hex.yaml",
+   "ref": "distributions.hollowknell_roll",
+   "src": "entities.skills.dusk_hex"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/dusk_lash.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.dusk_lash"
+  },
+  {
+   "dst": "distributions.gravetide_roll",
+   "path": "content/skills/dusk_pulse.yaml",
+   "ref": "distributions.gravetide_roll",
+   "src": "entities.skills.dusk_pulse"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/dusk_pulse.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.dusk_pulse"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/dusk_rite.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.dusk_rite"
+  },
+  {
+   "dst": "distributions.ossuary_dust_roll",
+   "path": "content/skills/dusk_veil.yaml",
+   "ref": "distributions.ossuary_dust_roll",
+   "src": "entities.skills.dusk_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/dusk_veil.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.dusk_veil"
+  },
+  {
+   "dst": "distributions.lichwick_roll",
+   "path": "content/skills/dusk_wail.yaml",
+   "ref": "distributions.lichwick_roll",
+   "src": "entities.skills.dusk_wail"
+  },
+  {
+   "dst": "distributions.ossuary_dust_roll",
+   "path": "content/skills/fen_chant.yaml",
+   "ref": "distributions.ossuary_dust_roll",
+   "src": "entities.skills.fen_chant"
+  },
+  {
+   "dst": "distributions.hollowknell_roll",
+   "path": "content/skills/fen_snare.yaml",
+   "ref": "distributions.hollowknell_roll",
+   "src": "entities.skills.fen_snare"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/fen_snare.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.fen_snare"
+  },
+  {
+   "dst": "distributions.gravetide_roll",
+   "path": "content/skills/fen_wail.yaml",
+   "ref": "distributions.gravetide_roll",
+   "src": "entities.skills.fen_wail"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/fen_wail.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.fen_wail"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/fen_ward.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.fen_ward"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/fen_ward.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.fen_ward"
+  },
+  {
+   "dst": "distributions.fenmurk_roll",
+   "path": "content/skills/gloam_cleave.yaml",
+   "ref": "distributions.fenmurk_roll",
+   "src": "entities.skills.gloam_cleave"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/gloam_pulse.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.gloam_pulse"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/gloam_pulse.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.gloam_pulse"
+  },
+  {
+   "dst": "distributions.fenmurk_roll",
+   "path": "content/skills/gloam_sear.yaml",
+   "ref": "distributions.fenmurk_roll",
+   "src": "entities.skills.gloam_sear"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/gloam_sear.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.gloam_sear"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/gloam_snare.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.gloam_snare"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/grave_chant.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.grave_chant"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/grave_chant.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.grave_chant"
+  },
+  {
+   "dst": "distributions.lichwick_roll",
+   "path": "content/skills/grave_cleave.yaml",
+   "ref": "distributions.lichwick_roll",
+   "src": "entities.skills.grave_cleave"
+  },
+  {
+   "dst": "distributions.palecoil_roll",
+   "path": "content/skills/grave_rite.yaml",
+   "ref": "distributions.palecoil_roll",
+   "src": "entities.skills.grave_rite"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/grave_rite.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.grave_rite"
+  },
+  {
+   "dst": "distributions.candlegrit_roll",
+   "path": "content/skills/grave_sear.yaml",
+   "ref": "distributions.candlegrit_roll",
+   "src": "entities.skills.grave_sear"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/grave_veil.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.grave_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/grave_veil.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.grave_veil"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/grave_ward.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.grave_ward"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/grave_ward.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.grave_ward"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/hollow_chant.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.hollow_chant"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/hollow_chant.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.hollow_chant"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/hollow_hex.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.hollow_hex"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/hollow_hex.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.hollow_hex"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/iron_cleave.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.iron_cleave"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/iron_hex.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.iron_hex"
+  },
+  {
+   "dst": "distributions.palecoil_roll",
+   "path": "content/skills/iron_snare.yaml",
+   "ref": "distributions.palecoil_roll",
+   "src": "entities.skills.iron_snare"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/iron_snare.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.iron_snare"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/iron_wail.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.iron_wail"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/iron_wail.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.iron_wail"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/knell_lash.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.knell_lash"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/knell_lash.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.knell_lash"
+  },
+  {
+   "dst": "distributions.palecoil_roll",
+   "path": "content/skills/knell_pulse.yaml",
+   "ref": "distributions.palecoil_roll",
+   "src": "entities.skills.knell_pulse"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/lich_chant.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.lich_chant"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/lich_chant.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.lich_chant"
+  },
+  {
+   "dst": "distributions.lichwick_roll",
+   "path": "content/skills/lich_ward.yaml",
+   "ref": "distributions.lichwick_roll",
+   "src": "entities.skills.lich_ward"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/lich_ward.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.lich_ward"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/moth_chant.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.moth_chant"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/moth_sear.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.moth_sear"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/moth_sear.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.moth_sear"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/moth_veil.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.moth_veil"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/murk_chant.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.murk_chant"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/murk_chant.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.murk_chant"
+  },
+  {
+   "dst": "distributions.ossuary_dust_roll",
+   "path": "content/skills/murk_pulse.yaml",
+   "ref": "distributions.ossuary_dust_roll",
+   "src": "entities.skills.murk_pulse"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/murk_sear.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.murk_sear"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/murk_sear.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.murk_sear"
+  },
+  {
+   "dst": "distributions.palecoil_roll",
+   "path": "content/skills/murk_veil.yaml",
+   "ref": "distributions.palecoil_roll",
+   "src": "entities.skills.murk_veil"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/ochre_bolt.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.ochre_bolt"
+  },
+  {
+   "dst": "distributions.barrowchill_roll",
+   "path": "content/skills/ochre_sear.yaml",
+   "ref": "distributions.barrowchill_roll",
+   "src": "entities.skills.ochre_sear"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/pale_bolt.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.pale_bolt"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/pale_bolt.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.pale_bolt"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/pale_hex.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.pale_hex"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/pale_pulse.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.pale_pulse"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/pale_pulse.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.pale_pulse"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/pale_veil.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.pale_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/pale_veil.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.pale_veil"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/rust_pulse.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.rust_pulse"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/rust_rite.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.rust_rite"
+  },
+  {
+   "dst": "distributions.lichwick_roll",
+   "path": "content/skills/rust_veil.yaml",
+   "ref": "distributions.lichwick_roll",
+   "src": "entities.skills.rust_veil"
+  },
+  {
+   "dst": "distributions.duskbite_roll",
+   "path": "content/skills/rust_ward.yaml",
+   "ref": "distributions.duskbite_roll",
+   "src": "entities.skills.rust_ward"
+  },
+  {
+   "dst": "distributions.candlegrit_roll",
+   "path": "content/skills/sable_bolt.yaml",
+   "ref": "distributions.candlegrit_roll",
+   "src": "entities.skills.sable_bolt"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/sable_bolt.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.sable_bolt"
+  },
+  {
+   "dst": "distributions.sablegleam_roll",
+   "path": "content/skills/sable_hex.yaml",
+   "ref": "distributions.sablegleam_roll",
+   "src": "entities.skills.sable_hex"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/sable_hex.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.sable_hex"
+  },
+  {
+   "dst": "distributions.ashveil_roll",
+   "path": "content/skills/sable_lash.yaml",
+   "ref": "distributions.ashveil_roll",
+   "src": "entities.skills.sable_lash"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/sable_rite.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.sable_rite"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/sable_snare.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.sable_snare"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/sable_snare.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.sable_snare"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/sable_veil.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.sable_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/sable_veil.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.sable_veil"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/sable_wail.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.sable_wail"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/sable_wail.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.sable_wail"
+  },
+  {
+   "dst": "distributions.fenmurk_roll",
+   "path": "content/skills/sable_ward.yaml",
+   "ref": "distributions.fenmurk_roll",
+   "src": "entities.skills.sable_ward"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/soot_bolt.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.soot_bolt"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/soot_bolt.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.soot_bolt"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/soot_lash.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.soot_lash"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/soot_lash.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.soot_lash"
+  },
+  {
+   "dst": "distributions.fenmurk_roll",
+   "path": "content/skills/soot_snare.yaml",
+   "ref": "distributions.fenmurk_roll",
+   "src": "entities.skills.soot_snare"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/soot_snare.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.soot_snare"
+  },
+  {
+   "dst": "distributions.duskbite_roll",
+   "path": "content/skills/soot_veil.yaml",
+   "ref": "distributions.duskbite_roll",
+   "src": "entities.skills.soot_veil"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/tallow_pulse.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.tallow_pulse"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/tallow_pulse.yaml",
+   "ref": "states.affliction.bleeding",
+   "src": "entities.skills.tallow_pulse"
+  },
+  {
+   "dst": "distributions.ashveil_roll",
+   "path": "content/skills/tallow_wail.yaml",
+   "ref": "distributions.ashveil_roll",
+   "src": "entities.skills.tallow_wail"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/tallow_wail.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.tallow_wail"
+  },
+  {
+   "dst": "distributions.lichwick_roll",
+   "path": "content/skills/umber_lash.yaml",
+   "ref": "distributions.lichwick_roll",
+   "src": "entities.skills.umber_lash"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/umber_lash.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.umber_lash"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/umber_veil.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.umber_veil"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/umber_veil.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.umber_veil"
+  },
+  {
+   "dst": "distributions.ossuary_dust_roll",
+   "path": "content/skills/vesper_chant.yaml",
+   "ref": "distributions.ossuary_dust_roll",
+   "src": "entities.skills.vesper_chant"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/vesper_pulse.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.vesper_pulse"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/vesper_pulse.yaml",
+   "ref": "states.affliction.chilled",
+   "src": "entities.skills.vesper_pulse"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/wick_chant.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.wick_chant"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/wick_cleave.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.wick_cleave"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/wick_cleave.yaml",
+   "ref": "states.affliction.dazed",
+   "src": "entities.skills.wick_cleave"
+  },
+  {
+   "dst": "distributions.tallowgrin_roll",
+   "path": "content/skills/wick_rite.yaml",
+   "ref": "distributions.tallowgrin_roll",
+   "src": "entities.skills.wick_rite"
+  },
+  {
+   "dst": "distributions.fenmurk_roll",
+   "path": "content/skills/wick_veil.yaml",
+   "ref": "distributions.fenmurk_roll",
+   "src": "entities.skills.wick_veil"
+  },
+  {
+   "dst": "distributions.ironsap_roll",
+   "path": "content/skills/yew_bolt.yaml",
+   "ref": "distributions.ironsap_roll",
+   "src": "entities.skills.yew_bolt"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/yew_cleave.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.yew_cleave"
+  },
+  {
+   "dst": "distributions.mothglow_roll",
+   "path": "content/skills/yew_lash.yaml",
+   "ref": "distributions.mothglow_roll",
+   "src": "entities.skills.yew_lash"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/yew_pulse.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.yew_pulse"
+  },
+  {
+   "dst": "distributions.rustmire_roll",
+   "path": "content/skills/yew_wail.yaml",
+   "ref": "distributions.rustmire_roll",
+   "src": "entities.skills.yew_wail"
+  },
+  {
+   "dst": "distributions.nightbrine_roll",
+   "path": "content/skills/yew_ward.yaml",
+   "ref": "distributions.nightbrine_roll",
+   "src": "entities.skills.yew_ward"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "content/skills/yew_ward.yaml",
+   "ref": "states.affliction.hexed",
+   "src": "entities.skills.yew_ward"
+  },
+  {
+   "dst": "entities.skills.fen_wail",
+   "path": "content/monsters/ashen_hound.yaml",
+   "ref": "entities.skills.fen_wail",
+   "src": "entities.monsters.ashen_hound"
+  },
+  {
+   "dst": "entities.skills.yew_cleave",
+   "path": "content/monsters/ashen_hound.yaml",
+   "ref": "entities.skills.yew_cleave",
+   "src": "entities.monsters.ashen_hound"
+  },
+  {
+   "dst": "entities.items.rust_brand",
+   "path": "content/monsters/ashen_hound.yaml",
+   "ref": "entities.items.rust_brand",
+   "src": "entities.monsters.ashen_hound"
+  },
+  {
+   "dst": "entities.skills.murk_sear",
+   "path": "content/monsters/ashen_mite.yaml",
+   "ref": "entities.skills.murk_sear",
+   "src": "entities.monsters.ashen_mite"
+  },
+  {
+   "dst": "entities.items.gloam_mantle",
+   "path": "content/monsters/ashen_mite.yaml",
+   "ref": "entities.items.gloam_mantle",
+   "src": "entities.monsters.ashen_mite"
+  },
+  {
+   "dst": "entities.items.knell_brand",
+   "path": "content/monsters/ashen_mite.yaml",
+   "ref": "entities.items.knell_brand",
+   "src": "entities.monsters.ashen_mite"
+  },
+  {
+   "dst": "entities.items.sable_ring",
+   "path": "content/monsters/ashen_mite.yaml",
+   "ref": "entities.items.sable_ring",
+   "src": "entities.monsters.ashen_mite"
+  },
+  {
+   "dst": "entities.skills.dusk_lash",
+   "path": "content/monsters/ashen_shade.yaml",
+   "ref": "entities.skills.dusk_lash",
+   "src": "entities.monsters.ashen_shade"
+  },
+  {
+   "dst": "entities.skills.umber_veil",
+   "path": "content/monsters/ashen_shade.yaml",
+   "ref": "entities.skills.umber_veil",
+   "src": "entities.monsters.ashen_shade"
+  },
+  {
+   "dst": "entities.items.murk_brand",
+   "path": "content/monsters/ashen_shade.yaml",
+   "ref": "entities.items.murk_brand",
+   "src": "entities.monsters.ashen_shade"
+  },
+  {
+   "dst": "entities.skills.gloam_cleave",
+   "path": "content/monsters/barrow_drudge.yaml",
+   "ref": "entities.skills.gloam_cleave",
+   "src": "entities.monsters.barrow_drudge"
+  },
+  {
+   "dst": "entities.items.murk_lens",
+   "path": "content/monsters/barrow_drudge.yaml",
+   "ref": "entities.items.murk_lens",
+   "src": "entities.monsters.barrow_drudge"
+  },
+  {
+   "dst": "entities.items.tallow_sigil",
+   "path": "content/monsters/barrow_drudge.yaml",
+   "ref": "entities.items.tallow_sigil",
+   "src": "entities.monsters.barrow_drudge"
+  },
+  {
+   "dst": "entities.items.vesper_ring",
+   "path": "content/monsters/barrow_drudge.yaml",
+   "ref": "entities.items.vesper_ring",
+   "src": "entities.monsters.barrow_drudge"
+  },
+  {
+   "dst": "entities.skills.candle_pulse",
+   "path": "content/monsters/barrow_husk.yaml",
+   "ref": "entities.skills.candle_pulse",
+   "src": "entities.monsters.barrow_husk"
+  },
+  {
+   "dst": "entities.items.candle_phial",
+   "path": "content/monsters/barrow_husk.yaml",
+   "ref": "entities.items.candle_phial",
+   "src": "entities.monsters.barrow_husk"
+  },
+  {
+   "dst": "entities.items.candle_torc",
+   "path": "content/monsters/barrow_husk.yaml",
+   "ref": "entities.items.candle_torc",
+   "src": "entities.monsters.barrow_husk"
+  },
+  {
+   "dst": "entities.items.ochre_brand",
+   "path": "content/monsters/barrow_husk.yaml",
+   "ref": "entities.items.ochre_brand",
+   "src": "entities.monsters.barrow_husk"
+  },
+  {
+   "dst": "entities.skills.briny_cleave",
+   "path": "content/monsters/barrow_wight.yaml",
+   "ref": "entities.skills.briny_cleave",
+   "src": "entities.monsters.barrow_wight"
+  },
+  {
+   "dst": "entities.skills.pale_pulse",
+   "path": "content/monsters/barrow_wight.yaml",
+   "ref": "entities.skills.pale_pulse",
+   "src": "entities.monsters.barrow_wight"
+  },
+  {
+   "dst": "entities.items.moth_flask",
+   "path": "content/monsters/barrow_wight.yaml",
+   "ref": "entities.items.moth_flask",
+   "src": "entities.monsters.barrow_wight"
+  },
+  {
+   "dst": "entities.skills.candle_pulse",
+   "path": "content/monsters/briny_ghoul.yaml",
+   "ref": "entities.skills.candle_pulse",
+   "src": "entities.monsters.briny_ghoul"
+  },
+  {
+   "dst": "entities.skills.wick_cleave",
+   "path": "content/monsters/briny_ghoul.yaml",
+   "ref": "entities.skills.wick_cleave",
+   "src": "entities.monsters.briny_ghoul"
+  },
+  {
+   "dst": "entities.items.briny_flask",
+   "path": "content/monsters/briny_ghoul.yaml",
+   "ref": "entities.items.briny_flask",
+   "src": "entities.monsters.briny_ghoul"
+  },
+  {
+   "dst": "entities.items.rust_censer",
+   "path": "content/monsters/briny_ghoul.yaml",
+   "ref": "entities.items.rust_censer",
+   "src": "entities.monsters.briny_ghoul"
+  },
+  {
+   "dst": "entities.items.tallow_brand",
+   "path": "content/monsters/briny_ghoul.yaml",
+   "ref": "entities.items.tallow_brand",
+   "src": "entities.monsters.briny_ghoul"
+  },
+  {
+   "dst": "entities.skills.ochre_bolt",
+   "path": "content/monsters/briny_lurker.yaml",
+   "ref": "entities.skills.ochre_bolt",
+   "src": "entities.monsters.briny_lurker"
+  },
+  {
+   "dst": "entities.items.dusk_dirk",
+   "path": "content/monsters/briny_lurker.yaml",
+   "ref": "entities.items.dusk_dirk",
+   "src": "entities.monsters.briny_lurker"
+  },
+  {
+   "dst": "entities.items.iron_censer",
+   "path": "content/monsters/briny_lurker.yaml",
+   "ref": "entities.items.iron_censer",
+   "src": "entities.monsters.briny_lurker"
+  },
+  {
+   "dst": "entities.items.tallow_mantle",
+   "path": "content/monsters/briny_lurker.yaml",
+   "ref": "entities.items.tallow_mantle",
+   "src": "entities.monsters.briny_lurker"
+  },
+  {
+   "dst": "entities.skills.ochre_sear",
+   "path": "content/monsters/briny_wisp.yaml",
+   "ref": "entities.skills.ochre_sear",
+   "src": "entities.monsters.briny_wisp"
+  },
+  {
+   "dst": "entities.items.dusk_phial",
+   "path": "content/monsters/briny_wisp.yaml",
+   "ref": "entities.items.dusk_phial",
+   "src": "entities.monsters.briny_wisp"
+  },
+  {
+   "dst": "entities.items.fen_brand",
+   "path": "content/monsters/briny_wisp.yaml",
+   "ref": "entities.items.fen_brand",
+   "src": "entities.monsters.briny_wisp"
+  },
+  {
+   "dst": "entities.items.iron_buckler",
+   "path": "content/monsters/briny_wisp.yaml",
+   "ref": "entities.items.iron_buckler",
+   "src": "entities.monsters.briny_wisp"
+  },
+  {
+   "dst": "entities.skills.gloam_cleave",
+   "path": "content/monsters/candle_hound.yaml",
+   "ref": "entities.skills.gloam_cleave",
+   "src": "entities.monsters.candle_hound"
+  },
+  {
+   "dst": "entities.items.lich_phial",
+   "path": "content/monsters/candle_hound.yaml",
+   "ref": "entities.items.lich_phial",
+   "src": "entities.monsters.candle_hound"
+  },
+  {
+   "dst": "entities.items.soot_charm",
+   "path": "content/monsters/candle_hound.yaml",
+   "ref": "entities.items.soot_charm",
+   "src": "entities.monsters.candle_hound"
+  },
+  {
+   "dst": "entities.items.vesper_gauntlet",
+   "path": "content/monsters/candle_hound.yaml",
+   "ref": "entities.items.vesper_gauntlet",
+   "src": "entities.monsters.candle_hound"
+  },
+  {
+   "dst": "entities.skills.barrow_veil",
+   "path": "content/monsters/dusk_crawler.yaml",
+   "ref": "entities.skills.barrow_veil",
+   "src": "entities.monsters.dusk_crawler"
+  },
+  {
+   "dst": "entities.skills.murk_pulse",
+   "path": "content/monsters/dusk_crawler.yaml",
+   "ref": "entities.skills.murk_pulse",
+   "src": "entities.monsters.dusk_crawler"
+  },
+  {
+   "dst": "entities.items.hollow_lens",
+   "path": "content/monsters/dusk_crawler.yaml",
+   "ref": "entities.items.hollow_lens",
+   "src": "entities.monsters.dusk_crawler"
+  },
+  {
+   "dst": "entities.skills.pale_pulse",
+   "path": "content/monsters/dusk_hound.yaml",
+   "ref": "entities.skills.pale_pulse",
+   "src": "entities.monsters.dusk_hound"
+  },
+  {
+   "dst": "entities.items.lich_torc",
+   "path": "content/monsters/dusk_hound.yaml",
+   "ref": "entities.items.lich_torc",
+   "src": "entities.monsters.dusk_hound"
+  },
+  {
+   "dst": "entities.skills.sable_hex",
+   "path": "content/monsters/dusk_lurker.yaml",
+   "ref": "entities.skills.sable_hex",
+   "src": "entities.monsters.dusk_lurker"
+  },
+  {
+   "dst": "entities.items.ashen_charm",
+   "path": "content/monsters/dusk_lurker.yaml",
+   "ref": "entities.items.ashen_charm",
+   "src": "entities.monsters.dusk_lurker"
+  },
+  {
+   "dst": "entities.items.briny_mantle",
+   "path": "content/monsters/dusk_lurker.yaml",
+   "ref": "entities.items.briny_mantle",
+   "src": "entities.monsters.dusk_lurker"
+  },
+  {
+   "dst": "entities.items.briny_ring",
+   "path": "content/monsters/dusk_lurker.yaml",
+   "ref": "entities.items.briny_ring",
+   "src": "entities.monsters.dusk_lurker"
+  },
+  {
+   "dst": "entities.skills.dusk_rite",
+   "path": "content/monsters/dusk_mite.yaml",
+   "ref": "entities.skills.dusk_rite",
+   "src": "entities.monsters.dusk_mite"
+  },
+  {
+   "dst": "entities.skills.ochre_bolt",
+   "path": "content/monsters/dusk_mite.yaml",
+   "ref": "entities.skills.ochre_bolt",
+   "src": "entities.monsters.dusk_mite"
+  },
+  {
+   "dst": "entities.items.barrow_charm",
+   "path": "content/monsters/dusk_mite.yaml",
+   "ref": "entities.items.barrow_charm",
+   "src": "entities.monsters.dusk_mite"
+  },
+  {
+   "dst": "entities.items.briny_flask",
+   "path": "content/monsters/dusk_mite.yaml",
+   "ref": "entities.items.briny_flask",
+   "src": "entities.monsters.dusk_mite"
+  },
+  {
+   "dst": "entities.skills.sable_hex",
+   "path": "content/monsters/dusk_stalker.yaml",
+   "ref": "entities.skills.sable_hex",
+   "src": "entities.monsters.dusk_stalker"
+  },
+  {
+   "dst": "entities.items.fen_lens",
+   "path": "content/monsters/dusk_stalker.yaml",
+   "ref": "entities.items.fen_lens",
+   "src": "entities.monsters.dusk_stalker"
+  },
+  {
+   "dst": "entities.items.umber_mantle",
+   "path": "content/monsters/dusk_stalker.yaml",
+   "ref": "entities.items.umber_mantle",
+   "src": "entities.monsters.dusk_stalker"
+  },
+  {
+   "dst": "entities.skills.fen_ward",
+   "path": "content/monsters/fen_crawler.yaml",
+   "ref": "entities.skills.fen_ward",
+   "src": "entities.monsters.fen_crawler"
+  },
+  {
+   "dst": "entities.skills.grave_cleave",
+   "path": "content/monsters/fen_crawler.yaml",
+   "ref": "entities.skills.grave_cleave",
+   "src": "entities.monsters.fen_crawler"
+  },
+  {
+   "dst": "entities.items.barrow_brand",
+   "path": "content/monsters/fen_crawler.yaml",
+   "ref": "entities.items.barrow_brand",
+   "src": "entities.monsters.fen_crawler"
+  },
+  {
+   "dst": "entities.items.murk_hood",
+   "path": "content/monsters/fen_crawler.yaml",
+   "ref": "entities.items.murk_hood",
+   "src": "entities.monsters.fen_crawler"
+  },
+  {
+   "dst": "entities.skills.gloam_cleave",
+   "path": "content/monsters/fen_drudge.yaml",
+   "ref": "entities.skills.gloam_cleave",
+   "src": "entities.monsters.fen_drudge"
+  },
+  {
+   "dst": "entities.items.briny_sigil",
+   "path": "content/monsters/fen_drudge.yaml",
+   "ref": "entities.items.briny_sigil",
+   "src": "entities.monsters.fen_drudge"
+  },
+  {
+   "dst": "entities.items.gloam_flask",
+   "path": "content/monsters/fen_drudge.yaml",
+   "ref": "entities.items.gloam_flask",
+   "src": "entities.monsters.fen_drudge"
+  },
+  {
+   "dst": "entities.items.tallow_torc",
+   "path": "content/monsters/fen_drudge.yaml",
+   "ref": "entities.items.tallow_torc",
+   "src": "entities.monsters.fen_drudge"
+  },
+  {
+   "dst": "entities.skills.candle_wail",
+   "path": "content/monsters/fen_shade.yaml",
+   "ref": "entities.skills.candle_wail",
+   "src": "entities.monsters.fen_shade"
+  },
+  {
+   "dst": "entities.items.dusk_phial",
+   "path": "content/monsters/fen_shade.yaml",
+   "ref": "entities.items.dusk_phial",
+   "src": "entities.monsters.fen_shade"
+  },
+  {
+   "dst": "entities.items.fen_flask",
+   "path": "content/monsters/fen_shade.yaml",
+   "ref": "entities.items.fen_flask",
+   "src": "entities.monsters.fen_shade"
+  },
+  {
+   "dst": "entities.skills.dusk_wail",
+   "path": "content/monsters/gloam_crawler.yaml",
+   "ref": "entities.skills.dusk_wail",
+   "src": "entities.monsters.gloam_crawler"
+  },
+  {
+   "dst": "entities.skills.wick_veil",
+   "path": "content/monsters/gloam_crawler.yaml",
+   "ref": "entities.skills.wick_veil",
+   "src": "entities.monsters.gloam_crawler"
+  },
+  {
+   "dst": "entities.items.candle_phial",
+   "path": "content/monsters/gloam_crawler.yaml",
+   "ref": "entities.items.candle_phial",
+   "src": "entities.monsters.gloam_crawler"
+  },
+  {
+   "dst": "entities.items.sable_ring",
+   "path": "content/monsters/gloam_crawler.yaml",
+   "ref": "entities.items.sable_ring",
+   "src": "entities.monsters.gloam_crawler"
+  },
+  {
+   "dst": "entities.items.umber_mantle",
+   "path": "content/monsters/gloam_crawler.yaml",
+   "ref": "entities.items.umber_mantle",
+   "src": "entities.monsters.gloam_crawler"
+  },
+  {
+   "dst": "entities.skills.dusk_chant",
+   "path": "content/monsters/gloam_hound.yaml",
+   "ref": "entities.skills.dusk_chant",
+   "src": "entities.monsters.gloam_hound"
+  },
+  {
+   "dst": "entities.skills.moth_chant",
+   "path": "content/monsters/gloam_hound.yaml",
+   "ref": "entities.skills.moth_chant",
+   "src": "entities.monsters.gloam_hound"
+  },
+  {
+   "dst": "entities.items.moth_phial",
+   "path": "content/monsters/gloam_hound.yaml",
+   "ref": "entities.items.moth_phial",
+   "src": "entities.monsters.gloam_hound"
+  },
+  {
+   "dst": "entities.skills.gloam_snare",
+   "path": "content/monsters/gloam_mite.yaml",
+   "ref": "entities.skills.gloam_snare",
+   "src": "entities.monsters.gloam_mite"
+  },
+  {
+   "dst": "entities.skills.grave_ward",
+   "path": "content/monsters/gloam_mite.yaml",
+   "ref": "entities.skills.grave_ward",
+   "src": "entities.monsters.gloam_mite"
+  },
+  {
+   "dst": "entities.items.knell_gauntlet",
+   "path": "content/monsters/gloam_mite.yaml",
+   "ref": "entities.items.knell_gauntlet",
+   "src": "entities.monsters.gloam_mite"
+  },
+  {
+   "dst": "entities.skills.grave_sear",
+   "path": "content/monsters/gloam_revenant.yaml",
+   "ref": "entities.skills.grave_sear",
+   "src": "entities.monsters.gloam_revenant"
+  },
+  {
+   "dst": "entities.skills.grave_veil",
+   "path": "content/monsters/gloam_revenant.yaml",
+   "ref": "entities.skills.grave_veil",
+   "src": "entities.monsters.gloam_revenant"
+  },
+  {
+   "dst": "entities.items.candle_flask",
+   "path": "content/monsters/gloam_revenant.yaml",
+   "ref": "entities.items.candle_flask",
+   "src": "entities.monsters.gloam_revenant"
+  },
+  {
+   "dst": "entities.items.ochre_censer",
+   "path": "content/monsters/gloam_revenant.yaml",
+   "ref": "entities.items.ochre_censer",
+   "src": "entities.monsters.gloam_revenant"
+  },
+  {
+   "dst": "entities.items.soot_ring",
+   "path": "content/monsters/gloam_revenant.yaml",
+   "ref": "entities.items.soot_ring",
+   "src": "entities.monsters.gloam_revenant"
+  },
+  {
+   "dst": "entities.skills.tallow_pulse",
+   "path": "content/monsters/gloam_wight.yaml",
+   "ref": "entities.skills.tallow_pulse",
+   "src": "entities.monsters.gloam_wight"
+  },
+  {
+   "dst": "entities.items.dusk_charm",
+   "path": "content/monsters/gloam_wight.yaml",
+   "ref": "entities.items.dusk_charm",
+   "src": "entities.monsters.gloam_wight"
+  },
+  {
+   "dst": "entities.items.tallow_torc",
+   "path": "content/monsters/gloam_wight.yaml",
+   "ref": "entities.items.tallow_torc",
+   "src": "entities.monsters.gloam_wight"
+  },
+  {
+   "dst": "entities.items.wick_phial",
+   "path": "content/monsters/gloam_wight.yaml",
+   "ref": "entities.items.wick_phial",
+   "src": "entities.monsters.gloam_wight"
+  },
+  {
+   "dst": "entities.skills.rust_rite",
+   "path": "content/monsters/grave_hound.yaml",
+   "ref": "entities.skills.rust_rite",
+   "src": "entities.monsters.grave_hound"
+  },
+  {
+   "dst": "entities.items.murk_gauntlet",
+   "path": "content/monsters/grave_hound.yaml",
+   "ref": "entities.items.murk_gauntlet",
+   "src": "entities.monsters.grave_hound"
+  },
+  {
+   "dst": "entities.items.tallow_dirk",
+   "path": "content/monsters/grave_hound.yaml",
+   "ref": "entities.items.tallow_dirk",
+   "src": "entities.monsters.grave_hound"
+  },
+  {
+   "dst": "entities.skills.yew_ward",
+   "path": "content/monsters/grave_lurker.yaml",
+   "ref": "entities.skills.yew_ward",
+   "src": "entities.monsters.grave_lurker"
+  },
+  {
+   "dst": "entities.items.barrow_charm",
+   "path": "content/monsters/grave_lurker.yaml",
+   "ref": "entities.items.barrow_charm",
+   "src": "entities.monsters.grave_lurker"
+  },
+  {
+   "dst": "entities.items.umber_phial",
+   "path": "content/monsters/grave_lurker.yaml",
+   "ref": "entities.items.umber_phial",
+   "src": "entities.monsters.grave_lurker"
+  },
+  {
+   "dst": "entities.skills.moth_sear",
+   "path": "content/monsters/grave_mite.yaml",
+   "ref": "entities.skills.moth_sear",
+   "src": "entities.monsters.grave_mite"
+  },
+  {
+   "dst": "entities.skills.sable_ward",
+   "path": "content/monsters/grave_mite.yaml",
+   "ref": "entities.skills.sable_ward",
+   "src": "entities.monsters.grave_mite"
+  },
+  {
+   "dst": "entities.items.fen_dirk",
+   "path": "content/monsters/grave_mite.yaml",
+   "ref": "entities.items.fen_dirk",
+   "src": "entities.monsters.grave_mite"
+  },
+  {
+   "dst": "entities.items.iron_sigil",
+   "path": "content/monsters/grave_mite.yaml",
+   "ref": "entities.items.iron_sigil",
+   "src": "entities.monsters.grave_mite"
+  },
+  {
+   "dst": "entities.skills.soot_bolt",
+   "path": "content/monsters/grave_wisp.yaml",
+   "ref": "entities.skills.soot_bolt",
+   "src": "entities.monsters.grave_wisp"
+  },
+  {
+   "dst": "entities.skills.tallow_wail",
+   "path": "content/monsters/grave_wisp.yaml",
+   "ref": "entities.skills.tallow_wail",
+   "src": "entities.monsters.grave_wisp"
+  },
+  {
+   "dst": "entities.items.barrow_buckler",
+   "path": "content/monsters/grave_wisp.yaml",
+   "ref": "entities.items.barrow_buckler",
+   "src": "entities.monsters.grave_wisp"
+  },
+  {
+   "dst": "entities.items.briny_gauntlet",
+   "path": "content/monsters/grave_wisp.yaml",
+   "ref": "entities.items.briny_gauntlet",
+   "src": "entities.monsters.grave_wisp"
+  },
+  {
+   "dst": "entities.items.iron_charm",
+   "path": "content/monsters/grave_wisp.yaml",
+   "ref": "entities.items.iron_charm",
+   "src": "entities.monsters.grave_wisp"
+  },
+  {
+   "dst": "entities.skills.umber_veil",
+   "path": "content/monsters/hollow_lurker.yaml",
+   "ref": "entities.skills.umber_veil",
+   "src": "entities.monsters.hollow_lurker"
+  },
+  {
+   "dst": "entities.items.dusk_mantle",
+   "path": "content/monsters/hollow_lurker.yaml",
+   "ref": "entities.items.dusk_mantle",
+   "src": "entities.monsters.hollow_lurker"
+  },
+  {
+   "dst": "entities.items.hollow_buckler",
+   "path": "content/monsters/hollow_lurker.yaml",
+   "ref": "entities.items.hollow_buckler",
+   "src": "entities.monsters.hollow_lurker"
+  },
+  {
+   "dst": "entities.items.tallow_mantle",
+   "path": "content/monsters/hollow_lurker.yaml",
+   "ref": "entities.items.tallow_mantle",
+   "src": "entities.monsters.hollow_lurker"
+  },
+  {
+   "dst": "entities.skills.yew_ward",
+   "path": "content/monsters/hollow_wight.yaml",
+   "ref": "entities.skills.yew_ward",
+   "src": "entities.monsters.hollow_wight"
+  },
+  {
+   "dst": "entities.items.candle_lens",
+   "path": "content/monsters/hollow_wight.yaml",
+   "ref": "entities.items.candle_lens",
+   "src": "entities.monsters.hollow_wight"
+  },
+  {
+   "dst": "entities.items.ochre_ring",
+   "path": "content/monsters/hollow_wight.yaml",
+   "ref": "entities.items.ochre_ring",
+   "src": "entities.monsters.hollow_wight"
+  },
+  {
+   "dst": "entities.items.tallow_brand",
+   "path": "content/monsters/hollow_wight.yaml",
+   "ref": "entities.items.tallow_brand",
+   "src": "entities.monsters.hollow_wight"
+  },
+  {
+   "dst": "entities.skills.dusk_chant",
+   "path": "content/monsters/iron_wisp.yaml",
+   "ref": "entities.skills.dusk_chant",
+   "src": "entities.monsters.iron_wisp"
+  },
+  {
+   "dst": "entities.skills.sable_rite",
+   "path": "content/monsters/iron_wisp.yaml",
+   "ref": "entities.skills.sable_rite",
+   "src": "entities.monsters.iron_wisp"
+  },
+  {
+   "dst": "entities.items.dusk_mantle",
+   "path": "content/monsters/iron_wisp.yaml",
+   "ref": "entities.items.dusk_mantle",
+   "src": "entities.monsters.iron_wisp"
+  },
+  {
+   "dst": "entities.skills.hollow_hex",
+   "path": "content/monsters/knell_mother.yaml",
+   "ref": "entities.skills.hollow_hex",
+   "src": "entities.monsters.knell_mother"
+  },
+  {
+   "dst": "entities.skills.murk_sear",
+   "path": "content/monsters/knell_mother.yaml",
+   "ref": "entities.skills.murk_sear",
+   "src": "entities.monsters.knell_mother"
+  },
+  {
+   "dst": "entities.items.moth_phial",
+   "path": "content/monsters/knell_mother.yaml",
+   "ref": "entities.items.moth_phial",
+   "src": "entities.monsters.knell_mother"
+  },
+  {
+   "dst": "entities.items.ochre_censer",
+   "path": "content/monsters/knell_mother.yaml",
+   "ref": "entities.items.ochre_censer",
+   "src": "entities.monsters.knell_mother"
+  },
+  {
+   "dst": "entities.items.sable_mantle",
+   "path": "content/monsters/knell_mother.yaml",
+   "ref": "entities.items.sable_mantle",
+   "src": "entities.monsters.knell_mother"
+  },
+  {
+   "dst": "entities.skills.briny_veil",
+   "path": "content/monsters/lamp_warden.yaml",
+   "ref": "entities.skills.briny_veil",
+   "src": "entities.monsters.lamp_warden"
+  },
+  {
+   "dst": "entities.skills.sable_lash",
+   "path": "content/monsters/lamp_warden.yaml",
+   "ref": "entities.skills.sable_lash",
+   "src": "entities.monsters.lamp_warden"
+  },
+  {
+   "dst": "entities.items.ashen_censer",
+   "path": "content/monsters/lamp_warden.yaml",
+   "ref": "entities.items.ashen_censer",
+   "src": "entities.monsters.lamp_warden"
+  },
+  {
+   "dst": "entities.items.murk_dirk",
+   "path": "content/monsters/lamp_warden.yaml",
+   "ref": "entities.items.murk_dirk",
+   "src": "entities.monsters.lamp_warden"
+  },
+  {
+   "dst": "entities.items.sable_mantle",
+   "path": "content/monsters/lamp_warden.yaml",
+   "ref": "entities.items.sable_mantle",
+   "src": "entities.monsters.lamp_warden"
+  },
+  {
+   "dst": "entities.skills.briny_veil",
+   "path": "content/monsters/lich_hound.yaml",
+   "ref": "entities.skills.briny_veil",
+   "src": "entities.monsters.lich_hound"
+  },
+  {
+   "dst": "entities.items.ashen_charm",
+   "path": "content/monsters/lich_hound.yaml",
+   "ref": "entities.items.ashen_charm",
+   "src": "entities.monsters.lich_hound"
+  },
+  {
+   "dst": "entities.skills.dusk_wail",
+   "path": "content/monsters/lich_husk.yaml",
+   "ref": "entities.skills.dusk_wail",
+   "src": "entities.monsters.lich_husk"
+  },
+  {
+   "dst": "entities.items.murk_torc",
+   "path": "content/monsters/lich_husk.yaml",
+   "ref": "entities.items.murk_torc",
+   "src": "entities.monsters.lich_husk"
+  },
+  {
+   "dst": "entities.items.sable_mantle",
+   "path": "content/monsters/lich_husk.yaml",
+   "ref": "entities.items.sable_mantle",
+   "src": "entities.monsters.lich_husk"
+  },
+  {
+   "dst": "entities.skills.wick_chant",
+   "path": "content/monsters/lich_lurker.yaml",
+   "ref": "entities.skills.wick_chant",
+   "src": "entities.monsters.lich_lurker"
+  },
+  {
+   "dst": "entities.items.umber_ring",
+   "path": "content/monsters/lich_lurker.yaml",
+   "ref": "entities.items.umber_ring",
+   "src": "entities.monsters.lich_lurker"
+  },
+  {
+   "dst": "entities.skills.dusk_wail",
+   "path": "content/monsters/lich_wight.yaml",
+   "ref": "entities.skills.dusk_wail",
+   "src": "entities.monsters.lich_wight"
+  },
+  {
+   "dst": "entities.skills.pale_hex",
+   "path": "content/monsters/lich_wight.yaml",
+   "ref": "entities.skills.pale_hex",
+   "src": "entities.monsters.lich_wight"
+  },
+  {
+   "dst": "entities.items.murk_censer",
+   "path": "content/monsters/lich_wight.yaml",
+   "ref": "entities.items.murk_censer",
+   "src": "entities.monsters.lich_wight"
+  },
+  {
+   "dst": "entities.skills.gloam_sear",
+   "path": "content/monsters/moth_hound.yaml",
+   "ref": "entities.skills.gloam_sear",
+   "src": "entities.monsters.moth_hound"
+  },
+  {
+   "dst": "entities.skills.grave_sear",
+   "path": "content/monsters/moth_hound.yaml",
+   "ref": "entities.skills.grave_sear",
+   "src": "entities.monsters.moth_hound"
+  },
+  {
+   "dst": "entities.items.lich_dirk",
+   "path": "content/monsters/moth_hound.yaml",
+   "ref": "entities.items.lich_dirk",
+   "src": "entities.monsters.moth_hound"
+  },
+  {
+   "dst": "entities.skills.sable_rite",
+   "path": "content/monsters/moth_wight.yaml",
+   "ref": "entities.skills.sable_rite",
+   "src": "entities.monsters.moth_wight"
+  },
+  {
+   "dst": "entities.items.umber_mantle",
+   "path": "content/monsters/moth_wight.yaml",
+   "ref": "entities.items.umber_mantle",
+   "src": "entities.monsters.moth_wight"
+  },
+  {
+   "dst": "entities.skills.fen_wail",
+   "path": "content/monsters/murk_revenant.yaml",
+   "ref": "entities.skills.fen_wail",
+   "src": "entities.monsters.murk_revenant"
+  },
+  {
+   "dst": "entities.skills.grave_chant",
+   "path": "content/monsters/murk_revenant.yaml",
+   "ref": "entities.skills.grave_chant",
+   "src": "entities.monsters.murk_revenant"
+  },
+  {
+   "dst": "entities.items.dusk_phial",
+   "path": "content/monsters/murk_revenant.yaml",
+   "ref": "entities.items.dusk_phial",
+   "src": "entities.monsters.murk_revenant"
+  },
+  {
+   "dst": "entities.items.wick_dirk",
+   "path": "content/monsters/murk_revenant.yaml",
+   "ref": "entities.items.wick_dirk",
+   "src": "entities.monsters.murk_revenant"
+  },
+  {
+   "dst": "entities.skills.iron_hex",
+   "path": "content/monsters/ochre_drudge.yaml",
+   "ref": "entities.skills.iron_hex",
+   "src": "entities.monsters.ochre_drudge"
+  },
+  {
+   "dst": "entities.skills.sable_hex",
+   "path": "content/monsters/ochre_drudge.yaml",
+   "ref": "entities.skills.sable_hex",
+   "src": "entities.monsters.ochre_drudge"
+  },
+  {
+   "dst": "entities.items.moth_phial",
+   "path": "content/monsters/ochre_drudge.yaml",
+   "ref": "entities.items.moth_phial",
+   "src": "entities.monsters.ochre_drudge"
+  },
+  {
+   "dst": "entities.skills.rust_pulse",
+   "path": "content/monsters/ochre_wisp.yaml",
+   "ref": "entities.skills.rust_pulse",
+   "src": "entities.monsters.ochre_wisp"
+  },
+  {
+   "dst": "entities.skills.yew_ward",
+   "path": "content/monsters/ochre_wisp.yaml",
+   "ref": "entities.skills.yew_ward",
+   "src": "entities.monsters.ochre_wisp"
+  },
+  {
+   "dst": "entities.items.murk_censer",
+   "path": "content/monsters/ochre_wisp.yaml",
+   "ref": "entities.items.murk_censer",
+   "src": "entities.monsters.ochre_wisp"
+  },
+  {
+   "dst": "entities.items.tallow_sigil",
+   "path": "content/monsters/ochre_wisp.yaml",
+   "ref": "entities.items.tallow_sigil",
+   "src": "entities.monsters.ochre_wisp"
+  },
+  {
+   "dst": "entities.skills.fen_chant",
+   "path": "content/monsters/rust_wight.yaml",
+   "ref": "entities.skills.fen_chant",
+   "src": "entities.monsters.rust_wight"
+  },
+  {
+   "dst": "entities.items.moth_ring",
+   "path": "content/monsters/rust_wight.yaml",
+   "ref": "entities.items.moth_ring",
+   "src": "entities.monsters.rust_wight"
+  },
+  {
+   "dst": "entities.items.soot_mantle",
+   "path": "content/monsters/rust_wight.yaml",
+   "ref": "entities.items.soot_mantle",
+   "src": "entities.monsters.rust_wight"
+  },
+  {
+   "dst": "entities.items.vesper_ring",
+   "path": "content/monsters/rust_wight.yaml",
+   "ref": "entities.items.vesper_ring",
+   "src": "entities.monsters.rust_wight"
+  },
+  {
+   "dst": "entities.skills.soot_lash",
+   "path": "content/monsters/sable_crawler.yaml",
+   "ref": "entities.skills.soot_lash",
+   "src": "entities.monsters.sable_crawler"
+  },
+  {
+   "dst": "entities.items.briny_ring",
+   "path": "content/monsters/sable_crawler.yaml",
+   "ref": "entities.items.briny_ring",
+   "src": "entities.monsters.sable_crawler"
+  },
+  {
+   "dst": "entities.items.candle_lens",
+   "path": "content/monsters/sable_crawler.yaml",
+   "ref": "entities.items.candle_lens",
+   "src": "entities.monsters.sable_crawler"
+  },
+  {
+   "dst": "entities.items.lich_dirk",
+   "path": "content/monsters/sable_crawler.yaml",
+   "ref": "entities.items.lich_dirk",
+   "src": "entities.monsters.sable_crawler"
+  },
+  {
+   "dst": "entities.skills.knell_pulse",
+   "path": "content/monsters/sable_drudge.yaml",
+   "ref": "entities.skills.knell_pulse",
+   "src": "entities.monsters.sable_drudge"
+  },
+  {
+   "dst": "entities.items.barrow_buckler",
+   "path": "content/monsters/sable_drudge.yaml",
+   "ref": "entities.items.barrow_buckler",
+   "src": "entities.monsters.sable_drudge"
+  },
+  {
+   "dst": "entities.items.hollow_ring",
+   "path": "content/monsters/sable_drudge.yaml",
+   "ref": "entities.items.hollow_ring",
+   "src": "entities.monsters.sable_drudge"
+  },
+  {
+   "dst": "entities.items.wick_gauntlet",
+   "path": "content/monsters/sable_drudge.yaml",
+   "ref": "entities.items.wick_gauntlet",
+   "src": "entities.monsters.sable_drudge"
+  },
+  {
+   "dst": "entities.skills.gloam_sear",
+   "path": "content/monsters/sable_shade.yaml",
+   "ref": "entities.skills.gloam_sear",
+   "src": "entities.monsters.sable_shade"
+  },
+  {
+   "dst": "entities.skills.ochre_bolt",
+   "path": "content/monsters/sable_shade.yaml",
+   "ref": "entities.skills.ochre_bolt",
+   "src": "entities.monsters.sable_shade"
+  },
+  {
+   "dst": "entities.items.barrow_brand",
+   "path": "content/monsters/sable_shade.yaml",
+   "ref": "entities.items.barrow_brand",
+   "src": "entities.monsters.sable_shade"
+  },
+  {
+   "dst": "entities.items.murk_torc",
+   "path": "content/monsters/sable_shade.yaml",
+   "ref": "entities.items.murk_torc",
+   "src": "entities.monsters.sable_shade"
+  },
+  {
+   "dst": "entities.skills.iron_wail",
+   "path": "content/monsters/soot_husk.yaml",
+   "ref": "entities.skills.iron_wail",
+   "src": "entities.monsters.soot_husk"
+  },
+  {
+   "dst": "entities.skills.rust_veil",
+   "path": "content/monsters/soot_husk.yaml",
+   "ref": "entities.skills.rust_veil",
+   "src": "entities.monsters.soot_husk"
+  },
+  {
+   "dst": "entities.items.candle_sigil",
+   "path": "content/monsters/soot_husk.yaml",
+   "ref": "entities.items.candle_sigil",
+   "src": "entities.monsters.soot_husk"
+  },
+  {
+   "dst": "entities.items.murk_lens",
+   "path": "content/monsters/soot_husk.yaml",
+   "ref": "entities.items.murk_lens",
+   "src": "entities.monsters.soot_husk"
+  },
+  {
+   "dst": "entities.items.wick_brand",
+   "path": "content/monsters/soot_husk.yaml",
+   "ref": "entities.items.wick_brand",
+   "src": "entities.monsters.soot_husk"
+  },
+  {
+   "dst": "entities.skills.candle_wail",
+   "path": "content/monsters/soot_king.yaml",
+   "ref": "entities.skills.candle_wail",
+   "src": "entities.monsters.soot_king"
+  },
+  {
+   "dst": "entities.skills.moth_sear",
+   "path": "content/monsters/soot_king.yaml",
+   "ref": "entities.skills.moth_sear",
+   "src": "entities.monsters.soot_king"
+  },
+  {
+   "dst": "entities.items.ashen_censer",
+   "path": "content/monsters/soot_king.yaml",
+   "ref": "entities.items.ashen_censer",
+   "src": "entities.monsters.soot_king"
+  },
+  {
+   "dst": "entities.items.grave_lens",
+   "path": "content/monsters/soot_king.yaml",
+   "ref": "entities.items.grave_lens",
+   "src": "entities.monsters.soot_king"
+  },
+  {
+   "dst": "entities.items.moth_phial",
+   "path": "content/monsters/soot_king.yaml",
+   "ref": "entities.items.moth_phial",
+   "src": "entities.monsters.soot_king"
+  },
+  {
+   "dst": "entities.skills.gloam_cleave",
+   "path": "content/monsters/soot_stalker.yaml",
+   "ref": "entities.skills.gloam_cleave",
+   "src": "entities.monsters.soot_stalker"
+  },
+  {
+   "dst": "entities.skills.soot_lash",
+   "path": "content/monsters/soot_stalker.yaml",
+   "ref": "entities.skills.soot_lash",
+   "src": "entities.monsters.soot_stalker"
+  },
+  {
+   "dst": "entities.items.hollow_mantle",
+   "path": "content/monsters/soot_stalker.yaml",
+   "ref": "entities.items.hollow_mantle",
+   "src": "entities.monsters.soot_stalker"
+  },
+  {
+   "dst": "entities.items.soot_ring",
+   "path": "content/monsters/soot_stalker.yaml",
+   "ref": "entities.items.soot_ring",
+   "src": "entities.monsters.soot_stalker"
+  },
+  {
+   "dst": "entities.items.umber_ring",
+   "path": "content/monsters/soot_stalker.yaml",
+   "ref": "entities.items.umber_ring",
+   "src": "entities.monsters.soot_stalker"
+  },
+  {
+   "dst": "entities.skills.briny_snare",
+   "path": "content/monsters/soot_wisp.yaml",
+   "ref": "entities.skills.briny_snare",
+   "src": "entities.monsters.soot_wisp"
+  },
+  {
+   "dst": "entities.items.ashen_dirk",
+   "path": "content/monsters/soot_wisp.yaml",
+   "ref": "entities.items.ashen_dirk",
+   "src": "entities.monsters.soot_wisp"
+  },
+  {
+   "dst": "entities.skills.briny_pulse",
+   "path": "content/monsters/tallow_drudge.yaml",
+   "ref": "entities.skills.briny_pulse",
+   "src": "entities.monsters.tallow_drudge"
+  },
+  {
+   "dst": "entities.items.iron_buckler",
+   "path": "content/monsters/tallow_drudge.yaml",
+   "ref": "entities.items.iron_buckler",
+   "src": "entities.monsters.tallow_drudge"
+  },
+  {
+   "dst": "entities.items.moth_ring",
+   "path": "content/monsters/tallow_drudge.yaml",
+   "ref": "entities.items.moth_ring",
+   "src": "entities.monsters.tallow_drudge"
+  },
+  {
+   "dst": "entities.skills.dusk_pulse",
+   "path": "content/monsters/tallow_shade.yaml",
+   "ref": "entities.skills.dusk_pulse",
+   "src": "entities.monsters.tallow_shade"
+  },
+  {
+   "dst": "entities.items.dusk_dirk",
+   "path": "content/monsters/tallow_shade.yaml",
+   "ref": "entities.items.dusk_dirk",
+   "src": "entities.monsters.tallow_shade"
+  },
+  {
+   "dst": "entities.items.iron_sigil",
+   "path": "content/monsters/tallow_shade.yaml",
+   "ref": "entities.items.iron_sigil",
+   "src": "entities.monsters.tallow_shade"
+  },
+  {
+   "dst": "entities.items.sable_sigil",
+   "path": "content/monsters/tallow_shade.yaml",
+   "ref": "entities.items.sable_sigil",
+   "src": "entities.monsters.tallow_shade"
+  },
+  {
+   "dst": "entities.skills.briny_snare",
+   "path": "content/monsters/tallow_stalker.yaml",
+   "ref": "entities.skills.briny_snare",
+   "src": "entities.monsters.tallow_stalker"
+  },
+  {
+   "dst": "entities.skills.fen_wail",
+   "path": "content/monsters/tallow_stalker.yaml",
+   "ref": "entities.skills.fen_wail",
+   "src": "entities.monsters.tallow_stalker"
+  },
+  {
+   "dst": "entities.items.ashen_censer",
+   "path": "content/monsters/tallow_stalker.yaml",
+   "ref": "entities.items.ashen_censer",
+   "src": "entities.monsters.tallow_stalker"
+  },
+  {
+   "dst": "entities.items.umber_phial",
+   "path": "content/monsters/tallow_stalker.yaml",
+   "ref": "entities.items.umber_phial",
+   "src": "entities.monsters.tallow_stalker"
+  },
+  {
+   "dst": "entities.items.yew_ring",
+   "path": "content/monsters/tallow_stalker.yaml",
+   "ref": "entities.items.yew_ring",
+   "src": "entities.monsters.tallow_stalker"
+  },
+  {
+   "dst": "entities.skills.soot_bolt",
+   "path": "content/monsters/umber_lurker.yaml",
+   "ref": "entities.skills.soot_bolt",
+   "src": "entities.monsters.umber_lurker"
+  },
+  {
+   "dst": "entities.items.hollow_gauntlet",
+   "path": "content/monsters/umber_lurker.yaml",
+   "ref": "entities.items.hollow_gauntlet",
+   "src": "entities.monsters.umber_lurker"
+  },
+  {
+   "dst": "entities.items.murk_hood",
+   "path": "content/monsters/umber_lurker.yaml",
+   "ref": "entities.items.murk_hood",
+   "src": "entities.monsters.umber_lurker"
+  },
+  {
+   "dst": "entities.skills.lich_chant",
+   "path": "content/monsters/umber_wisp.yaml",
+   "ref": "entities.skills.lich_chant",
+   "src": "entities.monsters.umber_wisp"
+  },
+  {
+   "dst": "entities.skills.tallow_pulse",
+   "path": "content/monsters/umber_wisp.yaml",
+   "ref": "entities.skills.tallow_pulse",
+   "src": "entities.monsters.umber_wisp"
+  },
+  {
+   "dst": "entities.items.briny_charm",
+   "path": "content/monsters/umber_wisp.yaml",
+   "ref": "entities.items.briny_charm",
+   "src": "entities.monsters.umber_wisp"
+  },
+  {
+   "dst": "entities.skills.sable_bolt",
+   "path": "content/monsters/vesper_ghoul.yaml",
+   "ref": "entities.skills.sable_bolt",
+   "src": "entities.monsters.vesper_ghoul"
+  },
+  {
+   "dst": "entities.skills.wick_veil",
+   "path": "content/monsters/vesper_ghoul.yaml",
+   "ref": "entities.skills.wick_veil",
+   "src": "entities.monsters.vesper_ghoul"
+  },
+  {
+   "dst": "entities.items.hollow_sigil",
+   "path": "content/monsters/vesper_ghoul.yaml",
+   "ref": "entities.items.hollow_sigil",
+   "src": "entities.monsters.vesper_ghoul"
+  },
+  {
+   "dst": "entities.items.umber_phial",
+   "path": "content/monsters/vesper_ghoul.yaml",
+   "ref": "entities.items.umber_phial",
+   "src": "entities.monsters.vesper_ghoul"
+  },
+  {
+   "dst": "entities.skills.grave_chant",
+   "path": "content/monsters/wick_lurker.yaml",
+   "ref": "entities.skills.grave_chant",
+   "src": "entities.monsters.wick_lurker"
+  },
+  {
+   "dst": "entities.skills.pale_hex",
+   "path": "content/monsters/wick_lurker.yaml",
+   "ref": "entities.skills.pale_hex",
+   "src": "entities.monsters.wick_lurker"
+  },
+  {
+   "dst": "entities.items.grave_lens",
+   "path": "content/monsters/wick_lurker.yaml",
+   "ref": "entities.items.grave_lens",
+   "src": "entities.monsters.wick_lurker"
+  },
+  {
+   "dst": "entities.items.soot_mantle",
+   "path": "content/monsters/wick_lurker.yaml",
+   "ref": "entities.items.soot_mantle",
+   "src": "entities.monsters.wick_lurker"
+  },
+  {
+   "dst": "entities.skills.grave_sear",
+   "path": "content/monsters/wick_shade.yaml",
+   "ref": "entities.skills.grave_sear",
+   "src": "entities.monsters.wick_shade"
+  },
+  {
+   "dst": "entities.skills.pale_veil",
+   "path": "content/monsters/wick_shade.yaml",
+   "ref": "entities.skills.pale_veil",
+   "src": "entities.monsters.wick_shade"
+  },
+  {
+   "dst": "entities.items.moth_gauntlet",
+   "path": "content/monsters/wick_shade.yaml",
+   "ref": "entities.items.moth_gauntlet",
+   "src": "entities.monsters.wick_shade"
+  },
+  {
+   "dst": "entities.skills.dusk_rite",
+   "path": "content/monsters/yew_hound.yaml",
+   "ref": "entities.skills.dusk_rite",
+   "src": "entities.monsters.yew_hound"
+  },
+  {
+   "dst": "entities.skills.pale_veil",
+   "path": "content/monsters/yew_hound.yaml",
+   "ref": "entities.skills.pale_veil",
+   "src": "entities.monsters.yew_hound"
+  },
+  {
+   "dst": "entities.items.fen_torc",
+   "path": "content/monsters/yew_hound.yaml",
+   "ref": "entities.items.fen_torc",
+   "src": "entities.monsters.yew_hound"
+  },
+  {
+   "dst": "entities.items.soot_censer",
+   "path": "content/monsters/yew_hound.yaml",
+   "ref": "entities.items.soot_censer",
+   "src": "entities.monsters.yew_hound"
+  },
+  {
+   "dst": "entities.skills.dusk_pulse",
+   "path": "content/monsters/yew_stalker.yaml",
+   "ref": "entities.skills.dusk_pulse",
+   "src": "entities.monsters.yew_stalker"
+  },
+  {
+   "dst": "entities.items.fen_sigil",
+   "path": "content/monsters/yew_stalker.yaml",
+   "ref": "entities.items.fen_sigil",
+   "src": "entities.monsters.yew_stalker"
+  },
+  {
+   "dst": "entities.items.gloam_flask",
+   "path": "content/monsters/yew_stalker.yaml",
+   "ref": "entities.items.gloam_flask",
+   "src": "entities.monsters.yew_stalker"
+  },
+  {
+   "dst": "entities.items.umber_mantle",
+   "path": "content/monsters/yew_stalker.yaml",
+   "ref": "entities.items.umber_mantle",
+   "src": "entities.monsters.yew_stalker"
+  },
+  {
+   "dst": "entities.skills.ashen_cleave",
+   "path": "content/monsters/yew_wisp.yaml",
+   "ref": "entities.skills.ashen_cleave",
+   "src": "entities.monsters.yew_wisp"
+  },
+  {
+   "dst": "entities.items.barrow_buckler",
+   "path": "content/monsters/yew_wisp.yaml",
+   "ref": "entities.items.barrow_buckler",
+   "src": "entities.monsters.yew_wisp"
+  },
+  {
+   "dst": "entities.items.iron_sigil",
+   "path": "content/monsters/yew_wisp.yaml",
+   "ref": "entities.items.iron_sigil",
+   "src": "entities.monsters.yew_wisp"
+  },
+  {
+   "dst": "entities.items.umber_phial",
+   "path": "content/monsters/yew_wisp.yaml",
+   "ref": "entities.items.umber_phial",
+   "src": "entities.monsters.yew_wisp"
+  },
+  {
+   "dst": "entities.monsters.barrow_husk",
+   "path": "content/encounters/briny_alcove.yaml",
+   "ref": "entities.monsters.barrow_husk",
+   "src": "entities.encounters.briny_alcove"
+  },
+  {
+   "dst": "entities.monsters.briny_lurker",
+   "path": "content/encounters/briny_alcove.yaml",
+   "ref": "entities.monsters.briny_lurker",
+   "src": "entities.encounters.briny_alcove"
+  },
+  {
+   "dst": "entities.monsters.grave_lurker",
+   "path": "content/encounters/briny_alcove.yaml",
+   "ref": "entities.monsters.grave_lurker",
+   "src": "entities.encounters.briny_alcove"
+  },
+  {
+   "dst": "distributions.ossuary_pack",
+   "path": "content/encounters/briny_alcove.yaml",
+   "ref": "distributions.ossuary_pack",
+   "src": "entities.encounters.briny_alcove"
+  },
+  {
+   "dst": "entities.monsters.barrow_drudge",
+   "path": "content/encounters/briny_den.yaml",
+   "ref": "entities.monsters.barrow_drudge",
+   "src": "entities.encounters.briny_den"
+  },
+  {
+   "dst": "entities.monsters.lamp_warden",
+   "path": "content/encounters/briny_den.yaml",
+   "ref": "entities.monsters.lamp_warden",
+   "src": "entities.encounters.briny_den"
+  },
+  {
+   "dst": "entities.monsters.lich_husk",
+   "path": "content/encounters/briny_den.yaml",
+   "ref": "entities.monsters.lich_husk",
+   "src": "entities.encounters.briny_den"
+  },
+  {
+   "dst": "entities.monsters.yew_stalker",
+   "path": "content/encounters/briny_den.yaml",
+   "ref": "entities.monsters.yew_stalker",
+   "src": "entities.encounters.briny_den"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/briny_den.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.briny_den"
+  },
+  {
+   "dst": "entities.monsters.sable_crawler",
+   "path": "content/encounters/candle_den.yaml",
+   "ref": "entities.monsters.sable_crawler",
+   "src": "entities.encounters.candle_den"
+  },
+  {
+   "dst": "entities.monsters.tallow_drudge",
+   "path": "content/encounters/candle_den.yaml",
+   "ref": "entities.monsters.tallow_drudge",
+   "src": "entities.encounters.candle_den"
+  },
+  {
+   "dst": "distributions.ossuary_pack",
+   "path": "content/encounters/candle_den.yaml",
+   "ref": "distributions.ossuary_pack",
+   "src": "entities.encounters.candle_den"
+  },
+  {
+   "dst": "entities.monsters.hollow_lurker",
+   "path": "content/encounters/candle_gallery.yaml",
+   "ref": "entities.monsters.hollow_lurker",
+   "src": "entities.encounters.candle_gallery"
+  },
+  {
+   "dst": "entities.monsters.ochre_drudge",
+   "path": "content/encounters/candle_gallery.yaml",
+   "ref": "entities.monsters.ochre_drudge",
+   "src": "entities.encounters.candle_gallery"
+  },
+  {
+   "dst": "distributions.ossuary_pack",
+   "path": "content/encounters/candle_gallery.yaml",
+   "ref": "distributions.ossuary_pack",
+   "src": "entities.encounters.candle_gallery"
+  },
+  {
+   "dst": "entities.monsters.ashen_hound",
+   "path": "content/encounters/candle_nave.yaml",
+   "ref": "entities.monsters.ashen_hound",
+   "src": "entities.encounters.candle_nave"
+  },
+  {
+   "dst": "entities.monsters.dusk_hound",
+   "path": "content/encounters/candle_nave.yaml",
+   "ref": "entities.monsters.dusk_hound",
+   "src": "entities.encounters.candle_nave"
+  },
+  {
+   "dst": "entities.monsters.tallow_stalker",
+   "path": "content/encounters/candle_nave.yaml",
+   "ref": "entities.monsters.tallow_stalker",
+   "src": "entities.encounters.candle_nave"
+  },
+  {
+   "dst": "entities.monsters.vesper_ghoul",
+   "path": "content/encounters/candle_nave.yaml",
+   "ref": "entities.monsters.vesper_ghoul",
+   "src": "entities.encounters.candle_nave"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/candle_nave.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.candle_nave"
+  },
+  {
+   "dst": "entities.monsters.fen_crawler",
+   "path": "content/encounters/dusk_crypt.yaml",
+   "ref": "entities.monsters.fen_crawler",
+   "src": "entities.encounters.dusk_crypt"
+  },
+  {
+   "dst": "entities.monsters.fen_shade",
+   "path": "content/encounters/dusk_crypt.yaml",
+   "ref": "entities.monsters.fen_shade",
+   "src": "entities.encounters.dusk_crypt"
+  },
+  {
+   "dst": "entities.monsters.gloam_wight",
+   "path": "content/encounters/dusk_crypt.yaml",
+   "ref": "entities.monsters.gloam_wight",
+   "src": "entities.encounters.dusk_crypt"
+  },
+  {
+   "dst": "entities.monsters.ochre_wisp",
+   "path": "content/encounters/dusk_crypt.yaml",
+   "ref": "entities.monsters.ochre_wisp",
+   "src": "entities.encounters.dusk_crypt"
+  },
+  {
+   "dst": "distributions.ossuary_pack",
+   "path": "content/encounters/dusk_crypt.yaml",
+   "ref": "distributions.ossuary_pack",
+   "src": "entities.encounters.dusk_crypt"
+  },
+  {
+   "dst": "entities.monsters.grave_mite",
+   "path": "content/encounters/fen_crypt.yaml",
+   "ref": "entities.monsters.grave_mite",
+   "src": "entities.encounters.fen_crypt"
+  },
+  {
+   "dst": "entities.monsters.knell_mother",
+   "path": "content/encounters/fen_crypt.yaml",
+   "ref": "entities.monsters.knell_mother",
+   "src": "entities.encounters.fen_crypt"
+  },
+  {
+   "dst": "entities.monsters.soot_stalker",
+   "path": "content/encounters/fen_crypt.yaml",
+   "ref": "entities.monsters.soot_stalker",
+   "src": "entities.encounters.fen_crypt"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/fen_crypt.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.fen_crypt"
+  },
+  {
+   "dst": "entities.monsters.ashen_shade",
+   "path": "content/encounters/fen_warren.yaml",
+   "ref": "entities.monsters.ashen_shade",
+   "src": "entities.encounters.fen_warren"
+  },
+  {
+   "dst": "entities.monsters.candle_hound",
+   "path": "content/encounters/fen_warren.yaml",
+   "ref": "entities.monsters.candle_hound",
+   "src": "entities.encounters.fen_warren"
+  },
+  {
+   "dst": "entities.monsters.gloam_crawler",
+   "path": "content/encounters/fen_warren.yaml",
+   "ref": "entities.monsters.gloam_crawler",
+   "src": "entities.encounters.fen_warren"
+  },
+  {
+   "dst": "distributions.gallery_pack",
+   "path": "content/encounters/fen_warren.yaml",
+   "ref": "distributions.gallery_pack",
+   "src": "entities.encounters.fen_warren"
+  },
+  {
+   "dst": "entities.monsters.dusk_stalker",
+   "path": "content/encounters/grave_warren.yaml",
+   "ref": "entities.monsters.dusk_stalker",
+   "src": "entities.encounters.grave_warren"
+  },
+  {
+   "dst": "entities.monsters.wick_shade",
+   "path": "content/encounters/grave_warren.yaml",
+   "ref": "entities.monsters.wick_shade",
+   "src": "entities.encounters.grave_warren"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/grave_warren.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.grave_warren"
+  },
+  {
+   "dst": "entities.monsters.dusk_crawler",
+   "path": "content/encounters/hollow_nave.yaml",
+   "ref": "entities.monsters.dusk_crawler",
+   "src": "entities.encounters.hollow_nave"
+  },
+  {
+   "dst": "entities.monsters.gloam_mite",
+   "path": "content/encounters/hollow_nave.yaml",
+   "ref": "entities.monsters.gloam_mite",
+   "src": "entities.encounters.hollow_nave"
+  },
+  {
+   "dst": "entities.monsters.murk_revenant",
+   "path": "content/encounters/hollow_nave.yaml",
+   "ref": "entities.monsters.murk_revenant",
+   "src": "entities.encounters.hollow_nave"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/hollow_nave.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.hollow_nave"
+  },
+  {
+   "dst": "entities.monsters.grave_wisp",
+   "path": "content/encounters/hollow_ossuary.yaml",
+   "ref": "entities.monsters.grave_wisp",
+   "src": "entities.encounters.hollow_ossuary"
+  },
+  {
+   "dst": "entities.monsters.iron_wisp",
+   "path": "content/encounters/hollow_ossuary.yaml",
+   "ref": "entities.monsters.iron_wisp",
+   "src": "entities.encounters.hollow_ossuary"
+  },
+  {
+   "dst": "entities.monsters.wick_lurker",
+   "path": "content/encounters/hollow_ossuary.yaml",
+   "ref": "entities.monsters.wick_lurker",
+   "src": "entities.encounters.hollow_ossuary"
+  },
+  {
+   "dst": "distributions.gallery_pack",
+   "path": "content/encounters/hollow_ossuary.yaml",
+   "ref": "distributions.gallery_pack",
+   "src": "entities.encounters.hollow_ossuary"
+  },
+  {
+   "dst": "entities.monsters.dusk_lurker",
+   "path": "content/encounters/iron_hollow.yaml",
+   "ref": "entities.monsters.dusk_lurker",
+   "src": "entities.encounters.iron_hollow"
+  },
+  {
+   "dst": "entities.monsters.hollow_wight",
+   "path": "content/encounters/iron_hollow.yaml",
+   "ref": "entities.monsters.hollow_wight",
+   "src": "entities.encounters.iron_hollow"
+  },
+  {
+   "dst": "entities.monsters.soot_husk",
+   "path": "content/encounters/iron_hollow.yaml",
+   "ref": "entities.monsters.soot_husk",
+   "src": "entities.encounters.iron_hollow"
+  },
+  {
+   "dst": "entities.monsters.yew_hound",
+   "path": "content/encounters/iron_hollow.yaml",
+   "ref": "entities.monsters.yew_hound",
+   "src": "entities.encounters.iron_hollow"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/iron_hollow.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.iron_hollow"
+  },
+  {
+   "dst": "entities.monsters.ashen_mite",
+   "path": "content/encounters/iron_ossuary.yaml",
+   "ref": "entities.monsters.ashen_mite",
+   "src": "entities.encounters.iron_ossuary"
+  },
+  {
+   "dst": "entities.monsters.barrow_wight",
+   "path": "content/encounters/iron_ossuary.yaml",
+   "ref": "entities.monsters.barrow_wight",
+   "src": "entities.encounters.iron_ossuary"
+  },
+  {
+   "dst": "entities.monsters.sable_drudge",
+   "path": "content/encounters/iron_ossuary.yaml",
+   "ref": "entities.monsters.sable_drudge",
+   "src": "entities.encounters.iron_ossuary"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/iron_ossuary.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.iron_ossuary"
+  },
+  {
+   "dst": "entities.monsters.briny_ghoul",
+   "path": "content/encounters/knell_vault.yaml",
+   "ref": "entities.monsters.briny_ghoul",
+   "src": "entities.encounters.knell_vault"
+  },
+  {
+   "dst": "entities.monsters.briny_wisp",
+   "path": "content/encounters/knell_vault.yaml",
+   "ref": "entities.monsters.briny_wisp",
+   "src": "entities.encounters.knell_vault"
+  },
+  {
+   "dst": "entities.monsters.grave_hound",
+   "path": "content/encounters/knell_vault.yaml",
+   "ref": "entities.monsters.grave_hound",
+   "src": "entities.encounters.knell_vault"
+  },
+  {
+   "dst": "distributions.gallery_pack",
+   "path": "content/encounters/knell_vault.yaml",
+   "ref": "distributions.gallery_pack",
+   "src": "entities.encounters.knell_vault"
+  },
+  {
+   "dst": "entities.monsters.dusk_mite",
+   "path": "content/encounters/lich_crypt.yaml",
+   "ref": "entities.monsters.dusk_mite",
+   "src": "entities.encounters.lich_crypt"
+  },
+  {
+   "dst": "entities.monsters.lich_hound",
+   "path": "content/encounters/lich_crypt.yaml",
+   "ref": "entities.monsters.lich_hound",
+   "src": "entities.encounters.lich_crypt"
+  },
+  {
+   "dst": "entities.monsters.umber_wisp",
+   "path": "content/encounters/lich_crypt.yaml",
+   "ref": "entities.monsters.umber_wisp",
+   "src": "entities.encounters.lich_crypt"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/lich_crypt.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.lich_crypt"
+  },
+  {
+   "dst": "entities.monsters.lich_lurker",
+   "path": "content/encounters/lich_hollow.yaml",
+   "ref": "entities.monsters.lich_lurker",
+   "src": "entities.encounters.lich_hollow"
+  },
+  {
+   "dst": "entities.monsters.tallow_shade",
+   "path": "content/encounters/lich_hollow.yaml",
+   "ref": "entities.monsters.tallow_shade",
+   "src": "entities.encounters.lich_hollow"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/lich_hollow.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.lich_hollow"
+  },
+  {
+   "dst": "entities.monsters.gloam_hound",
+   "path": "content/encounters/lich_warren.yaml",
+   "ref": "entities.monsters.gloam_hound",
+   "src": "entities.encounters.lich_warren"
+  },
+  {
+   "dst": "entities.monsters.lich_wight",
+   "path": "content/encounters/lich_warren.yaml",
+   "ref": "entities.monsters.lich_wight",
+   "src": "entities.encounters.lich_warren"
+  },
+  {
+   "dst": "entities.monsters.moth_wight",
+   "path": "content/encounters/lich_warren.yaml",
+   "ref": "entities.monsters.moth_wight",
+   "src": "entities.encounters.lich_warren"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/lich_warren.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.lich_warren"
+  },
+  {
+   "dst": "entities.monsters.gloam_revenant",
+   "path": "content/encounters/pale_den.yaml",
+   "ref": "entities.monsters.gloam_revenant",
+   "src": "entities.encounters.pale_den"
+  },
+  {
+   "dst": "entities.monsters.rust_wight",
+   "path": "content/encounters/pale_den.yaml",
+   "ref": "entities.monsters.rust_wight",
+   "src": "entities.encounters.pale_den"
+  },
+  {
+   "dst": "entities.monsters.umber_lurker",
+   "path": "content/encounters/pale_den.yaml",
+   "ref": "entities.monsters.umber_lurker",
+   "src": "entities.encounters.pale_den"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/pale_den.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.pale_den"
+  },
+  {
+   "dst": "entities.monsters.sable_shade",
+   "path": "content/encounters/sable_alcove.yaml",
+   "ref": "entities.monsters.sable_shade",
+   "src": "entities.encounters.sable_alcove"
+  },
+  {
+   "dst": "entities.monsters.soot_wisp",
+   "path": "content/encounters/sable_alcove.yaml",
+   "ref": "entities.monsters.soot_wisp",
+   "src": "entities.encounters.sable_alcove"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/sable_alcove.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.sable_alcove"
+  },
+  {
+   "dst": "entities.monsters.ashen_mite",
+   "path": "content/encounters/sable_gallery.yaml",
+   "ref": "entities.monsters.ashen_mite",
+   "src": "entities.encounters.sable_gallery"
+  },
+  {
+   "dst": "entities.monsters.fen_drudge",
+   "path": "content/encounters/sable_gallery.yaml",
+   "ref": "entities.monsters.fen_drudge",
+   "src": "entities.encounters.sable_gallery"
+  },
+  {
+   "dst": "entities.monsters.moth_hound",
+   "path": "content/encounters/sable_gallery.yaml",
+   "ref": "entities.monsters.moth_hound",
+   "src": "entities.encounters.sable_gallery"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/sable_gallery.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.sable_gallery"
+  },
+  {
+   "dst": "entities.monsters.dusk_lurker",
+   "path": "content/encounters/sable_nave.yaml",
+   "ref": "entities.monsters.dusk_lurker",
+   "src": "entities.encounters.sable_nave"
+  },
+  {
+   "dst": "entities.monsters.grave_hound",
+   "path": "content/encounters/sable_nave.yaml",
+   "ref": "entities.monsters.grave_hound",
+   "src": "entities.encounters.sable_nave"
+  },
+  {
+   "dst": "entities.monsters.yew_wisp",
+   "path": "content/encounters/sable_nave.yaml",
+   "ref": "entities.monsters.yew_wisp",
+   "src": "entities.encounters.sable_nave"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/sable_nave.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.sable_nave"
+  },
+  {
+   "dst": "entities.monsters.barrow_husk",
+   "path": "content/encounters/sable_ossuary.yaml",
+   "ref": "entities.monsters.barrow_husk",
+   "src": "entities.encounters.sable_ossuary"
+  },
+  {
+   "dst": "entities.monsters.fen_shade",
+   "path": "content/encounters/sable_ossuary.yaml",
+   "ref": "entities.monsters.fen_shade",
+   "src": "entities.encounters.sable_ossuary"
+  },
+  {
+   "dst": "entities.monsters.soot_stalker",
+   "path": "content/encounters/sable_ossuary.yaml",
+   "ref": "entities.monsters.soot_stalker",
+   "src": "entities.encounters.sable_ossuary"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/sable_ossuary.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.sable_ossuary"
+  },
+  {
+   "dst": "entities.monsters.briny_wisp",
+   "path": "content/encounters/soot_sanctum.yaml",
+   "ref": "entities.monsters.briny_wisp",
+   "src": "entities.encounters.soot_sanctum"
+  },
+  {
+   "dst": "entities.monsters.dusk_hound",
+   "path": "content/encounters/soot_sanctum.yaml",
+   "ref": "entities.monsters.dusk_hound",
+   "src": "entities.encounters.soot_sanctum"
+  },
+  {
+   "dst": "entities.monsters.soot_king",
+   "path": "content/encounters/soot_sanctum.yaml",
+   "ref": "entities.monsters.soot_king",
+   "src": "entities.encounters.soot_sanctum"
+  },
+  {
+   "dst": "distributions.sanctum_pack",
+   "path": "content/encounters/soot_sanctum.yaml",
+   "ref": "distributions.sanctum_pack",
+   "src": "entities.encounters.soot_sanctum"
+  },
+  {
+   "dst": "entities.monsters.grave_wisp",
+   "path": "content/encounters/umber_alcove.yaml",
+   "ref": "entities.monsters.grave_wisp",
+   "src": "entities.encounters.umber_alcove"
+  },
+  {
+   "dst": "entities.monsters.iron_wisp",
+   "path": "content/encounters/umber_alcove.yaml",
+   "ref": "entities.monsters.iron_wisp",
+   "src": "entities.encounters.umber_alcove"
+  },
+  {
+   "dst": "entities.monsters.sable_shade",
+   "path": "content/encounters/umber_alcove.yaml",
+   "ref": "entities.monsters.sable_shade",
+   "src": "entities.encounters.umber_alcove"
+  },
+  {
+   "dst": "entities.monsters.yew_stalker",
+   "path": "content/encounters/umber_alcove.yaml",
+   "ref": "entities.monsters.yew_stalker",
+   "src": "entities.encounters.umber_alcove"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/umber_alcove.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.umber_alcove"
+  },
+  {
+   "dst": "entities.monsters.lich_lurker",
+   "path": "content/encounters/umber_den.yaml",
+   "ref": "entities.monsters.lich_lurker",
+   "src": "entities.encounters.umber_den"
+  },
+  {
+   "dst": "entities.monsters.yew_hound",
+   "path": "content/encounters/umber_den.yaml",
+   "ref": "entities.monsters.yew_hound",
+   "src": "entities.encounters.umber_den"
+  },
+  {
+   "dst": "distributions.undercroft_pack",
+   "path": "content/encounters/umber_den.yaml",
+   "ref": "distributions.undercroft_pack",
+   "src": "entities.encounters.umber_den"
+  },
+  {
+   "dst": "entities.monsters.ochre_drudge",
+   "path": "content/encounters/vesper_barrow.yaml",
+   "ref": "entities.monsters.ochre_drudge",
+   "src": "entities.encounters.vesper_barrow"
+  },
+  {
+   "dst": "entities.monsters.sable_crawler",
+   "path": "content/encounters/vesper_barrow.yaml",
+   "ref": "entities.monsters.sable_crawler",
+   "src": "entities.encounters.vesper_barrow"
+  },
+  {
+   "dst": "entities.monsters.umber_wisp",
+   "path": "content/encounters/vesper_barrow.yaml",
+   "ref": "entities.monsters.umber_wisp",
+   "src": "entities.encounters.vesper_barrow"
+  },
+  {
+   "dst": "distributions.shallows_pack",
+   "path": "content/encounters/vesper_barrow.yaml",
+   "ref": "distributions.shallows_pack",
+   "src": "entities.encounters.vesper_barrow"
+  },
+  {
+   "dst": "entities.monsters.dusk_crawler",
+   "path": "content/encounters/vesper_hollow.yaml",
+   "ref": "entities.monsters.dusk_crawler",
+   "src": "entities.encounters.vesper_hollow"
+  },
+  {
+   "dst": "entities.monsters.tallow_shade",
+   "path": "content/encounters/vesper_hollow.yaml",
+   "ref": "entities.monsters.tallow_shade",
+   "src": "entities.encounters.vesper_hollow"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/vesper_hollow.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.vesper_hollow"
+  },
+  {
+   "dst": "entities.monsters.briny_ghoul",
+   "path": "content/encounters/vesper_ossuary.yaml",
+   "ref": "entities.monsters.briny_ghoul",
+   "src": "entities.encounters.vesper_ossuary"
+  },
+  {
+   "dst": "entities.monsters.moth_wight",
+   "path": "content/encounters/vesper_ossuary.yaml",
+   "ref": "entities.monsters.moth_wight",
+   "src": "entities.encounters.vesper_ossuary"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/vesper_ossuary.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.vesper_ossuary"
+  },
+  {
+   "dst": "entities.monsters.gloam_mite",
+   "path": "content/encounters/wick_pit.yaml",
+   "ref": "entities.monsters.gloam_mite",
+   "src": "entities.encounters.wick_pit"
+  },
+  {
+   "dst": "entities.monsters.soot_wisp",
+   "path": "content/encounters/wick_pit.yaml",
+   "ref": "entities.monsters.soot_wisp",
+   "src": "entities.encounters.wick_pit"
+  },
+  {
+   "dst": "entities.monsters.wick_lurker",
+   "path": "content/encounters/wick_pit.yaml",
+   "ref": "entities.monsters.wick_lurker",
+   "src": "entities.encounters.wick_pit"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/wick_pit.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.wick_pit"
+  },
+  {
+   "dst": "entities.monsters.tallow_drudge",
+   "path": "content/encounters/yew_alcove.yaml",
+   "ref": "entities.monsters.tallow_drudge",
+   "src": "entities.encounters.yew_alcove"
+  },
+  {
+   "dst": "entities.monsters.vesper_ghoul",
+   "path": "content/encounters/yew_alcove.yaml",
+   "ref": "entities.monsters.vesper_ghoul",
+   "src": "entities.encounters.yew_alcove"
+  },
+  {
+   "dst": "distributions.deepvault_pack",
+   "path": "content/encounters/yew_alcove.yaml",
+   "ref": "distributions.deepvault_pack",
+   "src": "entities.encounters.yew_alcove"
+  },
+  {
+   "dst": "resources.vigor",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.vigor",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "resources.ward_focus",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.ward_focus",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "resources.lantern_oil",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.lantern_oil",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "resources.grave_coin",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.grave_coin",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "resources.satchel_load",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.satchel_load",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "entities.satchel",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.satchel",
+   "src": "entities.lamplighter"
+  },
+  {
+   "dst": "entities.items",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.items",
+   "src": "entities.satchel"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.descend_stair"
+  },
+  {
+   "dst": "entities.encounters",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.encounters",
+   "src": "verbs.descend_stair"
+  },
+  {
+   "dst": "rules.spawn_encounter",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.spawn_encounter",
+   "src": "verbs.descend_stair"
+  },
+  {
+   "dst": "feel.descend_stair",
+   "path": "gdd/mechanics.md",
+   "ref": "feel.descend_stair",
+   "src": "verbs.descend_stair"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.strike_foe"
+  },
+  {
+   "dst": "entities.monsters",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.monsters",
+   "src": "verbs.strike_foe"
+  },
+  {
+   "dst": "rules.resolve_strike",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.resolve_strike",
+   "src": "verbs.strike_foe"
+  },
+  {
+   "dst": "feel.strike_foe",
+   "path": "gdd/mechanics.md",
+   "ref": "feel.strike_foe",
+   "src": "verbs.strike_foe"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.invoke_skill"
+  },
+  {
+   "dst": "resources.ward_focus",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.ward_focus",
+   "src": "verbs.invoke_skill"
+  },
+  {
+   "dst": "entities.skills",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.skills",
+   "src": "verbs.invoke_skill"
+  },
+  {
+   "dst": "rules.resolve_skill",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.resolve_skill",
+   "src": "verbs.invoke_skill"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.use_relic"
+  },
+  {
+   "dst": "entities.satchel",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.satchel",
+   "src": "verbs.use_relic"
+  },
+  {
+   "dst": "rules.apply_relic",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.apply_relic",
+   "src": "verbs.use_relic"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.loot_remains"
+  },
+  {
+   "dst": "entities.monsters",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.monsters",
+   "src": "verbs.loot_remains"
+  },
+  {
+   "dst": "rules.roll_drops",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.roll_drops",
+   "src": "verbs.loot_remains"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.salvage_gear"
+  },
+  {
+   "dst": "entities.satchel",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.satchel",
+   "src": "verbs.salvage_gear"
+  },
+  {
+   "dst": "rules.resolve_salvage",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.resolve_salvage",
+   "src": "verbs.salvage_gear"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.trim_wick"
+  },
+  {
+   "dst": "rules.refill_lantern",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.refill_lantern",
+   "src": "verbs.trim_wick"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.ring_the_knell"
+  },
+  {
+   "dst": "entities.monsters.knell_mother",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.monsters.knell_mother",
+   "src": "verbs.ring_the_knell"
+  },
+  {
+   "dst": "rules.boss_awakening",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.boss_awakening",
+   "src": "verbs.ring_the_knell"
+  },
+  {
+   "dst": "feel.ring_the_knell",
+   "path": "gdd/mechanics.md",
+   "ref": "feel.ring_the_knell",
+   "src": "verbs.ring_the_knell"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.breach_sanctum"
+  },
+  {
+   "dst": "entities.encounters.soot_sanctum",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.encounters.soot_sanctum",
+   "src": "verbs.breach_sanctum"
+  },
+  {
+   "dst": "rules.sanctum_trial",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.sanctum_trial",
+   "src": "verbs.breach_sanctum"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.flee_upward"
+  },
+  {
+   "dst": "rules.resolve_flight",
+   "path": "gdd/mechanics.md",
+   "ref": "rules.resolve_flight",
+   "src": "verbs.flee_upward"
+  },
+  {
+   "dst": "entities.lamplighter",
+   "path": "gdd/mechanics.md",
+   "ref": "entities.lamplighter",
+   "src": "verbs.make_camp"
+  },
+  {
+   "dst": "resources.vigor",
+   "path": "gdd/mechanics.md",
+   "ref": "resources.vigor",
+   "src": "verbs.make_camp"
+  },
+  {
+   "dst": "balance_targets.oil_per_floor",
+   "path": "gdd/mechanics.md",
+   "ref": "balance_targets.oil_per_floor",
+   "src": "resources.lantern_oil"
+  },
+  {
+   "dst": "balance_targets.coin_per_expedition",
+   "path": "gdd/mechanics.md",
+   "ref": "balance_targets.coin_per_expedition",
+   "src": "resources.grave_coin"
+  },
+  {
+   "dst": "events.chill_applied",
+   "path": "gdd/mechanics.md",
+   "ref": "events.chill_applied",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.hex_applied",
+   "path": "gdd/mechanics.md",
+   "ref": "events.hex_applied",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.wound_opened",
+   "path": "gdd/mechanics.md",
+   "ref": "events.wound_opened",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.daze_applied",
+   "path": "gdd/mechanics.md",
+   "ref": "events.daze_applied",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.affliction_faded",
+   "path": "gdd/mechanics.md",
+   "ref": "events.affliction_faded",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.affliction_faded",
+   "path": "gdd/mechanics.md",
+   "ref": "events.affliction_faded",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.affliction_faded",
+   "path": "gdd/mechanics.md",
+   "ref": "events.affliction_faded",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.affliction_faded",
+   "path": "gdd/mechanics.md",
+   "ref": "events.affliction_faded",
+   "src": "states.affliction"
+  },
+  {
+   "dst": "events.oil_low",
+   "path": "gdd/mechanics.md",
+   "ref": "events.oil_low",
+   "src": "states.lantern_state"
+  },
+  {
+   "dst": "events.oil_refilled",
+   "path": "gdd/mechanics.md",
+   "ref": "events.oil_refilled",
+   "src": "states.lantern_state"
+  },
+  {
+   "dst": "events.flame_out",
+   "path": "gdd/mechanics.md",
+   "ref": "events.flame_out",
+   "src": "states.lantern_state"
+  },
+  {
+   "dst": "verbs.strike_foe",
+   "path": "gdd/loops.md",
+   "ref": "verbs.strike_foe",
+   "src": "loops.delve_turn"
+  },
+  {
+   "dst": "verbs.invoke_skill",
+   "path": "gdd/loops.md",
+   "ref": "verbs.invoke_skill",
+   "src": "loops.delve_turn"
+  },
+  {
+   "dst": "verbs.use_relic",
+   "path": "gdd/loops.md",
+   "ref": "verbs.use_relic",
+   "src": "loops.delve_turn"
+  },
+  {
+   "dst": "clocks.lantern_burn",
+   "path": "gdd/loops.md",
+   "ref": "clocks.lantern_burn",
+   "src": "loops.delve_turn"
+  },
+  {
+   "dst": "balance_targets.turns_per_fight",
+   "path": "gdd/loops.md",
+   "ref": "balance_targets.turns_per_fight",
+   "src": "loops.delve_turn"
+  },
+  {
+   "dst": "verbs.descend_stair",
+   "path": "gdd/loops.md",
+   "ref": "verbs.descend_stair",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "loops.delve_turn",
+   "path": "gdd/loops.md",
+   "ref": "loops.delve_turn",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "verbs.loot_remains",
+   "path": "gdd/loops.md",
+   "ref": "verbs.loot_remains",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "verbs.salvage_gear",
+   "path": "gdd/loops.md",
+   "ref": "verbs.salvage_gear",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "verbs.trim_wick",
+   "path": "gdd/loops.md",
+   "ref": "verbs.trim_wick",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "balance_targets.oil_per_floor",
+   "path": "gdd/loops.md",
+   "ref": "balance_targets.oil_per_floor",
+   "src": "loops.floor_sweep"
+  },
+  {
+   "dst": "verbs.make_camp",
+   "path": "gdd/loops.md",
+   "ref": "verbs.make_camp",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "loops.floor_sweep",
+   "path": "gdd/loops.md",
+   "ref": "loops.floor_sweep",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "verbs.ring_the_knell",
+   "path": "gdd/loops.md",
+   "ref": "verbs.ring_the_knell",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "verbs.breach_sanctum",
+   "path": "gdd/loops.md",
+   "ref": "verbs.breach_sanctum",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "verbs.flee_upward",
+   "path": "gdd/loops.md",
+   "ref": "verbs.flee_upward",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "balance_targets.expedition_length",
+   "path": "gdd/loops.md",
+   "ref": "balance_targets.expedition_length",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "balance_targets.clear_rate",
+   "path": "gdd/loops.md",
+   "ref": "balance_targets.clear_rate",
+   "src": "loops.expedition"
+  },
+  {
+   "dst": "rules.gutter_check",
+   "path": "gdd/clocks.md",
+   "ref": "rules.gutter_check",
+   "src": "clocks.lantern_burn"
+  },
+  {
+   "dst": "rules.affliction_tick",
+   "path": "gdd/clocks.md",
+   "ref": "rules.affliction_tick",
+   "src": "clocks.lantern_burn"
+  },
+  {
+   "dst": "rules.wandering_spawn",
+   "path": "gdd/clocks.md",
+   "ref": "rules.wandering_spawn",
+   "src": "clocks.lantern_burn"
+  },
+  {
+   "dst": "distributions.depth_band",
+   "path": "gdd/systems/spawning.md",
+   "ref": "distributions.depth_band",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.iron_ossuary",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.iron_ossuary",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.lich_hollow",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.lich_hollow",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.lich_warren",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.lich_warren",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.sable_alcove",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.sable_alcove",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.sable_nave",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.sable_nave",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.sable_ossuary",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.sable_ossuary",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.umber_alcove",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.umber_alcove",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.vesper_barrow",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.vesper_barrow",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.briny_alcove",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.briny_alcove",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.candle_den",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.candle_den",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.candle_gallery",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.candle_gallery",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.dusk_crypt",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.dusk_crypt",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.fen_warren",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.fen_warren",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.hollow_ossuary",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.hollow_ossuary",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.knell_vault",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.knell_vault",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.briny_den",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.briny_den",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.candle_nave",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.candle_nave",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.grave_warren",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.grave_warren",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.hollow_nave",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.hollow_nave",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.iron_hollow",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.iron_hollow",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.sable_gallery",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.sable_gallery",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.umber_den",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.umber_den",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.fen_crypt",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.fen_crypt",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.lich_crypt",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.lich_crypt",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.pale_den",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.pale_den",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.vesper_hollow",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.vesper_hollow",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.vesper_ossuary",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.vesper_ossuary",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.wick_pit",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.wick_pit",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "entities.encounters.yew_alcove",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.encounters.yew_alcove",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "verbs.descend_stair",
+   "path": "gdd/systems/spawning.md",
+   "ref": "verbs.descend_stair",
+   "src": "rules.spawn_encounter"
+  },
+  {
+   "dst": "clocks.lantern_burn",
+   "path": "gdd/systems/spawning.md",
+   "ref": "clocks.lantern_burn",
+   "src": "rules.wandering_spawn"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/systems/spawning.md",
+   "ref": "states.lantern_state.dim",
+   "src": "rules.wandering_spawn"
+  },
+  {
+   "dst": "distributions.wander_chance",
+   "path": "gdd/systems/spawning.md",
+   "ref": "distributions.wander_chance",
+   "src": "rules.wandering_spawn"
+  },
+  {
+   "dst": "entities.monsters",
+   "path": "gdd/systems/spawning.md",
+   "ref": "entities.monsters",
+   "src": "rules.wandering_spawn"
+  },
+  {
+   "dst": "verbs.ring_the_knell",
+   "path": "gdd/systems/bosses.md",
+   "ref": "verbs.ring_the_knell",
+   "src": "rules.boss_awakening"
+  },
+  {
+   "dst": "entities.monsters.lamp_warden",
+   "path": "gdd/systems/bosses.md",
+   "ref": "entities.monsters.lamp_warden",
+   "src": "rules.boss_awakening"
+  },
+  {
+   "dst": "entities.monsters.knell_mother",
+   "path": "gdd/systems/bosses.md",
+   "ref": "entities.monsters.knell_mother",
+   "src": "rules.boss_awakening"
+  },
+  {
+   "dst": "verbs.breach_sanctum",
+   "path": "gdd/systems/bosses.md",
+   "ref": "verbs.breach_sanctum",
+   "src": "rules.sanctum_trial"
+  },
+  {
+   "dst": "entities.encounters.soot_sanctum",
+   "path": "gdd/systems/bosses.md",
+   "ref": "entities.encounters.soot_sanctum",
+   "src": "rules.sanctum_trial"
+  },
+  {
+   "dst": "entities.monsters.soot_king",
+   "path": "gdd/systems/bosses.md",
+   "ref": "entities.monsters.soot_king",
+   "src": "rules.sanctum_trial"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/systems/bosses.md",
+   "ref": "states.lantern_state.guttered",
+   "src": "rules.sanctum_trial"
+  },
+  {
+   "dst": "verbs.loot_remains",
+   "path": "gdd/systems/loot.md",
+   "ref": "verbs.loot_remains",
+   "src": "rules.roll_drops"
+  },
+  {
+   "dst": "distributions.drop_quality",
+   "path": "gdd/systems/loot.md",
+   "ref": "distributions.drop_quality",
+   "src": "rules.roll_drops"
+  },
+  {
+   "dst": "verbs.salvage_gear",
+   "path": "gdd/systems/loot.md",
+   "ref": "verbs.salvage_gear",
+   "src": "rules.resolve_salvage"
+  },
+  {
+   "dst": "distributions.salvage_yield",
+   "path": "gdd/systems/loot.md",
+   "ref": "distributions.salvage_yield",
+   "src": "rules.resolve_salvage"
+  },
+  {
+   "dst": "resources.grave_coin",
+   "path": "gdd/systems/loot.md",
+   "ref": "resources.grave_coin",
+   "src": "rules.resolve_salvage"
+  },
+  {
+   "dst": "verbs.strike_foe",
+   "path": "gdd/systems/combat.md",
+   "ref": "verbs.strike_foe",
+   "src": "rules.resolve_strike"
+  },
+  {
+   "dst": "distributions.strike_roll",
+   "path": "gdd/systems/combat.md",
+   "ref": "distributions.strike_roll",
+   "src": "rules.resolve_strike"
+  },
+  {
+   "dst": "verbs.invoke_skill",
+   "path": "gdd/systems/combat.md",
+   "ref": "verbs.invoke_skill",
+   "src": "rules.resolve_skill"
+  },
+  {
+   "dst": "resources.ward_focus",
+   "path": "gdd/systems/combat.md",
+   "ref": "resources.ward_focus",
+   "src": "rules.resolve_skill"
+  },
+  {
+   "dst": "verbs.use_relic",
+   "path": "gdd/systems/combat.md",
+   "ref": "verbs.use_relic",
+   "src": "rules.apply_relic"
+  },
+  {
+   "dst": "resources.vigor",
+   "path": "gdd/systems/combat.md",
+   "ref": "resources.vigor",
+   "src": "rules.apply_relic"
+  },
+  {
+   "dst": "verbs.flee_upward",
+   "path": "gdd/systems/combat.md",
+   "ref": "verbs.flee_upward",
+   "src": "rules.resolve_flight"
+  },
+  {
+   "dst": "distributions.flight_chance",
+   "path": "gdd/systems/combat.md",
+   "ref": "distributions.flight_chance",
+   "src": "rules.resolve_flight"
+  },
+  {
+   "dst": "resources.vigor",
+   "path": "gdd/systems/combat.md",
+   "ref": "resources.vigor",
+   "src": "rules.resolve_flight"
+  },
+  {
+   "dst": "clocks.lantern_burn",
+   "path": "gdd/systems/combat.md",
+   "ref": "clocks.lantern_burn",
+   "src": "rules.affliction_tick"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "gdd/systems/combat.md",
+   "ref": "states.affliction",
+   "src": "rules.affliction_tick"
+  },
+  {
+   "dst": "states.affliction",
+   "path": "gdd/systems/combat.md",
+   "ref": "states.affliction.bleeding",
+   "src": "rules.affliction_tick"
+  },
+  {
+   "dst": "clocks.lantern_burn",
+   "path": "gdd/systems/lantern.md",
+   "ref": "clocks.lantern_burn",
+   "src": "rules.gutter_check"
+  },
+  {
+   "dst": "resources.lantern_oil",
+   "path": "gdd/systems/lantern.md",
+   "ref": "resources.lantern_oil",
+   "src": "rules.gutter_check"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/systems/lantern.md",
+   "ref": "states.lantern_state.dim",
+   "src": "rules.gutter_check"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/systems/lantern.md",
+   "ref": "states.lantern_state.guttered",
+   "src": "rules.gutter_check"
+  },
+  {
+   "dst": "verbs.trim_wick",
+   "path": "gdd/systems/lantern.md",
+   "ref": "verbs.trim_wick",
+   "src": "rules.refill_lantern"
+  },
+  {
+   "dst": "resources.lantern_oil",
+   "path": "gdd/systems/lantern.md",
+   "ref": "resources.lantern_oil",
+   "src": "rules.refill_lantern"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/systems/lantern.md",
+   "ref": "states.lantern_state.lit",
+   "src": "rules.refill_lantern"
+  },
+  {
+   "dst": "resources.vigor",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "resources.vigor",
+   "src": "invariants.vigor_is_integer"
+  },
+  {
+   "dst": "resources.ward_focus",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "resources.ward_focus",
+   "src": "invariants.vigor_is_integer"
+  },
+  {
+   "dst": "entities.monsters",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "entities.monsters",
+   "src": "invariants.vigor_is_integer"
+  },
+  {
+   "dst": "clocks.lantern_burn",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "clocks.lantern_burn",
+   "src": "invariants.oil_only_via_clock"
+  },
+  {
+   "dst": "resources.lantern_oil",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "resources.lantern_oil",
+   "src": "invariants.oil_only_via_clock"
+  },
+  {
+   "dst": "distributions.strike_roll",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "distributions.strike_roll",
+   "src": "invariants.seeded_rolls"
+  },
+  {
+   "dst": "distributions.drop_quality",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "distributions.drop_quality",
+   "src": "invariants.seeded_rolls"
+  },
+  {
+   "dst": "distributions.depth_band",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "distributions.depth_band",
+   "src": "invariants.seeded_rolls"
+  },
+  {
+   "dst": "states.lantern_state",
+   "path": "gdd/architecture-invariants.md",
+   "ref": "states.lantern_state",
+   "src": "invariants.sim_owns_lantern_state"
+  },
+  {
+   "dst": "balance_targets.items_per_rarity",
+   "path": "gdd/content/items.md",
+   "ref": "balance_targets.items_per_rarity",
+   "src": "meta:gdd/content/items.md"
+  },
+  {
+   "dst": "balance_targets.skill_focus_cost",
+   "path": "gdd/content/skills.md",
+   "ref": "balance_targets.skill_focus_cost",
+   "src": "meta:gdd/content/skills.md"
+  },
+  {
+   "dst": "balance_targets.monster_vigor_curve",
+   "path": "gdd/content/monsters.md",
+   "ref": "balance_targets.monster_vigor_curve",
+   "src": "meta:gdd/content/monsters.md"
+  },
+  {
+   "dst": "balance_targets.encounter_pack_size",
+   "path": "gdd/content/encounters.md",
+   "ref": "balance_targets.encounter_pack_size",
+   "src": "meta:gdd/content/encounters.md"
+  },
+  {
+   "dst": "loops.delve_turn",
+   "path": "game-design.md",
+   "ref": "loops.delve_turn",
+   "src": "meta:game-design.md"
+  }
+ ],
+ "nodes": {
+  "balance_targets.clear_rate": "gdd/economy-balance.md",
+  "balance_targets.coin_per_expedition": "gdd/economy-balance.md",
+  "balance_targets.encounter_pack_size": "gdd/economy-balance.md",
+  "balance_targets.expedition_length": "gdd/economy-balance.md",
+  "balance_targets.items_per_rarity": "gdd/economy-balance.md",
+  "balance_targets.monster_vigor_curve": "gdd/economy-balance.md",
+  "balance_targets.oil_per_floor": "gdd/economy-balance.md",
+  "balance_targets.skill_focus_cost": "gdd/economy-balance.md",
+  "balance_targets.turns_per_fight": "gdd/economy-balance.md",
+  "clocks.lantern_burn": "gdd/clocks.md",
+  "distributions.ashveil_roll": "gdd/systems/distributions.md",
+  "distributions.barrowchill_roll": "gdd/systems/distributions.md",
+  "distributions.candlegrit_roll": "gdd/systems/distributions.md",
+  "distributions.deepvault_pack": "gdd/systems/distributions.md",
+  "distributions.depth_band": "gdd/systems/distributions.md",
+  "distributions.drop_quality": "gdd/systems/distributions.md",
+  "distributions.duskbite_roll": "gdd/systems/distributions.md",
+  "distributions.fenmurk_roll": "gdd/systems/distributions.md",
+  "distributions.flight_chance": "gdd/systems/distributions.md",
+  "distributions.gallery_pack": "gdd/systems/distributions.md",
+  "distributions.gravetide_roll": "gdd/systems/distributions.md",
+  "distributions.hollowknell_roll": "gdd/systems/distributions.md",
+  "distributions.ironsap_roll": "gdd/systems/distributions.md",
+  "distributions.lichwick_roll": "gdd/systems/distributions.md",
+  "distributions.mothglow_roll": "gdd/systems/distributions.md",
+  "distributions.nightbrine_roll": "gdd/systems/distributions.md",
+  "distributions.ossuary_dust_roll": "gdd/systems/distributions.md",
+  "distributions.ossuary_pack": "gdd/systems/distributions.md",
+  "distributions.palecoil_roll": "gdd/systems/distributions.md",
+  "distributions.rustmire_roll": "gdd/systems/distributions.md",
+  "distributions.sablegleam_roll": "gdd/systems/distributions.md",
+  "distributions.salvage_yield": "gdd/systems/distributions.md",
+  "distributions.sanctum_pack": "gdd/systems/distributions.md",
+  "distributions.shallows_pack": "gdd/systems/distributions.md",
+  "distributions.strike_roll": "gdd/systems/distributions.md",
+  "distributions.tallowgrin_roll": "gdd/systems/distributions.md",
+  "distributions.undercroft_pack": "gdd/systems/distributions.md",
+  "distributions.wander_chance": "gdd/systems/distributions.md",
+  "entities.encounters": "gdd/mechanics.md",
+  "entities.encounters.briny_alcove": "content/encounters/briny_alcove.yaml",
+  "entities.encounters.briny_den": "content/encounters/briny_den.yaml",
+  "entities.encounters.candle_den": "content/encounters/candle_den.yaml",
+  "entities.encounters.candle_gallery": "content/encounters/candle_gallery.yaml",
+  "entities.encounters.candle_nave": "content/encounters/candle_nave.yaml",
+  "entities.encounters.dusk_crypt": "content/encounters/dusk_crypt.yaml",
+  "entities.encounters.fen_crypt": "content/encounters/fen_crypt.yaml",
+  "entities.encounters.fen_warren": "content/encounters/fen_warren.yaml",
+  "entities.encounters.grave_warren": "content/encounters/grave_warren.yaml",
+  "entities.encounters.hollow_nave": "content/encounters/hollow_nave.yaml",
+  "entities.encounters.hollow_ossuary": "content/encounters/hollow_ossuary.yaml",
+  "entities.encounters.iron_hollow": "content/encounters/iron_hollow.yaml",
+  "entities.encounters.iron_ossuary": "content/encounters/iron_ossuary.yaml",
+  "entities.encounters.knell_vault": "content/encounters/knell_vault.yaml",
+  "entities.encounters.lich_crypt": "content/encounters/lich_crypt.yaml",
+  "entities.encounters.lich_hollow": "content/encounters/lich_hollow.yaml",
+  "entities.encounters.lich_warren": "content/encounters/lich_warren.yaml",
+  "entities.encounters.pale_den": "content/encounters/pale_den.yaml",
+  "entities.encounters.sable_alcove": "content/encounters/sable_alcove.yaml",
+  "entities.encounters.sable_gallery": "content/encounters/sable_gallery.yaml",
+  "entities.encounters.sable_nave": "content/encounters/sable_nave.yaml",
+  "entities.encounters.sable_ossuary": "content/encounters/sable_ossuary.yaml",
+  "entities.encounters.soot_sanctum": "content/encounters/soot_sanctum.yaml",
+  "entities.encounters.umber_alcove": "content/encounters/umber_alcove.yaml",
+  "entities.encounters.umber_den": "content/encounters/umber_den.yaml",
+  "entities.encounters.vesper_barrow": "content/encounters/vesper_barrow.yaml",
+  "entities.encounters.vesper_hollow": "content/encounters/vesper_hollow.yaml",
+  "entities.encounters.vesper_ossuary": "content/encounters/vesper_ossuary.yaml",
+  "entities.encounters.wick_pit": "content/encounters/wick_pit.yaml",
+  "entities.encounters.yew_alcove": "content/encounters/yew_alcove.yaml",
+  "entities.items": "gdd/mechanics.md",
+  "entities.items.ashen_buckler": "content/items/ashen_buckler.yaml",
+  "entities.items.ashen_censer": "content/items/ashen_censer.yaml",
+  "entities.items.ashen_charm": "content/items/ashen_charm.yaml",
+  "entities.items.ashen_dirk": "content/items/ashen_dirk.yaml",
+  "entities.items.ashen_gauntlet": "content/items/ashen_gauntlet.yaml",
+  "entities.items.ashen_mantle": "content/items/ashen_mantle.yaml",
+  "entities.items.barrow_brand": "content/items/barrow_brand.yaml",
+  "entities.items.barrow_buckler": "content/items/barrow_buckler.yaml",
+  "entities.items.barrow_charm": "content/items/barrow_charm.yaml",
+  "entities.items.briny_charm": "content/items/briny_charm.yaml",
+  "entities.items.briny_flask": "content/items/briny_flask.yaml",
+  "entities.items.briny_gauntlet": "content/items/briny_gauntlet.yaml",
+  "entities.items.briny_mantle": "content/items/briny_mantle.yaml",
+  "entities.items.briny_phial": "content/items/briny_phial.yaml",
+  "entities.items.briny_ring": "content/items/briny_ring.yaml",
+  "entities.items.briny_sigil": "content/items/briny_sigil.yaml",
+  "entities.items.candle_buckler": "content/items/candle_buckler.yaml",
+  "entities.items.candle_flask": "content/items/candle_flask.yaml",
+  "entities.items.candle_lens": "content/items/candle_lens.yaml",
+  "entities.items.candle_phial": "content/items/candle_phial.yaml",
+  "entities.items.candle_sigil": "content/items/candle_sigil.yaml",
+  "entities.items.candle_torc": "content/items/candle_torc.yaml",
+  "entities.items.dusk_buckler": "content/items/dusk_buckler.yaml",
+  "entities.items.dusk_censer": "content/items/dusk_censer.yaml",
+  "entities.items.dusk_charm": "content/items/dusk_charm.yaml",
+  "entities.items.dusk_dirk": "content/items/dusk_dirk.yaml",
+  "entities.items.dusk_hood": "content/items/dusk_hood.yaml",
+  "entities.items.dusk_lens": "content/items/dusk_lens.yaml",
+  "entities.items.dusk_mantle": "content/items/dusk_mantle.yaml",
+  "entities.items.dusk_phial": "content/items/dusk_phial.yaml",
+  "entities.items.dusk_ring": "content/items/dusk_ring.yaml",
+  "entities.items.fen_brand": "content/items/fen_brand.yaml",
+  "entities.items.fen_censer": "content/items/fen_censer.yaml",
+  "entities.items.fen_charm": "content/items/fen_charm.yaml",
+  "entities.items.fen_dirk": "content/items/fen_dirk.yaml",
+  "entities.items.fen_flask": "content/items/fen_flask.yaml",
+  "entities.items.fen_lens": "content/items/fen_lens.yaml",
+  "entities.items.fen_mantle": "content/items/fen_mantle.yaml",
+  "entities.items.fen_phial": "content/items/fen_phial.yaml",
+  "entities.items.fen_ring": "content/items/fen_ring.yaml",
+  "entities.items.fen_sigil": "content/items/fen_sigil.yaml",
+  "entities.items.fen_torc": "content/items/fen_torc.yaml",
+  "entities.items.gloam_dirk": "content/items/gloam_dirk.yaml",
+  "entities.items.gloam_flask": "content/items/gloam_flask.yaml",
+  "entities.items.gloam_mantle": "content/items/gloam_mantle.yaml",
+  "entities.items.grave_gauntlet": "content/items/grave_gauntlet.yaml",
+  "entities.items.grave_lens": "content/items/grave_lens.yaml",
+  "entities.items.grave_ring": "content/items/grave_ring.yaml",
+  "entities.items.grave_torc": "content/items/grave_torc.yaml",
+  "entities.items.hollow_buckler": "content/items/hollow_buckler.yaml",
+  "entities.items.hollow_dirk": "content/items/hollow_dirk.yaml",
+  "entities.items.hollow_gauntlet": "content/items/hollow_gauntlet.yaml",
+  "entities.items.hollow_lens": "content/items/hollow_lens.yaml",
+  "entities.items.hollow_mantle": "content/items/hollow_mantle.yaml",
+  "entities.items.hollow_ring": "content/items/hollow_ring.yaml",
+  "entities.items.hollow_sigil": "content/items/hollow_sigil.yaml",
+  "entities.items.hollow_torc": "content/items/hollow_torc.yaml",
+  "entities.items.iron_buckler": "content/items/iron_buckler.yaml",
+  "entities.items.iron_censer": "content/items/iron_censer.yaml",
+  "entities.items.iron_charm": "content/items/iron_charm.yaml",
+  "entities.items.iron_dirk": "content/items/iron_dirk.yaml",
+  "entities.items.iron_sigil": "content/items/iron_sigil.yaml",
+  "entities.items.knell_brand": "content/items/knell_brand.yaml",
+  "entities.items.knell_gauntlet": "content/items/knell_gauntlet.yaml",
+  "entities.items.knell_ring": "content/items/knell_ring.yaml",
+  "entities.items.lich_dirk": "content/items/lich_dirk.yaml",
+  "entities.items.lich_hood": "content/items/lich_hood.yaml",
+  "entities.items.lich_phial": "content/items/lich_phial.yaml",
+  "entities.items.lich_torc": "content/items/lich_torc.yaml",
+  "entities.items.moth_buckler": "content/items/moth_buckler.yaml",
+  "entities.items.moth_censer": "content/items/moth_censer.yaml",
+  "entities.items.moth_flask": "content/items/moth_flask.yaml",
+  "entities.items.moth_gauntlet": "content/items/moth_gauntlet.yaml",
+  "entities.items.moth_hood": "content/items/moth_hood.yaml",
+  "entities.items.moth_phial": "content/items/moth_phial.yaml",
+  "entities.items.moth_ring": "content/items/moth_ring.yaml",
+  "entities.items.moth_torc": "content/items/moth_torc.yaml",
+  "entities.items.murk_brand": "content/items/murk_brand.yaml",
+  "entities.items.murk_buckler": "content/items/murk_buckler.yaml",
+  "entities.items.murk_censer": "content/items/murk_censer.yaml",
+  "entities.items.murk_charm": "content/items/murk_charm.yaml",
+  "entities.items.murk_dirk": "content/items/murk_dirk.yaml",
+  "entities.items.murk_gauntlet": "content/items/murk_gauntlet.yaml",
+  "entities.items.murk_hood": "content/items/murk_hood.yaml",
+  "entities.items.murk_lens": "content/items/murk_lens.yaml",
+  "entities.items.murk_mantle": "content/items/murk_mantle.yaml",
+  "entities.items.murk_torc": "content/items/murk_torc.yaml",
+  "entities.items.ochre_brand": "content/items/ochre_brand.yaml",
+  "entities.items.ochre_censer": "content/items/ochre_censer.yaml",
+  "entities.items.ochre_charm": "content/items/ochre_charm.yaml",
+  "entities.items.ochre_dirk": "content/items/ochre_dirk.yaml",
+  "entities.items.ochre_lens": "content/items/ochre_lens.yaml",
+  "entities.items.ochre_mantle": "content/items/ochre_mantle.yaml",
+  "entities.items.ochre_ring": "content/items/ochre_ring.yaml",
+  "entities.items.pale_buckler": "content/items/pale_buckler.yaml",
+  "entities.items.pale_charm": "content/items/pale_charm.yaml",
+  "entities.items.pale_dirk": "content/items/pale_dirk.yaml",
+  "entities.items.rust_brand": "content/items/rust_brand.yaml",
+  "entities.items.rust_censer": "content/items/rust_censer.yaml",
+  "entities.items.rust_hood": "content/items/rust_hood.yaml",
+  "entities.items.rust_mantle": "content/items/rust_mantle.yaml",
+  "entities.items.rust_phial": "content/items/rust_phial.yaml",
+  "entities.items.rust_torc": "content/items/rust_torc.yaml",
+  "entities.items.sable_buckler": "content/items/sable_buckler.yaml",
+  "entities.items.sable_mantle": "content/items/sable_mantle.yaml",
+  "entities.items.sable_phial": "content/items/sable_phial.yaml",
+  "entities.items.sable_ring": "content/items/sable_ring.yaml",
+  "entities.items.sable_sigil": "content/items/sable_sigil.yaml",
+  "entities.items.soot_brand": "content/items/soot_brand.yaml",
+  "entities.items.soot_censer": "content/items/soot_censer.yaml",
+  "entities.items.soot_charm": "content/items/soot_charm.yaml",
+  "entities.items.soot_mantle": "content/items/soot_mantle.yaml",
+  "entities.items.soot_phial": "content/items/soot_phial.yaml",
+  "entities.items.soot_ring": "content/items/soot_ring.yaml",
+  "entities.items.soot_torc": "content/items/soot_torc.yaml",
+  "entities.items.tallow_brand": "content/items/tallow_brand.yaml",
+  "entities.items.tallow_buckler": "content/items/tallow_buckler.yaml",
+  "entities.items.tallow_dirk": "content/items/tallow_dirk.yaml",
+  "entities.items.tallow_flask": "content/items/tallow_flask.yaml",
+  "entities.items.tallow_mantle": "content/items/tallow_mantle.yaml",
+  "entities.items.tallow_phial": "content/items/tallow_phial.yaml",
+  "entities.items.tallow_sigil": "content/items/tallow_sigil.yaml",
+  "entities.items.tallow_torc": "content/items/tallow_torc.yaml",
+  "entities.items.umber_brand": "content/items/umber_brand.yaml",
+  "entities.items.umber_lens": "content/items/umber_lens.yaml",
+  "entities.items.umber_mantle": "content/items/umber_mantle.yaml",
+  "entities.items.umber_phial": "content/items/umber_phial.yaml",
+  "entities.items.umber_ring": "content/items/umber_ring.yaml",
+  "entities.items.vesper_gauntlet": "content/items/vesper_gauntlet.yaml",
+  "entities.items.vesper_phial": "content/items/vesper_phial.yaml",
+  "entities.items.vesper_ring": "content/items/vesper_ring.yaml",
+  "entities.items.wick_brand": "content/items/wick_brand.yaml",
+  "entities.items.wick_censer": "content/items/wick_censer.yaml",
+  "entities.items.wick_dirk": "content/items/wick_dirk.yaml",
+  "entities.items.wick_gauntlet": "content/items/wick_gauntlet.yaml",
+  "entities.items.wick_phial": "content/items/wick_phial.yaml",
+  "entities.items.yew_gauntlet": "content/items/yew_gauntlet.yaml",
+  "entities.items.yew_ring": "content/items/yew_ring.yaml",
+  "entities.items.yew_sigil": "content/items/yew_sigil.yaml",
+  "entities.items.yew_torc": "content/items/yew_torc.yaml",
+  "entities.lamplighter": "gdd/mechanics.md",
+  "entities.monsters": "gdd/mechanics.md",
+  "entities.monsters.ashen_hound": "content/monsters/ashen_hound.yaml",
+  "entities.monsters.ashen_mite": "content/monsters/ashen_mite.yaml",
+  "entities.monsters.ashen_shade": "content/monsters/ashen_shade.yaml",
+  "entities.monsters.barrow_drudge": "content/monsters/barrow_drudge.yaml",
+  "entities.monsters.barrow_husk": "content/monsters/barrow_husk.yaml",
+  "entities.monsters.barrow_wight": "content/monsters/barrow_wight.yaml",
+  "entities.monsters.briny_ghoul": "content/monsters/briny_ghoul.yaml",
+  "entities.monsters.briny_lurker": "content/monsters/briny_lurker.yaml",
+  "entities.monsters.briny_wisp": "content/monsters/briny_wisp.yaml",
+  "entities.monsters.candle_hound": "content/monsters/candle_hound.yaml",
+  "entities.monsters.dusk_crawler": "content/monsters/dusk_crawler.yaml",
+  "entities.monsters.dusk_hound": "content/monsters/dusk_hound.yaml",
+  "entities.monsters.dusk_lurker": "content/monsters/dusk_lurker.yaml",
+  "entities.monsters.dusk_mite": "content/monsters/dusk_mite.yaml",
+  "entities.monsters.dusk_stalker": "content/monsters/dusk_stalker.yaml",
+  "entities.monsters.fen_crawler": "content/monsters/fen_crawler.yaml",
+  "entities.monsters.fen_drudge": "content/monsters/fen_drudge.yaml",
+  "entities.monsters.fen_shade": "content/monsters/fen_shade.yaml",
+  "entities.monsters.gloam_crawler": "content/monsters/gloam_crawler.yaml",
+  "entities.monsters.gloam_hound": "content/monsters/gloam_hound.yaml",
+  "entities.monsters.gloam_mite": "content/monsters/gloam_mite.yaml",
+  "entities.monsters.gloam_revenant": "content/monsters/gloam_revenant.yaml",
+  "entities.monsters.gloam_wight": "content/monsters/gloam_wight.yaml",
+  "entities.monsters.grave_hound": "content/monsters/grave_hound.yaml",
+  "entities.monsters.grave_lurker": "content/monsters/grave_lurker.yaml",
+  "entities.monsters.grave_mite": "content/monsters/grave_mite.yaml",
+  "entities.monsters.grave_wisp": "content/monsters/grave_wisp.yaml",
+  "entities.monsters.hollow_lurker": "content/monsters/hollow_lurker.yaml",
+  "entities.monsters.hollow_wight": "content/monsters/hollow_wight.yaml",
+  "entities.monsters.iron_wisp": "content/monsters/iron_wisp.yaml",
+  "entities.monsters.knell_mother": "content/monsters/knell_mother.yaml",
+  "entities.monsters.lamp_warden": "content/monsters/lamp_warden.yaml",
+  "entities.monsters.lich_hound": "content/monsters/lich_hound.yaml",
+  "entities.monsters.lich_husk": "content/monsters/lich_husk.yaml",
+  "entities.monsters.lich_lurker": "content/monsters/lich_lurker.yaml",
+  "entities.monsters.lich_wight": "content/monsters/lich_wight.yaml",
+  "entities.monsters.moth_hound": "content/monsters/moth_hound.yaml",
+  "entities.monsters.moth_wight": "content/monsters/moth_wight.yaml",
+  "entities.monsters.murk_revenant": "content/monsters/murk_revenant.yaml",
+  "entities.monsters.ochre_drudge": "content/monsters/ochre_drudge.yaml",
+  "entities.monsters.ochre_wisp": "content/monsters/ochre_wisp.yaml",
+  "entities.monsters.rust_wight": "content/monsters/rust_wight.yaml",
+  "entities.monsters.sable_crawler": "content/monsters/sable_crawler.yaml",
+  "entities.monsters.sable_drudge": "content/monsters/sable_drudge.yaml",
+  "entities.monsters.sable_shade": "content/monsters/sable_shade.yaml",
+  "entities.monsters.soot_husk": "content/monsters/soot_husk.yaml",
+  "entities.monsters.soot_king": "content/monsters/soot_king.yaml",
+  "entities.monsters.soot_stalker": "content/monsters/soot_stalker.yaml",
+  "entities.monsters.soot_wisp": "content/monsters/soot_wisp.yaml",
+  "entities.monsters.tallow_drudge": "content/monsters/tallow_drudge.yaml",
+  "entities.monsters.tallow_shade": "content/monsters/tallow_shade.yaml",
+  "entities.monsters.tallow_stalker": "content/monsters/tallow_stalker.yaml",
+  "entities.monsters.umber_lurker": "content/monsters/umber_lurker.yaml",
+  "entities.monsters.umber_wisp": "content/monsters/umber_wisp.yaml",
+  "entities.monsters.vesper_ghoul": "content/monsters/vesper_ghoul.yaml",
+  "entities.monsters.wick_lurker": "content/monsters/wick_lurker.yaml",
+  "entities.monsters.wick_shade": "content/monsters/wick_shade.yaml",
+  "entities.monsters.yew_hound": "content/monsters/yew_hound.yaml",
+  "entities.monsters.yew_stalker": "content/monsters/yew_stalker.yaml",
+  "entities.monsters.yew_wisp": "content/monsters/yew_wisp.yaml",
+  "entities.satchel": "gdd/mechanics.md",
+  "entities.skills": "gdd/mechanics.md",
+  "entities.skills.ashen_chant": "content/skills/ashen_chant.yaml",
+  "entities.skills.ashen_cleave": "content/skills/ashen_cleave.yaml",
+  "entities.skills.ashen_wail": "content/skills/ashen_wail.yaml",
+  "entities.skills.ashen_ward": "content/skills/ashen_ward.yaml",
+  "entities.skills.barrow_hex": "content/skills/barrow_hex.yaml",
+  "entities.skills.barrow_veil": "content/skills/barrow_veil.yaml",
+  "entities.skills.briny_cleave": "content/skills/briny_cleave.yaml",
+  "entities.skills.briny_pulse": "content/skills/briny_pulse.yaml",
+  "entities.skills.briny_snare": "content/skills/briny_snare.yaml",
+  "entities.skills.briny_veil": "content/skills/briny_veil.yaml",
+  "entities.skills.candle_cleave": "content/skills/candle_cleave.yaml",
+  "entities.skills.candle_hex": "content/skills/candle_hex.yaml",
+  "entities.skills.candle_pulse": "content/skills/candle_pulse.yaml",
+  "entities.skills.candle_wail": "content/skills/candle_wail.yaml",
+  "entities.skills.dusk_chant": "content/skills/dusk_chant.yaml",
+  "entities.skills.dusk_hex": "content/skills/dusk_hex.yaml",
+  "entities.skills.dusk_lash": "content/skills/dusk_lash.yaml",
+  "entities.skills.dusk_pulse": "content/skills/dusk_pulse.yaml",
+  "entities.skills.dusk_rite": "content/skills/dusk_rite.yaml",
+  "entities.skills.dusk_veil": "content/skills/dusk_veil.yaml",
+  "entities.skills.dusk_wail": "content/skills/dusk_wail.yaml",
+  "entities.skills.fen_chant": "content/skills/fen_chant.yaml",
+  "entities.skills.fen_snare": "content/skills/fen_snare.yaml",
+  "entities.skills.fen_wail": "content/skills/fen_wail.yaml",
+  "entities.skills.fen_ward": "content/skills/fen_ward.yaml",
+  "entities.skills.gloam_cleave": "content/skills/gloam_cleave.yaml",
+  "entities.skills.gloam_pulse": "content/skills/gloam_pulse.yaml",
+  "entities.skills.gloam_sear": "content/skills/gloam_sear.yaml",
+  "entities.skills.gloam_snare": "content/skills/gloam_snare.yaml",
+  "entities.skills.grave_chant": "content/skills/grave_chant.yaml",
+  "entities.skills.grave_cleave": "content/skills/grave_cleave.yaml",
+  "entities.skills.grave_rite": "content/skills/grave_rite.yaml",
+  "entities.skills.grave_sear": "content/skills/grave_sear.yaml",
+  "entities.skills.grave_veil": "content/skills/grave_veil.yaml",
+  "entities.skills.grave_ward": "content/skills/grave_ward.yaml",
+  "entities.skills.hollow_chant": "content/skills/hollow_chant.yaml",
+  "entities.skills.hollow_hex": "content/skills/hollow_hex.yaml",
+  "entities.skills.iron_cleave": "content/skills/iron_cleave.yaml",
+  "entities.skills.iron_hex": "content/skills/iron_hex.yaml",
+  "entities.skills.iron_snare": "content/skills/iron_snare.yaml",
+  "entities.skills.iron_wail": "content/skills/iron_wail.yaml",
+  "entities.skills.knell_lash": "content/skills/knell_lash.yaml",
+  "entities.skills.knell_pulse": "content/skills/knell_pulse.yaml",
+  "entities.skills.lich_chant": "content/skills/lich_chant.yaml",
+  "entities.skills.lich_ward": "content/skills/lich_ward.yaml",
+  "entities.skills.moth_chant": "content/skills/moth_chant.yaml",
+  "entities.skills.moth_sear": "content/skills/moth_sear.yaml",
+  "entities.skills.moth_veil": "content/skills/moth_veil.yaml",
+  "entities.skills.murk_chant": "content/skills/murk_chant.yaml",
+  "entities.skills.murk_pulse": "content/skills/murk_pulse.yaml",
+  "entities.skills.murk_sear": "content/skills/murk_sear.yaml",
+  "entities.skills.murk_veil": "content/skills/murk_veil.yaml",
+  "entities.skills.ochre_bolt": "content/skills/ochre_bolt.yaml",
+  "entities.skills.ochre_sear": "content/skills/ochre_sear.yaml",
+  "entities.skills.pale_bolt": "content/skills/pale_bolt.yaml",
+  "entities.skills.pale_hex": "content/skills/pale_hex.yaml",
+  "entities.skills.pale_pulse": "content/skills/pale_pulse.yaml",
+  "entities.skills.pale_veil": "content/skills/pale_veil.yaml",
+  "entities.skills.rust_pulse": "content/skills/rust_pulse.yaml",
+  "entities.skills.rust_rite": "content/skills/rust_rite.yaml",
+  "entities.skills.rust_veil": "content/skills/rust_veil.yaml",
+  "entities.skills.rust_ward": "content/skills/rust_ward.yaml",
+  "entities.skills.sable_bolt": "content/skills/sable_bolt.yaml",
+  "entities.skills.sable_hex": "content/skills/sable_hex.yaml",
+  "entities.skills.sable_lash": "content/skills/sable_lash.yaml",
+  "entities.skills.sable_rite": "content/skills/sable_rite.yaml",
+  "entities.skills.sable_snare": "content/skills/sable_snare.yaml",
+  "entities.skills.sable_veil": "content/skills/sable_veil.yaml",
+  "entities.skills.sable_wail": "content/skills/sable_wail.yaml",
+  "entities.skills.sable_ward": "content/skills/sable_ward.yaml",
+  "entities.skills.soot_bolt": "content/skills/soot_bolt.yaml",
+  "entities.skills.soot_lash": "content/skills/soot_lash.yaml",
+  "entities.skills.soot_snare": "content/skills/soot_snare.yaml",
+  "entities.skills.soot_veil": "content/skills/soot_veil.yaml",
+  "entities.skills.tallow_pulse": "content/skills/tallow_pulse.yaml",
+  "entities.skills.tallow_wail": "content/skills/tallow_wail.yaml",
+  "entities.skills.umber_lash": "content/skills/umber_lash.yaml",
+  "entities.skills.umber_veil": "content/skills/umber_veil.yaml",
+  "entities.skills.vesper_chant": "content/skills/vesper_chant.yaml",
+  "entities.skills.vesper_pulse": "content/skills/vesper_pulse.yaml",
+  "entities.skills.wick_chant": "content/skills/wick_chant.yaml",
+  "entities.skills.wick_cleave": "content/skills/wick_cleave.yaml",
+  "entities.skills.wick_rite": "content/skills/wick_rite.yaml",
+  "entities.skills.wick_veil": "content/skills/wick_veil.yaml",
+  "entities.skills.yew_bolt": "content/skills/yew_bolt.yaml",
+  "entities.skills.yew_cleave": "content/skills/yew_cleave.yaml",
+  "entities.skills.yew_lash": "content/skills/yew_lash.yaml",
+  "entities.skills.yew_pulse": "content/skills/yew_pulse.yaml",
+  "entities.skills.yew_wail": "content/skills/yew_wail.yaml",
+  "entities.skills.yew_ward": "content/skills/yew_ward.yaml",
+  "events.affliction_faded": "gdd/mechanics.md",
+  "events.chill_applied": "gdd/mechanics.md",
+  "events.daze_applied": "gdd/mechanics.md",
+  "events.flame_out": "gdd/mechanics.md",
+  "events.hex_applied": "gdd/mechanics.md",
+  "events.oil_low": "gdd/mechanics.md",
+  "events.oil_refilled": "gdd/mechanics.md",
+  "events.wound_opened": "gdd/mechanics.md",
+  "feel.descend_stair": "gdd/feel.md",
+  "feel.ring_the_knell": "gdd/feel.md",
+  "feel.strike_foe": "gdd/feel.md",
+  "invariants.events_one_way": "gdd/architecture-invariants.md",
+  "invariants.oil_only_via_clock": "gdd/architecture-invariants.md",
+  "invariants.seeded_rolls": "gdd/architecture-invariants.md",
+  "invariants.sim_owns_lantern_state": "gdd/architecture-invariants.md",
+  "invariants.vigor_is_integer": "gdd/architecture-invariants.md",
+  "loops.delve_turn": "gdd/loops.md",
+  "loops.expedition": "gdd/loops.md",
+  "loops.floor_sweep": "gdd/loops.md",
+  "resources.grave_coin": "gdd/mechanics.md",
+  "resources.lantern_oil": "gdd/mechanics.md",
+  "resources.satchel_load": "gdd/mechanics.md",
+  "resources.vigor": "gdd/mechanics.md",
+  "resources.ward_focus": "gdd/mechanics.md",
+  "rules.affliction_tick": "gdd/systems/combat.md",
+  "rules.apply_relic": "gdd/systems/combat.md",
+  "rules.boss_awakening": "gdd/systems/bosses.md",
+  "rules.gutter_check": "gdd/systems/lantern.md",
+  "rules.refill_lantern": "gdd/systems/lantern.md",
+  "rules.resolve_flight": "gdd/systems/combat.md",
+  "rules.resolve_salvage": "gdd/systems/loot.md",
+  "rules.resolve_skill": "gdd/systems/combat.md",
+  "rules.resolve_strike": "gdd/systems/combat.md",
+  "rules.roll_drops": "gdd/systems/loot.md",
+  "rules.sanctum_trial": "gdd/systems/bosses.md",
+  "rules.spawn_encounter": "gdd/systems/spawning.md",
+  "rules.wandering_spawn": "gdd/systems/spawning.md",
+  "states.affliction": "gdd/mechanics.md",
+  "states.lantern_state": "gdd/mechanics.md",
+  "verbs.breach_sanctum": "gdd/mechanics.md",
+  "verbs.descend_stair": "gdd/mechanics.md",
+  "verbs.flee_upward": "gdd/mechanics.md",
+  "verbs.invoke_skill": "gdd/mechanics.md",
+  "verbs.loot_remains": "gdd/mechanics.md",
+  "verbs.make_camp": "gdd/mechanics.md",
+  "verbs.ring_the_knell": "gdd/mechanics.md",
+  "verbs.salvage_gear": "gdd/mechanics.md",
+  "verbs.strike_foe": "gdd/mechanics.md",
+  "verbs.trim_wick": "gdd/mechanics.md",
+  "verbs.use_relic": "gdd/mechanics.md"
+ },
+ "seed": 20260930,
+ "subfiles": [
+  "gdd/architecture-invariants.md",
+  "gdd/clocks.md",
+  "gdd/content/_index.md",
+  "gdd/economy-balance.md",
+  "gdd/feel.md",
+  "gdd/glossary.md",
+  "gdd/loops.md",
+  "gdd/mechanics.md",
+  "gdd/pillars.md",
+  "gdd/systems/bosses.md",
+  "gdd/systems/combat.md",
+  "gdd/systems/distributions.md",
+  "gdd/systems/lantern.md",
+  "gdd/systems/loot.md",
+  "gdd/systems/spawning.md"
+ ]
+}

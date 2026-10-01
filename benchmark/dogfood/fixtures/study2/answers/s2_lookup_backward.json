@@ -1,0 +1,52 @@
+{
+  "_provenance": "Frozen answers for dogfood study 2 (D-026). Computed by generate.py from its planted edge list (edges.json), never by parsing the tree with gdmd code. tests/test_dogfood_study2.py cross-checks them once against gdmd graph / gdmd view and refs.walk_refs; a disagreement is fixed at its source, never by editing these files. Checkers compare against this file only.",
+  "questions": {
+    "Q1": {
+      "answer": [
+        "entities.monsters.gloam_revenant",
+        "entities.monsters.moth_hound",
+        "entities.monsters.vesper_ghoul",
+        "entities.monsters.wick_shade",
+        "entities.skills.grave_sear",
+        "entities.skills.sable_bolt"
+      ],
+      "candidates": 9,
+      "evidence_files": [
+        "content/monsters/gloam_revenant.yaml",
+        "content/monsters/moth_hound.yaml",
+        "content/monsters/vesper_ghoul.yaml",
+        "content/monsters/wick_shade.yaml",
+        "content/skills/grave_sear.yaml",
+        "content/skills/sable_bolt.yaml"
+      ],
+      "k": 2,
+      "kind": "content",
+      "relation": "backward_within",
+      "start": "distributions.candlegrit_roll"
+    },
+    "Q2": {
+      "answer": [
+        "entities.encounters.candle_nave",
+        "entities.encounters.hollow_nave",
+        "entities.items.dusk_censer",
+        "entities.monsters.ashen_hound",
+        "entities.monsters.murk_revenant",
+        "entities.monsters.tallow_stalker"
+      ],
+      "candidates": 53,
+      "evidence_files": [
+        "content/encounters/candle_nave.yaml",
+        "content/encounters/hollow_nave.yaml",
+        "content/items/dusk_censer.yaml",
+        "content/monsters/ashen_hound.yaml",
+        "content/monsters/murk_revenant.yaml",
+        "content/monsters/tallow_stalker.yaml"
+      ],
+      "k": 3,
+      "kind": "content",
+      "relation": "backward_within",
+      "start": "entities.skills.fen_wail"
+    }
+  },
+  "task": "s2_lookup_backward"
+}

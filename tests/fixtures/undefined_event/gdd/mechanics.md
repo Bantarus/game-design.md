@@ -20,8 +20,8 @@ events:
 
 ## Tokens
 
-The transition uses `event: go` (a bare string) rather than `event: "{events.go}"`. The
-`state-machine-coverage` rule should fire `undefined-event` at severity `warning`, even
-though the event token *is* declared in the events namespace — the migration backstop
-checks the *form* of the transition value, not whether the bare identifier happens to
-match a declared event.
+The transition uses `event: go` (a bare string) rather than `event: "{events.go}"`. Since
+D-046 that is a `schema-violation` error at the transition (the retired `undefined-event`
+warning was a `state-machine-coverage` sub-finding), even though the event token *is*
+declared in the events namespace — the check is on the *form* of the transition value,
+not on whether the bare identifier happens to match a declared event.

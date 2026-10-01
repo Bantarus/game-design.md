@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: lich_hood
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Lich Hood
+rarity: worn
+slot: ward
+weight: 2
+value: 21
+grants: "{entities.skills.candle_wail}"
+description: A worn ward pitted by the brine seeps.

@@ -1,0 +1,101 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1856,
+  "cache_read_tokens": 461980,
+  "cache_creation_tokens": 72844,
+  "tool_calls": 7,
+  "files_read": 1,
+  "bytes_read": 913,
+  "re_reads": 0,
+  "consultation_bytes": 10302,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 76705,
+  "per_turn_occupancy": [
+    72399,
+    74766,
+    76270,
+    76705,
+    77729,
+    78262,
+    78707
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 8177,
+  "bash_files_read": 4,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/loot.md",
+    "examples/lanternfall/impl/lanternfall/loot/drop_tables.py"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "6rUiXG",
+      "result_bytes": 4844,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:20-142"
+    },
+    {
+      "tool": "Bash",
+      "id": "39XjbT",
+      "result_bytes": 2871,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:154-233"
+    },
+    {
+      "tool": "Bash",
+      "id": "HcH4r8",
+      "result_bytes": 311,
+      "is_error": true,
+      "vcc": "s2_maintenance__baseline__r1.txt:249-252"
+    },
+    {
+      "tool": "Bash",
+      "id": "HW7B6K",
+      "result_bytes": 611,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:264-280"
+    },
+    {
+      "tool": "Read",
+      "id": "5vaTZn",
+      "result_bytes": 913,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:292-317"
+    },
+    {
+      "tool": "Bash",
+      "id": "MAUZ2N",
+      "result_bytes": 462,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:329-343"
+    },
+    {
+      "tool": "Bash",
+      "id": "eTrmK4",
+      "result_bytes": 290,
+      "is_error": false,
+      "vcc": "s2_maintenance__baseline__r1.txt:361-371"
+    }
+  ]
+}

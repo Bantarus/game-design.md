@@ -1,0 +1,5 @@
+{
+  "_provenance": "Frozen expected answers for tasks/lookup_refs.md. Hand-verified 2026-09-30 against examples/deckbuilder at the v0.4 dogfood-drafts commit: Q1 from a plain-text grep for 'resources.energy' (gdd/mechanics.md entities.player + verbs.play_card + states.card_lifecycle side_effects; gdd/systems/combat.md rules.end_of_turn reset_resource; the mechanics.md implemented_in path is not a reference); Q2 by reading gdd/loops.md combat_turn.sequence and each verb's effects[*].resolve in gdd/mechanics.md. Cross-checked once against a code derivation by tests/test_dogfood.py::test_lookup_expected_matches_code_derivation. The checker compares against this file only; it never recomputes answers with the ref-extraction code gdmd view is built on (oracle-circularity rule). If the deckbuilder tree changes, re-verify by hand before editing this file.",
+  "Q1": ["entities.player", "rules.end_of_turn", "states.card_lifecycle", "verbs.play_card"],
+  "Q2": ["rules.damage_resolution", "rules.draw_card", "rules.end_of_turn"]
+}

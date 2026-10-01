@@ -1,0 +1,170 @@
+{
+  "turns": 13,
+  "input_tokens": 26,
+  "output_tokens": 5625,
+  "cache_read_tokens": 953210,
+  "cache_creation_tokens": 78788,
+  "tool_calls": 14,
+  "files_read": 1,
+  "bytes_read": 1658,
+  "re_reads": 0,
+  "consultation_bytes": 12313,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 78624,
+  "per_turn_occupancy": [
+    72613,
+    75457,
+    76068,
+    76737,
+    78158,
+    78364,
+    78624,
+    80131,
+    81473,
+    82634,
+    83350,
+    83764,
+    84651
+  ],
+  "tool_counts": {
+    "Bash": 8,
+    "Grep": 5,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 6366,
+  "bash_files_read": 4,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_backward.txt",
+    "examples/lanternfall",
+    "examples/lanternfall/content/skills/fen_wail.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/content/monsters.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r3-repo/2ff46112-b8c7-48b0-93e1-23973f68965f/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/*/2ff46112*/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r3-repo/2ff46112-b8c7-48b0-93e1-23973f68965f/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "75fDL9",
+      "result_bytes": 5406,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:33-192"
+    },
+    {
+      "tool": "Bash",
+      "id": "9NCYHk",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:204-204"
+    },
+    {
+      "tool": "Bash",
+      "id": "FDwwUV",
+      "result_bytes": 567,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:216-235"
+    },
+    {
+      "tool": "Bash",
+      "id": "PCkfym",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:247-247"
+    },
+    {
+      "tool": "Bash",
+      "id": "gyyETk",
+      "result_bytes": 138,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:317-317"
+    },
+    {
+      "tool": "Bash",
+      "id": "6xocjz",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:329-329"
+    },
+    {
+      "tool": "Bash",
+      "id": "KWkRvy",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:341-341"
+    },
+    {
+      "tool": "Grep",
+      "id": "eCspAD",
+      "result_bytes": 2254,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:357-388"
+    },
+    {
+      "tool": "Grep",
+      "id": "cLmk2P",
+      "result_bytes": 584,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:402-410"
+    },
+    {
+      "tool": "Grep",
+      "id": "FjJ3aV",
+      "result_bytes": 389,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:424-429"
+    },
+    {
+      "tool": "Read",
+      "id": "rq4N3c",
+      "result_bytes": 1658,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:441-494"
+    },
+    {
+      "tool": "Grep",
+      "id": "up2chg",
+      "result_bytes": 557,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:511-519"
+    },
+    {
+      "tool": "Grep",
+      "id": "DG2Ez1",
+      "result_bytes": 257,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:534-537"
+    },
+    {
+      "tool": "Bash",
+      "id": "8XTd7N",
+      "result_bytes": 393,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r3.txt:549-562"
+    }
+  ]
+}

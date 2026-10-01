@@ -1,13 +1,13 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: core
 name: "Ember Ascent"
 short_pitch: "A 30-minute deckbuilder roguelike where every turn you reshape a hand of fire to climb a collapsing volcano."
 genre_tags: [deckbuilder, roguelike, single-player]
 status: draft
-version: 0.4.2
-last_updated: "2026-05-21"
+version: 0.4.3
+last_updated: "2026-09-30"
 target_platforms_neutral: [desktop, handheld]
 pillars:
   - "Every turn, a meaningful hand-shape decision"

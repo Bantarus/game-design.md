@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_crypt
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Crypt
+depth: 4
+monsters:
+  - "{entities.monsters.grave_mite}"
+  - "{entities.monsters.knell_mother}"
+  - "{entities.monsters.soot_stalker}"
+spawn_roll: "{distributions.deepvault_pack}"
+description: "Fen Crypt: a gallery of cracked knell-bells."

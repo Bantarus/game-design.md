@@ -1,0 +1,17 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: murk_revenant
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Murk Revenant
+tier: minion
+max_vigor: 18
+skills:
+  - "{entities.skills.fen_wail}"
+  - "{entities.skills.grave_chant}"
+drops:
+  - "{entities.items.dusk_phial}"
+  - "{entities.items.wick_dirk}"
+description: A minion that follows the smell of lamp oil.

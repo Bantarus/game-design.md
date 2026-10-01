@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: gloam_dirk
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Gloam Dirk
+rarity: worn
+slot: ward
+weight: 4
+value: 21
+description: A worn ward with a wick-cut groove along one edge.

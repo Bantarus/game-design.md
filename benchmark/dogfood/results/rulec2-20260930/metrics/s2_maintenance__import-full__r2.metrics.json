@@ -1,0 +1,90 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1545,
+  "cache_read_tokens": 505464,
+  "cache_creation_tokens": 79739,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10397,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 84387,
+  "per_turn_occupancy": [
+    79513,
+    81885,
+    84009,
+    84387,
+    84691,
+    85130,
+    85602
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 8923,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "kxMkV5",
+      "result_bytes": 4881,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-full__r2.txt:20-146"
+    },
+    {
+      "tool": "Bash",
+      "id": "Chui2f",
+      "result_bytes": 4042,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-full__r2.txt:158-219"
+    },
+    {
+      "tool": "Bash",
+      "id": "3PzByc",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_maintenance__import-full__r2.txt:231-231"
+    },
+    {
+      "tool": "Bash",
+      "id": "vwMEsX",
+      "result_bytes": 350,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-full__r2.txt:243-257"
+    },
+    {
+      "tool": "Bash",
+      "id": "aSJNJc",
+      "result_bytes": 611,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-full__r2.txt:271-287"
+    },
+    {
+      "tool": "Bash",
+      "id": "XLceK7",
+      "result_bytes": 322,
+      "is_error": false,
+      "vcc": "s2_maintenance__import-full__r2.txt:299-311"
+    }
+  ]
+}

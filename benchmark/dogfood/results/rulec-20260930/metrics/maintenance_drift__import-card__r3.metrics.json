@@ -1,0 +1,130 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 2085,
+  "cache_read_tokens": 257047,
+  "cache_creation_tokens": 33019,
+  "tool_calls": 9,
+  "files_read": 1,
+  "bytes_read": 4296,
+  "re_reads": 0,
+  "consultation_bytes": 13459,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37430.0,
+  "per_turn_occupancy": [
+    30631,
+    33686,
+    35394,
+    37232,
+    37628,
+    38044,
+    38585,
+    38882
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Edit": 1,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 8075,
+  "bash_files_read": 4,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat/game-design.md",
+    "examples/tick-combat/gdd",
+    "examples/tick-combat/gdd/*.md",
+    "examples/tick-combat/gdd/*/*.md",
+    "examples/tick-combat/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/last_updated:"
+    },
+    {
+      "tool": "Bash",
+      "path": "../.."
+    },
+    {
+      "tool": "Bash",
+      "path": "/last_updated:"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "McjNzc",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:111-156"
+    },
+    {
+      "tool": "Read",
+      "id": "ati4YU",
+      "result_bytes": 4296,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:24-106"
+    },
+    {
+      "tool": "Bash",
+      "id": "nAxQJC",
+      "result_bytes": 3228,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:168-195"
+    },
+    {
+      "tool": "Bash",
+      "id": "gZzyZb",
+      "result_bytes": 2855,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:207-272"
+    },
+    {
+      "tool": "Bash",
+      "id": "QP8TEp",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "maintenance_drift__import-card__r3.txt:284-284"
+    },
+    {
+      "tool": "Bash",
+      "id": "uh6K5J",
+      "result_bytes": 321,
+      "is_error": true,
+      "vcc": "maintenance_drift__import-card__r3.txt:296-296"
+    },
+    {
+      "tool": "Bash",
+      "id": "C9uyXQ",
+      "result_bytes": 44,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:310-310"
+    },
+    {
+      "tool": "Edit",
+      "id": "ULqg83",
+      "result_bytes": 216,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:329-329"
+    },
+    {
+      "tool": "Bash",
+      "id": "FkwpEB",
+      "result_bytes": 316,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-card__r3.txt:341-353"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: rust_hood
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Rust Hood
+rarity: sound
+slot: lantern
+weight: 7
+value: 33
+grants: "{entities.skills.candle_pulse}"
+description: A sound lantern pitted by the brine seeps.

@@ -1,0 +1,112 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 2289,
+  "cache_read_tokens": 260918,
+  "cache_creation_tokens": 33700,
+  "tool_calls": 8,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 12669,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37826.0,
+  "per_turn_occupancy": [
+    31096,
+    35050,
+    35617,
+    37645,
+    38007,
+    38555,
+    39101,
+    39563
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 4,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 11776
+  },
+  "view_mode_calls": {
+    "graph": 4
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 8545,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/content/encounters",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "J8XZxt",
+      "result_bytes": 7904,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:33-292"
+    },
+    {
+      "tool": "Bash",
+      "id": "FLdYU2",
+      "result_bytes": 285,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:310-315"
+    },
+    {
+      "tool": "Bash",
+      "id": "Z1PRVV",
+      "result_bytes": 2031,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:331-351"
+    },
+    {
+      "tool": "Bash",
+      "id": "x2NbRn",
+      "result_bytes": 1556,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:356-372"
+    },
+    {
+      "tool": "Bash",
+      "id": "RiUN6h",
+      "result_bytes": 299,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:384-392"
+    },
+    {
+      "tool": "Bash",
+      "id": "5YAsko",
+      "result_bytes": 342,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:404-408"
+    },
+    {
+      "tool": "Bash",
+      "id": "3sKVTf",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:439-439"
+    },
+    {
+      "tool": "Write",
+      "id": "pTbbJ7",
+      "result_bytes": 203,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r2.txt:467-467"
+    }
+  ]
+}

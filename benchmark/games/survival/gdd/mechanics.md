@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: subfile
 status: draft
 last_verified: "2026-05-23"
@@ -59,8 +59,8 @@ entities:
 verbs:
   gather:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 30, condition: tool_present, else_in_game_minutes: 60 }
+    cost: 0
+    time_cost: { in_game_minutes: 30, condition: tool_present, else_in_game_minutes: 60 }
     target_schema:
       type: "{entities.resource_node}"
       filter: "adjacent_to_actor_and_has_remaining_harvests"
@@ -71,9 +71,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/gather.py"]
   craft:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 60 }
-      consumes: target_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 60 }
+    consumes: target_recipe_inputs
     target_schema:
       type: "{entities.recipes}"
       filter: "recipe_station_required_or_adjacent_to_station"
@@ -84,9 +84,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/craft.py"]
   eat:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 15 }
-      consumes: target_food_item
+    cost: 0
+    time_cost: { in_game_minutes: 15 }
+    consumes: target_food_item
     target_schema:
       type: "{entities.player_inventory}"
       filter: "tag_equals_food"
@@ -97,8 +97,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/eat.py"]
   drink:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 15 }
+    cost: 0
+    time_cost: { in_game_minutes: 15 }
     target_schema:
       type: "{entities.resource_node}"
       filter: "node_kind_in_spring_or_still_and_adjacent_to_actor"
@@ -109,9 +109,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/drink.py"]
   place_station:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 60 }
-      consumes: station_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 60 }
+    consumes: station_recipe_inputs
     target_schema:
       type: "{entities.crafting_station}"
       filter: "actor_in_camp_region_OR_station_kind_is_pyre_layer_at_high_point"
@@ -122,8 +122,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/place_station.py"]
   sleep_through_night:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_hours: hours_until_dawn }
+    cost: 0
+    time_cost: { in_game_minutes: minutes_until_dawn }
     target_schema:
       type: world_coordinate
       filter: "adjacent_to_shelter_or_open_air_at_camp"
@@ -134,9 +134,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/sleep.py"]
   assemble_pyre:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 90 }
-      consumes: pyre_layer_recipe_inputs
+    cost: 0
+    time_cost: { in_game_minutes: 90 }
+    consumes: pyre_layer_recipe_inputs
     target_schema:
       type: "{entities.pyre}"
       filter: "actor_at_high_point_AND_pyre_assembled_layers_lt_4"
@@ -147,9 +147,9 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/assemble_pyre.py"]
   light_pyre:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 5 }
-      consumes: one_flint_shard
+    cost: 0
+    time_cost: { in_game_minutes: 5 }
+    consumes: one_flint_shard
     target_schema:
       type: "{entities.pyre}"
       filter: "pyre_assembled_layers_eq_4_AND_day_eq_5_AND_part_eq_evening"
@@ -160,8 +160,8 @@ verbs:
     implemented_in: ["src/driftwood/mechanics/verbs/light_pyre.py"]
   start_day:
     actor: "{entities.player}"
-    cost:
-      time_cost: { in_game_minutes: 0 }
+    cost: 0
+    time_cost: { in_game_minutes: 0 }
     target_schema:
       type: world_clock
       filter: "world_clock_part_is_night_AND_dawn_due"
@@ -495,13 +495,13 @@ rules:
 
 ## Tokens
 
-The complete mechanical surface: 5 entities (one of which is the `recipes` content_collection), 11 verbs, 3 resources, 2 state machines, 6 events, 11 rules. Reading order from the spec's universal-surface §4 ordering: entities → verbs → resources → states → events → rules.
+The complete mechanical surface: 6 entities (among them the `recipes` content_collection and the `player_inventory` instance_container), 9 verbs, 3 resources, 2 state machines, 6 events, 11 rules. Reading order from the spec's universal-surface §4 ordering: entities → verbs → resources → states → events → rules.
 
 ## Rationale
 
 ### Entities
 
-The five entities partition the world into the things-that-act, the things-that-yield, the things-that-craft, the player's win-condition object, and the data-only recipe collection.
+The six entities partition the world into five roles: the things-that-act (the player and its inventory), the things-that-yield, the things-that-craft, the player's win-condition object, and the data-only recipe collection.
 
 - `player` is the sole actor. Its inventory is a first-class `instance_container` entity (`{entities.player_inventory}`, capacity 12, 8-per-slot stacking via `per_instance_state.quantity`) referenced by the player's `inventory:` property — see the per-instance-state note below.
 - `resource_node` is hand-authored per-island; the brief enumerates the kinds (tree, stone outcrop, fiber plant, berry bush, tidepool, spring, flint outcrop). The `yield_per_harvest_with_correct_tool` field encodes the brief's "bare hands gives a small amount, the right tool gives a useful amount."
@@ -511,9 +511,11 @@ The five entities partition the world into the things-that-act, the things-that-
 
 ### Verbs
 
-The four verbs the brief names — gather / craft / eat-drink-sleep / build-the-pyre — expand here into 10 verbs because eating and drinking decompose differently from each other (different cooldown, different resources), and the pyre's "assemble" and "light" are separate actions on separate days. The auxiliary verb `start_day` is infrastructure (system-actor, system-issued). Per-action world-time advancement is driven by `{clocks.world_time}` (spec §4.7, F-010 v0.3 resolution) — see `gdd/clocks.md`.
+The four verbs the brief names — gather / craft / eat-drink-sleep / build-the-pyre — expand here into 8 player verbs because eating and drinking decompose differently from each other (different cooldown, different resources), and the pyre's "assemble" and "light" are separate actions on separate days. The ninth verb, `start_day`, is infrastructure (system-actor, system-issued). Per-action world-time advancement is driven by `{clocks.world_time}` (spec §4.7, F-010 v0.3 resolution) — see `gdd/clocks.md`.
 
 **Per-action time-passage is modeled as a first-class clock at v0.3.** Driftwood's in-game clock advances every time the player acts (each player verb declares its `time_cost.in_game_minutes`); the natural model is "world time ticks per action." In the original v0.1 / v0.2.0-alpha authoring this required a synthetic `verbs.advance_world_time` whose sole purpose was to satisfy the spec's verb-triggers-rule pattern; the friction was logged as a v0.3 candidate finding (F-010), and was the same pattern surfaced by Embergrave's `advance_tick` (the convergence across two genres was what motivated the resolution). F-010's resolution at v0.3 adds the first-class `clocks` namespace (spec §4.7), and Driftwood's per-action driver is now `{clocks.world_time}` (per_verb_delta mode, drives `{rules.advance_world_time}` then `{rules.tick_meters}`). See `gdd/clocks.md`.
+
+**Sleep's time cost is the rest of the night, in minutes.** `{verbs.sleep_through_night}` declares `time_cost.in_game_minutes: minutes_until_dawn`: the in-game minutes from the moment the verb fires to dawn, the end of the night day-part. It is computed when the verb fires, as `gather`'s tool-dependent cost is. The night is 8 in-game hours (`{balance_targets.day_part_hour_boundaries}`), so a sleep begun at nightfall costs 480 minutes, and one begun later costs less. `{clocks.world_time}` reads it like any other verb's cost: `{rules.advance_world_time}` adds those minutes to the world clock, and `{rules.tick_meters}` decays hunger and thirst over the hours slept.
 
 ### Resources
 
@@ -530,11 +532,11 @@ Two state machines:
 
 ### Events
 
-Six events, each emitted by exactly one verb or rule (see `description:` per event). The `day_part_elapsed` event fires multiple times per day (one per part boundary crossed); the other five are once-per-run-at-most.
+Six events (see `description:` per event). `day_part_elapsed` fires once per day-part boundary crossed, `dawn_after_sleep` once per dawn (emitted by `sleep_resolution`, or by `start_day_resolution`), and `pyre_layer_assembled` once per layer, four times per run at most. `pyre_lit_at_dawn`, `day_5_passed` and `hp_reached_zero` fire at most once per run: each moves `{states.world_clock}` to a terminal node.
 
 ### Rules
 
-Eleven rules cover the ten verbs plus the world-time driver (most rules are 1:1 with verbs; `advance_world_time` and `tick_meters` are both driven by `{clocks.world_time}` rather than directly by a player verb; `start_day_resolution` shares its dawn-emission with `sleep_resolution`).
+Eleven rules: one per verb (nine), plus `advance_world_time` and `tick_meters`, which `{clocks.world_time}` drives rather than a player verb. `start_day_resolution` shares its dawn-emission with `sleep_resolution`.
 
 Every `do:` step is a typed object with a `kind:` field per D-011 (no bare-string steps). Context-local refs `{actor.<field>}` and `{target.<field>}` follow spec §3 — `{actor.inventory}`, `{actor.position}`, `{target.kind}`, `{target.station_required}`, `{target.output_item}`, etc. — resolved at rule-evaluation time against the live world. Internal step-to-step captures use bare variable names (`gathered_qty`, `tool_present`, `shelter_present`, `hunger_decay`, etc.); these are not curly-brace references in the spec's sense and are intentionally local to the rule. Distributions are referenced through `{distributions.<id>}` (deterministic-by-design for Driftwood; see `gdd/systems/distributions.md`).
 

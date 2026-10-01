@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: candle_hex
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Candle Hex
+school: umbral
+focus_cost: 1
+roll: "{distributions.rustmire_roll}"
+inflicts: "{states.affliction.chilled}"
+description: "An umbral hex; it leaves frost on the caster's teeth."

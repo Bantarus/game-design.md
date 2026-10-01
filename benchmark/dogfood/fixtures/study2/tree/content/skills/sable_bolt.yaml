@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: sable_bolt
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Sable Bolt
+school: brine
+focus_cost: 6
+roll: "{distributions.candlegrit_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "A brine bolt; it leaves frost on the caster's teeth."

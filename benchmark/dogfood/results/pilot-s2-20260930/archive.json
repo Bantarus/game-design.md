@@ -1,0 +1,31 @@
+{
+  "archive": "/home/bantarus/.local/share/gdmd-dogfood/archive/pilot-s2-20260930.tar.xz",
+  "bytes": 170612,
+  "members": {
+    "s2_impact_files__baseline__r1.jsonl": "203b3676f96b08f1f805eea213f5b13f2342434ff84a8310948ebb6e171fb07e",
+    "s2_impact_files__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "s2_impact_tokens__baseline__r1.jsonl": "dc6b7a00788fa3d7af78ea954bcce34d46f7868bee61b80d4e0ff5afb361f56f",
+    "s2_impact_tokens__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "s2_lookup_backward__baseline__r1.jsonl": "96a38ba2938a49699721708c63cf8b5d1afa7ccb0d36a846c0fc9c06f52a204f",
+    "s2_lookup_backward__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "s2_lookup_forward__baseline__r1.jsonl": "a9d5696ab0797591899e3ae36fe186268cba16b14208828eb46fa55835e18d04",
+    "s2_lookup_forward__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "s2_maintenance__baseline__r1.jsonl": "01327777895a28bc48af424084b13bdabe89af72df72428ebc0ba9880e67f4d0",
+    "s2_maintenance__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "s2_negative_control__baseline__r1.jsonl": "4343e76703b2aff5f39ecd4ccd4a98258cd674fbf090c253ace39cfce835d78c",
+    "s2_negative_control__baseline__r1.stderr.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "views/s2_impact_files__baseline__r1.min.txt": "9564c42d33b7e66d7764c171915364589d7173348a9f13ea70fe5265743a0611",
+    "views/s2_impact_files__baseline__r1.txt": "e02f2f81eb7d4c5f70c971ac834dc0c6df83384cf14f0093301e26147a2e6ecb",
+    "views/s2_impact_tokens__baseline__r1.min.txt": "9714a1da959cb41fa42598f99026bd84640859459458031ebad96ce98e8a08ae",
+    "views/s2_impact_tokens__baseline__r1.txt": "63fd7546400a13ba6e5450e53ea8d70ece2d590992740d9b3d357835c5fe3614",
+    "views/s2_lookup_backward__baseline__r1.min.txt": "16e5c4348090e62a4e70dff459abd9e9c1224f99b5a8a8e19039465cbf19f4eb",
+    "views/s2_lookup_backward__baseline__r1.txt": "83b64034deea116287e450e2e6974e6e5b31f29e8f7efb6d117e17f856e029e3",
+    "views/s2_lookup_forward__baseline__r1.min.txt": "f4995e939179cb4bf05576ebb5de7e6bfece1a11a0bc203d7d9bbf3ba6bdbf39",
+    "views/s2_lookup_forward__baseline__r1.txt": "a8df364ddffa8d859c7d7d4ea85ff0b34834950b9ecbb1497031edd66f46a3f8",
+    "views/s2_maintenance__baseline__r1.min.txt": "42483b6a11a4f875509f26327fab20adb124e0b6a66f88303029a2f8c95f01ef",
+    "views/s2_maintenance__baseline__r1.txt": "5fb6c0b6b060306ca8319104f69c48d9c294f995ef0cdbb1980ef78e21f2cb87",
+    "views/s2_negative_control__baseline__r1.min.txt": "7c739ad59d0501ee4cf691b3a81ca87960548293f8eec97fca414a98f7a8da9e",
+    "views/s2_negative_control__baseline__r1.txt": "1e687d89a4ecbc12170279c55bf86d614a17a50a980ffedd111d47ecdf1000bd"
+  },
+  "sha256": "19010e8c1d9dfa9deceff67eefe36d2c64433ad8e313642331d84bb8724ddcdd"
+}

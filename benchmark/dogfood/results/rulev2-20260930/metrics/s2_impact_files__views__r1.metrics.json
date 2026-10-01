@@ -1,0 +1,96 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1288,
+  "cache_read_tokens": 335142,
+  "cache_creation_tokens": 80022,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 7282,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83135,
+  "per_turn_occupancy": [
+    80337,
+    82801,
+    83135,
+    84188,
+    84713
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 5402,
+    "mixed": 1725
+  },
+  "view_mode_calls": {
+    "graph": 2,
+    "mixed": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 155,
+  "bash_files_read": 5,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../../answers"
+    },
+    {
+      "tool": "Bash",
+      "path": "../../answers/s2_impact_files.txt"
+    },
+    {
+      "tool": "Bash",
+      "path": "../../answers/s2_impact_files.txt"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "bcbKKk",
+      "result_bytes": 5194,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r1.txt:27-226"
+    },
+    {
+      "tool": "Bash",
+      "id": "urLQvT",
+      "result_bytes": 208,
+      "is_error": true,
+      "vcc": "s2_impact_files__views__r1.txt:243-247"
+    },
+    {
+      "tool": "Bash",
+      "id": "LvBiUw",
+      "result_bytes": 1725,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r1.txt:259-277"
+    },
+    {
+      "tool": "Bash",
+      "id": "Z128d4",
+      "result_bytes": 155,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r1.txt:289-297"
+    }
+  ]
+}

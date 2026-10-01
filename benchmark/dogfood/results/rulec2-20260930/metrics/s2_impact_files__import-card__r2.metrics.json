@@ -1,0 +1,82 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1952,
+  "cache_read_tokens": 147405,
+  "cache_creation_tokens": 32485,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 11752,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37217,
+  "per_turn_occupancy": [
+    31043,
+    35551,
+    37217,
+    37741,
+    38348
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 9311
+  },
+  "view_mode_calls": {
+    "graph": 1
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 2426,
+  "bash_files_read": 6,
+  "all_files_read": 6,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_impact_files.txt",
+    "examples/lanternfall",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "N1Wg46",
+      "result_bytes": 9311,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r2.txt:27-436"
+    },
+    {
+      "tool": "Bash",
+      "id": "cGqanL",
+      "result_bytes": 2111,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r2.txt:448-471"
+    },
+    {
+      "tool": "Bash",
+      "id": "GW1cj2",
+      "result_bytes": 15,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-card__r2.txt:483-483"
+    },
+    {
+      "tool": "Bash",
+      "id": "GXf3Jy",
+      "result_bytes": 315,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-card__r2.txt:495-503"
+    }
+  ]
+}

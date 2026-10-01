@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: dusk_hound
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Dusk Hound
+tier: elite
+max_vigor: 40
+skills:
+  - "{entities.skills.pale_pulse}"
+drops:
+  - "{entities.items.lich_torc}"
+description: An elite that avoids direct light.

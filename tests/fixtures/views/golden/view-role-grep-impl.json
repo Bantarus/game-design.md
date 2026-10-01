@@ -1,0 +1,296 @@
+{
+  "view": "grep",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "regex": "src/sim",
+    "ignore_case": false,
+    "roles": [
+      "impl"
+    ]
+  },
+  "blocks": [
+    {
+      "role": "impl",
+      "id": "game-design.md#implementation_pointers",
+      "pointer": "game-design.md:23-24",
+      "status": null,
+      "context": [],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "game-design.md#implementation_pointers",
+          "pointer": "game-design.md:23-24",
+          "status": null
+        }
+      ],
+      "matches": [
+        24
+      ],
+      "source": "implementation_pointers:\n  sim: \"src/sim/**/*.py\"",
+      "elided": []
+    },
+    {
+      "role": "impl",
+      "id": "gdd/mechanics.md#implemented_in",
+      "pointer": "gdd/mechanics.md:7-7",
+      "status": null,
+      "context": [],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "gdd/mechanics.md#implemented_in",
+          "pointer": "gdd/mechanics.md:7-7",
+          "status": null
+        }
+      ],
+      "matches": [
+        7
+      ],
+      "source": "implemented_in: [\"src/sim/*.py\"]",
+      "elided": []
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:18-18",
+          "text": "verbs:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{verbs.study}",
+          "pointer": "gdd/mechanics.md:26-26",
+          "status": null
+        }
+      ],
+      "matches": [
+        26
+      ],
+      "source": "  study:\n… 6 lines · gdd/mechanics.md:20-25\n[impl] {verbs.study} gdd/mechanics.md:26-26\n    implemented_in: [\"src/sim/study.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:20-25",
+          "lines": 6
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:18-18",
+          "text": "verbs:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{verbs.rest}",
+          "pointer": "gdd/mechanics.md:34-34",
+          "status": null
+        }
+      ],
+      "matches": [
+        34
+      ],
+      "source": "  rest:\n… 6 lines · gdd/mechanics.md:28-33\n[impl] {verbs.rest} gdd/mechanics.md:34-34\n    implemented_in: [\"src/sim/rest.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:28-33",
+          "lines": 6
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:35-35",
+          "text": "resources:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:47-47",
+          "status": null
+        }
+      ],
+      "matches": [
+        47
+      ],
+      "source": "… 1 line · gdd/mechanics.md:36-36\n  focus:\n… 9 lines · gdd/mechanics.md:38-46\n[impl] {resources.focus} gdd/mechanics.md:47-47\n    implemented_in: [\"src/sim/focus.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:36-36",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:38-46",
+          "lines": 9
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:48-48",
+          "text": "rules:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{rules.study_rule}",
+          "pointer": "gdd/mechanics.md:58-58",
+          "status": null
+        }
+      ],
+      "matches": [
+        58
+      ],
+      "source": "  study_rule:\n… 8 lines · gdd/mechanics.md:50-57\n[impl] {rules.study_rule} gdd/mechanics.md:58-58\n    implemented_in: [\"src/sim/rules.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:50-57",
+          "lines": 8
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:48-48",
+          "text": "rules:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{rules.rest_rule}",
+          "pointer": "gdd/mechanics.md:66-66",
+          "status": null
+        }
+      ],
+      "matches": [
+        66
+      ],
+      "source": "  rest_rule:\n… 6 lines · gdd/mechanics.md:60-65\n[impl] {rules.rest_rule} gdd/mechanics.md:66-66\n    implemented_in: [\"src/sim/rules.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:60-65",
+          "lines": 6
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/loops.md:7-7",
+          "text": "loops:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{loops.day}",
+          "pointer": "gdd/loops.md:18-18",
+          "status": null
+        }
+      ],
+      "matches": [
+        18
+      ],
+      "source": "  day:\n… 9 lines · gdd/loops.md:9-17\n[impl] {loops.day} gdd/loops.md:18-18\n    implemented_in: [\"src/sim/day.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/loops.md:9-17",
+          "lines": 9
+        }
+      ]
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft",
+      "context": [],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{entities.relics.lamp}",
+          "pointer": "content/relics/lamp.yaml:6-6",
+          "status": null
+        }
+      ],
+      "matches": [
+        6
+      ],
+      "source": "… 5 lines · content/relics/lamp.yaml:1-5\n[impl] {entities.relics.lamp} content/relics/lamp.yaml:6-6\nimplemented_in: [\"src/sim/relics/lamp.py\"]\n… 2 lines · content/relics/lamp.yaml:7-8",
+      "elided": [
+        {
+          "pointer": "content/relics/lamp.yaml:1-5",
+          "lines": 5
+        },
+        {
+          "pointer": "content/relics/lamp.yaml:7-8",
+          "lines": 2
+        }
+      ]
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.quill}",
+      "pointer": "content/relics/quill.yaml:1-7",
+      "status": "draft",
+      "context": [],
+      "selected": [
+        {
+          "role": "impl",
+          "id": "{entities.relics.quill}",
+          "pointer": "content/relics/quill.yaml:6-6",
+          "status": null
+        }
+      ],
+      "matches": [
+        6
+      ],
+      "source": "… 5 lines · content/relics/quill.yaml:1-5\n[impl] {entities.relics.quill} content/relics/quill.yaml:6-6\nimplemented_in: [\"src/sim/relics/quill.py\"]\n… 1 line · content/relics/quill.yaml:7-7",
+      "elided": [
+        {
+          "pointer": "content/relics/quill.yaml:1-5",
+          "lines": 5
+        },
+        {
+          "pointer": "content/relics/quill.yaml:7-7",
+          "lines": 1
+        }
+      ]
+    }
+  ]
+}

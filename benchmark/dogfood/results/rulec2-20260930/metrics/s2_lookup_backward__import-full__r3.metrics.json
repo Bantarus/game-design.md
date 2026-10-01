@@ -1,0 +1,123 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 3001,
+  "cache_read_tokens": 531078,
+  "cache_creation_tokens": 87140,
+  "tool_calls": 8,
+  "files_read": 1,
+  "bytes_read": 3481,
+  "re_reads": 0,
+  "consultation_bytes": 22421,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 90229,
+  "per_turn_occupancy": [
+    79740,
+    85084,
+    85859,
+    90229,
+    91838,
+    92479,
+    93003
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Read": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 11264
+  },
+  "view_mode_calls": {
+    "graph": 3
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 610,
+  "bash_files_read": 1,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/game-design.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-backward--import-full--r3-repo/9717dc0f-c6b5-4d7c-8427-9a5cffeef370/scratchpad/q1.json"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-backward--import-full--r3-repo/9717dc0f-c6b5-4d7c-8427-9a5cffeef370/scratchpad/q2.json"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-backward--import-full--r3-repo/9717dc0f-c6b5-4d7c-8427-9a5cffeef370/scratchpad/q1.json"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "yUkf4w",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:33-117"
+    },
+    {
+      "tool": "Bash",
+      "id": "L2LViL",
+      "result_bytes": 6814,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:130-329"
+    },
+    {
+      "tool": "Bash",
+      "id": "FcZxhv",
+      "result_bytes": 259,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:342-342"
+    },
+    {
+      "tool": "Bash",
+      "id": "4gF8u9",
+      "result_bytes": 9703,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:355-737"
+    },
+    {
+      "tool": "Bash",
+      "id": "ECUxRP",
+      "result_bytes": 610,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:750-759"
+    },
+    {
+      "tool": "Bash",
+      "id": "LiG1nv",
+      "result_bytes": 1302,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:772-815"
+    },
+    {
+      "tool": "Bash",
+      "id": "zttMET",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:845-845"
+    },
+    {
+      "tool": "Write",
+      "id": "rbfTEV",
+      "result_bytes": 203,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-full__r3.txt:875-875"
+    }
+  ]
+}

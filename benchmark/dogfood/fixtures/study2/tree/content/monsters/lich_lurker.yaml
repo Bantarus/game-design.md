@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: lich_lurker
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Lich Lurker
+tier: brute
+max_vigor: 32
+skills:
+  - "{entities.skills.wick_chant}"
+drops:
+  - "{entities.items.umber_ring}"
+description: A brute that follows the smell of lamp oil.

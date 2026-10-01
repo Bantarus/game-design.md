@@ -1,0 +1,145 @@
+{
+  "view": "overview",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {},
+  "files": [
+    {
+      "path": "game-design.md",
+      "file_type": "core",
+      "status": "draft",
+      "last_verified": null,
+      "pointer": "game-design.md:1-37"
+    },
+    {
+      "path": "gdd/mechanics.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/mechanics.md:1-86"
+    },
+    {
+      "path": "gdd/loops.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/loops.md:1-23"
+    },
+    {
+      "path": "gdd/architecture-invariants.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/architecture-invariants.md:1-20"
+    },
+    {
+      "path": "gdd/economy-balance.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/economy-balance.md:1-18"
+    },
+    {
+      "path": "gdd/content/relics.md",
+      "file_type": "content-schema",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/content/relics.md:1-24"
+    }
+  ],
+  "namespaces": {
+    "entities": [
+      {
+        "role": "token",
+        "id": "{entities.player}",
+        "pointer": "gdd/mechanics.md:9-13",
+        "status": "draft"
+      },
+      {
+        "role": "token",
+        "id": "{entities.relics}",
+        "pointer": "gdd/mechanics.md:14-17",
+        "status": "draft"
+      }
+    ],
+    "verbs": [
+      {
+        "role": "token",
+        "id": "{verbs.study}",
+        "pointer": "gdd/mechanics.md:19-26",
+        "status": "draft"
+      },
+      {
+        "role": "token",
+        "id": "{verbs.rest}",
+        "pointer": "gdd/mechanics.md:27-34",
+        "status": "draft"
+      }
+    ],
+    "resources": [
+      {
+        "role": "token",
+        "id": "{resources.focus}",
+        "pointer": "gdd/mechanics.md:36-47",
+        "status": "draft"
+      }
+    ],
+    "rules": [
+      {
+        "role": "token",
+        "id": "{rules.study_rule}",
+        "pointer": "gdd/mechanics.md:49-58",
+        "status": "draft"
+      },
+      {
+        "role": "token",
+        "id": "{rules.rest_rule}",
+        "pointer": "gdd/mechanics.md:59-66",
+        "status": "draft"
+      }
+    ],
+    "loops": [
+      {
+        "role": "token",
+        "id": "{loops.day}",
+        "pointer": "gdd/loops.md:8-18",
+        "status": "draft"
+      }
+    ],
+    "balance_targets": [
+      {
+        "role": "token",
+        "id": "{balance_targets.focus_per_day}",
+        "pointer": "gdd/economy-balance.md:8-13",
+        "status": "draft"
+      }
+    ],
+    "invariants": [
+      {
+        "role": "invariant",
+        "id": "{invariants.focus_is_integer}",
+        "pointer": "gdd/architecture-invariants.md:8-13",
+        "status": null
+      }
+    ],
+    "events": [
+      {
+        "role": "token",
+        "id": "{events.studied}",
+        "pointer": "gdd/mechanics.md:68-68",
+        "status": "draft"
+      }
+    ]
+  },
+  "content": [
+    {
+      "kind": "relics",
+      "count": 2,
+      "by_status": {
+        "draft": 2
+      },
+      "schema_pointer": "gdd/content/relics.md:1-24"
+    }
+  ],
+  "blocks": []
+}

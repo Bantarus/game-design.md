@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: core
 name: "Untitled Deckbuilder"
 short_pitch: "A short pitch for your deckbuilder — one sentence, ≤280 chars."

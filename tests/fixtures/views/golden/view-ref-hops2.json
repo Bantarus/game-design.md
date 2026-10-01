@@ -1,0 +1,354 @@
+{
+  "view": "ref",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "ref": "{resources.focus}",
+    "hops": 2
+  },
+  "focus": {
+    "role": "token",
+    "id": "{resources.focus}",
+    "pointer": "gdd/mechanics.md:36-47",
+    "status": "draft",
+    "source": "  # Focus is the only resource: every verb spends or restores it.\n  focus:\n    scope: per_turn\n    min: 0\n    max: 5\n    velocity_target: \"{balance_targets.focus_per_day}\"\n    visibility: hud\n    note: |\n      A block scalar.\n      # This line is scalar content, not a YAML comment.\n    status: draft\n    implemented_in: [\"src/sim/focus.py\"]"
+  },
+  "sub_path": null,
+  "forward": [
+    {
+      "ref": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/mechanics.md:41",
+      "kind": "value",
+      "outcome": "resolved",
+      "field": "resources.focus.velocity_target",
+      "target": "{balance_targets.focus_per_day}",
+      "target_pointer": "gdd/economy-balance.md:8-13"
+    }
+  ],
+  "backlinks": [
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "gap",
+        "pointer": "game-design.md:29-29"
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "game-design.md:29",
+          "kind": "prose",
+          "outcome": "resolved",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "> Intro text before the first section mentions `{resources.focus}`: a gap-line reference."
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{entities.player}",
+        "pointer": "gdd/mechanics.md:9-13",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:12",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "entities.player.properties.focus.from",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "      focus: { from: \"{resources.focus}\" }"
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{verbs.study}",
+        "pointer": "gdd/mechanics.md:19-26",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:21",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.cost.resource",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "    cost: { resource: \"{resources.focus}\", amount: 1 }"
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{rules.rest_rule}",
+        "pointer": "gdd/mechanics.md:59-66",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{resources.focus.nonexistent}",
+          "pointer": "gdd/mechanics.md:63",
+          "kind": "value",
+          "outcome": "unresolved",
+          "field": "rules.rest_rule.do[0].target",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "        target: \"{resources.focus.nonexistent}\""
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "invariant",
+        "id": "{invariants.focus_is_integer}",
+        "pointer": "gdd/architecture-invariants.md:8-13",
+        "status": null
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "gdd/architecture-invariants.md:11",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "invariants.focus_is_integer.applies_to[0]",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "    applies_to: [\"{resources.focus}\"]"
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "rationale",
+        "id": "gdd/economy-balance.md#Rationale",
+        "pointer": "gdd/economy-balance.md:16-18",
+        "status": null
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "gdd/economy-balance.md:18",
+          "kind": "prose",
+          "outcome": "resolved",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "Tuned against `{resources.focus}`."
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "content-entity",
+        "id": "{entities.relics.lamp}",
+        "pointer": "content/relics/lamp.yaml:1-8",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{resources.focus}",
+          "pointer": "content/relics/lamp.yaml:8",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "grants",
+          "target": "{resources.focus}",
+          "target_pointer": "gdd/mechanics.md:36-47",
+          "text": "grants: \"{resources.focus}\""
+        }
+      ]
+    }
+  ],
+  "neighbors": [
+    {
+      "hop": 2,
+      "direction": "forward",
+      "block": {
+        "role": "token",
+        "id": "{loops.day}",
+        "pointer": "gdd/loops.md:8-18",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{loops.day}",
+          "pointer": "gdd/economy-balance.md:12",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "balance_targets.focus_per_day.measure",
+          "target": "{loops.day}",
+          "target_pointer": "gdd/loops.md:8-18",
+          "text": "    measure: \"focus available per {loops.day}\""
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{verbs.rest}",
+        "pointer": "gdd/mechanics.md:27-34",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{entities.player}",
+          "pointer": "gdd/mechanics.md:28",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.actor",
+          "target": "{entities.player}",
+          "target_pointer": "gdd/mechanics.md:9-13",
+          "text": "    actor: \"{entities.player}\""
+        },
+        {
+          "ref": "{rules.rest_rule}",
+          "pointer": "gdd/mechanics.md:32",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.effects[0].resolve",
+          "target": "{rules.rest_rule}",
+          "target_pointer": "gdd/mechanics.md:59-66",
+          "text": "      - resolve: \"{rules.rest_rule}\""
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{rules.study_rule}",
+        "pointer": "gdd/mechanics.md:49-58",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{verbs.study}",
+          "pointer": "gdd/mechanics.md:50",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.given.verb",
+          "target": "{verbs.study}",
+          "target_pointer": "gdd/mechanics.md:19-26",
+          "text": "    given: { verb: \"{verbs.study}\" }"
+        },
+        {
+          "ref": "{entities.relics.lamp}",
+          "pointer": "gdd/mechanics.md:55",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.do[1].target",
+          "target": "{entities.relics.lamp}",
+          "target_pointer": "content/relics/lamp.yaml:1-8",
+          "text": "        target: \"{entities.relics.lamp}\""
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "rationale",
+        "id": "gdd/mechanics.md#Tokens",
+        "pointer": "gdd/mechanics.md:72-74",
+        "status": null
+      },
+      "via": [
+        {
+          "ref": "{verbs.study}",
+          "pointer": "gdd/mechanics.md:74",
+          "kind": "prose",
+          "outcome": "resolved",
+          "target": "{verbs.study}",
+          "target_pointer": "gdd/mechanics.md:19-26",
+          "text": "`{verbs.study}` and `{verbs.rest}` are the whole verb set."
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "rationale",
+        "id": "gdd/mechanics.md#Rationale/study",
+        "pointer": "gdd/mechanics.md:84-86",
+        "status": null,
+        "explains": "{verbs.study}"
+      },
+      "via": [
+        {
+          "ref": "{entities.relics.lamp}",
+          "pointer": "gdd/mechanics.md:86",
+          "kind": "prose",
+          "outcome": "resolved",
+          "target": "{entities.relics.lamp}",
+          "target_pointer": "content/relics/lamp.yaml:1-8",
+          "text": "Studying the lamp (`{entities.relics.lamp}`) is the core beat."
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{loops.day}",
+        "pointer": "gdd/loops.md:8-18",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{verbs.study}",
+          "pointer": "gdd/loops.md:12",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "loops.day.sequence[0].study",
+          "target": "{verbs.study}",
+          "target_pointer": "gdd/mechanics.md:19-26",
+          "text": "      - study: \"{verbs.study}\""
+        }
+      ]
+    },
+    {
+      "hop": 2,
+      "direction": "back",
+      "block": {
+        "role": "rationale",
+        "id": "gdd/loops.md#Rationale",
+        "pointer": "gdd/loops.md:21-23",
+        "status": null
+      },
+      "via": [
+        {
+          "ref": "{verbs.study}",
+          "pointer": "gdd/loops.md:23",
+          "kind": "prose",
+          "outcome": "resolved",
+          "target": "{verbs.study}",
+          "target_pointer": "gdd/mechanics.md:19-26",
+          "text": "`{loops.day}` alternates `{verbs.study}` and `{verbs.rest}`."
+        }
+      ]
+    }
+  ]
+}

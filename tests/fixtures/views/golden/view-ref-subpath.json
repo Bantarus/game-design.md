@@ -1,0 +1,100 @@
+{
+  "view": "ref",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "ref": "{rules.study_rule.do}",
+    "hops": 1
+  },
+  "focus": {
+    "role": "token",
+    "id": "{rules.study_rule}",
+    "pointer": "gdd/mechanics.md:49-58",
+    "status": "draft",
+    "source": "  study_rule:\n    given: { verb: \"{verbs.study}\" }\n    do:\n      - kind: spend\n        amount: \"{actor.focus_cost}\"\n      - kind: inspect\n        target: \"{entities.relics.lamp}\"\n    outputs: [\"{events.studied}\"]\n    status: draft\n    implemented_in: [\"src/sim/rules.py\"]"
+  },
+  "sub_path": "do",
+  "forward": [
+    {
+      "ref": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:50",
+      "kind": "value",
+      "outcome": "resolved",
+      "field": "rules.study_rule.given.verb",
+      "target": "{verbs.study}",
+      "target_pointer": "gdd/mechanics.md:19-26"
+    },
+    {
+      "ref": "{actor.focus_cost}",
+      "pointer": "gdd/mechanics.md:53",
+      "kind": "value",
+      "outcome": "context-local",
+      "field": "rules.study_rule.do[0].amount"
+    },
+    {
+      "ref": "{entities.relics.lamp}",
+      "pointer": "gdd/mechanics.md:55",
+      "kind": "value",
+      "outcome": "resolved",
+      "field": "rules.study_rule.do[1].target",
+      "target": "{entities.relics.lamp}",
+      "target_pointer": "content/relics/lamp.yaml:1-8"
+    },
+    {
+      "ref": "{events.studied}",
+      "pointer": "gdd/mechanics.md:56",
+      "kind": "value",
+      "outcome": "resolved",
+      "field": "rules.study_rule.outputs[0]",
+      "target": "{events.studied}",
+      "target_pointer": "gdd/mechanics.md:68-68"
+    }
+  ],
+  "backlinks": [
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{verbs.study}",
+        "pointer": "gdd/mechanics.md:19-26",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{rules.study_rule}",
+          "pointer": "gdd/mechanics.md:24",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.effects[0].resolve",
+          "target": "{rules.study_rule}",
+          "target_pointer": "gdd/mechanics.md:49-58",
+          "text": "      - resolve: \"{rules.study_rule}\""
+        }
+      ]
+    },
+    {
+      "hop": 1,
+      "direction": "back",
+      "block": {
+        "role": "token",
+        "id": "{events.studied}",
+        "pointer": "gdd/mechanics.md:68-68",
+        "status": "draft"
+      },
+      "via": [
+        {
+          "ref": "{rules.study_rule}",
+          "pointer": "gdd/mechanics.md:68",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "events.studied.description",
+          "target": "{rules.study_rule}",
+          "target_pointer": "gdd/mechanics.md:49-58",
+          "text": "  studied: { status: draft, description: \"Emitted by {rules.study_rule}.\" }"
+        }
+      ]
+    }
+  ],
+  "neighbors": []
+}

@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: murk_gauntlet
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Murk Gauntlet
+rarity: gleaming
+slot: trinket
+weight: 3
+value: 68
+description: A gleaming trinket pitted by the brine seeps.

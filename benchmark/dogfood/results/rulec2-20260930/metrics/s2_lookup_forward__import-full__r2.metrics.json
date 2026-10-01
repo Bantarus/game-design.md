@@ -1,0 +1,230 @@
+{
+  "turns": 12,
+  "input_tokens": 24,
+  "output_tokens": 4672,
+  "cache_read_tokens": 945739,
+  "cache_creation_tokens": 84902,
+  "tool_calls": 15,
+  "files_read": 4,
+  "bytes_read": 1449,
+  "re_reads": 0,
+  "consultation_bytes": 12226,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 85602.0,
+  "per_turn_occupancy": [
+    79708,
+    82369,
+    82756,
+    83281,
+    84379,
+    85160,
+    86044,
+    87487,
+    88914,
+    89582,
+    90220,
+    90765
+  ],
+  "tool_counts": {
+    "Bash": 9,
+    "Read": 4,
+    "Write": 2
+  },
+  "gdmd_view_calls": 3,
+  "gdmd_graph_calls": 1,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 5183,
+    "graph": 1500
+  },
+  "view_mode_calls": {
+    "ref": 3,
+    "graph": 1
+  },
+  "bash_read_calls": 5,
+  "bash_read_bytes": 9801,
+  "bash_files_read": 18,
+  "all_files_read": 21,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad/g.json",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/items/candle_flask.yaml",
+    "examples/lanternfall/content/items/hollow_gauntlet.yaml",
+    "examples/lanternfall/content/items/moth_ring.yaml",
+    "examples/lanternfall/content/items/murk_hood.yaml",
+    "examples/lanternfall/content/items/ochre_censer.yaml",
+    "examples/lanternfall/content/items/soot_mantle.yaml",
+    "examples/lanternfall/content/items/soot_ring.yaml",
+    "examples/lanternfall/content/items/vesper_ring.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/content/skills/fen_chant.yaml",
+    "examples/lanternfall/content/skills/grave_sear.yaml",
+    "examples/lanternfall/content/skills/grave_veil.yaml",
+    "examples/lanternfall/content/skills/soot_bolt.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad/g.json"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad/g.json"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad/walk.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulec2-20260930-s2-lookup-forward--import-full--r2-repo/baa1be39-75a6-4271-a354-2e90d13eab5f/scratchpad/walk.py"
+    },
+    {
+      "tool": "Read",
+      "file_path": "/tmp/gdmd-dogfood-rulec2-20260930/s2_lookup_forward__import-full__r2/repo/examples/lanternfall/gdd/systems/distributions.md"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "1pHwBT",
+      "result_bytes": 4777,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:33-197"
+    },
+    {
+      "tool": "Bash",
+      "id": "4268hb",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:209-209"
+    },
+    {
+      "tool": "Bash",
+      "id": "YsuuHT",
+      "result_bytes": 381,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:221-221"
+    },
+    {
+      "tool": "Bash",
+      "id": "2SkxAe",
+      "result_bytes": 1500,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:233-297"
+    },
+    {
+      "tool": "Bash",
+      "id": "EDkMWF",
+      "result_bytes": 95,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:328-328"
+    },
+    {
+      "tool": "Write",
+      "id": "xVXTQT",
+      "result_bytes": 244,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:364-364"
+    },
+    {
+      "tool": "Bash",
+      "id": "mUSqAd",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:376-376"
+    },
+    {
+      "tool": "Read",
+      "id": "mrPLGo",
+      "result_bytes": 368,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:390-405"
+    },
+    {
+      "tool": "Read",
+      "id": "RteyKv",
+      "result_bytes": 435,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:417-434"
+    },
+    {
+      "tool": "Read",
+      "id": "FWgFVx",
+      "result_bytes": 198,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:448-448"
+    },
+    {
+      "tool": "Read",
+      "id": "y3ueZ3",
+      "result_bytes": 448,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:460-475"
+    },
+    {
+      "tool": "Bash",
+      "id": "sVRnGi",
+      "result_bytes": 2605,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:487-587"
+    },
+    {
+      "tool": "Bash",
+      "id": "JBSLxf",
+      "result_bytes": 417,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:599-610"
+    },
+    {
+      "tool": "Bash",
+      "id": "dbAyjb",
+      "result_bytes": 502,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:624-631"
+    },
+    {
+      "tool": "Write",
+      "id": "3rvRfn",
+      "result_bytes": 201,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r2.txt:655-655"
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1488,
+  "cache_read_tokens": 384838,
+  "cache_creation_tokens": 72532,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10708,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 76824.0,
+  "per_turn_occupancy": [
+    72381,
+    75227,
+    76400,
+    77248,
+    77731,
+    78395
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 4,
+  "bash_read_bytes": 9429,
+  "bash_files_read": 3,
+  "all_files_read": 3,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat",
+    "examples/tick-combat/game-design.md",
+    "examples/tick-combat/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "D684FL",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "cehJmi",
+      "result_bytes": 3827,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:77-156"
+    },
+    {
+      "tool": "Bash",
+      "id": "g7aBxN",
+      "result_bytes": 2108,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:168-186"
+    },
+    {
+      "tool": "Bash",
+      "id": "jDP7EL",
+      "result_bytes": 1502,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:198-234"
+    },
+    {
+      "tool": "Bash",
+      "id": "NDWra9",
+      "result_bytes": 646,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:246-269"
+    },
+    {
+      "tool": "Bash",
+      "id": "Wsji8C",
+      "result_bytes": 633,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r1.txt:281-303"
+    }
+  ]
+}

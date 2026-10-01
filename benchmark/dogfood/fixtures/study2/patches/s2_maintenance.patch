@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sam Teammate <sam@example.invalid>
+Date: Wed, 30 Sep 2026 09:12:00 +0200
+Subject: [PATCH] loot: name the drop keep-odds in roll_drops
+
+Behavior-preserving refactor: replace the literal 3 with a named constant.
+---
+ examples/lanternfall/impl/lanternfall/loot/drop_tables.py | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/examples/lanternfall/impl/lanternfall/loot/drop_tables.py b/examples/lanternfall/impl/lanternfall/loot/drop_tables.py
+--- a/examples/lanternfall/impl/lanternfall/loot/drop_tables.py
++++ b/examples/lanternfall/impl/lanternfall/loot/drop_tables.py
+@@ -2,6 +2,8 @@
+ from __future__ import annotations
+ 
+ QUALITY_WEIGHTS = {"worn": 60, "sound": 30, "gleaming": 10}
++# One-in-N odds that a listed drop survives the fight.
++DROP_KEEP_ODDS = 3
+ 
+ 
+ def roll_quality(rng) -> str:
+@@ -15,9 +17,9 @@
+ 
+ 
+ def roll_drops(monster: dict, rng) -> list[tuple[str, str]]:
+-    """Keep each listed drop on a one-in-three roll, then roll its quality."""
++    """Keep each listed drop on a one-in-DROP_KEEP_ODDS roll, then roll its quality."""
+     kept = []
+     for item in monster["drops"]:
+-        if rng.randrange(3) == 0:
++        if rng.randrange(DROP_KEEP_ODDS) == 0:
+             kept.append((item, roll_quality(rng)))
+     return kept

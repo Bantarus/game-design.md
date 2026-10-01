@@ -1,0 +1,117 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 2094,
+  "cache_read_tokens": 496118,
+  "cache_creation_tokens": 79718,
+  "tool_calls": 8,
+  "files_read": 1,
+  "bytes_read": 395,
+  "re_reads": 0,
+  "consultation_bytes": 7086,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82595,
+  "per_turn_occupancy": [
+    79109,
+    81336,
+    82002,
+    82595,
+    82781,
+    83618,
+    84409
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Edit": 1,
+    "Read": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {
+    "grep": 4512
+  },
+  "view_mode_calls": {
+    "grep": 1
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 5459,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/deckbuilder/content/cards/bellows.yaml",
+    "examples/deckbuilder/content/cards/firewall.yaml",
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/content/cards.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/last_updated:"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "ymAf4X",
+      "result_bytes": 4512,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:25-120"
+    },
+    {
+      "tool": "Bash",
+      "id": "UR1xk2",
+      "result_bytes": 947,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:132-170"
+    },
+    {
+      "tool": "Bash",
+      "id": "S8U1jW",
+      "result_bytes": 73,
+      "is_error": true,
+      "vcc": "authoring_new_card__views__r1.txt:205-205"
+    },
+    {
+      "tool": "Bash",
+      "id": "ULjM3f",
+      "result_bytes": 44,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:217-219"
+    },
+    {
+      "tool": "Write",
+      "id": "fWkjoi",
+      "result_bytes": 212,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:253-253"
+    },
+    {
+      "tool": "Read",
+      "id": "3Y1gf2",
+      "result_bytes": 395,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:266-277"
+    },
+    {
+      "tool": "Edit",
+      "id": "eWGJp6",
+      "result_bytes": 143,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:296-296"
+    },
+    {
+      "tool": "Bash",
+      "id": "WEpZmP",
+      "result_bytes": 760,
+      "is_error": false,
+      "vcc": "authoring_new_card__views__r1.txt:308-335"
+    }
+  ]
+}

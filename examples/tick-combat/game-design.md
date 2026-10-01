@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: core
 name: "Lockstep"
 short_pitch: "A fixed-seed auto-battler: assemble a 5-unit squad, lock the formation, watch the tick."

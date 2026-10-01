@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: ashen_shade
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Ashen Shade
+tier: brute
+max_vigor: 23
+skills:
+  - "{entities.skills.dusk_lash}"
+  - "{entities.skills.umber_veil}"
+drops:
+  - "{entities.items.murk_brand}"
+description: A brute that hunts by the sound of a trimmed wick.

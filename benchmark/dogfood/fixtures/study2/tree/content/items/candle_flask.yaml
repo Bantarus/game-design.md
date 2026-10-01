@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: candle_flask
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Candle Flask
+rarity: worn
+slot: lantern
+weight: 3
+value: 13
+description: A worn lantern that smells of old tallow.

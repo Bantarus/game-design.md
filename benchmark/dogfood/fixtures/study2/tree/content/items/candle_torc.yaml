@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: candle_torc
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Candle Torc
+rarity: worn
+slot: ward
+weight: 5
+value: 13
+description: A worn ward pitted by the brine seeps.

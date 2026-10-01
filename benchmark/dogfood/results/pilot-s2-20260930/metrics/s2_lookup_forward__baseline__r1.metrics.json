@@ -1,0 +1,201 @@
+{
+  "turns": 11,
+  "input_tokens": 22,
+  "output_tokens": 4956,
+  "cache_read_tokens": 833613,
+  "cache_creation_tokens": 83086,
+  "tool_calls": 19,
+  "files_read": 7,
+  "bytes_read": 14375,
+  "re_reads": 0,
+  "consultation_bytes": 23125,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 85696,
+  "per_turn_occupancy": [
+    72600,
+    77004,
+    77850,
+    78413,
+    84387,
+    85696,
+    86781,
+    87790,
+    88515,
+    88736,
+    88949
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Glob": 1,
+    "Grep": 3,
+    "Read": 7,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 1,
+  "bash_read_bytes": 1085,
+  "bash_files_read": 2,
+  "all_files_read": 9,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall/content/encounters/lich_hollow.yaml",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "2ewT1k",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:33-117"
+    },
+    {
+      "tool": "Glob",
+      "id": "Dz6qvX",
+      "result_bytes": 5321,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:130-230"
+    },
+    {
+      "tool": "Bash",
+      "id": "xbdmUb",
+      "result_bytes": 1085,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:242-300"
+    },
+    {
+      "tool": "Bash",
+      "id": "2uAj7L",
+      "result_bytes": 341,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:312-312"
+    },
+    {
+      "tool": "Read",
+      "id": "PRpifX",
+      "result_bytes": 368,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:324-339"
+    },
+    {
+      "tool": "Read",
+      "id": "dCie7e",
+      "result_bytes": 435,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:351-368"
+    },
+    {
+      "tool": "Read",
+      "id": "K2B1tB",
+      "result_bytes": 491,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:380-398"
+    },
+    {
+      "tool": "Read",
+      "id": "1vkhoy",
+      "result_bytes": 441,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:410-427"
+    },
+    {
+      "tool": "Read",
+      "id": "ZdH4VN",
+      "result_bytes": 413,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:439-455"
+    },
+    {
+      "tool": "Read",
+      "id": "wGfXKh",
+      "result_bytes": 8746,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:467-741"
+    },
+    {
+      "tool": "Bash",
+      "id": "NHzfze",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:753-753"
+    },
+    {
+      "tool": "Grep",
+      "id": "KEW2PT",
+      "result_bytes": 354,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:767-781"
+    },
+    {
+      "tool": "Grep",
+      "id": "RinnjT",
+      "result_bytes": 660,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:798-806"
+    },
+    {
+      "tool": "Grep",
+      "id": "yEVfZ9",
+      "result_bytes": 219,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:821-823"
+    },
+    {
+      "tool": "Bash",
+      "id": "Kk98AC",
+      "result_bytes": 295,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:835-837"
+    },
+    {
+      "tool": "Write",
+      "id": "HZFheU",
+      "result_bytes": 200,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:863-863"
+    },
+    {
+      "tool": "Bash",
+      "id": "76D5SY",
+      "result_bytes": 180,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:875-875"
+    },
+    {
+      "tool": "Bash",
+      "id": "DaFQAV",
+      "result_bytes": 39,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:887-891"
+    },
+    {
+      "tool": "Bash",
+      "id": "BAffN9",
+      "result_bytes": 31,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__baseline__r1.txt:903-903"
+    }
+  ]
+}

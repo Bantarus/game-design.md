@@ -1,0 +1,90 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1589,
+  "cache_read_tokens": 422766,
+  "cache_creation_tokens": 80362,
+  "tool_calls": 6,
+  "files_read": 1,
+  "bytes_read": 4296,
+  "re_reads": 0,
+  "consultation_bytes": 12711,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 84881.0,
+  "per_turn_occupancy": [
+    79276,
+    82355,
+    84651,
+    85111,
+    85522,
+    86225
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 6815,
+  "bash_files_read": 1,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat",
+    "examples/tick-combat/game-design.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "WV2pmn",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:20-65"
+    },
+    {
+      "tool": "Read",
+      "id": "bmeQsj",
+      "result_bytes": 4296,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:77-159"
+    },
+    {
+      "tool": "Bash",
+      "id": "2iEQKD",
+      "result_bytes": 4823,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:171-253"
+    },
+    {
+      "tool": "Bash",
+      "id": "eYSMqe",
+      "result_bytes": 371,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:265-279"
+    },
+    {
+      "tool": "Bash",
+      "id": "xqhzb5",
+      "result_bytes": 607,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:291-310"
+    },
+    {
+      "tool": "Bash",
+      "id": "jgVgKV",
+      "result_bytes": 622,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r3.txt:322-341"
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "turns": 9,
+  "input_tokens": 18,
+  "output_tokens": 2912,
+  "cache_read_tokens": 694928,
+  "cache_creation_tokens": 85708,
+  "tool_calls": 9,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 18635,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 89438,
+  "per_turn_occupancy": [
+    79713,
+    82398,
+    82852,
+    83187,
+    89438,
+    89911,
+    90590,
+    90994,
+    91571
+  ],
+  "tool_counts": {
+    "Bash": 8,
+    "Grep": 1
+  },
+  "gdmd_view_calls": 5,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 17683
+  },
+  "view_mode_calls": {
+    "ref": 5
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 5559,
+  "bash_files_read": 3,
+  "all_files_read": 3,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "KqzW8U",
+      "result_bytes": 5222,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:33-144"
+    },
+    {
+      "tool": "Bash",
+      "id": "bTM2A1",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:156-156"
+    },
+    {
+      "tool": "Bash",
+      "id": "Hv5YRb",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:168-168"
+    },
+    {
+      "tool": "Bash",
+      "id": "qs26dd",
+      "result_bytes": 5478,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:184-282"
+    },
+    {
+      "tool": "Bash",
+      "id": "EimBwE",
+      "result_bytes": 6933,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:287-409"
+    },
+    {
+      "tool": "Bash",
+      "id": "PhBGNd",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:421-421"
+    },
+    {
+      "tool": "Grep",
+      "id": "sGZexm",
+      "result_bytes": 590,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:438-445"
+    },
+    {
+      "tool": "Bash",
+      "id": "thYc7e",
+      "result_bytes": 90,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:457-460"
+    },
+    {
+      "tool": "Bash",
+      "id": "qhZUAL",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-full__r1.txt:472-481"
+    }
+  ]
+}

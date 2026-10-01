@@ -1,0 +1,126 @@
+{
+  "view": "overview",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "roles": [
+      "rationale"
+    ]
+  },
+  "files": [
+    {
+      "path": "game-design.md",
+      "file_type": "core",
+      "status": "draft",
+      "last_verified": null,
+      "pointer": "game-design.md:1-37"
+    },
+    {
+      "path": "gdd/mechanics.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/mechanics.md:1-86"
+    },
+    {
+      "path": "gdd/loops.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/loops.md:1-23"
+    },
+    {
+      "path": "gdd/architecture-invariants.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/architecture-invariants.md:1-20"
+    },
+    {
+      "path": "gdd/economy-balance.md",
+      "file_type": "subfile",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/economy-balance.md:1-18"
+    },
+    {
+      "path": "gdd/content/relics.md",
+      "file_type": "content-schema",
+      "status": "draft",
+      "last_verified": "2026-09-30",
+      "pointer": "gdd/content/relics.md:1-24"
+    }
+  ],
+  "namespaces": {},
+  "content": [],
+  "blocks": [
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#Glossary",
+      "pointer": "game-design.md:35-37",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale",
+      "pointer": "gdd/mechanics.md:76-86",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale/study",
+      "pointer": "gdd/mechanics.md:84-86",
+      "status": null,
+      "explains": "{verbs.study}"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale",
+      "pointer": "gdd/architecture-invariants.md:16-20",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+      "pointer": "gdd/architecture-invariants.md:18-20",
+      "status": null,
+      "explains": "{invariants.focus_is_integer}"
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Schema",
+      "pointer": "gdd/content/relics.md:18-20",
+      "status": null
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/content/relics.md#Representative Example",
+      "pointer": "gdd/content/relics.md:22-24",
+      "status": null
+    }
+  ]
+}

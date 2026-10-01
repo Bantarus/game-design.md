@@ -1,0 +1,72 @@
+{
+  "cli_version": "2.1.285 (Claude Code)",
+  "effort": "high",
+  "model_requested": "claude-sonnet-5-5",
+  "source_sha": "e4291739d1b42c3fa2cdf438243d93f0a312b988",
+  "spec_import_tokens_difference": 6670,
+  "spec_md_bytes_difference": 18313,
+  "worlds": {
+    "matrix": {
+      "overlay_sha": null,
+      "spec_import_tokens": 52645,
+      "spec_md_bytes": 139852,
+      "with_spec_import": {
+        "assistant_models": [
+          "claude-sonnet-5-5"
+        ],
+        "cost_usd": 0.2959632,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "460d1dbc-e7fb-4c2a-ae96-5460e8c48d02",
+        "stop_reason": "completed",
+        "turn1_occupancy": 79310
+      },
+      "without_spec_import": {
+        "assistant_models": [
+          "claude-sonnet-5-5"
+        ],
+        "cost_usd": 0.0853832,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "bb1450a9-8040-4d41-854f-1e237cef2bf7",
+        "stop_reason": "completed",
+        "turn1_occupancy": 26665
+      }
+    },
+    "v0.3": {
+      "overlay_sha": "61c95fe9ae89ecc58712127768d206c6e41e5f1e",
+      "spec_import_tokens": 45975,
+      "spec_md_bytes": 121539,
+      "with_spec_import": {
+        "assistant_models": [
+          "claude-sonnet-5-5"
+        ],
+        "cost_usd": 0.26747319999999997,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "abc8183a-876a-4d40-846b-cfe50f6e7373",
+        "stop_reason": "completed",
+        "turn1_occupancy": 72190
+      },
+      "without_spec_import": {
+        "assistant_models": [
+          "claude-sonnet-5-5"
+        ],
+        "cost_usd": 0.0835882,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "770cac66-3057-417c-95fe-445af99cf685",
+        "stop_reason": "completed",
+        "turn1_occupancy": 26215
+      }
+    }
+  }
+}

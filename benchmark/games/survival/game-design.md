@@ -1,13 +1,13 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: core
 name: "Driftwood"
 short_pitch: "A 30-minute survival game about shipwreck on a small island: gather, craft, build the signal pyre, get rescued."
 genre_tags: [survival, crafting, single-player]
 status: draft
-version: 0.2.0
-last_updated: "2026-05-28"
+version: 0.2.2
+last_updated: "2026-10-01"
 target_platforms_neutral: [desktop, handheld]
 pillars:
   - "The graph is the game"

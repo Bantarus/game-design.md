@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: sable_mantle
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Sable Mantle
+rarity: gleaming
+slot: tonic
+weight: 3
+value: 67
+description: A gleaming tonic that hums near open flame.

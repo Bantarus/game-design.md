@@ -1,0 +1,137 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 2696,
+  "cache_read_tokens": 224328,
+  "cache_creation_tokens": 34115,
+  "tool_calls": 8,
+  "files_read": 1,
+  "bytes_read": 3481,
+  "re_reads": 0,
+  "consultation_bytes": 12209,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 37357,
+  "per_turn_occupancy": [
+    31060,
+    35546,
+    36856,
+    37357,
+    38400,
+    39260,
+    39978
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Read": 1
+  },
+  "gdmd_view_calls": 3,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 5159
+  },
+  "view_mode_calls": {
+    "ref": 3
+  },
+  "bash_read_calls": 4,
+  "bash_read_bytes": 3569,
+  "bash_files_read": 20,
+  "all_files_read": 21,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/content/encounters/pale_den.yaml",
+    "examples/lanternfall/content/items/candle_flask.yaml",
+    "examples/lanternfall/content/items/hollow_gauntlet.yaml",
+    "examples/lanternfall/content/items/moth_ring.yaml",
+    "examples/lanternfall/content/items/murk_hood.yaml",
+    "examples/lanternfall/content/items/ochre_censer.yaml",
+    "examples/lanternfall/content/items/soot_mantle.yaml",
+    "examples/lanternfall/content/items/soot_ring.yaml",
+    "examples/lanternfall/content/items/vesper_ring.yaml",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/content/skills/fen_chant.yaml",
+    "examples/lanternfall/content/skills/grave_sear.yaml",
+    "examples/lanternfall/content/skills/grave_veil.yaml",
+    "examples/lanternfall/content/skills/soot_bolt.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/hop"
+    },
+    {
+      "tool": "Bash",
+      "path": "/hop"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "9zqtPG",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:33-117"
+    },
+    {
+      "tool": "Bash",
+      "id": "QARyWY",
+      "result_bytes": 5021,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:129-273"
+    },
+    {
+      "tool": "Bash",
+      "id": "6j54aj",
+      "result_bytes": 1662,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:285-352"
+    },
+    {
+      "tool": "Bash",
+      "id": "vGCE5P",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:364-364"
+    },
+    {
+      "tool": "Bash",
+      "id": "C924uH",
+      "result_bytes": 113,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:376-376"
+    },
+    {
+      "tool": "Bash",
+      "id": "37WW6v",
+      "result_bytes": 1158,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:388-410"
+    },
+    {
+      "tool": "Bash",
+      "id": "aVPyoz",
+      "result_bytes": 502,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:422-429"
+    },
+    {
+      "tool": "Bash",
+      "id": "iZZkMJ",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__import-card__r1.txt:443-452"
+    }
+  ]
+}

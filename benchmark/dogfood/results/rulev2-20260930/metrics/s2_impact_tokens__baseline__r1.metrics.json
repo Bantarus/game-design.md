@@ -1,0 +1,155 @@
+{
+  "turns": 13,
+  "input_tokens": 26,
+  "output_tokens": 4400,
+  "cache_read_tokens": 1002794,
+  "cache_creation_tokens": 83727,
+  "tool_calls": 12,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 26224,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 84817,
+  "per_turn_occupancy": [
+    72607,
+    74648,
+    79945,
+    80732,
+    81695,
+    82653,
+    84817,
+    85562,
+    87788,
+    88473,
+    88884,
+    89153,
+    89590
+  ],
+  "tool_counts": {
+    "Bash": 11,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 9,
+  "bash_read_bytes": 25788,
+  "bash_files_read": 13,
+  "all_files_read": 13,
+  "all_re_reads": 12,
+  "all_files_read_paths": [
+    ".",
+    "examples/lanternfall",
+    "examples/lanternfall/content",
+    "examples/lanternfall/content/items/fen_mantle.yaml",
+    "examples/lanternfall/content/monsters/briny_wisp.yaml",
+    "examples/lanternfall/content/skills/ashen_ward.yaml",
+    "examples/lanternfall/content/skills/ochre_sear.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "9fRnfD",
+      "result_bytes": 3469,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:27-128"
+    },
+    {
+      "tool": "Bash",
+      "id": "WzTGsV",
+      "result_bytes": 10561,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:140-456"
+    },
+    {
+      "tool": "Bash",
+      "id": "vwpUg7",
+      "result_bytes": 781,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:468-494"
+    },
+    {
+      "tool": "Bash",
+      "id": "3eEG9F",
+      "result_bytes": 1025,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:506-540"
+    },
+    {
+      "tool": "Bash",
+      "id": "B76JZ3",
+      "result_bytes": 1281,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:552-565"
+    },
+    {
+      "tool": "Bash",
+      "id": "fbxQoz",
+      "result_bytes": 3844,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:583-693"
+    },
+    {
+      "tool": "Bash",
+      "id": "cadH3N",
+      "result_bytes": 569,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:705-713"
+    },
+    {
+      "tool": "Bash",
+      "id": "yKgFKR",
+      "result_bytes": 4021,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:725-824"
+    },
+    {
+      "tool": "Bash",
+      "id": "ppEwvE",
+      "result_bytes": 237,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:836-839"
+    },
+    {
+      "tool": "Bash",
+      "id": "XiVQb4",
+      "result_bytes": 49,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:867-867"
+    },
+    {
+      "tool": "Bash",
+      "id": "4P7XKa",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:881-881"
+    },
+    {
+      "tool": "Write",
+      "id": "Upd5VV",
+      "result_bytes": 196,
+      "is_error": false,
+      "vcc": "s2_impact_tokens__baseline__r1.txt:908-908"
+    }
+  ]
+}

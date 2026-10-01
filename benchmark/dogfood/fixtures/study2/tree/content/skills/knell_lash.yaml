@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: knell_lash
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Knell Lash
+school: brine
+focus_cost: 1
+roll: "{distributions.tallowgrin_roll}"
+inflicts: "{states.affliction.bleeding}"
+description: "A brine lash; the flame gutters as it lands."

@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: pale_pulse
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Pale Pulse
+school: umbral
+focus_cost: 1
+roll: "{distributions.mothglow_roll}"
+inflicts: "{states.affliction.bleeding}"
+description: "An umbral pulse; the dark leans away from it."

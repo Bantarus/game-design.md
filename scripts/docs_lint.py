@@ -21,14 +21,13 @@ ROOT = Path(__file__).resolve().parent.parent
 # The four stability-guarantee fields per spec §5.1 / §8.2.
 STABILITY_FIELDS = ["pillars", "non_goals", "player_experience_goals", "core_loop_ref"]
 
-# Valid reference namespaces per spec §3 (namespace-ownership table), plus the
-# context-local prefixes (D-012) and the doc-placeholder spellings used when
-# teaching the syntax rather than referencing a real token.
+# Valid reference namespaces per spec §3: the twelve referenceable namespaces
+# (not the reserved owned keys, D-039: `{pillars.x}` does not resolve), plus
+# the context-local prefixes (D-012) and the doc-placeholder spellings used
+# when teaching the syntax rather than referencing a real token.
 VALID_NAMESPACES = {
     "entities", "verbs", "resources", "states", "events", "rules", "loops",
     "clocks", "distributions", "feel", "balance_targets", "invariants",
-    "verify_targets", "adapters", "pillars", "player_experience_goals",
-    "content_schema",
     # context-local (bound at rule-evaluation time, not globally resolvable)
     "actor", "target",
     # documentation placeholders
@@ -67,6 +66,29 @@ def check_versions() -> None:
             f"docs/spec.md: status line does not mention v{version} "
             f"(pyproject says {m.group(1)}): {status_line.strip()!r}"
         )
+
+    # The other carriers the release procedure bumps (AGENTS.md). §11 read
+    # "conformant at v0.2.0-alpha" through all of v0.3.
+    fm = re.search(r"^spec_version:\s*(\S+)", spec, re.M)
+    if not fm or fm.group(1) != version:
+        fail(f"docs/spec.md: frontmatter spec_version is "
+             f"{fm.group(1) if fm else 'missing'}, not {version}")
+    conformance = re.search(r"\*\*conformant at (v[^*]+)\*\*", spec)
+    if not conformance or conformance.group(1) != f"v{version}":
+        fail(f"docs/spec.md §11: conformance sentence names "
+             f"{conformance.group(1) if conformance else 'no version'}, not v{version}")
+    init = (ROOT / "src" / "game_design_md" / "__init__.py").read_text(encoding="utf-8")
+    for name, want in (("__version__", m.group(1)), ("__spec_version__", version)):
+        im = re.search(rf'^{name}\s*=\s*"([^"]*)"', init, re.M)
+        if not im or im.group(1) != want:
+            fail(f"src/game_design_md/__init__.py: {name} is "
+                 f"{im.group(1) if im else 'missing'}, not {want} "
+                 f"(`gdmd --version` printed 0.1.0 through all of v0.3)")
+    schema = (ROOT / "schema" / "game-design.schema.json").read_text(encoding="utf-8")
+    for key in ("$id", "title"):
+        sm = re.search(rf'^\s*"{re.escape(key)}":\s*"([^"]*)"', schema, re.M)
+        if not sm or f"v{version}" not in sm.group(1):
+            fail(f"schema/game-design.schema.json: {key} does not mention v{version}")
 
 
 def check_cli_verbs() -> None:
@@ -129,11 +151,39 @@ def check_agents_namespaces() -> None:
             fail(f"AGENTS.md: reference uses unknown namespace {{{ns}.…}}")
 
 
+# A version-dated promise about future behavior ("ratchets to error in v0.3",
+# "a v0.4+ concern", "deferred to v0.4+"). The spec and the schema state
+# current behavior only; planned changes live in DECISIONS.md's Ratchet
+# Register as trigger -> action (D-044). Seventeen spec lines and one schema
+# description had gone stale by v0.4, several promising behavior never shipped.
+DATED_PROMISE_RE = re.compile("|".join(f"(?:{p})" for p in (
+    r"\bratchets?\b[^.;()]{0,60}?\bin\s+v\d",                     # ratchets (to X) in v0.3
+    r"\bv\d+(?:\.\d+)*\+?\s+(?:spec-)?(?:concern|ratchet|follow-on|[\w-]+\s+question)",
+    r"\b(?:info|warning|error)\s+in\s+v\d",                         # warning in v0.3
+    r"\bdeferred\s+to\s+v\d",
+    r"\bcandidates?\s+for\s+v\d",
+)), re.I)
+
+
+def dated_promises(text: str) -> list[tuple[int, str]]:
+    """(line number, matched text) for every version-dated promise in `text`."""
+    return [(i, m.group(0)) for i, line in enumerate(text.splitlines(), 1)
+            for m in DATED_PROMISE_RE.finditer(line)]
+
+
+def check_spec_states_current_behavior() -> None:
+    for rel in ("docs/spec.md", "schema/game-design.schema.json"):
+        for line, hit in dated_promises((ROOT / rel).read_text(encoding="utf-8")):
+            fail(f"{rel}:{line}: version-dated promise {hit!r}; state current behavior and "
+                 f"put the plan in DECISIONS.md's Ratchet Register (D-044)")
+
+
 def main() -> int:
     check_versions()
     check_cli_verbs()
     check_stability_guarantee()
     check_agents_namespaces()
+    check_spec_states_current_behavior()
     if findings:
         print(f"docs-lint: {len(findings)} finding(s)")
         for f in findings:

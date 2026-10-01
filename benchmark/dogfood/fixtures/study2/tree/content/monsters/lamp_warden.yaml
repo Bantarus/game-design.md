@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: lamp_warden
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Lamp Warden
+tier: boss
+max_vigor: 180
+skills:
+  - "{entities.skills.briny_veil}"
+  - "{entities.skills.sable_lash}"
+drops:
+  - "{entities.items.ashen_censer}"
+  - "{entities.items.murk_dirk}"
+  - "{entities.items.sable_mantle}"
+description: A boss that hunts by the sound of a trimmed wick.

@@ -1,0 +1,193 @@
+{
+  "turns": 12,
+  "input_tokens": 24,
+  "output_tokens": 6645,
+  "cache_read_tokens": 901458,
+  "cache_creation_tokens": 81807,
+  "tool_calls": 16,
+  "files_read": 2,
+  "bytes_read": 5139,
+  "re_reads": 0,
+  "consultation_bytes": 16811,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 81545.0,
+  "per_turn_occupancy": [
+    72614,
+    77014,
+    78010,
+    79453,
+    81009,
+    81245,
+    81845,
+    84081,
+    86075,
+    86981,
+    87292,
+    87670
+  ],
+  "tool_counts": {
+    "Bash": 7,
+    "Glob": 1,
+    "Grep": 5,
+    "Read": 2,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 1348,
+  "bash_files_read": 3,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/answers/s2_lookup_backward.txt",
+    "examples/lanternfall/content/skills/fen_wail.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/content/monsters.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r1-repo/86e9a07c-5c81-496e-a86a-dd472305aad2/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r1-repo/86e9a07c-5c81-496e-a86a-dd472305aad2/scratchpad/g.py"
+    },
+    {
+      "tool": "Write",
+      "file_path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r1-repo/86e9a07c-5c81-496e-a86a-dd472305aad2/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r1-repo/86e9a07c-5c81-496e-a86a-dd472305aad2/scratchpad/g.py"
+    },
+    {
+      "tool": "Bash",
+      "path": "/tmp/claude-1000/-tmp-gdmd-dogfood-rulev2-20260930-s2-lookup-backward--baseline--r1-repo/86e9a07c-5c81-496e-a86a-dd472305aad2/scratchpad/g.py"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "sh2TkF",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:33-117"
+    },
+    {
+      "tool": "Glob",
+      "id": "rkg7KN",
+      "result_bytes": 5321,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:130-230"
+    },
+    {
+      "tool": "Bash",
+      "id": "tc2og2",
+      "result_bytes": 862,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:242-290"
+    },
+    {
+      "tool": "Bash",
+      "id": "QBGpr5",
+      "result_bytes": 34,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:351-351"
+    },
+    {
+      "tool": "Write",
+      "id": "ykhdE1",
+      "result_bytes": 239,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:431-431"
+    },
+    {
+      "tool": "Bash",
+      "id": "wySFCb",
+      "result_bytes": 235,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:443-443"
+    },
+    {
+      "tool": "Bash",
+      "id": "6wY4wU",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:455-455"
+    },
+    {
+      "tool": "Grep",
+      "id": "X8DtcT",
+      "result_bytes": 588,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:471-479"
+    },
+    {
+      "tool": "Grep",
+      "id": "GJfQCj",
+      "result_bytes": 385,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:493-498"
+    },
+    {
+      "tool": "Grep",
+      "id": "KURDj5",
+      "result_bytes": 557,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:512-520"
+    },
+    {
+      "tool": "Read",
+      "id": "yEiHcX",
+      "result_bytes": 1658,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:533-586"
+    },
+    {
+      "tool": "Grep",
+      "id": "4iJNsK",
+      "result_bytes": 257,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:600-603"
+    },
+    {
+      "tool": "Grep",
+      "id": "vZBPSP",
+      "result_bytes": 2470,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:617-648"
+    },
+    {
+      "tool": "Bash",
+      "id": "3Aw2me",
+      "result_bytes": 486,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:660-674"
+    },
+    {
+      "tool": "Bash",
+      "id": "CxHoQT",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:686-686"
+    },
+    {
+      "tool": "Bash",
+      "id": "Lc8Jha",
+      "result_bytes": 17,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__baseline__r1.txt:698-698"
+    }
+  ]
+}

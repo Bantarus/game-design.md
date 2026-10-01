@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: gloam_mite
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Gloam Mite
+tier: minion
+max_vigor: 11
+skills:
+  - "{entities.skills.gloam_snare}"
+  - "{entities.skills.grave_ward}"
+drops:
+  - "{entities.items.knell_gauntlet}"
+description: A minion that sleeps in cold ash.

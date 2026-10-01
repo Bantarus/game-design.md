@@ -1,18 +1,18 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 status: draft
-last_updated: 2026-05-29
+last_updated: 2026-10-01
 license: Apache-2.0
 ---
 
 # The `game-design.md` Specification
 
-> **Status: pre-stable (v0.3.0).** Expect the format to change as it matures. v0.x is pre-stable; v1.0 is the stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
+> **Status: pre-stable (v0.4.0).** Expect the format to change as it matures. v0.x is pre-stable; v1.0 is the stable lock. Modeled on Google Labs' [`DESIGN.md`](https://github.com/google-labs-code/design.md).
 
 `game-design.md` is a plain-text, LLM-first, engine-neutral, genre-agnostic standard for describing a video game to an AI coding agent as a living source of truth. A `game-design.md` tree pairs **normative YAML tokens** (the truth an agent compiles against) with **prose rationale** (why, and fallback when no token covers a case). The primary reader is an AI coding agent; a human is the second reader.
 
-The rest of this document is normative. Where this spec is silent, the corresponding rule in `DESIGN.md` upstream applies; where the two disagree, this document wins for `game-design.md` trees.
+The rest of this document is normative. It states current behavior only: planned changes, each with the observed-need trigger that would start it, are kept in the Ratchet Register in `DECISIONS.md` (D-044), not here. Where this spec is silent, the corresponding rule in `DESIGN.md` upstream applies; where the two disagree, this document wins for `game-design.md` trees.
 
 ---
 
@@ -92,7 +92,7 @@ Canonical layout for any conformant example:
     milestones.md           # optional
     glossary.md             # optional but strongly recommended
   content/
-    cards/*.yaml            # one file per entity, referenced via data_source
+    cards/*.yaml            # one file per entity, found via the content-schema's data_dir
     enemies/*.yaml
     items/*.yaml
     levels/*.yaml
@@ -100,7 +100,7 @@ Canonical layout for any conformant example:
 
 **Required vs optional.** *Required* files must exist for the linter to pass. *Optional* files are accepted if present and ignored if absent — the linter never errors on absence of an optional file, only on broken references into one. The four conditionally-required files (`distributions.md`, `feel.md`, `clocks.md`, `content/_index.md`) are required exactly when the conditions in the comments above hold. `economy-balance.md` is effectively unconditional: `missing-balance-targets` (§9.1) fires at error when no `balance_targets` exist anywhere in the tree, and the namespace is owned by that file.
 
-**The `files:` map contract.** The root `game-design.md` frontmatter declares a `files:` map whose keys are stable logical names (e.g. `loops`, `mechanics`, `cards`) and whose values are workspace-relative paths to subfiles. The linter validates that every value resolves to a real file. Any subfile not listed in `files:` is *orphaned* (rule `orphaned-entity`, severity warning). The map is the agent's navigation index — if it's not in `files:`, the agent will not find it.
+**The `files:` map contract.** The root `game-design.md` frontmatter declares a `files:` map whose keys are stable logical names (e.g. `loops`, `mechanics`, `cards`) and whose values are paths to subfiles, relative to the tree root (§2.3). The linter validates that every value resolves to a real file. Any subfile not listed in `files:` is *orphaned* (rule `orphaned-entity`, severity warning). The map is the agent's navigation index — if it's not in `files:`, the agent will not find it.
 
 ### 2.3 Required frontmatter keys per file type
 
@@ -133,6 +133,8 @@ There are four file types. Every `.md` file in the tree declares its type explic
 | `count_target` | — | — | required (integer) | — |
 | `balance_refs` | — | — | optional (array of refs) | — |
 
+**Paths are relative to the tree root (v0.4, D-038).** The tree root is the directory holding the root `game-design.md`. `files:` values, and the globs in `implemented_in:` and `implementation_pointers:`, are resolved against it. For a tree at the root of its repository, that is the workspace. A glob may climb out of the tree with `../`, for example a tree in `docs/gdd/` pointing at `../../src/**/*.py`, but not out of the git repository. Such a glob warns (`implementation-pointer-outside-repo`, §9.1): `gdmd hook check` never sees files outside the repository staged, and another clone does not have them.
+
 Subfiles have a free per-namespace top-level key in their frontmatter (e.g. `loops.md` carries a top-level `loops:` map, `mechanics.md` carries `entities:`, `verbs:`, `resources:`). The JSON Schema (§10) enumerates the namespace-to-file mapping.
 
 ---
@@ -141,7 +143,7 @@ Subfiles have a free per-namespace top-level key in their frontmatter (e.g. `loo
 
 Tokens are referenced inline as `{namespace.id}` with literal curly braces. Examples: `{loops.combat_turn}`, `{resources.energy}`, `{verbs.play_card}`, `{distributions.card_draw}`, `{entities.cards.ember_strike}`.
 
-**Namespace ownership.** Each namespace is owned by exactly one subfile:
+**Namespace ownership.** Each namespace is owned by exactly one subfile. These twelve are the referenceable namespaces: a subfile keys each one's tokens by id.
 
 | Namespace | Owning subfile |
 | --- | --- |
@@ -157,26 +159,36 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 | `feel` | `gdd/feel.md` |
 | `balance_targets` | `gdd/economy-balance.md` |
 | `invariants` | `gdd/architecture-invariants.md` |
-| `verify_targets` / `adapters` | `gdd/verification.md` |
+
+**Reserved owned keys (v0.4, D-039): not referenceable.** These frontmatter keys also have an owning file, but they are lists or free-form mappings, not tokens keyed by id, so a reference has nothing to name. `{pillars.<x>}` fires `broken-ref`, and so does a whole-namespace `{pillars}` in `applies_to`. Elsewhere, `{pillars}` is plain text to the tools.
+
+| Key | Owning file |
+| --- | --- |
 | `pillars` | `gdd/pillars.md` (and the root `game-design.md`) |
 | `player_experience_goals` | the root `game-design.md` |
+| `verify_targets` / `adapters` | `gdd/verification.md` |
 
 **Resolution.** A reference `{ns.id}` resolves by looking up `ns` in the namespace table above, opening the owning subfile, and reading the value at `ns.id` in its frontmatter. References may chain through dot paths into nested objects (e.g. `{entities.cards.ember_strike.cost}`).
 
 **Primitive vs composite.** A reference may resolve to either a *primitive* (number, string, boolean) or a *composite* (object, array). Composite refs are legal anywhere; primitive refs are required only where the consuming field declares a scalar type (e.g. a `cost:` field must resolve to a number or to a composite that itself contains a number under a documented sub-path).
 
-**References into `content/*/*.yaml`.** A reference whose path starts with `{entities.<kind>.<id>...}` resolves through the `data_source:` of the matching content-schema file. Example: `{entities.cards.ember_strike}` first reads `gdd/content/cards.md` frontmatter, finds `data_source: ../content/cards`, and resolves the rest of the path against `../content/cards/ember_strike.yaml`. The linter computes these resolutions during `lint`.
+**References into `content/*/*.yaml`.** A reference whose path starts with `{entities.<kind>.<id>...}` resolves to the content-entity file whose `id:` is `<id>`, in a directory named `<kind>`, and reads the rest of the path in that file. The directory is the one named by the `data_dir:` of the content-schema file whose `entity:` is `<kind>` (§6.1). Example: `gdd/content/cards.md` declares `entity: cards` and `data_dir: ../../content/cards`, so `{entities.cards.ember_strike}` is `content/cards/ember_strike.yaml`. Lint keeps resolution and validation on the same files: a content-schema's `data_dir:` must name a directory called its `entity:`, and an entity's `id:` must equal its file name's stem (rule `content-entity-invalid`, §6.2; D-037).
 
 **Nesting / depth.** Maximum reference depth is 6 dot-separated segments. References inside references (`{foo.{bar.baz}}`) are not supported in v0.1.
 
+**Whole-namespace references (v0.4, D-033).** An item of an invariant's `applies_to:` list (§4.11) whose entire string is `{namespace}` is a **whole-namespace reference**: it names every token of that namespace, including tokens added later. This is the only place a one-segment reference is recognized; anywhere else, `{word}` is plain text.
+
+- It resolves when `namespace` is one of the twelve referenceable namespaces in the first table above, whether or not the tree declares a token in it yet. Otherwise, a reserved key included, it fires `broken-ref`.
+- It is not a use of any individual token. It does not count as a reference for `orphaned-entity` or `unreferenced-verb`.
+
 **Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
 
-**Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time:
+**Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time. The set is closed: these two, and no others (D-047).
 
 - `{actor.<field>}` — the acting unit / entity in the current rule firing.
 - `{target.<field>}` — the rule's target (resolved per `target_selection:`).
 
-The linter's `broken-ref` rule skips refs starting with these prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Adding new context-local prefixes is a spec-level event (a v0.3 ratchet may close the set or extend it). Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
+The linter's `broken-ref` rule skips refs starting with these two prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Any other prefix that is not a namespace, such as `{world.tick}`, fires `broken-ref`. Adding a context-local prefix is a spec-level event. Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
 
 **Binding to `instance_container` per-instance state (D-019, F-008 v0.3 addressing DSL).** When the actor or target is an instance from an `instance_container` (§4.1), `{actor.<field>}` / `{target.<field>}` resolve `<field>` through a documented lookup order:
 
@@ -197,7 +209,7 @@ The lint rule `write-to-template-field` (severity: error) catches this staticall
 1. **Symmetry.** `{actor.<field>}` and `{target.<field>}` resolve the same way. Neither is snapshotted at action-start or tick-start. The intuitive "target HP is live so accumulated damage kills" semantics extends to actor fields too.
 2. **Composability.** A rule's `do:` array may mutate `{actor.<field>}` in step N and read the mutated value in step N+1. There is no implicit per-firing snapshot.
 
-Engines MAY internally snapshot when they can prove no in-firing mutations affect the reads (e.g., tick-combat's xtreme reads `actor.attack` from a tick-start snapshot because tick-combat has no mid-tick attack mutations — the snapshot is provably equivalent to a live read). The normative contract is "produces the value of a live read at the step." When a future engine or future content introduces mid-firing mutations, the live-read semantics is what wins; snapshot-based engines must refactor. An explicit `snapshot:` step kind for use-the-frozen-value cases is a v0.3+ concern; at v0.2.0-alpha the only binding is apply-time. See `DECISIONS.md` D-012 and the v0.2 Phase-2 ambiguity #11.
+Engines MAY internally snapshot when they can prove no in-firing mutations affect the reads (e.g., tick-combat's xtreme reads `actor.attack` from a tick-start snapshot because tick-combat has no mid-tick attack mutations — the snapshot is provably equivalent to a live read). The normative contract is "produces the value of a live read at the step." When a future engine or future content introduces mid-firing mutations, the live-read semantics is what wins; snapshot-based engines must refactor. There is no `snapshot:` step kind for use-the-frozen-value cases; the only binding is apply-time. See `DECISIONS.md` D-012 and the v0.2 Phase-2 ambiguity #11.
 
 ---
 
@@ -219,9 +231,8 @@ entities:
     status: implemented
     implemented_in: ["src/player.py"]
   cards:
+    # Entries: content/cards/*.yaml, via the data_dir of the content-schema with entity: cards (§6.1).
     type: content_collection
-    data_source: ../../content/cards
-    schema_ref: "{content_schema.cards}"
     status: balanced
     count_target: 220
   # F-008 v0.3: instance_container — N owned instances with per-instance state.
@@ -237,9 +248,11 @@ entities:
     implemented_in: ["src/inventory.py"]
 ```
 
-**Required keys per entity (top-level):** `type` (`actor | content_collection | terrain | currency | system_object | instance_container`), `status`, `implemented_in` (omit only for `content_collection` types — those carry it per-entity-file). `properties` is required for `actor / terrain / currency / system_object`; `data_source` is required for `content_collection` types and must point to an existing directory; `capacity` + `holds_template_from` + `per_instance_state` are required for `instance_container` types.
+**Required keys per entity (top-level):** `type` (`actor | content_collection | terrain | currency | system_object | instance_container`), `status`, `implemented_in` (omit only for `content_collection` types — those carry it per-entity-file). `properties` is required for `actor / terrain / currency / system_object`; `capacity` + `holds_template_from` + `per_instance_state` are required for `instance_container` types. A `content_collection`'s entries are the files in the directory named by the `data_dir:` of the content-schema file whose `entity:` is the collection's key (§6.1).
 
-**Entity cardinality covers three cases.** `actor` is one (the player, a boss); `content_collection` is many-templated (cards in a library, recipes in a cookbook — each entry is a template from `data_source/*.yaml`); `instance_container` (F-008 v0.3) is many-instanced (12 inventory slots each holding an owned item with its own durability/charges/quantity, 4 party members each with their own hp/mp/equipment, cards on the battlefield each with their own +1/+1 counters). The three together make the entity-type vocabulary complete on cardinality.
+**`data_source` is deprecated (v0.4, D-037) and will be removed before v1.0.** It is optional. When present, it MUST be the same string as that content-schema's `data_dir:`, relative to the content-schema file (rule `content-entity-invalid`). Before v0.4 it was required and described as pointing to the content directory. But its value resolves only from the content-schema file's directory, and in every in-repo tree it was a copy of `data_dir:`.
+
+**Entity cardinality covers three cases.** `actor` is one (the player, a boss); `content_collection` is many-templated (cards in a library, recipes in a cookbook — each entry is a template, one `*.yaml` file in the content-schema's `data_dir`); `instance_container` (F-008 v0.3) is many-instanced (12 inventory slots each holding an owned item with its own durability/charges/quantity, 4 party members each with their own hp/mp/equipment, cards on the battlefield each with their own +1/+1 counters). The three together make the entity-type vocabulary complete on cardinality.
 
 **`instance_container` is the F-008 resolution.** The v0.2.0-alpha three-layer vocabulary (`actor` + `content_collection` + `resources`) had no way to express "N owned instances each carrying per-instance runtime state" — the gap forced authoring workarounds in survival inventories, RPG parties, and TCG board states. F-008 v0.3 closes the gap: an `instance_container` declares (a) the `capacity:` (how many simultaneous instances), (b) the `holds_template_from:` content_collection (what each instance IS, by reference to a template), and (c) the `per_instance_state:` sub-schema (what runtime fields each instance carries beyond the template). The `per_instance_state:` sub-schema uses the same shape as content-schema files' `schema.properties:` (§6.1) — type declarations with `type`, `minimum`, `maximum`, `default`, etc. Engines validate per-instance values against this sub-schema at runtime.
 
@@ -323,11 +336,11 @@ events:
 
 **Required keys per event (v0.2.0-alpha):** `status` (from the §8.1 lifecycle). `implemented_in:` (array of globs) is required for `status >= prototyped` and is the hook for declaring where the event is *emitted* in code. `description:` (string) is recommended — explain what the event means and which verb/rule emits it.
 
-**Events as first-class tokens (D-005 ratchet at v0.2).** Every `transitions[*].event` value is a `{events.<id>}` reference — events live in their own namespace, owned by `gdd/mechanics.md`. Bare-string events (v0.1.1 legacy) fire `state-machine-coverage` sub-finding `undefined-event` at severity warning; they ratchet to error in v0.3 once the migration window closes. Three further linter behaviors follow from events being tokens:
+**Events as first-class tokens (D-005 ratchet at v0.2).** Every `transitions[*].event` value is a `{events.<id>}` reference — events live in their own namespace, owned by `gdd/mechanics.md`. A bare-string event (the v0.1.1 legacy shape) is a `schema-violation` error at that transition, because `$defs.StateTransition` requires the `{events.<id>}` form. From v0.2 to v0.3 it was a `state-machine-coverage` warning, `undefined-event`, which D-046 retired as subsumed. Three linter behaviors follow from events being tokens:
 
 - An `{events.<id>}` reference that does not resolve fires `broken-ref` at error.
 - An event defined but referenced by no transition fires `orphaned-entity` at warning (events join the standard orphan check).
-- A `transitions[*].event` value that *is* a bare string is the `undefined-event` warning above.
+- A `transitions[*].event` value that *is* a bare string is the `schema-violation` error above.
 
 > **Why `event:` and not `on:`.** YAML 1.1 — still the default behavior in most loaders, including PyYAML's `safe_load` — implicitly coerces unquoted `on`, `off`, `yes`, `no` to booleans. An unquoted `on: draw` would parse as `True: draw` and silently break the schema's required-key check. We use `event:` so that authors who forget to quote get a clear, working key. **Do not "tidy" this back to `on:`.** Tracked as decision D-001 in `DECISIONS.md`.
 
@@ -359,7 +372,7 @@ rules:
 
 **Per-instance addressing (D-019, F-008 v0.3 addressing DSL).** When the rule's actor or target is an instance from an `instance_container` (§4.1), the existing context-local refs `{actor.<field>}` / `{target.<field>}` resolve through the container's `per_instance_state` schema per §3 (the "Binding to instance_container per-instance state" paragraph). The rule body uses no new vocabulary — reads via context-local refs, mutations via existing `kind:` steps (`apply_damage`, `transition_state`, `add_counter`, etc.). State-machine transitions on the instance fire via the same per_instance_state binding (e.g., `{target.lifecycle}` transitions via the `unit_lifecycle` machine whose `nodes:` and `transitions:` are declared in `states`).
 
-**Writes are restricted to `per_instance_state` fields.** A do[] step that declares `field: <name>` is a write to the target's `<name>` — the spec requires `<name>` to be declared in the target container's `per_instance_state`. Writing to a template field (e.g., `field: attack` where `attack` lives in the content_collection's schema, not per_instance_state) is a spec violation: templates are immutable. The lint rule `write-to-template-field` (§9.1) catches this statically. The check is opt-in (only fires when the step declares `field:`); the discipline is to declare what you mutate, and the lint guards the declaration. Ratchet to required `field:` on mutation steps is a v0.4 concern.
+**Writes are restricted to `per_instance_state` fields.** A do[] step that declares `field: <name>` is a write to the target's `<name>` — the spec requires `<name>` to be declared in the target container's `per_instance_state`. Writing to a template field (e.g., `field: attack` where `attack` lives in the content_collection's schema, not per_instance_state) is a spec violation: templates are immutable. The lint rule `write-to-template-field` (§9.1) catches this statically. The check is opt-in (only fires when the step declares `field:`); the discipline is to declare what you mutate, and the lint guards the declaration.
 
 **Actor selection for clock-driven rules.** A verb-driven rule's actor is implicit — it's the verb's `actor:` (e.g., `{entities.player}`). A clock-driven rule (`given.driver: {clocks.<id>}`) has no implicit actor; the rule must resolve it in its `do[]` body via a structured step. Tick-combat's canonical pattern (the observed need at v0.3):
 
@@ -384,9 +397,9 @@ tick_resolution:
 
 The `kind: select_actor` step is the engine-neutral way to bind `{actor.<field>}` for clock-driven rules; subsequent steps reference the resolved actor. `target_selection:` (when paired with a containered actor) iterates the actor's container by default; explicit `target_container:` declaration is reserved for the rare case where target lives in a different container (not yet observed in v0.3; deferred until surfaced).
 
-The `kind:` value vocabulary inside `do[]` remains project-defined at v0.2.0-alpha + v0.3 (per-game vocabulary; engine-neutral as long as `kind:` semantics are documented in the project's design); a normative closed-set ratchet is a v0.4+ concern. The discipline: closed enums grow by observed cross-engine need, not anticipation.
+The `kind:` value vocabulary inside `do[]` is project-defined (per-game vocabulary; engine-neutral as long as `kind:` semantics are documented in the project's design). The spec does not close it. The discipline: closed enums grow by observed cross-engine need, not anticipation.
 
-**Computable form on deterministic loop paths (D-011, advisory at v0.2.0-alpha; ratchets to error in v0.3).** Every item in a `do:` array SHOULD be a structured object (a YAML map), not a bare string. Bare-string steps like `resolve_unit_action` or `award_gold_to_winner` are *prose labels*, not computable procedures — two engines may interpret them differently, defeating the cross-engine determinism bar. The linter emits the advisory finding `determinism-undetermined-rule` for every bare-string item in a rule's `do:` whose enclosing rule is reachable from a deterministic loop (any `{loops.<id>}` whose `timescale: moment`). The intent is to catch the failure mode where spec authors leave resolution as prose — the "Phase-2 archaeology" pattern. See `DECISIONS.md` D-011.
+**Computable form on deterministic loop paths (D-011; lint severity info).** Every item in a `do:` array SHOULD be a structured object (a YAML map), not a bare string. Bare-string steps like `resolve_unit_action` or `award_gold_to_winner` are *prose labels*, not computable procedures — two engines may interpret them differently, defeating the cross-engine determinism bar. The linter emits the advisory finding `determinism-undetermined-rule` for every bare-string item in a rule's `do:` whose enclosing rule is reachable from a deterministic loop (any `{loops.<id>}` whose `timescale: moment`). The intent is to catch the failure mode where spec authors leave resolution as prose — the "Phase-2 archaeology" pattern. See `DECISIONS.md` D-011.
 
 ### 4.6 `loops`
 
@@ -455,7 +468,7 @@ clocks:
 
 - **`scheduled` (watch-for v0.4)** — a clock that fires at declared in-game-time points or intervals (day/night cycles, wave timers, scripted-event clocks). Likely to surface in strategy or survival games with explicit waves or daily cadence. Adding it now without an observed surfacing would be the symmetric form of the gate-loosening trap.
 
-If a tree needs a mode not in the closed enum, that's a v0.4 spec-ratchet event: add the mode when observed use demands it, not when anticipated use could imagine it.
+If a tree needs a mode not in the closed enum, the mode is added by a spec decision when observed use demands it, not when anticipated use could imagine it.
 
 **Determinism.** Clock-driven rules participate in the same deterministic-loop reachability the linter applies to verb-driven rules (`determinism-undetermined-rule`, §9.1). For a moment-timescale loop with a `clock:` field, the linter traces `loop → clock.drives → rules` and checks every rule's `do[]` for bare-string steps. The semantic contract is identical to verb-driven rules: every step must be a structured object that resolves identically across engines that share the pinned PRNG.
 
@@ -686,7 +699,7 @@ damage_roll:
   status: implemented
 ```
 
-Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local and project-defined at v0.2.0-alpha (a closed vocabulary ratchets in v0.3). A distribution with `params_from:` overrides its inline parameter values for any key present.
+Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings that use the closed context-local prefixes of §3, `{actor.<field>}` and `{target.<field>}`, which the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local, through the context-local prefixes of §3. A distribution with `params_from:` overrides its inline parameter values for any key present.
 
 **Binding moment for `params_from:` reads.** Each parameter sourced via `params_from:` is read at **apply-time** — at the `do:` step that calls `sample:` on this distribution, the context refs are resolved live against the world. This is the same rule as for context-local refs anywhere else (see §3). Two engines that read `{actor.attack}` at different moments (e.g. one at action-start, one at the sample step) produce different integer trajectories the moment any mid-firing mutation is added — the canonical timing must live in the spec, not in each engine. Tick-combat's xtreme reads `actor.attack` from a tick-start snapshot, which is provably equivalent under tick-combat's no-mid-tick-mutation invariant; this is permitted as an optimization, not a different semantics.
 
@@ -753,7 +766,7 @@ balance_targets:
 
 A `diff` between two trees emits an entry for any target whose `target` value changed; if a `scalar` target's value left its previous `tolerance` band (or a `distribution_over_categories` shifted any category outside its per-category tolerance), exit code 1.
 
-**Legacy permissive targets.** A `balance_targets.<id>` missing `target_kind:` fires rule `balance-target-untyped` at severity warning. This is the v0.1.1 → v0.2 migration backstop; in v0.3 the rule ratchets to error and `target_kind` becomes structurally required by the loader.
+**Legacy permissive targets.** A `balance_targets.<id>` missing `target_kind:` (the v0.1.1 shape) is a `schema-violation` error at that target (§9.1), because `$defs.BalanceTarget` requires the discriminator. From v0.2 to v0.3 a dedicated rule, `balance-target-untyped`, also warned as the migration hint. It never became the error D-003 scheduled for v0.3, and at v0.4 it is retired, subsumed by `schema-violation` (D-040). The loader does not reject such a tree; the tree fails lint instead.
 
 If the example tree contains no `balance_targets`, rule `missing-balance-targets` fires at severity error.
 
@@ -794,7 +807,7 @@ invariants:
     severity: error
 ```
 
-**Required keys per invariant:** `kind`, `rule`, `enforcement`, `severity`. `applies_to` is optional (an array of `{namespace.id}` refs the invariant governs).
+**Required keys per invariant:** `kind`, `rule`, `enforcement`, `severity`. `applies_to` is optional: an array of the tokens the invariant governs, each a `{namespace.id}` reference or a whole-namespace `{namespace}` reference (§3), which governs every token of the namespace. The linter's static checks read it that way: a `numeric_domain` invariant over `{resources}` checks every resource's bounds, and one over `{entities}` checks every content collection.
 
 - `kind` enum: `numeric_domain | architectural_pattern | layer_boundary | communication | determinism`.
 - `enforcement` enum: `lint` (statically checkable now), `verify` (checked at runtime by `gdmd verify` — §9.5), `advisory` (declared, human/agent-reviewed, never auto-failed).
@@ -815,7 +828,7 @@ The root `game-design.md`. Under ~200 lines, llms.txt-style navigation.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: core
 name: "Ember Ascent"
 short_pitch: "A 30-minute deckbuilder roguelike about reshaping your hand each turn."
@@ -883,7 +896,7 @@ The root file MUST NOT contain authoritative numbers in its prose; all numbers l
 
 A "content-heavy type" is an `entities` kind whose `count_target` is ≥ 20. (In a deckbuilder: cards, enemies, items, relics, events. In a party RPG: classes, skills, items, encounters. In a TCG: cards, archetypes.) For these types, inlining the full set in Markdown is a context-window disaster.
 
-**Rule (v0.1, mandatory):** if `count_target >= 20`, the entries MUST be split into a sibling `content/<entity>/*.yaml` tree referenced via `data_source` on the content-schema file. The `gdd/content/<entity>.md` subfile contains only the **schema + one representative example** as prose. Violating this fires rule `inline-content-over-threshold` at severity error.
+**Rule (v0.1, mandatory):** if `count_target >= 20`, the entries MUST be split into a sibling `content/<entity>/*.yaml` tree referenced via `data_dir` on the content-schema file. The `gdd/content/<entity>.md` subfile contains only the **schema + one representative example** as prose. Violating this fires rule `inline-content-over-threshold` at severity error.
 
 For `count_target < 20`, the split is recommended but optional.
 
@@ -892,7 +905,7 @@ For `count_target < 20`, the split is recommended but optional.
 ```yaml
 ---
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: content-schema
 status: balanced
 last_verified: 2026-05-18
@@ -914,11 +927,13 @@ balance_refs:
 ---
 ```
 
+`data_dir:` is resolved against the content-schema file's own directory. Its last segment MUST be the file's `entity:` (rule `content-entity-invalid`, D-037), because references into content resolve by directory name (§3).
+
 ### 6.2 Per-entity file (`content/<kind>/<id>.yaml`)
 
 ```yaml
 spec: game-design.md
-spec_version: 0.2.0-alpha
+spec_version: 0.4.0
 file_type: content-entity
 id: ember_strike
 status: balanced
@@ -932,7 +947,7 @@ effects:
   - { kind: apply_state, state: "{states.enemies.burning}", duration: 2 }
 ```
 
-The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`.
+The linter (a) validates each entity against the content-schema-file `schema:`, (b) requires `id` to match the filename stem, and (c) enforces presence of `status` and `implemented_in`. From v0.4, (a) and (b) are rule `content-entity-invalid` and (c) is rule `schema-violation` (§9.1). An entity belongs to the content-schema whose resolved `data_dir:` contains it; an entity that no `data_dir:` covers is itself a finding, since it is validated against nothing.
 
 ---
 
@@ -1012,7 +1027,7 @@ draft → prototyped → implemented → balanced → shipped              cut
 
 The standard exists because GDDs drift. These four mechanisms keep the doc and the code in sync:
 
-1. **`implemented_in` existence check.** For every entity with status ≥ `prototyped`, every path/glob in `implemented_in:` must resolve to at least one real file in the repo. If a glob resolves to zero files, the linter fires `broken-implementation-pointer`. **Entities at status `draft` are silent** — the code isn't written yet; that's not a defect, it's the expected state of a design doc. **Severity is `error` at v0.2.0-alpha** (ratcheted from `warning` at v0.1.1 once the tick-combat / xtreme reference implementation shipped real source; see `DECISIONS.md` D-002). The intended discipline: the moment a designer advances an entity's `status:` to `prototyped` or higher, the linter verifies code exists at the declared paths — drift is caught at the boundary.
+1. **`implemented_in` existence check.** For every entity with status ≥ `prototyped`, every path/glob in `implemented_in:` must resolve to at least one real file, with globs relative to the tree root (§2.3). If a glob resolves to zero files, the linter fires `broken-implementation-pointer`. **Entities at status `draft` are silent** — the code isn't written yet; that's not a defect, it's the expected state of a design doc. **Severity is `error` at v0.2.0-alpha** (ratcheted from `warning` at v0.1.1 once the tick-combat / xtreme reference implementation shipped real source; see `DECISIONS.md` D-002). The intended discipline: the moment a designer advances an entity's `status:` to `prototyped` or higher, the linter verifies code exists at the declared paths — drift is caught at the boundary.
 
 2. **`last_verified` staleness.** For every subfile, content-schema file, and content-entity file, the linter compares the `last_verified:` date against the most recent `mtime` of the files in its `implemented_in:`. If any source file is newer than `last_verified:` by more than 30 days, rule `stale-section` fires at severity warning.
 
@@ -1026,7 +1041,7 @@ The standard exists because GDDs drift. These four mechanisms keep the doc and t
 
 ## 9. The CLI
 
-Verbs: `lint | diff | export | spec | verify | status | hook | touch | init`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
+Verbs: `lint | diff | export | spec | verify | status | hook | touch | init | view | graph`. Installed binaries: `game-design.md` and the short alias `gdmd`. Reference implementation in Python ≥ 3.10.
 
 ### 9.1 `lint`
 
@@ -1068,14 +1083,18 @@ Exit code: `0` if zero findings of severity `error`; `1` otherwise. Warnings nev
 | `undefined-distribution` | **error** | A `rule.do[].sample` or any other stochastic operation does not reference a `{distributions.<id>}`. |
 | `inline-content-over-threshold` | error | A content-schema file with `count_target >= 20` does not declare `data_dir:` (i.e. entries are inlined). |
 | `stale-section` | warning | A subfile's `last_verified:` is more than `--stale-days` (default 30) older than the mtime of any file in its `implemented_in:`. v0.3 Task 6 extensions: configurable threshold via `--stale-days N`; status-aware skip — files at `status: draft \| cut \| deferred` are exempt (impl-vs-doc drift isn't a meaningful signal at those statuses). |
-| `prototyped-without-pointer` | warning (v0.3+) | Per-token: status is `prototyped \| implemented \| balanced \| shipped \| experimental` AND `implemented_in:` is empty/absent AND the containing subfile's `last_verified:` is more than `--prototyped-stale-days` (default 30) old. Signals either (a) stale spec the agent forgot to update, or (b) genuine non-code prototyping (paper sketch / conceptual exploration). The rule does NOT distinguish between (a) and (b) — see §9.1 prose below. Tokens at `status: draft \| cut \| deferred` are exempt. |
+| `prototyped-without-pointer` | warning (v0.3+) | Per-token: status is `prototyped \| implemented \| balanced \| shipped \| experimental` AND `implemented_in:` is empty/absent AND the containing subfile's `last_verified:` is more than `--prototyped-stale-days` (default 30) old. Signals either (a) stale spec the agent forgot to update, or (b) genuine non-code prototyping (paper sketch / conceptual exploration). The rule does NOT distinguish between (a) and (b) — see §9.1 prose below. Tokens at `status: draft \| cut \| deferred` are exempt, and so are namespaces whose §10 schema forbids `implemented_in:` (`balance_targets`), where a pointer would be schema-illegal (D-036). |
 | `shipped-stale-doc` | warning (v0.3+) | File at `status: shipped` whose `last_verified:` is more than `--shipped-stale-days` (default 180) old. Promoted from `gdmd status`'s `--shipped-stale-days` flag (§9.6); a shipped section that hasn't been re-verified in 6 months is highly suspect of having drifted from production code. Distinct from `stale-section` (which compares doc to impl mtime); this rule fires on doc recency alone. |
-| `balance-target-untyped` | warning (v0.2.0-alpha), error (v0.3+) | A `balance_targets.<id>` lacks the `target_kind:` discriminator (v0.1.1 legacy shape). See `DECISIONS.md` D-003. |
-| `determinism-undetermined-rule` | info (advisory) at v0.2.0-alpha; warning in v0.3; error in v0.4 | A `do:` step inside a `{rules.<id>}` reachable from a deterministic loop (`{loops.<id>}` with `timescale: moment`) is a bare string instead of a structured object. Reachability follows two chains: (a) `loop.sequence → verbs → rules.given.verb`, and (b) `loop.clock → clocks.drives → rules` (F-010 / v0.3) — also rules whose `given.driver:` matches a moment-loop clock. Surfaces the "Phase-2 archaeology" pattern — prose labels for resolution procedures don't constrain implementations. See `DECISIONS.md` D-011. |
-| `write-to-template-field` | error | A `do:` step declares `field: <name>` where `<name>` is not present in any instance_container's `per_instance_state` schema. Writes are restricted to per_instance_state fields per D-019; templates are immutable per §6, and container properties are read-only. The check is opt-in (fires only when `field:` is declared on the step); ratchet to required-`field:` on mutation steps is a v0.4 concern. See spec §3 + §4.5 D-019 paragraphs. |
+| `balance-target-untyped` | retired (v0.4) | Was: a `balance_targets.<id>` lacks the `target_kind:` discriminator (v0.1.1 legacy shape), a warning from v0.2. Now subsumed by `schema-violation` (error), which reports the missing `target_kind` at the target (§4.10). See `DECISIONS.md` D-003, D-040. |
+| `determinism-undetermined-rule` | info (advisory) | A `do:` step inside a `{rules.<id>}` reachable from a deterministic loop (`{loops.<id>}` with `timescale: moment`) is a bare string instead of a structured object. Reachability follows two chains: (a) `loop.sequence → verbs → rules.given.verb`, and (b) `loop.clock → clocks.drives → rules` (F-010 / v0.3) — also rules whose `given.driver:` matches a moment-loop clock. Surfaces the "Phase-2 archaeology" pattern — prose labels for resolution procedures don't constrain implementations. See `DECISIONS.md` D-011. |
+| `write-to-template-field` | error | A `do:` step declares `field: <name>` where `<name>` is not present in any instance_container's `per_instance_state` schema. Writes are restricted to per_instance_state fields per D-019; templates are immutable per §6, and container properties are read-only. The check is opt-in (fires only when `field:` is declared on the step). See spec §3 + §4.5 D-019 paragraphs. |
 | `section-order` | error | A `##` section appears before its canonical predecessor, or duplicate `##` heading (hard error). |
+| `implementation-pointer-outside-repo` | warning (v0.4+) | An `implemented_in:` or `implementation_pointers:` glob's literal base (the segments before its first wildcard), resolved against the tree root, is outside the git repository root (§2.3). Every status, `draft` included. Silent when the tree is in no git repository. See `DECISIONS.md` D-038. |
+| `trajectory-sort-by-missing` | error (v0.4+) | An array field in a subfile's `trajectory.schema:`, including one nested under an array's `items:`, declares no non-empty `sort_by:` key list (§9.5.5's MUST). Whether the keys give a total order is not checked. See `DECISIONS.md` D-048. |
+| `schema-violation` | error (v0.4+) | A game-design.md file's frontmatter does not validate against the §10 JSON Schema: the branch for its `file_type:`, or the whole schema when `file_type:` is missing or unknown. One finding per schema error, located at the offending field. Files that neither declare `spec: game-design.md` nor carry a `file_type:` (other YAML under the tree) are not validated. See `DECISIONS.md` D-034. |
+| `content-entity-invalid` | error (v0.4+) | §6.2 (a) and (b): a content entity does not validate against the `schema:` of the content-schema whose `data_dir:` contains it, its `id` differs from its file name's stem, or no content-schema's `data_dir:` covers it. A content-schema whose `schema:` is not a valid JSON Schema is reported once, on that file. §6.2 (c) is `schema-violation`'s. From D-037 it also reports a content-schema whose `data_dir:` names a directory other than its `entity:` (§6.1), and an entity's deprecated `data_source:` that differs from that content-schema's `data_dir:` (§4.1). See `DECISIONS.md` D-035, D-037. |
 | `invariant-violation` | varies | An `enforcement: lint` invariant's static check failed; finding severity matches the invariant's declared `severity`. |
-| `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`), `undefined-event` (warning at v0.2.0-alpha, error in v0.3 — transition `event:` is a bare string instead of a `{events.<id>}` token). |
+| `state-machine-coverage` | varies | A `states` machine violates totality. Sub-findings: `dead-end` (error — non-terminal node with no outgoing transition), `undeclared-destination` (error — `to:` a node not in `nodes`), `unreachable-node` (warning — node not reachable from `initial`), `missing-initial` (error — no `initial`, or `initial` not in `nodes`). The former `undefined-event` sub-finding (a bare-string transition `event:`) is retired: it is a `schema-violation` error (§4.4, D-046). |
 | `verify-result-regression` | error/warning | A prior `verify` axis result regressed. `build_health` and `behavioral_alignment` regressions are error; `presentation_usability` regressions are warning. Emitted only by `gdmd verify` (§9.5), not by `lint`. |
 
 **Anti-staleness rule family at v0.3 (Task 6).** Three rules in the table above — `stale-section` (extended), `prototyped-without-pointer` (new), `shipped-stale-doc` (new) — share a `LintConfig` carrying the configurable thresholds `--stale-days` (default 30), `--prototyped-stale-days` (default 30), and `--shipped-stale-days` (default 180). Defaults are calibrated against reasonable maintenance-cadence assumptions, NOT the in-repo trees' `last_verified` distribution (at the v0.3 commit every in-repo entry was touched within ~7 days by recent retro-touches, so the 6 trees pass any threshold ≥ 8 days trivially). For projects with non-default cadence — a hobby project where prototyped-for-3-months is normal, or a production project where prototyped-for-2-weeks is alarming — override the thresholds at invocation time.
@@ -1089,9 +1108,9 @@ The rule firing on case 2 is **not malfunction** — it's surfacing that the spe
 
 - **Use `status: experimental`** (the v0.3 lateral state added in D-020) for design-under-active-evaluation. NOTE: `experimental` is in the active-status set for this rule, so it still fires on experimental tokens without `implemented_in:` — `experimental` means "code exists but design is under evaluation," not "no code yet." Don't use `experimental` to silence the rule on truly-no-code-yet entries.
 - **Populate `implemented_in:` with a placeholder path** — e.g. `["docs/sketches/foo.md"]` or `["docs/design-notes/bar.md"]`. The lint then doesn't fire because the pointer is declared (and `broken-implementation-pointer` will check the placeholder resolves to a real file). This is the recommended workflow norm: always declare *where* the prototyped artifact lives, even if it's a design document rather than code.
-- **Accept the warning as a real workflow signal.** The spec lacks vocabulary for "actively prototyping without code yet"; that gap is a v0.4+ vocabulary-extension question to surface, not a rule to silence. The warning makes the gap visible.
+- **Accept the warning as a real workflow signal.** The spec lacks vocabulary for "actively prototyping without code yet"; that gap is an open vocabulary question, not a rule to silence. The warning makes the gap visible.
 
-The minimum-vocab discipline (D-015, D-017, D-019, D-020) governs the response: if a real adoption surfaces "no-code prototyping" as a recurring need the current vocab can't express, extend the lifecycle vocab via a v0.4+ ratchet decision; don't suppress the rule preemptively.
+The minimum-vocab discipline (D-015, D-017, D-019, D-020) governs the response: if a real adoption surfaces "no-code prototyping" as a recurring need the current vocab can't express, extend the lifecycle vocab by a decision recorded in `DECISIONS.md`; don't suppress the rule preemptively.
 
 ### 9.2 `diff`
 
@@ -1133,10 +1152,26 @@ gdmd export <path> --format {schema|tokens}
 ### 9.4 `spec`
 
 ```
-gdmd spec
+gdmd spec [--card | --section <id>]
 ```
 
 Prints this document (`docs/spec.md`) to stdout, with frontmatter stripped, for injection into an agent prompt.
+
+- **`--section <id>` (v0.4)** prints one section verbatim: its heading through the line before the next heading of the same or a higher level, so its subsections are included.
+  - Ids are the section numbers (`4.8`, `9.9.2`; a leading `§` is accepted) and the appendix letters (`A`).
+  - Headings inside fenced code blocks are not sections.
+  - An unknown id exits 2.
+- **`--card` (v0.4)** prints the **agent card**, a short digest **generated from this document's structure**, never hand-written (`DECISIONS.md` D-024, D-029). It contains verbatim excerpts, each selected by section number and the spec's own lead-in labels:
+  - §3's opening sentence, its namespace-ownership table, and its resolution, unresolved-reference and context-local paragraphs;
+  - §8.1's status table;
+  - §8.2's maintenance ritual;
+  - §9.9's command synopsis.
+
+  It then gives an index of every section, each with its RFC-2119 keyword count and its `--section` pointer.
+  - The card carries the sha256 prefix of the text it was generated from.
+  - Generation fails if a selected anchor disappears, so an edit to the spec cannot silently empty the card.
+  - **Completeness:** every sentence carrying an uppercase RFC-2119 keyword (`MUST`, `MUST NOT`, `REQUIRED`, `SHALL`, `SHALL NOT`) is in the card or inside a section the card points to (tested). Lowercase normative "must" / "required" is not machine-identifiable, so the test does not cover it.
+  - Whether an agent file imports the card instead of this document is an adoption decision under a locked rule (D-024, D-025 Rule C), not a default.
 
 ### 9.5 `verify`
 
@@ -1214,7 +1249,12 @@ The adapter emits, on stdout, a JSON document conforming to `$defs.VerifyResult`
 - `1` if any `build_health` or `behavioral_alignment` target failed.
 - `0` (with warnings in `notes`) if only `presentation_usability` regressed.
 
-When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`).
+When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`). Concretely (D-045):
+
+- **The baseline** is a prior `gdmd verify` report: an object whose `results` rows each carry `axis` and `pass`. One that is not readable as such is a usage error (exit 2) before any adapter runs.
+- **A regression** is a result row that passed in the baseline and fails now, matched by `axis` and `target`. A target new since the baseline, or one no longer run, is not a regression.
+- **The report** gains a `regressions` array, present only with `--baseline`. Each finding carries `rule` (`verify-result-regression`), `severity`, `axis`, `target` and `message`. The adapter's own output (§9.5.3) is unchanged.
+- **The exit code is as above.** A regression on a blocking axis is already a failed target (exit 1), and a `presentation_usability` regression stays at exit 0.
 
 #### 9.5.5 Trajectory format (engine-neutral, canonical JSONL)
 
@@ -1251,7 +1291,7 @@ trajectory:
 
 **Why `sort_by: [side, deploy_order]` is a total order for tick-combat.** `side` has two values (`player`, `enemy`, comparing as ASCII strings so `enemy < player`); `deploy_order` is a 0-based integer that is unique within a side per the deploy-roster contract. The pair `(side, deploy_order)` is therefore unique across every valid trajectory — no two units can collide, so sorting is total. If a future content type allowed two units on the same side at the same `deploy_order`, this `sort_by:` would no longer be a total order and would have to be extended (e.g. tie-break by `id`).
 
-The schema is per-game, not per-engine. Both xtreme (engine A) and a future Unreal port (engine B) emit trajectories conforming to this same schema. The reference golden lives in the engine A directory under `tests/`; future engines test against the *same* golden, not a per-engine fixture. **At v0.2.0-alpha the `schema:` body is advisory** — `verify` does not validate trajectory line-by-line against it; trajectory equality is checked byte-for-byte against the golden fixture, and the schema serves as the canonical human reference. A `trajectory-schema-validation` lint rule ratchets in v0.3.
+The schema is per-game, not per-engine. Both xtreme (engine A) and a future Unreal port (engine B) emit trajectories conforming to this same schema. The reference golden lives in the engine A directory under `tests/`; future engines test against the *same* golden, not a per-engine fixture. **The `schema:` body is not checked against trajectories** — `verify` does not validate trajectory line-by-line against it; trajectory equality is checked byte-for-byte against the golden fixture, and the schema serves as the canonical human reference. Lint checks one requirement statically: an array field, including one nested under an array's `items:`, without a non-empty `sort_by:` key list fires `trajectory-sort-by-missing` (error, §9.1). Whether the declared keys give a total order is not checked.
 
 **Why JSONL.** Any frontier language has a JSON parser. Each line is independent (so partial-progress trajectories from a crashed run are still consumable). The format diffs cleanly under git (one tick per line). Canonicalization (sorted keys, no whitespace) makes byte-identity the natural equality.
 
@@ -1340,13 +1380,13 @@ gdmd status <path> [--json] [--stale-days N] [--shipped-stale-days N]
 - Tooling (CI dashboards, editor integrations) consumes `--json` output to surface project health.
 - Anti-drift discovery: stale-sections + shipped-stale highlight where the doc has fallen behind code.
 
-The view is intentionally non-exhaustive at v0.3 — it surfaces the markers v0.2 already declared. Richer aggregations (a "what's next" view for sections at `draft` referenced by sections at `prototyped+`; per-namespace drill-downs; cross-tree comparison) are candidates for v0.4 based on observed use.
+The view is intentionally non-exhaustive: it surfaces the markers v0.2 already declared. Richer aggregations (a "what's next" view for sections at `draft` referenced by sections at `prototyped+`; per-namespace drill-downs; cross-tree comparison) are not provided.
 
 ### 9.7 `hook` and `touch` — the bidirectional anti-drift workflow (v0.3)
 
 ```
 gdmd hook install <path> [--repo-root <dir>]
-gdmd hook check   <path> [<staged_files>...]
+gdmd hook check   <path> [<staged_files>...] [--show-tokens]
 gdmd touch        <subfile> [<subfile>...]
 ```
 
@@ -1359,17 +1399,19 @@ gdmd touch        <subfile> [<subfile>...]
 
 **`gdmd hook install <path> [--repo-root <dir>]`.** Writes or updates `.pre-commit-config.yaml` at the repo root to register a `local` hook entry that invokes `gdmd hook check <path> $staged_files`. `language: system` so it dispatches to the `gdmd` binary on PATH (no separate pre-commit-managed venv). `pass_filenames: true` is the pre-commit-framework default; staged filenames arrive as positional args. `--repo-root` defaults to CWD — the typical place the user runs `gdmd hook install` from, and the root where pre-commit looks for `.pre-commit-config.yaml`. The command is idempotent: a second invocation against a config that already contains the gdmd hook leaves the file completely untouched (mtime unchanged), and prints `unchanged` instead of `updated`. Composes cleanly with other hooks already declared in the same `.pre-commit-config.yaml`.
 
-**`gdmd hook check <path> [<staged_files>...]`.** The pre-commit-invoked check. Builds an inverted index `{tree_relative_code_path: [Reference, ...]}` over the spec tree at `<path>` once, then walks `staged_files` (resolved against CWD per the pre-commit convention — staged paths arrive repo-root-relative when pre-commit invokes from the repo root) intersecting against the index. Empty intersection → empty stdout (hook stays silent on commits that don't touch spec-referenced code paths). Non-empty intersection → a human-readable report listing each affected spec file, the affected `<ns>.<token>` locations, the triggering code paths, and a single-line `gdmd touch` suggestion to bump `last_verified:` after re-verifying. Always exits 0 (informational, not a gate).
+**`gdmd hook check <path> [<staged_files>...]`.** The pre-commit-invoked check. Builds an inverted index `{code_path: [Reference, ...]}` over the spec tree at `<path>` once, then walks `staged_files` (resolved against CWD per the pre-commit convention — staged paths arrive repo-root-relative when pre-commit invokes from the repo root) intersecting against the index. From v0.4 (D-038), both sides are resolved and keyed relative to the git repository root, or to the tree root when the tree is in no git repository, so a glob that climbs out of the tree with `../` (§2.3) matches the staged file it names, and the report names each triggering file as git stages it. Empty intersection → empty stdout (hook stays silent on commits that don't touch spec-referenced code paths). Non-empty intersection → a human-readable report listing each affected spec file, the affected `<ns>.<token>` locations, the triggering code paths, and a single-line `gdmd touch` suggestion to bump `last_verified:` after re-verifying. Always exits 0 (informational, not a gate).
+
+**`--show-tokens` (v0.4).** Each affected spec file's entry is followed by the YAML the staged change may have made stale, taken from the compiled model of §9.9.1 and printed under the §9.9.2 lowering rule: verbatim lines, each block under its `[role] <primary> <path>:<start>-<end>` header. A token-level reference prints its token block. A file-level reference prints the file's `implemented_in:` declaration; for a content-entity file, it prints the whole entity. An `implementation_pointers.<key>` reference prints the core file's `implementation_pointers:` block. The hook stays informational: exit 0, and the flag is off by default, so `gdmd hook install` does not add it.
 
 **`gdmd touch <subfile> [<subfile>...]`.** Atomically bumps each subfile's `last_verified:` to today's date. Idempotent: if the field is already today's date the file is untouched and the command reports `no change:`. Preserves the author's quoting choice (`"2026-05-28"` stays quoted; `2026-05-28` stays unquoted) and frontmatter formatting — the implementation is regex-based on the frontmatter slab to avoid pyyaml's round-trip normalization. Errors (no frontmatter, frontmatter not closed) raise a clear `ClickException` rather than silently no-op'ing. Always exits 0.
 
 **Why the hook is informational, not a gate.** Pre-commit hooks that take >1s or that block on non-actionable signals get disabled by developers — the discipline only sticks if the friction is low. The hook's job is to make affected sections *visible*; the developer judges whether their change actually altered the design intent, then runs `gdmd touch <section>` if it did and proceeds with the commit either way. The interactive verification is up to the developer; the hook only surfaces the *what's affected* question. This is the pattern the user named: "non-interactive hook + interactive follow-up command."
 
-**Performance budget.** Pre-commit hooks that take >1s get disabled. The inverted index is O(N) over spec files at build time; staged-file lookup is O(1) per file post-index. For the 6 in-repo trees (each ~15-20 subfiles, each declaring ~5-10 globs), index build + lookup is <100ms easily. If a future tree is large enough that the lookup gets slow, the inverted index probably wants caching with invalidation by spec mtime — a v0.4+ concern, not v0.3.
+**Performance budget.** Pre-commit hooks that take >1s get disabled. The inverted index is O(N) over spec files at build time; staged-file lookup is O(1) per file post-index. For the 6 in-repo trees (each ~15-20 subfiles, each declaring ~5-10 globs), index build + lookup is <100ms easily. The index is rebuilt on every call; there is no cache.
 
 **Why pre-commit framework (vs direct `.git/hooks/pre-commit` write).** Three options were considered at v0.3 design time: (a) direct `.git/hooks/pre-commit` write, (b) pre-commit framework via `.pre-commit-config.yaml`, (c) custom Python runner the user invokes themselves. (b) is the dominant convention in the Python ecosystem the tool already targets; it composes with other hooks the user already runs; and `gdmd hook install` writing to `.pre-commit-config.yaml` is non-destructive (idempotent, additive). (a) doesn't compose. (c) requires user effort. (b) was the deliberate choice.
 
-**Spec → code direction deferred to v0.4+.** The inverse direction — *spec edit implies impl may need updating* — is a different workflow shape (closer to design-doc-driven-development than to anti-drift) and adds significant complexity. v0.3 ships what's demanded by the observed problem (code→spec via pre-commit hook + verify-mtime); spec→code is naturally a v0.4 follow-on if real adoption surfaces a need for it. Same minimum-extension discipline that closed F-010's mode enum and D-019's addressing DSL.
+**No spec → code direction.** The inverse direction — *spec edit implies impl may need updating* — is a different workflow shape (closer to design-doc-driven-development than to anti-drift) and adds significant complexity. The tools ship what the observed problem demanded (code→spec via pre-commit hook + verify-mtime); spec→code is not provided. Same minimum-extension discipline that closed F-010's mode enum and D-019's addressing DSL.
 
 ### 9.8 `init` — per-genre starter scaffolding (v0.3)
 
@@ -1400,13 +1442,176 @@ gdmd init [<dest>]                 # interactive prompt
 
 **Refusal of non-empty destinations.** `gdmd init` refuses to copy into a directory that contains existing files; either pass a fresh path or clear the destination first. This is the equivalent of `mkdir` refusing to clobber — `init` is destructive in the sense that it lays down a tree, so we explicitly avoid the silent-overwrite failure mode.
 
+### 9.9 `view` and `graph` — projected views over a tree (v0.4)
+
+```
+gdmd view  <path> [--full | --grep <regex> [--ignore-case] | --ref <{ns.id}> [--hops N]]
+                  [--flat] [--role <role>]... [--json]
+gdmd graph <path> [--impact <{ns.id}> | --from <{ns.id}> --to <{ns.id}> [--max-paths N] | --cycles]
+                  [--format text|json|dot]
+```
+
+**Status: specified at v0.4 (`DECISIONS.md` D-027).**
+
+`view` and `graph` are a **consultation interface**. They let an agent read a tree through projections computed on demand, instead of opening whole files. They are tooling, not format: they add no namespace, no schema field and no file to the tree, and a tree needs nothing new to support them.
+
+Whether projected views reduce session cost is an empirical question. It is governed by §11.3 and the locked rules in D-025 / D-026, and this section makes no such claim.
+
+#### 9.9.1 The compiled model
+
+Every invocation compiles the tree afresh. The pipeline has five stages:
+
+1. **Load:** the §2 loader.
+2. **Parse with positions:** the YAML is composed with the same strict loader, so every value keeps its source position.
+3. **IR:** a list of **blocks**.
+4. **Lower:** one of the views below.
+5. **Emit:** text or JSON.
+
+**Nothing is stored.** A conformant implementation writes no cache, index or other file, and memoizes only in-process. Output is a deterministic function of the tree's bytes and the arguments: the same inputs MUST produce byte-identical output.
+
+**Blocks and roles.** Each block has exactly one role, drawn from this closed set:
+
+| Role | One block per | Extent |
+| --- | --- | --- |
+| `token` | top-level token of a §3 namespace in a subfile, except `invariants` | the token's key line through the last non-blank line of its value, plus any contiguous comment lines directly above the key |
+| `invariant` | `invariants.<id>` token (§4.11) | as `token` |
+| `content-entity` | content-entity file (§6.2) | the whole file |
+| `rationale` | `##` section of a Markdown body; `###` sections are child blocks | the heading line through the line before the next heading of the same or higher level, with trailing blank lines trimmed |
+| `impl` | `implemented_in:` declaration (per token or per file) and the core file's `implementation_pointers:` | the key's lines |
+| `meta` | any other top-level frontmatter key: file metadata (`status`, `last_verified`, `files`, `core_loop_ref`, `schema`, `balance_refs`, …) and the normative non-namespace keys (`prng`, `trajectory`, `verify_targets`, `adapters`) | the key's lines |
+
+**Nesting.** Blocks nest:
+
+- An `impl` block for a token-level or entity-level `implemented_in:` lies inside its `token`, `invariant` or `content-entity` block.
+- A `###` rationale block lies inside its `##` block.
+
+Every other block is outermost. A block's **ancestors** are the blocks that contain it, plus, for frontmatter blocks, the namespace key line above them.
+
+**Gap lines.** Lines outside every outermost block are gap lines:
+
+- frontmatter fences;
+- namespace key lines (`verbs:`);
+- comment and blank lines between tokens;
+- body text before the first `##` (a title, an introduction).
+
+**`tree_sha`.** This identifies the compiled tree state. It is the SHA-256 of a manifest with one line per loaded file, sorted by tree-relative POSIX path; each line is the path, a tab, and the SHA-256 of the file's bytes. The loaded files are those the §2 loader classifies, with frontmatter. Any byte change in any of them changes `tree_sha`. Pointers are valid only against the `tree_sha` they were emitted with.
+
+**Coordinates.** Every block carries two coordinates:
+
+- **Primary (stable across edits):**
+  - `{ns.id}` for `token`, `invariant` and `content-entity` blocks (content entities are `{entities.<kind>.<id>}`, as resolved in §3);
+  - `{ns.id}` of the owning token for a token-level `impl` block;
+  - `<path>#<key>` for `meta` blocks and file-level `impl` blocks;
+  - `<path>#<heading>` or `<path>#<heading>/<subheading>` for `rationale` blocks.
+- **Secondary (recomputed on every compile):** `<path>:<start>-<end>`. The path is tree-relative; the lines are 1-based, inclusive and counted in the whole file. **The secondary coordinate is the only valid pointer target.** Reading lines `start`..`end` of `path` MUST yield exactly the block's source text.
+
+  A pointer is valid only for the tree state it was compiled from. After any edit, an agent MUST re-run the view instead of reusing an old pointer.
+
+**Attribution:** a `###` rationale section whose heading equals the id of a token defined in the same file (the §4.11 convention, `### <invariant_id>`) is annotated as explaining that token.
+
+**References and backlinks.** `view` and `graph` use the linter's definitions exactly (§9.1), so a view and `lint` can never disagree about the graph:
+
+- **Extraction:**
+  - Frontmatter references are every `{…}` occurrence in any string value of any file (`walk_refs`).
+  - Body references are every occurrence in a Markdown body.
+  - A whole-namespace reference (`"{resources}"` as an `applies_to:` item, §3) is extracted like any other. The same string anywhere else is not a reference.
+- **Resolution** follows §3 as implemented by the linter (`has_token`). A reference's **target** is the longest prefix naming a top-level token or content entity; the remainder is its sub-path.
+  - A reference that does not resolve is shown as `unresolved`, the `broken-ref` predicate.
+  - `{actor.*}` and `{target.*}` (D-012) are shown as `context-local` and are not edges.
+  - A whole-namespace reference that resolves is shown as `namespace`. It has no target and is not an edge, and it is no token's backlink (§3).
+- **Backlinks.** The backlinks of token `T` are every reference `r` with `r == T` or `r` starting with `T.`. This is exactly the `orphaned-entity` predicate. For every token that rule checks (it exempts `verbs`, `invariants`, `cut` tokens and `actor` entities), the token has no backlinks if and only if `orphaned-entity` reports it.
+- **Edges.** An edge runs from the block containing a reference to the reference's target. It carries the field path (frontmatter) or line (body) where the reference occurs, and its kind: `value` (frontmatter) or `prose` (body).
+
+#### 9.9.2 The lowering rule (normative)
+
+A view is a projection of the tree. **Views select, truncate, or annotate; they never rewrite.**
+
+1. Everything a view emits about the tree MUST be one of:
+   - a **verbatim slice** of a tree file (whole source lines, unmodified, with their original indentation);
+   - a **coordinate**;
+   - an **annotation** computed deterministically from the tree: a role, a status, a count, a resolution outcome, an edge kind, a hop distance or an elision marker.
+2. **Token values MUST be emitted verbatim**, as the source lines at the block's pointer. They are never re-serialized, reformatted, paraphrased or summarized.
+3. **Every omission inside an emitted block MUST be marked** with an elision marker carrying the pointer of the omitted lines (`… N lines · <path>:<a>-<b>`). A view MUST NOT silently drop lines from a block it emits.
+4. In JSON output a block's `source` field is the verbatim slice. It MAY be accompanied by `value`, the loader's own parse of that slice: the same data `lint` compiles against. JSON output MUST NOT carry any other rendering of the value.
+
+#### 9.9.3 `gdmd view`
+
+- **`gdmd view <path>`: overview.** A compiled index, not an authored summary:
+  - Each file: its path, `file_type`, `status` and `last_verified`, with a pointer.
+  - Each §3 namespace, in `SUBFILE_NAMESPACES` order: every top-level token's id, its `status` (or `-`) and its pointer.
+  - Content entities are listed **per kind, not per entity**: the kind, the count, counts by status, and the pointer to its content-schema file. The elision marker names the view that lists them (`--flat --role content-entity`).
+- **`--full`: the flattened tree.**
+  - It opens with a header line carrying the tree path and its `tree_sha`.
+  - It then emits every outermost block verbatim, each preceded by a header line (`[role] <primary> <secondary>`). Nested blocks are not emitted a second time; their headers appear as annotations within the enclosing block.
+  - Gap lines are emitted verbatim, marked `[gap] <secondary>`, or as elision markers carrying their pointer.
+  - **Every non-blank line of every loaded file appears in `--full` exactly once:** either verbatim, or inside the pointer range of an elision marker.
+
+  The order is canonical:
+  1. the core file;
+  2. files in the core `files:` map order;
+  3. the remaining files in path order;
+  4. content entities grouped by kind and sorted by id.
+
+  Within a file, frontmatter blocks come in source order, then rationale blocks.
+- **`--grep <regex>`: adaptive.** The regex is Python syntax, case-sensitive unless `--ignore-case`.
+  - Selects the **innermost** block containing each match: its source text, or its primary coordinate. A match inside an `impl` block selects the `impl` block, shown within its token's structure.
+  - Each selected block is lowered to its header, the matching lines, the header lines of its ancestor blocks, and **every ancestor key line of each matching line** (namespace → token → field). All other lines are replaced by elision markers.
+  - A match on a gap line (outside every block: a namespace key, a comment between tokens, a title or introduction) is a **`gap` selection**: the matching lines verbatim with their pointer, under their file, with their ancestor key lines. `--role` excludes gap selections, since a gap line has no role.
+  - Output is grouped by file, in canonical order.
+- **`--ref <{ns.id}> [--hops N]`: graph-adaptive.**
+  - The focus token's block, in full.
+  - Its **forward references:** each with its field path, target, resolution outcome, and the target block's pointer.
+  - Its **backlinks:** each with the referencing block's header, its edge kind, and the referencing source line verbatim.
+  - With `--hops N` (default 1), neighbors up to N edges away in both directions are listed by hop distance, each with its header and the referencing line, never its full block.
+  - A sub-path argument (`{rules.card_draw.do}`) focuses the owning token and names the sub-path.
+- **`--flat`: transposed.** The current selection (all blocks, `--grep` matches, or `--ref` neighbors) as one line per block: role, primary, secondary, status.
+- **`--role <role>`** (repeatable) restricts the selection to those roles. It works with every view.
+- **`--json`** emits the same selection as one JSON document, always carrying `tree_sha`:
+
+```json
+{
+  "view": "grep", "tree": "examples/deckbuilder", "tree_sha": "5f0c…", "args": {"regex": "energy"},
+  "blocks": [
+    {"role": "token", "id": "{resources.energy}", "pointer": "gdd/mechanics.md:89-96",
+     "status": "draft", "source": "  energy:\n    scope: per_turn\n…",
+     "elided": [{"pointer": "gdd/mechanics.md:91-92", "lines": 2}]}
+  ],
+  "edges": []
+}
+```
+
+#### 9.9.4 `gdmd graph`
+
+`graph` renders the same reference graph as `view`, built by the same implementation, as structure. Nodes are blocks: `token`, `invariant` and `content-entity` blocks, plus `rationale` and `meta` blocks that contain references. Edges are as in §9.9.1; several references between the same two nodes form one edge carrying every location.
+
+- **`--impact <{ns.id}>`:** the transitive reverse closure. It lists every node that references the token, directly or through any chain of references, with its hop distance, edge kinds and pointer. `rationale` nodes appear as leaves (nothing references a prose section). For every token, the impact set MUST contain the backlinks `view --ref` reports at every hop count.
+- **`--from <A> --to <B>`:** the **shortest** forward paths from A to B, each as a node sequence with the reference location of every step.
+  - At most `--max-paths N` paths are emitted (default 20), in a deterministic order: lexicographic by node primary coordinates.
+  - When more shortest paths exist, an elision annotation gives the total (`… 20 of 57 shortest paths`).
+  - No path means empty output and exit 0.
+- **`--cycles`:** every strongly connected component of more than one node, plus self-referencing nodes, over `value` edges.
+- **No mode:** the whole graph.
+- **`--format`:** `text` (default), `json`, or `dot` for rendering with standard graph tools. JSON output carries `tree_sha`.
+
+#### 9.9.5 Budget, exit codes, and what views do not do
+
+- **Budget:** a `view` or `graph` invocation SHOULD be cheap enough to run for every consultation, and far cheaper than reading the files it projects. The reference implementation's budget and how it is measured are recorded in D-027.
+- **Exit codes:**
+  - `0` on success, including empty selections.
+  - `2` for a `--ref`, `--impact`, `--from` or `--to` argument that does not resolve. The command prints the argument and exits.
+  - Views never fail a tree for lint findings; unresolved references are annotated, not raised.
+- **What views do not do:**
+  - Nothing is summarized, embedded or LLM-extracted. Every edge is one the author wrote as a `{ns.id}` reference.
+  - Views do not resolve `DECISIONS.md` or other non-tree files; a `decision` role is deferred (D-027).
+  - They do not follow the spec→code direction beyond listing `impl` globs and the files those globs match. The code→spec direction is `gdmd hook check` (§9.7).
+
 ---
 
 ## 10. JSON Schema
 
 The normative frontmatter schema lives at `schema/game-design.schema.json`. It is the machine-readable companion to §4–§6 and is what editors validate against live.
 
-The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `Clock`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
+The schema is a discriminated union over `file_type:` with one variant per file type (`core`, `subfile`, `content-schema`, `content-entity`) sharing common `$defs` for `Status`, `TokenRef`, `NamespaceRef`, `Distribution`, `Loop`, `Verb`, `Resource`, `Entity`, `BalanceTarget`, `Feel`, `Invariant`, `Clock`, `StateMachine` (with `StateNode` + `StateTransition`), `VerifyTarget`, and `VerifyResult`.
 
 VS Code's YAML extension picks up the schema via the YAML language server's standard mapping. Add this to a workspace `.vscode/settings.json`:
 
@@ -1426,13 +1631,21 @@ VS Code's YAML extension picks up the schema via the YAML language server's stan
 
 ## 11. Conformance
 
-A `game-design.md` tree is **conformant at v0.2.0-alpha** if:
+A `game-design.md` tree is **conformant at v0.4.0** if:
 
-1. `gdmd lint <tree>` returns exit code `0` (no findings of severity `error`).
+1. `gdmd lint <tree>` returns exit code `0`: it reports no finding of severity `error`. Findings at `warning` or `info` do not change the exit code. Every error-severity rule in §9.1 counts, including rules that enforce MUSTs outside items 2–5, such as `trajectory-sort-by-missing` (§9.5.5).
 2. The root `game-design.md` has all required frontmatter keys (§5.1) and the canonical prose section order (§5.2).
+   - `schema-violation` validates the root frontmatter against the schema's `CoreFile` branch (§10): every required key present, no key outside the branch, every value of its declared shape. `missing-pillars` and `missing-core-loop` also report fewer than three pillars and a `core_loop_ref` that does not resolve.
+   - `section-order` reports a canonical `##` heading that is out of order, follows a non-canonical heading, or is repeated. It does not report a canonical heading that is absent.
 3. Every subfile has `spec`, `spec_version`, `file_type`, `status`, `last_verified` in its frontmatter.
-4. Every `content/*/*.yaml` validates against its referencing content-schema file's `schema:`.
+   - `schema-violation` validates each subfile against the schema's `Subfile` branch, which requires these five keys. It validates every file in the tree whose frontmatter declares `spec: game-design.md` or a `file_type`: against its `file_type`'s branch, or against the whole schema when the `file_type` is missing or unknown. A file that declares neither is not a `game-design.md` file, and lint reports nothing about it.
+4. Every content entity validates against the `schema:` of the content-schema whose `data_dir` contains it (§6.2).
+   - `content-entity-invalid` validates each file that declares `file_type: content-entity` against the `schema:` of every content-schema whose `data_dir` contains it. It also reports an entity whose `id` is not its file stem, an entity that no `data_dir` contains, and a `data_dir` that does not name a directory called its content-schema's `entity:`. `schema-violation` checks that each entity has `id`, `status` and `implemented_in`.
+   - A YAML file in a `data_dir` that declares neither `spec: game-design.md` nor a `file_type` is not checked.
 5. Every random outcome resolves to a named `distributions.<id>`.
+   - `undefined-distribution` reports a stochastic step in a rule's `do:` list (`sample:`, `roll:` or `random:`) that is not a `{distributions.<id>}` reference, and `broken-ref` reports one that does not resolve. Randomness written anywhere else, such as a stochastic step in a verb's `effects:` or in prose, is not checked.
+
+Items 2–5 are checked only as far as the rules named under each go. The parts marked "not checked" or "does not report" are conditions of conformance that `gdmd lint` does not verify.
 
 ### 11.1 Success benchmark
 
@@ -1458,6 +1671,21 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 
 **The deployment-surface reframe is gate correction, not gate loosening** (D-021). The kickoff's "at least one live project" validation bar was set against the factual premise that named live projects had spec trees the v0.3 vocabulary would be deployed into; that premise was incorrect. Restating the bar under the corrected premise is the same discipline as a constraint-driven scope reduction firing AS DESIGNED — different from a result-driven gate widening (which would face the counterfactual-adoption test). The in-repo surface carries the three validation claims above; the longitudinal claim is queued, not silently dropped. See `DECISIONS.md` D-021 for the full lineage.
 
+### 11.3 Routine evidence surface (v0.4+)
+
+From v0.4, the routine evidence surface for claims about how agents *work with* a tree is the **dogfood harness** (`benchmark/dogfood/`, `DECISIONS.md` D-023). Such claims include consultation cost, lookup accuracy, and session-level maintenance (claim 3 of §11.2). The harness runs:
+- headless coding-agent sessions on this repository's own trees;
+- a small fixed task set covering the three agent modes (authoring, operating, maintenance) plus a negative control;
+- deterministic checkers, with no LLM judge;
+- a locked rule, pre-registered before the first real run.
+
+Rules for claims:
+
+1. **No unmeasured claims.** No statement that a tool or format change reduces session cost or improves success appears in this spec, the README or release notes unless a dogfood locked rule has produced it. Results are reported by the rule, including NULL and FAIL.
+2. **Not comparable to F-009.** F-009 (v0.2 Phase 5) used a different model, harness, task set and metric. F-009 stands as recorded; its records do not speak to consultation cost (D-022).
+3. **Stated limits.** Dogfood is small-n and single-model, and its tasks are authored by the format's own authors on the format's own trees. Every dogfood report states these limits.
+4. **Longitudinal stays queued.** Dogfood does not test the longitudinal living-doc property; that claim (§11.2) awaits live adoption.
+
 ---
 
 ## Appendix A — Worked Examples
@@ -1474,7 +1702,7 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 | Aspect | Inherited verbatim | Extended / new |
 | --- | --- | --- |
 | Two-layer file (YAML + prose) | ✓ | |
-| `{namespace.id}` reference syntax | ✓ | depth ≤ 6; refs into `content/*/*.yaml` via `data_source` |
+| `{namespace.id}` reference syntax | ✓ | depth ≤ 6; refs into `content/*/*.yaml` via the content-schema's `data_dir`; whole-namespace `{namespace}` in `applies_to` (§3) |
 | Canonical `##` order, linter-enforced | ✓ | per-file-type orders (§7.1) |
 | Unknown-content handling | ✓ | + `status-regression`, `inline-content-over-threshold` |
 | CLI verb set | ✓ | `diff` exit-codes balance regressions |
@@ -1485,7 +1713,7 @@ v0.3 ships under three validation claims, with one ambition explicitly **queued 
 | Named distributions for all randomness | | **new** (§4.8) — strict at v0.1 |
 | First-class clocks (`{clocks.<id>}` namespace) | | **new** (§4.7) — F-010 resolution at v0.3 |
 | `instance_container` entity type + `per_instance_state:` | | **new** (§4.1) — F-008 resolution at v0.3; completes entity-cardinality coverage (one / many-templated / many-instanced) |
-| Content-heavy data pattern (`data_source:`) | | **new** (§6) |
+| Content-heavy data pattern (`data_dir:`) | | **new** (§6) |
 | Architecture invariants, state-machine totality, `verify` adapter contract | | **new** (§4.11, §4.4, §9.5) — adapted from a parallel research effort and re-grounded engine-neutral (the source assumed a web engine; we express codebase properties and a pluggable adapter contract instead). |
 
 ## Appendix C — Glossary of Spec Terms

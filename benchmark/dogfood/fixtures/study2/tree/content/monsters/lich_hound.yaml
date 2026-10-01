@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: lich_hound
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Lich Hound
+tier: brute
+max_vigor: 32
+skills:
+  - "{entities.skills.briny_veil}"
+drops:
+  - "{entities.items.ashen_charm}"
+description: A brute that avoids direct light.

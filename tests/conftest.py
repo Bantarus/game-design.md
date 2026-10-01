@@ -10,12 +10,23 @@ invariant-violation).
 """
 from __future__ import annotations
 
+import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
 
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# The 12 in-repo trees: 4 canonical examples, 2 benchmark games, 6 starters.
+IN_REPO_TREES: tuple[str, ...] = (
+    "examples/deckbuilder", "examples/tick-combat", "examples/party-rpg",
+    "examples/tcg", "benchmark/games/platformer", "benchmark/games/survival",
+) + tuple(f"templates/starters/{g}" for g in (
+    "deckbuilder", "party-rpg", "platformer", "survival", "tcg", "tick-combat",
+))
 
 
 BASELINE_FILES: dict[str, str] = {
@@ -311,3 +322,29 @@ def fixture_overlay(make_tree, tmp_path: Path):
             dest.write_text(src_file.read_text())
         return root
     return _overlay
+
+
+def tick_combat_out_of_tree(tmp_path: Path) -> tuple[Path, Path]:
+    """D-038 (OI-002): the real tick-combat tree at `repo/docs/tick-combat`,
+    with its engine code at the repository root (`repo/impl/`) and its
+    implementation globs rewritten from `impl/...` to `../../impl/...`.
+    `repo/.git` marks the repository root. Returns (repo, tree)."""
+    import shutil
+    src = REPO_ROOT / "examples/tick-combat"
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    tree = repo / "docs/tick-combat"
+    shutil.copytree(src, tree, ignore=shutil.ignore_patterns("impl"))
+    for rel in ("impl/xtreme/src", "impl/godot/src"):
+        shutil.copytree(src / rel, repo / rel)
+    shutil.copy(src / "impl/xtreme/Cargo.toml", repo / "impl/xtreme/Cargo.toml")
+    for f in (tree / "game-design.md", *tree.glob("gdd/**/*.md")):
+        f.write_text(f.read_text().replace('"impl/', '"../../impl/'))
+    # Pin every mtime before the tree's earliest last_verified (2026-05-22), so
+    # `stale-section` does not depend on when the checkout was made (a fresh
+    # CI checkout gave 12 warnings).
+    pinned = datetime(2026, 5, 1, tzinfo=timezone.utc).timestamp()
+    for p in repo.rglob("*"):
+        if p.is_file():
+            os.utime(p, (pinned, pinned))
+    return repo, tree

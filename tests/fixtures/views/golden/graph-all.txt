@@ -1,0 +1,92 @@
+[graph all] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+nodes (23):
+  [meta] game-design.md#core_loop_ref game-design.md:16-16
+  [rationale] game-design.md#High Concept game-design.md:31-33
+  [token] {entities.player} gdd/mechanics.md:9-13 status=draft
+  [token] {entities.relics} gdd/mechanics.md:14-17 status=draft
+  [token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+  [token] {verbs.rest} gdd/mechanics.md:27-34 status=draft
+  [token] {resources.focus} gdd/mechanics.md:36-47 status=draft
+  [token] {rules.study_rule} gdd/mechanics.md:49-58 status=draft
+  [token] {rules.rest_rule} gdd/mechanics.md:59-66 status=draft
+  [token] {events.studied} gdd/mechanics.md:68-68 status=draft
+  [rationale] gdd/mechanics.md#Tokens gdd/mechanics.md:72-74
+  [rationale] gdd/mechanics.md#Rationale gdd/mechanics.md:76-86
+  [rationale] gdd/mechanics.md#Rationale/study gdd/mechanics.md:84-86 explains={verbs.study}
+  [token] {loops.day} gdd/loops.md:8-18 status=draft
+  [rationale] gdd/loops.md#Rationale gdd/loops.md:21-23
+  [invariant] {invariants.focus_is_integer} gdd/architecture-invariants.md:8-13
+  [rationale] gdd/architecture-invariants.md#Rationale/focus_is_integer gdd/architecture-invariants.md:18-20 explains={invariants.focus_is_integer}
+  [token] {balance_targets.focus_per_day} gdd/economy-balance.md:8-13 status=draft
+  [rationale] gdd/economy-balance.md#Rationale gdd/economy-balance.md:16-18
+  [meta] gdd/content/relics.md#balance_refs gdd/content/relics.md:15-15
+  [content-entity] {entities.relics.lamp} content/relics/lamp.yaml:1-8 status=draft
+  [content-entity] {entities.relics.quill} content/relics/quill.yaml:1-7 status=draft
+  [gap] game-design.md:29-29
+edges (33):
+  game-design.md#core_loop_ref -> {loops.day} (value)
+    game-design.md:16 value core_loop_ref
+  game-design.md:29 -> {resources.focus} (prose)
+    game-design.md:29 prose body
+  game-design.md#High Concept -> {loops.day} (prose)
+    game-design.md:33 prose body
+  {entities.player} -> {resources.focus} (value)
+    gdd/mechanics.md:12 value entities.player.properties.focus.from
+  {verbs.study} -> {entities.player} (value)
+    gdd/mechanics.md:20 value verbs.study.actor
+  {verbs.study} -> {resources.focus} (value)
+    gdd/mechanics.md:21 value verbs.study.cost.resource
+  {verbs.study} -> {entities.relics} (value)
+    gdd/mechanics.md:22 value verbs.study.target_schema.type
+  {verbs.study} -> {rules.study_rule} (value)
+    gdd/mechanics.md:24 value verbs.study.effects[0].resolve
+  {verbs.rest} -> {entities.player} (value)
+    gdd/mechanics.md:28 value verbs.rest.actor
+  {verbs.rest} -> {rules.rest_rule} (value)
+    gdd/mechanics.md:32 value verbs.rest.effects[0].resolve
+  {resources.focus} -> {balance_targets.focus_per_day} (value)
+    gdd/mechanics.md:41 value resources.focus.velocity_target
+  {rules.study_rule} -> {verbs.study} (value)
+    gdd/mechanics.md:50 value rules.study_rule.given.verb
+  {rules.study_rule} -> {entities.relics.lamp} (value)
+    gdd/mechanics.md:55 value rules.study_rule.do[1].target
+  {rules.study_rule} -> {events.studied} (value)
+    gdd/mechanics.md:56 value rules.study_rule.outputs[0]
+  {rules.rest_rule} -> {verbs.rest} (value)
+    gdd/mechanics.md:60 value rules.rest_rule.given.verb
+  {rules.rest_rule} -> {resources.focus} (value)
+    gdd/mechanics.md:63 value rules.rest_rule.do[0].target
+  {events.studied} -> {rules.study_rule} (value)
+    gdd/mechanics.md:68 value events.studied.description
+  gdd/mechanics.md#Tokens -> {verbs.study} (prose)
+    gdd/mechanics.md:74 prose body
+  gdd/mechanics.md#Tokens -> {verbs.rest} (prose)
+    gdd/mechanics.md:74 prose body
+  gdd/mechanics.md#Rationale -> {verbs.rest} (prose)
+    gdd/mechanics.md:78 prose body
+  gdd/mechanics.md#Rationale/study -> {entities.relics.lamp} (prose)
+    gdd/mechanics.md:86 prose body
+  {loops.day} -> {verbs.study} (value)
+    gdd/loops.md:12 value loops.day.sequence[0].study
+  {loops.day} -> {verbs.rest} (value)
+    gdd/loops.md:13 value loops.day.sequence[1].rest
+  {loops.day} -> {balance_targets.focus_per_day} (value)
+    gdd/loops.md:16 value loops.day.balance_targets[0]
+  gdd/loops.md#Rationale -> {loops.day} (prose)
+    gdd/loops.md:23 prose body
+  gdd/loops.md#Rationale -> {verbs.study} (prose)
+    gdd/loops.md:23 prose body
+  gdd/loops.md#Rationale -> {verbs.rest} (prose)
+    gdd/loops.md:23 prose body
+  {invariants.focus_is_integer} -> {resources.focus} (value)
+    gdd/architecture-invariants.md:11 value invariants.focus_is_integer.applies_to[0]
+  gdd/architecture-invariants.md#Rationale/focus_is_integer -> {balance_targets.focus_per_day} (prose)
+    gdd/architecture-invariants.md:20 prose body
+  {balance_targets.focus_per_day} -> {loops.day} (value)
+    gdd/economy-balance.md:12 value balance_targets.focus_per_day.measure
+  gdd/economy-balance.md#Rationale -> {resources.focus} (prose)
+    gdd/economy-balance.md:18 prose body
+  gdd/content/relics.md#balance_refs -> {balance_targets.focus_per_day} (value)
+    gdd/content/relics.md:15 value balance_refs[0]
+  {entities.relics.lamp} -> {resources.focus} (value)
+    content/relics/lamp.yaml:8 value grants

@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: dusk_crypt
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Dusk Crypt
+depth: 2
+monsters:
+  - "{entities.monsters.fen_crawler}"
+  - "{entities.monsters.fen_shade}"
+  - "{entities.monsters.gloam_wight}"
+  - "{entities.monsters.ochre_wisp}"
+spawn_roll: "{distributions.ossuary_pack}"
+description: "Dusk Crypt: a warren of burrows in the soot."

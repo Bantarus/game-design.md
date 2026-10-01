@@ -1,7 +1,7 @@
 """gdmd init — per-genre starter scaffolding (Task 7 v0.3).
 
-Surfaces the starter templates bundled in `templates/starters/<genre>/`
-as a one-command tree initializer. Each starter is a descriptive scaffold
+Surfaces the starter templates in `templates/starters/<genre>/`, which the
+wheel bundles as package data, as a one-command tree initializer. Each starter is a descriptive scaffold
 extracted from the corresponding canonical example (NOT a prescriptive
 contract). The descriptive-scaffold framing is repeated in each starter's
 root file's STARTER NOTE comment block.
@@ -25,29 +25,37 @@ import shutil
 from importlib import resources
 from pathlib import Path
 
-# Bundled starters live under the package data path. In a dev install
-# (`pip install -e .`), the path resolves to the repo's templates/starters/
-# directory; in a wheel install, it resolves to the same path inside the
-# wheel's data tree.
-def _starters_root() -> Path:
-    """Return the templates/starters/ directory bundled with gdmd."""
-    # First try: alongside the installed package (dev / editable install).
-    pkg_dir = Path(__file__).parent
-    candidate = pkg_dir.parent.parent / "templates" / "starters"
-    if candidate.is_dir():
-        return candidate
-    # Fallback: package-data lookup (wheel install).
+# The starters ship as package data (D-006, D-050): the wheel force-includes
+# templates/starters/ at game_design_md/_data/starters/. An editable install
+# has no _data/, so the repo's templates/starters/ is the fallback.
+def _packaged_starters() -> Path | None:
+    """The starters in package data (wheel installs), via importlib.resources.
+
+    Returns None when the package data is unavailable (editable dev install)
+    or not on the file system, since copy_starter copies real files.
+    """
     try:
-        with resources.as_file(
-            resources.files("game_design_md") / ".." / "templates" / "starters"
-        ) as p:
-            if p.is_dir():
-                return p
-    except (ModuleNotFoundError, FileNotFoundError):
-        pass
-    raise FileNotFoundError(
-        f"could not locate templates/starters/ — looked in {candidate}"
-    )
+        res = resources.files("game_design_md").joinpath("_data/starters")
+    except (ModuleNotFoundError, OSError):
+        return None
+    return res if isinstance(res, Path) and res.is_dir() else None
+
+
+def _dev_tree_starters() -> Path | None:
+    candidate = Path(__file__).resolve().parents[2] / "templates" / "starters"
+    return candidate if candidate.is_dir() else None
+
+
+def _starters_root() -> Path:
+    """Return the starters directory: package data first, the dev tree second."""
+    root = _packaged_starters() or _dev_tree_starters()
+    if root is None:
+        raise FileNotFoundError(
+            "could not locate the starters: no game_design_md/_data/starters/ in "
+            "the package and no templates/starters/ near "
+            f"{Path(__file__).resolve().parents[2]}"
+        )
+    return root
 
 
 def list_genres() -> list[str]:

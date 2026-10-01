@@ -1,0 +1,25 @@
+[view ref] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+[token] {rules.study_rule} gdd/mechanics.md:49-58 status=draft sub_path=do
+  study_rule:
+    given: { verb: "{verbs.study}" }
+    do:
+      - kind: spend
+        amount: "{actor.focus_cost}"
+      - kind: inspect
+        target: "{entities.relics.lamp}"
+    outputs: ["{events.studied}"]
+    status: draft
+[impl] {rules.study_rule} gdd/mechanics.md:58-58
+    implemented_in: ["src/sim/rules.py"]
+forward (4):
+  {verbs.study} resolved rules.study_rule.given.verb gdd/mechanics.md:50 → [token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+  {actor.focus_cost} context-local rules.study_rule.do[0].amount gdd/mechanics.md:53
+  {entities.relics.lamp} resolved rules.study_rule.do[1].target gdd/mechanics.md:55 → [content-entity] {entities.relics.lamp} content/relics/lamp.yaml:1-8 status=draft
+  {events.studied} resolved rules.study_rule.outputs[0] gdd/mechanics.md:56 → [token] {events.studied} gdd/mechanics.md:68-68 status=draft
+backlinks (2):
+  [token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+    gdd/mechanics.md:24 value verbs.study.effects[0].resolve
+      - resolve: "{rules.study_rule}"
+  [token] {events.studied} gdd/mechanics.md:68-68 status=draft
+    gdd/mechanics.md:68 value events.studied.description
+  studied: { status: draft, description: "Emitted by {rules.study_rule}." }

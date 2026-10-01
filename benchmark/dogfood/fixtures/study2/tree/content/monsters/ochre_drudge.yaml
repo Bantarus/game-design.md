@@ -1,0 +1,16 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: ochre_drudge
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Ochre Drudge
+tier: minion
+max_vigor: 13
+skills:
+  - "{entities.skills.iron_hex}"
+  - "{entities.skills.sable_hex}"
+drops:
+  - "{entities.items.moth_phial}"
+description: A minion that follows the smell of lamp oil.

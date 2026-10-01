@@ -1,0 +1,103 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1746,
+  "cache_read_tokens": 507065,
+  "cache_creation_tokens": 79002,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 7868,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 84180,
+  "per_turn_occupancy": [
+    80337,
+    82799,
+    83180,
+    84180,
+    84859,
+    85197,
+    85529
+  ],
+  "tool_counts": {
+    "Bash": 5,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 7177
+  },
+  "view_mode_calls": {
+    "graph": 3
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 302,
+  "bash_files_read": 5,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/gdd/loops.md",
+    "examples/lanternfall/gdd/mechanics.md",
+    "examples/lanternfall/gdd/systems/bosses.md",
+    "examples/lanternfall/gdd/systems/spawning.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "EA4ASm",
+      "result_bytes": 5194,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r3.txt:27-226"
+    },
+    {
+      "tool": "Bash",
+      "id": "YjcQBV",
+      "result_bytes": 258,
+      "is_error": true,
+      "vcc": "s2_impact_files__views__r3.txt:243-247"
+    },
+    {
+      "tool": "Bash",
+      "id": "jkxKZr",
+      "result_bytes": 1725,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r3.txt:259-277"
+    },
+    {
+      "tool": "Bash",
+      "id": "RZnLHc",
+      "result_bytes": 302,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r3.txt:289-294"
+    },
+    {
+      "tool": "Bash",
+      "id": "BEvb7w",
+      "result_bytes": 198,
+      "is_error": true,
+      "vcc": "s2_impact_files__views__r3.txt:306-306"
+    },
+    {
+      "tool": "Write",
+      "id": "umrRNm",
+      "result_bytes": 191,
+      "is_error": false,
+      "vcc": "s2_impact_files__views__r3.txt:327-327"
+    }
+  ]
+}

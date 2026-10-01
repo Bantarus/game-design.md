@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: umber_lens
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Umber Lens
+rarity: sound
+slot: lantern
+weight: 2
+value: 34
+description: A sound lantern stitched from moth-silk.

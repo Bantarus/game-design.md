@@ -1,0 +1,15 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_sanctum
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot Sanctum
+depth: 5
+monsters:
+  - "{entities.monsters.briny_wisp}"
+  - "{entities.monsters.dusk_hound}"
+  - "{entities.monsters.soot_king}"
+spawn_roll: "{distributions.sanctum_pack}"
+description: "Soot Sanctum: a stair landing littered with snuffed candles."

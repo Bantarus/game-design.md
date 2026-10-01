@@ -259,3 +259,87 @@ def test_verify_collect_targets_and_adapters_from_subfile(make_tree):
     assert targets[0].seed == 1
     assert targets[0].target_ref == "{loops.main}"
     assert adapters["default"] == "./tools/verify-adapter"
+
+
+# ---- --baseline: verify-result-regression (D-045, OI-011, spec §9.5.4) ----------
+
+def _row(axis, target, ok):
+    return {"axis": axis, "target": target, "pass": ok}
+
+
+def test_regressions_are_pass_to_fail_with_severity_per_axis():
+    base = {"results": [_row("behavioral_alignment", "{loops.a}", True),
+                        _row("build_health", "build_health", True),
+                        _row("presentation_usability", "{feel.x}", True),
+                        _row("behavioral_alignment", "{loops.b}", False),
+                        _row("behavioral_alignment", "{loops.gone}", True),
+                        _row("behavioral_alignment", "{loops.kept}", True)]}
+    cur = {"results": [_row("behavioral_alignment", "{loops.a}", False),
+                       _row("build_health", "build_health", False),
+                       _row("presentation_usability", "{feel.x}", False),
+                       _row("behavioral_alignment", "{loops.b}", False),    # failing before too
+                       _row("behavioral_alignment", "{loops.new}", False),  # no baseline row
+                       _row("behavioral_alignment", "{loops.kept}", True)]}
+    found = verify_cmd.regressions(base, cur)
+    assert [(f["axis"], f["target"], f["severity"]) for f in found] == [
+        ("behavioral_alignment", "{loops.a}", "error"),
+        ("build_health", "build_health", "error"),
+        ("presentation_usability", "{feel.x}", "warning")]
+    assert {f["rule"] for f in found} == {"verify-result-regression"}
+
+
+def test_regressions_match_by_axis_and_target():
+    base = {"results": [_row("presentation_usability", "{loops.a}", True)]}
+    cur = {"results": [_row("behavioral_alignment", "{loops.a}", False)]}
+    assert verify_cmd.regressions(base, cur) == []
+
+
+@pytest.mark.parametrize("content", [
+    "not json", "[]", '{"results": {}}', '{"results": [{"axis": "build_health"}]}'])
+def test_load_baseline_rejects_what_is_not_a_report(tmp_path, content):
+    f = tmp_path / "prior.json"
+    f.write_text(content)
+    with pytest.raises(verify_cmd.VerifyError, match="baseline"):
+        verify_cmd.load_baseline(f)
+
+
+def test_verify_baseline_end_to_end(make_tree, tmp_path):
+    """A passing run's report is the baseline. After the golden changes, the
+    same target fails, and `--baseline` reports one error regression (exit 1).
+    Without `--baseline`, the report has no `regressions` key (v0.3's output).
+    A baseline that is not a report is a usage error (exit 2) before any
+    adapter runs."""
+    from click.testing import CliRunner
+    from game_design_md.cli import main
+    root = make_tree({"gdd/verification.md": _verification_md(
+        '  - axis: behavioral_alignment\n'
+        '    target: "{loops.main}"\n'
+        '    seed: 42\n'
+        '    expect:\n'
+        '      trajectory:\n'
+        '        matches_golden: ./tests/golden.jsonl\n'
+        '  - axis: build_health\n'
+        '    expect: { builds: true }\n'
+    )})
+    _write_adapter(root, SEED_OBEYING_ADAPTER)
+    (root / "tests").mkdir()
+    golden = root / "tests" / "golden.jsonl"
+    golden.write_text(_canonical_golden([{"hp": 10 - t, "seed": 42, "tick": t} for t in range(6)]))
+
+    first = CliRunner().invoke(main, ["verify", str(root)])
+    assert first.exit_code == 0, first.output
+    assert "regressions" not in json.loads(first.output)
+    prior = tmp_path / "prior.json"
+    prior.write_text(first.output)
+
+    golden.write_text(_canonical_golden([{"hp": 9, "seed": 42, "tick": 0}]))
+    second = CliRunner().invoke(main, ["verify", str(root), "--baseline", str(prior)])
+    report = json.loads(second.output)
+    assert second.exit_code == 1
+    assert [(f["axis"], f["target"], f["severity"]) for f in report["regressions"]] == [
+        ("behavioral_alignment", "{loops.main}", "error")]
+
+    bad = tmp_path / "bad.json"
+    bad.write_text("[]")
+    third = CliRunner().invoke(main, ["verify", str(root), "--baseline", str(bad)])
+    assert third.exit_code == 2 and "not a verify report" in third.output

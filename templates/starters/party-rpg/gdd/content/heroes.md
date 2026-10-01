@@ -1,6 +1,6 @@
 ---
 spec: game-design.md
-spec_version: 0.3.0
+spec_version: 0.4.0
 file_type: content-schema
 status: draft
 last_verified: "2026-05-28"
@@ -15,6 +15,8 @@ schema:
     attack:   { type: integer, minimum: 0 }
     defense:  { type: integer, minimum: 0 }
     speed:    { type: integer, minimum: 1 }
+data_dir: ../../content/heroes
+count_target: 8
 ---
 
 ## Schema

@@ -5,6 +5,8 @@ mutates the baseline to trigger exactly one rule, then asserts the finding.
 """
 from __future__ import annotations
 
+import json
+
 from game_design_md import linter
 from game_design_md.tree import Tree
 
@@ -146,6 +148,388 @@ def test_inline_content_over_threshold(make_tree):
     assert any(f.rule == "inline-content-over-threshold" for f in res.findings)
 
 
+# ---- D-033: whole-namespace references in applies_to ----------------------------
+
+def _with_applies_to(make_tree, items: str, **extra):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'applies_to: ["{resources.energy}"]', f"applies_to: {items}")
+    return make_tree({"gdd/architecture-invariants.md": inv, **extra})
+
+
+def test_whole_namespace_ref_resolves_or_is_broken(make_tree):
+    res = _lint(_with_applies_to(make_tree, '["{resources}", "{clocks}"]'))
+    assert not [f for f in res.findings if f.rule == "broken-ref"]   # {clocks}: no token yet
+    res = _lint(_with_applies_to(make_tree, '["{resourcez}"]'))
+    assert [(f.rule, f.location, f.message) for f in res.findings if f.rule == "broken-ref"] == [
+        ("broken-ref", "frontmatter:invariants.damage_int.applies_to.[0]",
+         "reference {resourcez} does not resolve")]
+
+
+def test_a_whole_namespace_string_elsewhere_is_not_a_reference(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'rule: "amounts are integers"', 'rule: "all {resourcez} are integers"')
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    assert not [f for f in res.findings if f.rule == "broken-ref"]
+
+
+def test_a_whole_namespace_ref_is_no_tokens_backlink(make_tree):
+    """`{resources}` governs every resource but uses none: a resource nothing
+    else names is still orphaned."""
+    mech = (make_tree() / "gdd/mechanics.md").read_text()
+    spare = mech.replace("resources:\n", "resources:\n  spare:\n    scope: per_run\n"
+                         "    min: 0\n    max: 1\n    visibility: hud\n"
+                         "    status: draft\n    implemented_in: []\n", 1)
+    assert spare != mech
+    res = _lint(_with_applies_to(make_tree, '["{resources}"]',
+                                 **{"gdd/mechanics.md": spare}))
+    assert "resources.spare" in {f.location for f in res.findings
+                                 if f.rule == "orphaned-entity"}
+
+
+def test_numeric_domain_whole_namespace_checks_every_resource(make_tree):
+    """Proof of fire: before D-033, `{resources}` checked nothing."""
+    mech = (make_tree() / "gdd/mechanics.md").read_text().replace("max: 1", "max: 1.5")
+    res = _lint(_with_applies_to(make_tree, '["{resources}"]', **{"gdd/mechanics.md": mech}))
+    assert any(f.rule == "invariant-violation" and "resources.energy.max" in f.location
+               for f in res.findings)
+
+
+def test_numeric_domain_whole_namespace_proof_of_fire_on_a_starter(tmp_path):
+    """Real-shaped content: the survival starter's `meters_are_integer` governs
+    `{resources}`; one non-integer bound now fires, and the starter as shipped
+    is clean."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "survival"
+    shutil.copytree(REPO_ROOT / "templates/starters/survival", root)
+    assert not [f for f in _lint(root).findings
+                if f.rule == "invariant-violation" and f.severity != "info"]
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    new = re.sub(r"(resources:\n(?:.*\n)*?\s+max: )(\d+)", r"\g<1>2.5", text, count=1)
+    assert new != text
+    mech.write_text(new)
+    assert any(f.rule == "invariant-violation" and f.location.startswith("resources.")
+               and f.location.endswith(".max") for f in _lint(root).findings)
+
+
+# ---- schema-violation (D-034) --------------------------------------------------------
+
+def _schema_findings(res):
+    return [(f.file, f.location, f.severity) for f in res.findings if f.rule == "schema-violation"]
+
+
+def test_schema_violation_names_the_field(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        "severity: error", "severity: fatal")
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    assert _schema_findings(res) == [
+        ("gdd/architecture-invariants.md", "invariants.damage_int.severity", "error")]
+    assert res.exit_code == 1
+
+
+def test_schema_violation_list_index_and_union_message(make_tree):
+    inv = (make_tree() / "gdd/architecture-invariants.md").read_text().replace(
+        'applies_to: ["{resources.energy}"]', 'applies_to: ["{resources.energy}", "{Bad}"]')
+    res = _lint(make_tree({"gdd/architecture-invariants.md": inv}))
+    [f] = [f for f in res.findings if f.rule == "schema-violation"]
+    assert f.location == "invariants.damage_int.applies_to[1]"
+    assert "does not match" in f.message and len(f.message) <= 200
+
+
+def test_schema_violation_skips_yaml_that_is_not_a_game_design_file(make_tree):
+    """A manifest with its own `spec:` or a CI file under the tree is not validated."""
+    root = make_tree({"deploy/app.yaml": "kind: Deployment\nspec:\n  replicas: 2\n",
+                      "ci.yml": "on: [push]\njobs: {}\n"})
+    assert _schema_findings(_lint(root)) == []
+
+
+def test_schema_violation_unknown_file_type_uses_the_whole_schema(make_tree):
+    root = make_tree({"gdd/odd.md": "---\nspec: game-design.md\nspec_version: 0.3.0\n"
+                                    "file_type: appendix\n---\n\n## Notes\n"})
+    assert ("gdd/odd.md", "file_type", "error") in _schema_findings(_lint(root))
+
+
+def test_schema_violation_proof_of_fire_on_the_real_oi006_defects(tmp_path):
+    """The defects OI-006 found by hand, re-created in copies of the real trees:
+    class B (time_cost nested in cost, D-030) and class C (heroes.md without
+    data_dir / count_target, D-031). Lint passed both at v0.3."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    surv = tmp_path / "survival"
+    shutil.copytree(REPO_ROOT / "benchmark/games/survival", surv)
+    mech = surv / "gdd/mechanics.md"
+    text = mech.read_text()
+    bad = text.replace("    cost: 0\n    time_cost: { in_game_minutes: 60 }\n",
+                       "    cost: { time_cost: { in_game_minutes: 60 } }\n", 1)
+    assert bad != text
+    mech.write_text(bad)
+    locs = [loc for f, loc, _ in _schema_findings(_lint(surv)) if f == "gdd/mechanics.md"]
+    assert len(locs) == 1 and locs[0].startswith("verbs.") and locs[0].endswith(".cost")
+
+    rpg = tmp_path / "party-rpg"
+    shutil.copytree(REPO_ROOT / "templates/starters/party-rpg", rpg)
+    heroes = rpg / "gdd/content/heroes.md"
+    heroes.write_text(heroes.read_text().replace("data_dir: ../../content/heroes\n", "")
+                      .replace("count_target: 8\n", ""))
+    found = [f for f in _lint(rpg).findings if f.rule == "schema-violation"]
+    assert [f.file for f in found] == ["gdd/content/heroes.md"] * len(found) and found
+    assert {("data_dir" in f.message) or ("count_target" in f.message) for f in found} == {True}
+
+
+# ---- content-entity-invalid (D-035, OI-005) -------------------------------------------
+
+def _entity_findings(res):
+    return sorted((f.file, f.location) for f in res.findings if f.rule == "content-entity-invalid")
+
+
+def test_content_entity_invalid_fixture(fixture_overlay):
+    """Proof of fire on the on-disk fixture: each §6.2 failure, and an entity
+    no content-schema covers."""
+    res = _lint(fixture_overlay("content_entity_invalid"))
+    assert _entity_findings(res) == [
+        ("content/cards/bad_cost.yaml", "cost"),
+        ("content/cards/no_name.yaml", "frontmatter"),
+        ("content/cards/renamed.yaml", "id"),
+        ("content/relics/lonely.yaml", "file"),
+    ]
+    msgs = {f.file: f.message for f in res.findings if f.rule == "content-entity-invalid"}
+    assert "(schema: gdd/content/cards.md)" in msgs["content/cards/bad_cost.yaml"]
+    assert "'name' is a required property" in msgs["content/cards/no_name.yaml"]
+    assert "does not match the file name 'renamed'" in msgs["content/cards/renamed.yaml"]
+    assert res.exit_code == 1
+
+
+def test_content_entity_header_keys_are_schema_violations_not_duplicated(make_tree):
+    """§6.2 (c), status and implemented_in, is the §10 schema's job (D-034)."""
+    card = (make_tree() / "content/cards/test_card.yaml").read_text().replace(
+        "status: prototyped\n", "")
+    res = _lint(make_tree({"content/cards/test_card.yaml": card}))
+    assert _entity_findings(res) == []
+    assert any(f.rule == "schema-violation" and f.file == "content/cards/test_card.yaml"
+               for f in res.findings)
+
+
+def test_content_entity_invalid_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: the deckbuilder's enemies schema with the mangled key it
+    carried until 1bcfc01 is reported once, on the content-schema; a card with
+    a wrong-typed field is reported at the field."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    assert _entity_findings(_lint(root)) == []
+    enemies = root / "gdd/content/enemies.md"
+    enemies.write_text(enemies.read_text().replace("targets_burn: { type: boolean }",
+                                                   "targets_burn:{ type: boolean }"))
+    card = root / "content/cards/ember_strike.yaml"
+    card.write_text(card.read_text().replace("cost: 1", "cost: one", 1))
+    assert _entity_findings(_lint(root)) == [("content/cards/ember_strike.yaml", "cost"),
+                                             ("gdd/content/enemies.md", "schema")]
+
+
+def _deckbuilder_copy(tmp_path):
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    return root
+
+
+def test_content_schema_data_dir_must_name_its_entity(tmp_path):
+    """D-037 (OI-001): the deckbuilder's cards moved to content/card_pool/, with
+    data_dir and data_source following. Every card still validates, but
+    {entities.cards.<id>} resolves by directory name (§3) and reaches none of
+    them. Before D-037 this linted clean; now the content-schema is reported."""
+    root = _deckbuilder_copy(tmp_path)
+    (root / "content/cards").rename(root / "content/card_pool")
+    for rel in ("gdd/content/cards.md", "gdd/mechanics.md"):
+        f = root / rel
+        f.write_text(f.read_text().replace("../../content/cards", "../../content/card_pool"))
+    tree = Tree.load(root)
+    assert not tree.has_token("entities.cards.ember_strike")
+    assert tree.has_token("entities.card_pool.ember_strike")
+    res = linter.run_all(tree)
+    assert [(f.rule, f.file, f.location) for f in res.findings if f.severity == "error"] == [
+        ("content-entity-invalid", "gdd/content/cards.md", "data_dir")]
+    assert "not 'cards'" in next(f.message for f in res.findings if f.location == "data_dir")
+
+
+def test_data_source_when_present_repeats_the_content_schema_data_dir(tmp_path):
+    """D-037 (OI-001): data_source is deprecated and optional. When present it
+    must equal the data_dir of the content-schema whose entity: is its key.
+    The mismatch here is the value spec §3's example carried until D-037."""
+    root = _deckbuilder_copy(tmp_path)
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    mech.write_text(text.replace("data_source: ../../content/cards", "data_source: ../content/cards"))
+    res = _lint(root)
+    assert _entity_findings(res) == [("gdd/mechanics.md", "entities.cards.data_source")]
+    msg = next(f.message for f in res.findings if f.rule == "content-entity-invalid")
+    assert "'../../content/cards' of gdd/content/cards.md" in msg
+
+    # Absent is valid: no longer required by the schema, and not reported.
+    mech.write_text(text.replace("    data_source: ../../content/cards\n", "")
+                        .replace("    data_source: ../../content/enemies\n", ""))
+    res = _lint(root)
+    assert res.errors == 0 and "data_source" not in mech.read_text()
+
+
+# ---- reserved owned keys and schema_ref (D-039, OI-004) ---------------------------
+
+def test_reserved_owned_keys_are_not_referenceable(make_tree):
+    """§3 (D-039): `{pillars.x}` and a whole-namespace `{pillars}` in applies_to
+    are broken-ref; `{pillars}` in prose, as seven places in four in-repo
+    trees write it, is plain text to the tools."""
+    extra = """\
+---
+spec: game-design.md
+spec_version: 0.3.0
+file_type: subfile
+status: draft
+last_verified: "2026-09-30"
+invariants:
+  pillar_guard:
+    kind: architectural_pattern
+    rule: "Honors {pillars.p1}."
+    applies_to: ["{pillars}"]
+    enforcement: advisory
+    severity: info
+---
+
+## Notes
+
+Per `{pillars}`, and `{pillars}[2]` in particular.
+"""
+    res = _lint(make_tree({"gdd/extra.md": extra}))
+    broken = sorted((f.location, f.message) for f in res.findings if f.rule == "broken-ref")
+    assert [loc for loc, _ in broken] == ["frontmatter:invariants.pillar_guard.applies_to.[0]",
+                                          "frontmatter:invariants.pillar_guard.rule"]
+
+
+def test_schema_ref_is_removed_from_the_schema(make_tree):
+    """D-039: `$defs.Entity` no longer declares `schema_ref` (no tree used it;
+    the spec's §4.1 example named `{content_schema.cards}`, which is no
+    namespace). Entity admits additional properties, so a tree carrying it
+    stays schema-valid, and its reference is broken-ref, as before."""
+    from game_design_md.export_cmd import export_schema
+    assert "schema_ref" not in json.loads(export_schema())["$defs"]["Entity"]["properties"]
+    mech = (make_tree() / "gdd/mechanics.md").read_text().replace(
+        "    data_source: ../../content/cards\n",
+        "    data_source: ../../content/cards\n    schema_ref: \"{content_schema.cards}\"\n")
+    res = _lint(make_tree({"gdd/mechanics.md": mech}))
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
+    assert [f.location for f in res.findings if f.rule == "broken-ref"] == [
+        "frontmatter:entities.cards.schema_ref"]
+
+
+# ---- implementation-pointer-outside-repo (D-038, OI-002) ---------------------------
+
+def _outside(res):
+    return [(f.file, f.location) for f in res.findings
+            if f.rule == "implementation-pointer-outside-repo"]
+
+
+def test_implementation_pointer_outside_repo_proof_of_fire(tmp_path):
+    """Real content: tick-combat in docs/, its code at the repository root via
+    `../../impl/...` globs, lints 0/0. With the repository root moved to
+    docs/, the same globs point outside it: each one warns, and nothing else
+    changes (the globs still resolve)."""
+    import shutil
+    from tests.conftest import tick_combat_out_of_tree
+    repo, tree_root = tick_combat_out_of_tree(tmp_path)
+    res = _lint(tree_root)
+    assert (res.errors, res.warnings) == (0, 0)
+    n = sum(1 for _, pat, _ in linter._impl_patterns(Tree.load(tree_root))
+            if pat.startswith("../../impl/"))
+    assert n > 0
+    shutil.move(repo / ".git", repo / "docs/.git")
+    res = _lint(tree_root)
+    assert len(_outside(res)) == n and res.errors == 0 and res.warnings == n
+
+
+def test_implementation_pointer_outside_repo_ignores_status_and_needs_a_repository(make_tree):
+    """A draft's planned path outside the repository warns too; with no git
+    repository above the tree, there is no boundary and the rule is silent."""
+    extra = ("---\nspec: game-design.md\nspec_version: 0.3.0\nfile_type: subfile\n"
+             "status: draft\nlast_verified: \"2026-09-30\"\n"
+             "implemented_in: [\"../elsewhere/**/*.py\", \"src/**/*.py\"]\n---\n\n## Notes\n")
+    root = make_tree({"gdd/extra.md": extra})
+    assert _outside(_lint(root)) == []
+    (root / ".git").mkdir()
+    assert _outside(_lint(root)) == [("gdd/extra.md", "implemented_in[0]")]
+
+
+# ---- trajectory-sort-by-missing (D-048, R11a, spec §9.5.5) -------------------------
+
+_TRAJ_SUBFILE = """\
+---
+spec: game-design.md
+spec_version: 0.3.0
+file_type: subfile
+status: draft
+last_verified: "2026-10-01"
+trajectory:
+  unit: tick
+  schema:
+    tick:   {{ type: integer, minimum: 0 }}
+    units:
+      type: array
+{units_sort}      items:
+        id:   {{ type: string }}
+        buffs:
+          type: array
+{buffs_sort}          items:
+            kind: {{ type: string }}
+    tags:   {{ type: [array, "null"], sort_by: [] }}
+---
+
+## Notes
+"""
+
+
+def _sort_findings(res):
+    return [(f.file, f.location, f.severity) for f in res.findings
+            if f.rule == "trajectory-sort-by-missing"]
+
+
+def test_trajectory_sort_by_missing_covers_every_array(make_tree):
+    """Every array in trajectory.schema, nested ones under items included,
+    needs a non-empty sort_by list (§9.5.5's MUST)."""
+    text = _TRAJ_SUBFILE.format(units_sort="", buffs_sort="")
+    found = _sort_findings(_lint(make_tree({"gdd/verification.md": text})))
+    assert found == [
+        ("gdd/verification.md", "trajectory.schema.units", "error"),
+        ("gdd/verification.md", "trajectory.schema.units.items.buffs", "error"),
+        ("gdd/verification.md", "trajectory.schema.tags", "error"),   # empty list
+    ]
+    ok = _TRAJ_SUBFILE.format(units_sort="      sort_by: [id]\n",
+                              buffs_sort="          sort_by: [kind]\n").replace(
+        "sort_by: [] }", "sort_by: [name] }")
+    assert _sort_findings(_lint(make_tree({"gdd/verification.md": ok}))) == []
+
+
+def test_trajectory_sort_by_missing_proof_of_fire_on_tick_combat(tmp_path):
+    """Real content: tick-combat declares `units` with sort_by: [side,
+    deploy_order] and lints clean; without the line, one error at that array.
+    No other rule caught it before D-048 (the TrajectorySpec schema body is a
+    free object)."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "tick-combat"
+    shutil.copytree(REPO_ROOT / "examples/tick-combat", root, ignore=shutil.ignore_patterns("impl"))
+    ver = root / "gdd/verification.md"
+    assert _sort_findings(_lint(root)) == []
+    text = ver.read_text()
+    line = "      sort_by: [side, deploy_order]\n"
+    assert text.count(line) == 1
+    ver.write_text(text.replace(line, ""))
+    res = _lint(root)
+    assert _sort_findings(res) == [("gdd/verification.md", "trajectory.schema.units", "error")]
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
+
+
 # ---- invariant-violation ------------------------------------------------------
 
 def test_invariant_violation_numeric(fixture_overlay):
@@ -214,51 +598,99 @@ def test_invariant_violation_numeric_resource_int_passes(make_tree):
     assert findings == []
 
 
-# ---- balance-target-untyped (D-003) ------------------------------------------
+# ---- untyped balance targets: schema-violation (D-003, D-040) ------------------
 
-def test_balance_target_untyped_warning(make_tree):
-    """A legacy v0.1.1 balance target without target_kind fires the migration warning."""
+def test_untyped_balance_target_is_one_schema_violation(make_tree):
+    """D-040 (OI-009): `balance-target-untyped` is retired. A target without
+    target_kind is exactly one finding: schema-violation, error, at the
+    target, because $defs.BalanceTarget requires the discriminator."""
     bal = (make_tree() / "gdd/economy-balance.md").read_text().replace(
         "target_kind: scalar\n    target: 1",
         "target: 1",
     )
-    root = make_tree({"gdd/economy-balance.md": bal})
+    res = _lint(make_tree({"gdd/economy-balance.md": bal}))
+    errors = [(f.rule, f.location) for f in res.findings if f.severity == "error"]
+    assert len(errors) == 1 and errors[0][0] == "schema-violation"
+    assert errors[0][1].startswith("balance_targets.")
+    assert not [f for f in res.findings if f.rule == "balance-target-untyped"]
+    assert "'target_kind' is a required property" in next(
+        f.message for f in res.findings if f.rule == "schema-violation")
+
+
+def test_untyped_balance_target_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: a deckbuilder balance target stripped of target_kind is
+    one error, and the tree cannot lint clean. Before D-040 it was that error
+    plus the retired rule's warning."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    bal = root / "gdd/economy-balance.md"
+    text = bal.read_text()
+    assert text.count("target_kind: scalar") >= 1
+    bal.write_text(text.replace("    target_kind: scalar\n", "", 1))
     res = _lint(root)
-    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
-    assert findings, "expected balance-target-untyped on the legacy target"
-    assert all(f.severity == "warning" for f in findings)
-    # Warnings don't affect exit code.
-    assert res.errors == 0
+    assert [(f.rule, f.file) for f in res.findings if f.severity in ("error", "warning")] == [
+        ("schema-violation", "gdd/economy-balance.md")]
+    assert res.exit_code == 1
 
 
-def test_balance_target_typed_is_silent(make_tree):
-    """A target with target_kind: scalar does NOT fire balance-target-untyped."""
-    res = _lint(make_tree())  # baseline already declares target_kind
-    findings = [f for f in res.findings if f.rule == "balance-target-untyped"]
-    assert findings == []
+# ---- bare-string transition events: schema-violation (D-005, D-046) ---------------
 
-
-# ---- undefined-event (D-005) -------------------------------------------------
-
-def test_undefined_event_on_bare_string(fixture_overlay):
-    """The deliberately-broken undefined_event fixture has event: go (bare).
-    state-machine-coverage should fire undefined-event at warning severity."""
+def test_bare_string_event_is_a_schema_violation(fixture_overlay):
+    """The undefined_event fixture's transition says `event: go` (bare). Since
+    D-046 that is one schema-violation error at the transition; the retired
+    undefined-event warning no longer fires."""
     res = _lint(fixture_overlay("undefined_event"))
-    sm_findings = [f for f in res.findings if f.rule == "state-machine-coverage"]
-    ue_findings = [f for f in sm_findings if "undefined-event" in f.message]
-    assert ue_findings, (
-        "expected undefined-event sub-finding on bare-string transition event; got: "
-        + ", ".join(f.message for f in sm_findings)
-    )
-    assert all(f.severity == "warning" for f in ue_findings)
+    found = [(f.rule, f.severity, f.location) for f in res.findings
+             if f.location.endswith(".event")]
+    assert found == [("schema-violation", "error", "states.thing_state.transitions[0].event")], found
+    assert not [f for f in res.findings if "undefined-event" in f.message]
 
 
 def test_token_event_is_silent(make_tree):
-    """The baseline uses event: \"{events.go}\" — no undefined-event finding."""
+    """The baseline uses event: \"{events.go}\": no finding on the transition."""
     res = _lint(make_tree())
-    findings = [f for f in res.findings
-                if f.rule == "state-machine-coverage" and "undefined-event" in f.message]
-    assert findings == []
+    assert not [f for f in res.findings if f.location.endswith(".event")]
+
+
+def test_bare_string_event_proof_of_fire_on_the_deckbuilder(tmp_path):
+    """Real content: one deckbuilder transition event made bare is one
+    schema-violation error at that transition. Before D-046 it was only the
+    undefined-event warning, and the tree could lint without errors."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    mech = root / "gdd/mechanics.md"
+    text = mech.read_text()
+    m = re.search(r'event: "\{events\.([a-z0-9_]+)\}"', text)
+    mech.write_text(text.replace(m.group(0), f"event: {m.group(1)}", 1))
+    res = _lint(root)
+    assert [(f.rule, f.location) for f in res.findings if f.severity == "error"] == [
+        ("schema-violation", "states.card_lifecycle.transitions[0].event")]
+    assert not [f for f in res.findings if f.rule == "state-machine-coverage"]
+
+
+def test_context_local_prefix_set_is_closed_on_real_content(tmp_path):
+    """D-047 (R7): in tick-combat's damage_roll, `{actor.attack}` binds at
+    rule-evaluation time; the same field under any other prefix fires
+    broken-ref, because the set is closed at {actor, target}."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "tick-combat"
+    shutil.copytree(REPO_ROOT / "examples/tick-combat", root,
+                    ignore=shutil.ignore_patterns("impl"))
+    dist = root / "gdd/systems/distributions.md"
+
+    def broken(text):
+        dist.write_text(text)
+        return [f.location for f in _lint(root).findings if f.rule == "broken-ref"]
+    text = dist.read_text()
+    assert '"{actor.attack}"' in text and broken(text) == []
+    assert broken(text.replace('"{actor.attack}"', '"{world.attack}"', 1)) == [
+        "frontmatter:distributions.damage_roll.params_from.mean"]
 
 
 def test_broken_event_ref_is_error(make_tree):
@@ -502,6 +934,49 @@ def test_prototyped_without_pointer_fires_on_stale_file(make_tree):
     assert all(f.severity == "warning" for f in findings)
     # Warning, not error — exit code stays clean.
     assert res.exit_code == 0
+
+
+def test_prototyped_without_pointer_exempts_namespaces_whose_schema_forbids_impl(make_tree):
+    """D-036 (OI-003): the baseline's balance target (status prototyped, no
+    implemented_in, which $defs.BalanceTarget forbids) no longer fires on a stale
+    file; every namespace that admits implemented_in still does."""
+    res = _lint_with_config(make_tree(), now=_dt(2026, 7, 30))
+    locs = {f.location for f in res.findings if f.rule == "prototyped-without-pointer"}
+    assert "balance_targets.energy_target" not in locs
+    assert {"resources.energy", "verbs.do_thing", "loops.main"} <= locs
+
+
+def test_the_exempt_namespaces_come_from_the_schema():
+    """Exactly the $defs that close their properties without implemented_in;
+    of those, only BalanceTarget carries a status, so only balance_targets
+    changes behavior."""
+    import json
+    from game_design_md.export_cmd import export_schema
+    assert linter.namespaces_forbidding_impl() == {"balance_targets", "invariants", "states"}
+    defs = json.loads(export_schema())["$defs"]
+    with_status = {n for n in ("BalanceTarget", "Invariant", "StateMachine")
+                   if "status" in defs[n]["properties"]}
+    assert with_status == {"BalanceTarget"}
+
+
+def test_prototyped_without_pointer_balanced_target_on_the_deckbuilder(tmp_path):
+    """Real content (OI-003's scenario): a deckbuilder balance target advanced to
+    `balanced` on a stale file used to fire, with no schema-legal remedy but
+    `gdmd touch`; it no longer does."""
+    import re
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "deckbuilder"
+    shutil.copytree(REPO_ROOT / "examples/deckbuilder", root)
+    econ = root / "gdd/economy-balance.md"
+    text = econ.read_text()
+    new = re.sub(r"(\n  [a-z_]+:\n(?:    .*\n)*?    status: )draft", r"\g<1>balanced", text, count=1)
+    assert new != text
+    econ.write_text(new)
+    res = _lint_with_config(root, now=_dt(2027, 1, 1))
+    assert not [f for f in res.findings if f.rule == "prototyped-without-pointer"
+                and f.location.startswith("balance_targets.")]
+    assert not [f for f in res.findings if f.rule == "schema-violation"]
 
 
 def test_prototyped_without_pointer_silent_when_impl_populated(make_tree):

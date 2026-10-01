@@ -1,0 +1,18 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: soot_king
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Soot King
+tier: boss
+max_vigor: 240
+skills:
+  - "{entities.skills.candle_wail}"
+  - "{entities.skills.moth_sear}"
+drops:
+  - "{entities.items.ashen_censer}"
+  - "{entities.items.grave_lens}"
+  - "{entities.items.moth_phial}"
+description: A boss that sleeps in cold ash.

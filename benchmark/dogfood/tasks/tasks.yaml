@@ -1,0 +1,74 @@
+# Dogfood task registry (D-023). Excluded from every subject copy, like the
+# rest of benchmark/dogfood/. `prompt` files are given to the subject verbatim.
+#
+# fields:
+#   mode           AGENTS.md operating mode the task exercises
+#   tree           the design tree the task works on (preflight-linted 0/0)
+#   fixture_patch  optional git-format-patch applied (as a teammate commit)
+#                  after the pristine copy is committed and before the base tag
+#   study          1 (D-025, the default) or 2 (D-026)
+#   fixture_tree   study 2: fixtures/<name>/tree is placed at `tree` in the copy
+#   prompt         prompt file relative to this directory (default <task_id>.md)
+tasks:
+  authoring_new_card:
+    mode: authoring
+    tree: examples/deckbuilder
+    fixture_patch: null
+  lookup_refs:
+    mode: lookup
+    tree: examples/deckbuilder
+    fixture_patch: null
+  operating_energy_budget:
+    mode: operating
+    tree: examples/deckbuilder
+    fixture_patch: null
+  maintenance_drift:
+    mode: maintenance
+    tree: examples/tick-combat
+    fixture_patch: maintenance_drift.fixture.patch
+  negative_control_no_drift:
+    mode: negative_control
+    tree: examples/tick-combat
+    fixture_patch: negative_control_no_drift.fixture.patch
+  s2_lookup_forward:
+    study: 2
+    mode: lookup
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_lookup_forward.md
+    fixture_patch: null
+  s2_lookup_backward:
+    study: 2
+    mode: lookup
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_lookup_backward.md
+    fixture_patch: null
+  s2_impact_tokens:
+    study: 2
+    mode: impact
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_impact_tokens.md
+    fixture_patch: null
+  s2_impact_files:
+    study: 2
+    mode: impact
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_impact_files.md
+    fixture_patch: null
+  s2_maintenance:
+    study: 2
+    mode: maintenance
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_maintenance.md
+    fixture_patch: ../fixtures/study2/patches/s2_maintenance.patch
+  s2_negative_control:
+    study: 2
+    mode: negative_control
+    tree: examples/lanternfall
+    fixture_tree: study2
+    prompt: ../fixtures/study2/prompts/s2_negative_control.md
+    fixture_patch: ../fixtures/study2/patches/s2_negative_control.patch

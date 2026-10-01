@@ -1,0 +1,82 @@
+{
+  "turns": 5,
+  "input_tokens": 10,
+  "output_tokens": 1552,
+  "cache_read_tokens": 309332,
+  "cache_creation_tokens": 73216,
+  "tool_calls": 5,
+  "files_read": 1,
+  "bytes_read": 4296,
+  "re_reads": 0,
+  "consultation_bytes": 12379,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 77285,
+  "per_turn_occupancy": [
+    72377,
+    75450,
+    77285,
+    78367,
+    79079
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Read": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 7450,
+  "bash_files_read": 2,
+  "all_files_read": 3,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat/game-design.md",
+    "examples/tick-combat/gdd",
+    "examples/tick-combat/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "ho1X4G",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r2.txt:20-65"
+    },
+    {
+      "tool": "Read",
+      "id": "3vXtW1",
+      "result_bytes": 4296,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r2.txt:77-159"
+    },
+    {
+      "tool": "Bash",
+      "id": "6vR18a",
+      "result_bytes": 3524,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r2.txt:171-209"
+    },
+    {
+      "tool": "Bash",
+      "id": "EsTazL",
+      "result_bytes": 1934,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r2.txt:221-289"
+    },
+    {
+      "tool": "Bash",
+      "id": "6sNn3s",
+      "result_bytes": 633,
+      "is_error": false,
+      "vcc": "maintenance_drift__baseline__r2.txt:307-329"
+    }
+  ]
+}

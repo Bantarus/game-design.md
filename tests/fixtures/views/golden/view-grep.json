@@ -1,0 +1,414 @@
+{
+  "view": "grep",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "regex": "focus",
+    "ignore_case": false
+  },
+  "blocks": [
+    {
+      "role": "gap",
+      "id": null,
+      "file": "game-design.md",
+      "pointer": "game-design.md:29-29",
+      "context": [],
+      "matches": [
+        29
+      ],
+      "source": "> Intro text before the first section mentions `{resources.focus}`: a gap-line reference."
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:8-8",
+          "text": "entities:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{entities.player}",
+          "pointer": "gdd/mechanics.md:9-13",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        12
+      ],
+      "source": "  player:\n… 1 line · gdd/mechanics.md:10-10\n    properties:\n      focus: { from: \"{resources.focus}\" }\n… 1 line · gdd/mechanics.md:13-13",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:10-10",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:13-13",
+          "lines": 1
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:18-18",
+          "text": "verbs:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{verbs.study}",
+          "pointer": "gdd/mechanics.md:19-26",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        21
+      ],
+      "source": "  study:\n… 1 line · gdd/mechanics.md:20-20\n    cost: { resource: \"{resources.focus}\", amount: 1 }\n… 5 lines · gdd/mechanics.md:22-26",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:20-20",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:22-26",
+          "lines": 5
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{resources.focus}",
+      "pointer": "gdd/mechanics.md:36-47",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:35-35",
+          "text": "resources:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:36-47",
+          "status": "draft"
+        },
+        {
+          "role": "impl",
+          "id": "{resources.focus}",
+          "pointer": "gdd/mechanics.md:47-47",
+          "status": null
+        }
+      ],
+      "matches": [
+        37,
+        41,
+        47
+      ],
+      "source": "… 1 line · gdd/mechanics.md:36-36\n  focus:\n… 3 lines · gdd/mechanics.md:38-40\n    velocity_target: \"{balance_targets.focus_per_day}\"\n… 5 lines · gdd/mechanics.md:42-46\n[impl] {resources.focus} gdd/mechanics.md:47-47\n    implemented_in: [\"src/sim/focus.py\"]",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:36-36",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:38-40",
+          "lines": 3
+        },
+        {
+          "pointer": "gdd/mechanics.md:42-46",
+          "lines": 5
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:48-48",
+          "text": "rules:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{rules.study_rule}",
+          "pointer": "gdd/mechanics.md:49-58",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        53
+      ],
+      "source": "  study_rule:\n… 1 line · gdd/mechanics.md:50-50\n    do:\n      - kind: spend\n        amount: \"{actor.focus_cost}\"\n… 5 lines · gdd/mechanics.md:54-58",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:50-50",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:54-58",
+          "lines": 5
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/mechanics.md:48-48",
+          "text": "rules:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{rules.rest_rule}",
+          "pointer": "gdd/mechanics.md:59-66",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        63
+      ],
+      "source": "  rest_rule:\n… 1 line · gdd/mechanics.md:60-60\n    do:\n      - kind: restore\n        target: \"{resources.focus.nonexistent}\"\n… 3 lines · gdd/mechanics.md:64-66",
+      "elided": [
+        {
+          "pointer": "gdd/mechanics.md:60-60",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/mechanics.md:64-66",
+          "lines": 3
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/loops.md:7-7",
+          "text": "loops:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{loops.day}",
+          "pointer": "gdd/loops.md:8-18",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        14,
+        16
+      ],
+      "source": "  day:\n… 5 lines · gdd/loops.md:9-13\n    intended_dynamics: [\"pacing focus\"]\n… 1 line · gdd/loops.md:15-15\n    balance_targets: [\"{balance_targets.focus_per_day}\"]\n… 2 lines · gdd/loops.md:17-18",
+      "elided": [
+        {
+          "pointer": "gdd/loops.md:9-13",
+          "lines": 5
+        },
+        {
+          "pointer": "gdd/loops.md:15-15",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/loops.md:17-18",
+          "lines": 2
+        }
+      ]
+    },
+    {
+      "role": "invariant",
+      "id": "{invariants.focus_is_integer}",
+      "pointer": "gdd/architecture-invariants.md:8-13",
+      "status": null,
+      "context": [
+        {
+          "pointer": "gdd/architecture-invariants.md:7-7",
+          "text": "invariants:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "invariant",
+          "id": "{invariants.focus_is_integer}",
+          "pointer": "gdd/architecture-invariants.md:8-13",
+          "status": null
+        }
+      ],
+      "matches": [
+        8,
+        11
+      ],
+      "source": "  focus_is_integer:\n… 2 lines · gdd/architecture-invariants.md:9-10\n    applies_to: [\"{resources.focus}\"]\n… 2 lines · gdd/architecture-invariants.md:12-13",
+      "elided": [
+        {
+          "pointer": "gdd/architecture-invariants.md:9-10",
+          "lines": 2
+        },
+        {
+          "pointer": "gdd/architecture-invariants.md:12-13",
+          "lines": 2
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale",
+      "pointer": "gdd/architecture-invariants.md:16-20",
+      "status": null,
+      "context": [],
+      "selected": [
+        {
+          "role": "rationale",
+          "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+          "pointer": "gdd/architecture-invariants.md:18-20",
+          "status": null,
+          "explains": "{invariants.focus_is_integer}"
+        }
+      ],
+      "matches": [
+        18,
+        20
+      ],
+      "source": "## Rationale\n… 1 line · gdd/architecture-invariants.md:17-17\n[rationale] gdd/architecture-invariants.md#Rationale/focus_is_integer gdd/architecture-invariants.md:18-20 explains={invariants.focus_is_integer}\n### focus_is_integer\n… 1 line · gdd/architecture-invariants.md:19-19\nFractional focus would make `{balance_targets.focus_per_day}` unmeasurable.",
+      "elided": [
+        {
+          "pointer": "gdd/architecture-invariants.md:17-17",
+          "lines": 1
+        },
+        {
+          "pointer": "gdd/architecture-invariants.md:19-19",
+          "lines": 1
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft",
+      "context": [
+        {
+          "pointer": "gdd/economy-balance.md:7-7",
+          "text": "balance_targets:"
+        }
+      ],
+      "selected": [
+        {
+          "role": "token",
+          "id": "{balance_targets.focus_per_day}",
+          "pointer": "gdd/economy-balance.md:8-13",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        8,
+        12
+      ],
+      "source": "  focus_per_day:\n… 3 lines · gdd/economy-balance.md:9-11\n    measure: \"focus available per {loops.day}\"\n… 1 line · gdd/economy-balance.md:13-13",
+      "elided": [
+        {
+          "pointer": "gdd/economy-balance.md:9-11",
+          "lines": 3
+        },
+        {
+          "pointer": "gdd/economy-balance.md:13-13",
+          "lines": 1
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null,
+      "context": [],
+      "selected": [
+        {
+          "role": "rationale",
+          "id": "gdd/economy-balance.md#Rationale",
+          "pointer": "gdd/economy-balance.md:16-18",
+          "status": null
+        }
+      ],
+      "matches": [
+        18
+      ],
+      "source": "## Rationale\n… 1 line · gdd/economy-balance.md:17-17\nTuned against `{resources.focus}`.",
+      "elided": [
+        {
+          "pointer": "gdd/economy-balance.md:17-17",
+          "lines": 1
+        }
+      ]
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#balance_refs",
+      "pointer": "gdd/content/relics.md:15-15",
+      "status": null,
+      "context": [],
+      "selected": [
+        {
+          "role": "meta",
+          "id": "gdd/content/relics.md#balance_refs",
+          "pointer": "gdd/content/relics.md:15-15",
+          "status": null
+        }
+      ],
+      "matches": [
+        15
+      ],
+      "source": "balance_refs: [\"{balance_targets.focus_per_day}\"]",
+      "elided": []
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft",
+      "context": [],
+      "selected": [
+        {
+          "role": "content-entity",
+          "id": "{entities.relics.lamp}",
+          "pointer": "content/relics/lamp.yaml:1-8",
+          "status": "draft"
+        }
+      ],
+      "matches": [
+        8
+      ],
+      "source": "… 7 lines · content/relics/lamp.yaml:1-7\ngrants: \"{resources.focus}\"",
+      "elided": [
+        {
+          "pointer": "content/relics/lamp.yaml:1-7",
+          "lines": 7
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,401 @@
+{
+  "graph": "impact",
+  "tree": "tree",
+  "tree_sha": "97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282",
+  "args": {
+    "impact": "{resources.focus}"
+  },
+  "focus": {
+    "role": "token",
+    "id": "{resources.focus}",
+    "pointer": "gdd/mechanics.md:36-47",
+    "status": "draft"
+  },
+  "impact": [
+    {
+      "role": "gap",
+      "id": null,
+      "pointer": "game-design.md:29-29",
+      "hop": 1,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "game-design.md:29",
+          "ref": "{resources.focus}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/economy-balance.md#Rationale",
+      "pointer": "gdd/economy-balance.md:16-18",
+      "status": null,
+      "hop": 1,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/economy-balance.md:18",
+          "ref": "{resources.focus}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{entities.player}",
+      "pointer": "gdd/mechanics.md:9-13",
+      "status": "draft",
+      "hop": 1,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:12",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "entities.player.properties.focus.from"
+        }
+      ]
+    },
+    {
+      "role": "content-entity",
+      "id": "{entities.relics.lamp}",
+      "pointer": "content/relics/lamp.yaml:1-8",
+      "status": "draft",
+      "hop": 1,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "content/relics/lamp.yaml:8",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "grants"
+        }
+      ]
+    },
+    {
+      "role": "invariant",
+      "id": "{invariants.focus_is_integer}",
+      "pointer": "gdd/architecture-invariants.md:8-13",
+      "status": null,
+      "hop": 1,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/architecture-invariants.md:11",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "invariants.focus_is_integer.applies_to[0]"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.rest_rule}",
+      "pointer": "gdd/mechanics.md:59-66",
+      "status": "draft",
+      "hop": 1,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:63",
+          "ref": "{resources.focus.nonexistent}",
+          "kind": "value",
+          "outcome": "unresolved",
+          "field": "rules.rest_rule.do[0].target"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{verbs.study}",
+      "pointer": "gdd/mechanics.md:19-26",
+      "status": "draft",
+      "hop": 1,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:21",
+          "ref": "{resources.focus}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.study.cost.resource"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/loops.md#Rationale",
+      "pointer": "gdd/loops.md:21-23",
+      "status": null,
+      "hop": 2,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/loops.md:23",
+          "ref": "{verbs.study}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale/study",
+      "pointer": "gdd/mechanics.md:84-86",
+      "status": null,
+      "hop": 2,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:86",
+          "ref": "{entities.relics.lamp}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Tokens",
+      "pointer": "gdd/mechanics.md:72-74",
+      "status": null,
+      "hop": 2,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:74",
+          "ref": "{verbs.study}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{loops.day}",
+      "pointer": "gdd/loops.md:8-18",
+      "status": "draft",
+      "hop": 2,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/loops.md:12",
+          "ref": "{verbs.study}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "loops.day.sequence[0].study"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{rules.study_rule}",
+      "pointer": "gdd/mechanics.md:49-58",
+      "status": "draft",
+      "hop": 2,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:50",
+          "ref": "{verbs.study}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.given.verb"
+        },
+        {
+          "pointer": "gdd/mechanics.md:55",
+          "ref": "{entities.relics.lamp}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "rules.study_rule.do[1].target"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{verbs.rest}",
+      "pointer": "gdd/mechanics.md:27-34",
+      "status": "draft",
+      "hop": 2,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:28",
+          "ref": "{entities.player}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.actor"
+        },
+        {
+          "pointer": "gdd/mechanics.md:32",
+          "ref": "{rules.rest_rule}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "verbs.rest.effects[0].resolve"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "game-design.md#High Concept",
+      "pointer": "game-design.md:31-33",
+      "status": null,
+      "hop": 3,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "game-design.md:33",
+          "ref": "{loops.day}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "meta",
+      "id": "game-design.md#core_loop_ref",
+      "pointer": "game-design.md:16-16",
+      "status": null,
+      "hop": 3,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "game-design.md:16",
+          "ref": "{loops.day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "core_loop_ref"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/mechanics.md#Rationale",
+      "pointer": "gdd/mechanics.md:76-86",
+      "status": null,
+      "hop": 3,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:78",
+          "ref": "{verbs.rest}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{balance_targets.focus_per_day}",
+      "pointer": "gdd/economy-balance.md:8-13",
+      "status": "draft",
+      "hop": 3,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/economy-balance.md:12",
+          "ref": "{loops.day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "balance_targets.focus_per_day.measure"
+        }
+      ]
+    },
+    {
+      "role": "token",
+      "id": "{events.studied}",
+      "pointer": "gdd/mechanics.md:68-68",
+      "status": "draft",
+      "hop": 3,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/mechanics.md:68",
+          "ref": "{rules.study_rule}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "events.studied.description"
+        }
+      ]
+    },
+    {
+      "role": "rationale",
+      "id": "gdd/architecture-invariants.md#Rationale/focus_is_integer",
+      "pointer": "gdd/architecture-invariants.md:18-20",
+      "status": null,
+      "hop": 4,
+      "kinds": [
+        "prose"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/architecture-invariants.md:20",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "prose",
+          "outcome": "resolved"
+        }
+      ]
+    },
+    {
+      "role": "meta",
+      "id": "gdd/content/relics.md#balance_refs",
+      "pointer": "gdd/content/relics.md:15-15",
+      "status": null,
+      "hop": 4,
+      "kinds": [
+        "value"
+      ],
+      "via": [
+        {
+          "pointer": "gdd/content/relics.md:15",
+          "ref": "{balance_targets.focus_per_day}",
+          "kind": "value",
+          "outcome": "resolved",
+          "field": "balance_refs[0]"
+        }
+      ]
+    }
+  ]
+}

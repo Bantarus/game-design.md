@@ -1,0 +1,90 @@
+[view grep] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+[file] game-design.md core
+[gap] game-design.md:29-29
+> Intro text before the first section mentions `{resources.focus}`: a gap-line reference.
+[file] gdd/mechanics.md subfile
+[gap] gdd/mechanics.md:8-8
+entities:
+[token] {entities.player} gdd/mechanics.md:9-13 status=draft
+  player:
+… 1 line · gdd/mechanics.md:10-10
+    properties:
+      focus: { from: "{resources.focus}" }
+… 1 line · gdd/mechanics.md:13-13
+[gap] gdd/mechanics.md:18-18
+verbs:
+[token] {verbs.study} gdd/mechanics.md:19-26 status=draft
+  study:
+… 1 line · gdd/mechanics.md:20-20
+    cost: { resource: "{resources.focus}", amount: 1 }
+… 5 lines · gdd/mechanics.md:22-26
+[gap] gdd/mechanics.md:35-35
+resources:
+[token] {resources.focus} gdd/mechanics.md:36-47 status=draft
+… 1 line · gdd/mechanics.md:36-36
+  focus:
+… 3 lines · gdd/mechanics.md:38-40
+    velocity_target: "{balance_targets.focus_per_day}"
+… 5 lines · gdd/mechanics.md:42-46
+[impl] {resources.focus} gdd/mechanics.md:47-47
+    implemented_in: ["src/sim/focus.py"]
+[gap] gdd/mechanics.md:48-48
+rules:
+[token] {rules.study_rule} gdd/mechanics.md:49-58 status=draft
+  study_rule:
+… 1 line · gdd/mechanics.md:50-50
+    do:
+      - kind: spend
+        amount: "{actor.focus_cost}"
+… 5 lines · gdd/mechanics.md:54-58
+[token] {rules.rest_rule} gdd/mechanics.md:59-66 status=draft
+  rest_rule:
+… 1 line · gdd/mechanics.md:60-60
+    do:
+      - kind: restore
+        target: "{resources.focus.nonexistent}"
+… 3 lines · gdd/mechanics.md:64-66
+[file] gdd/loops.md subfile
+[gap] gdd/loops.md:7-7
+loops:
+[token] {loops.day} gdd/loops.md:8-18 status=draft
+  day:
+… 5 lines · gdd/loops.md:9-13
+    intended_dynamics: ["pacing focus"]
+… 1 line · gdd/loops.md:15-15
+    balance_targets: ["{balance_targets.focus_per_day}"]
+… 2 lines · gdd/loops.md:17-18
+[file] gdd/architecture-invariants.md subfile
+[gap] gdd/architecture-invariants.md:7-7
+invariants:
+[invariant] {invariants.focus_is_integer} gdd/architecture-invariants.md:8-13
+  focus_is_integer:
+… 2 lines · gdd/architecture-invariants.md:9-10
+    applies_to: ["{resources.focus}"]
+… 2 lines · gdd/architecture-invariants.md:12-13
+[rationale] gdd/architecture-invariants.md#Rationale gdd/architecture-invariants.md:16-20
+## Rationale
+… 1 line · gdd/architecture-invariants.md:17-17
+[rationale] gdd/architecture-invariants.md#Rationale/focus_is_integer gdd/architecture-invariants.md:18-20 explains={invariants.focus_is_integer}
+### focus_is_integer
+… 1 line · gdd/architecture-invariants.md:19-19
+Fractional focus would make `{balance_targets.focus_per_day}` unmeasurable.
+[file] gdd/economy-balance.md subfile
+[gap] gdd/economy-balance.md:7-7
+balance_targets:
+[token] {balance_targets.focus_per_day} gdd/economy-balance.md:8-13 status=draft
+  focus_per_day:
+… 3 lines · gdd/economy-balance.md:9-11
+    measure: "focus available per {loops.day}"
+… 1 line · gdd/economy-balance.md:13-13
+[rationale] gdd/economy-balance.md#Rationale gdd/economy-balance.md:16-18
+## Rationale
+… 1 line · gdd/economy-balance.md:17-17
+Tuned against `{resources.focus}`.
+[file] gdd/content/relics.md content-schema
+[meta] gdd/content/relics.md#balance_refs gdd/content/relics.md:15-15
+balance_refs: ["{balance_targets.focus_per_day}"]
+[file] content/relics/lamp.yaml content-entity
+[content-entity] {entities.relics.lamp} content/relics/lamp.yaml:1-8 status=draft
+… 7 lines · content/relics/lamp.yaml:1-7
+grants: "{resources.focus}"

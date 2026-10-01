@@ -1,0 +1,145 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 3082,
+  "cache_read_tokens": 598050,
+  "cache_creation_tokens": 87047,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 20478,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 84190.0,
+  "per_turn_occupancy": [
+    80360,
+    82116,
+    82454,
+    83262,
+    85118,
+    85732,
+    92497,
+    93574
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Grep": 1
+  },
+  "gdmd_view_calls": 3,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 3804
+  },
+  "view_mode_calls": {
+    "ref": 3
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 3742,
+  "bash_files_read": 7,
+  "all_files_read": 7,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/content/monsters/gloam_revenant.yaml",
+    "examples/lanternfall/content/monsters/lich_lurker.yaml",
+    "examples/lanternfall/content/monsters/rust_wight.yaml",
+    "examples/lanternfall/content/monsters/tallow_shade.yaml",
+    "examples/lanternfall/content/monsters/umber_lurker.yaml",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "/^forward/,/^backlinks/p"
+    },
+    {
+      "tool": "Bash",
+      "path": "../gdd/systems/distributions.md"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "JToFfU",
+      "result_bytes": 3131,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r1.txt:33-84"
+    },
+    {
+      "tool": "Bash",
+      "id": "6um4Wv",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r1.txt:96-96"
+    },
+    {
+      "tool": "Bash",
+      "id": "qADq8T",
+      "result_bytes": 648,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r1.txt:108-108"
+    },
+    {
+      "tool": "Bash",
+      "id": "oKTi4N",
+      "result_bytes": 3495,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r1.txt:122-265"
+    },
+    {
+      "tool": "Bash",
+      "id": "8Lz65j",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r1.txt:277-277"
+    },
+    {
+      "tool": "Grep",
+      "id": "3HfgBq",
+      "result_bytes": 12907,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r1.txt:292-468"
+    },
+    {
+      "tool": "Bash",
+      "id": "nVetXN",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r1.txt:480-489"
+    }
+  ]
+}

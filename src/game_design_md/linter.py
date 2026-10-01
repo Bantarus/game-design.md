@@ -12,7 +12,10 @@ config to the ones that do.
 """
 from __future__ import annotations
 
+import functools
 import inspect
+import json
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
@@ -20,9 +23,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
+import jsonschema
+
 from .findings import Finding, LintResult
 from .refs import TOKEN_REF_RE, walk_refs
-from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree, find_repo_root
 
 
 @dataclass(frozen=True)
@@ -123,7 +128,7 @@ def rule_broken_ref(tree: Tree) -> list[Finding]:
         for ref, path in walk_refs(pf.frontmatter or {}):
             if _is_context_local(ref):
                 continue
-            if not tree.has_token(ref):
+            if not tree.resolves(ref):
                 findings.append(Finding(
                     rule="broken-ref", severity="error", file=pf.rel_str,
                     location="frontmatter:" + ".".join(path),
@@ -294,28 +299,6 @@ def rule_state_machine_coverage(tree: Tree) -> list[Finding]:
                         file=pf.rel_str, location=f"{loc_base}.nodes['{n}']",
                         message=(f"dead-end: non-terminal node '{n}' has no "
                                  f"outgoing transition"),
-                    ))
-
-            # D-005: undefined-event — transition `event:` values must be
-            # {events.<id>} token refs. Bare strings are the v0.1.1 legacy
-            # shape; flag them as warnings during the migration window. (A
-            # {events.<id>} ref that does NOT resolve is already an error via
-            # broken-ref.)
-            for i, t in enumerate(transitions):
-                if not isinstance(t, dict):
-                    continue
-                ev = t.get("event")
-                if not isinstance(ev, str):
-                    continue
-                m = re.match(r"^\{(events\.[a-z0-9_][a-z0-9_-]*)\}$", ev)
-                if m is None:
-                    findings.append(Finding(
-                        rule="state-machine-coverage", severity="warning",
-                        file=pf.rel_str,
-                        location=f"{loc_base}.transitions[{i}].event",
-                        message=(f"undefined-event: event={ev!r} is a bare "
-                                 f"string; promote to a {{events.<id>}} token "
-                                 f"reference. Ratchets to error in v0.3."),
                     ))
 
             reachable = {initial}
@@ -504,6 +487,70 @@ def rule_broken_implementation_pointer(tree: Tree) -> list[Finding]:
     return findings
 
 
+def _impl_patterns(tree: Tree) -> Iterable[tuple[ParsedFile, str, str]]:
+    """Every implementation glob in the tree, whatever its status, as
+    (declaring file, pattern, location): file-level and per-token
+    `implemented_in:`, and the core's `implementation_pointers:`."""
+    for pf in tree.files:
+        impl = pf.frontmatter.get("implemented_in") if pf.frontmatter else None
+        if isinstance(impl, list):
+            for i, pat in enumerate(impl):
+                if isinstance(pat, str):
+                    yield pf, pat, f"implemented_in[{i}]"
+        if pf.file_type != "subfile":
+            continue
+        for ns in SUBFILE_NAMESPACES:
+            block = pf.frontmatter.get(ns)
+            if not isinstance(block, dict):
+                continue
+            for k, v in block.items():
+                sub = v.get("implemented_in") if isinstance(v, dict) else None
+                if isinstance(sub, list):
+                    for i, pat in enumerate(sub):
+                        if isinstance(pat, str):
+                            yield pf, pat, f"{ns}.{k}.implemented_in[{i}]"
+    if tree.core is not None:
+        ip = tree.core.frontmatter.get("implementation_pointers")
+        if isinstance(ip, dict):
+            for key, pat in ip.items():
+                if isinstance(pat, str):
+                    yield tree.core, pat, f"implementation_pointers.{key}"
+
+
+_GLOB_MAGIC = re.compile(r"[*?\[]")
+
+
+def _glob_base(pattern: str) -> str:
+    """A glob's literal leading segments: the directory it cannot leave."""
+    parts = pattern.split("/")
+    first_magic = next((i for i, p in enumerate(parts) if _GLOB_MAGIC.search(p)), len(parts))
+    return "/".join(parts[:first_magic]) or "."
+
+
+def rule_implementation_pointer_outside_repo(tree: Tree) -> list[Finding]:
+    """D-038 (OI-002): an implementation glob is relative to the tree root and
+    may climb out of it with `../` (spec §2.1), but not out of the git
+    repository: files there are never staged in this repository, so
+    `gdmd hook check` cannot see them change, and another clone does not
+    have them. Judged on the glob's literal base, so it fires whether or not
+    anything matches. Silent when the tree is in no git repository."""
+    root = tree.root.resolve()
+    repo = find_repo_root(root)
+    if repo is None:
+        return []
+    findings: list[Finding] = []
+    for pf, pat, loc in _impl_patterns(tree):
+        base = Path(os.path.normpath(root / _glob_base(pat)))
+        if not base.is_relative_to(repo):
+            findings.append(Finding(
+                rule="implementation-pointer-outside-repo", severity="warning",
+                file=pf.rel_str, location=loc,
+                message=(f"glob {pat!r} points outside the git repository root; "
+                         f"hook check never sees files there staged, and other "
+                         f"clones do not have them")))
+    return findings
+
+
 def rule_stale_section(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
     """File's impl source mtime is newer than its `last_verified:` by more
     than `config.stale_days` days.
@@ -567,6 +614,25 @@ _ACTIVE_STATUSES_FOR_POINTER = frozenset(
 )
 
 
+@functools.lru_cache(maxsize=1)
+def namespaces_forbidding_impl() -> frozenset[str]:
+    """D-036 (OI-003): the subfile namespaces whose token $def closes its
+    properties without `implemented_in` (today `balance_targets`). A pointer
+    there is schema-illegal, so `prototyped-without-pointer` cannot ask for one.
+    Read from the §10 schema, the single source of truth lint now enforces."""
+    from .export_cmd import export_schema
+    schema = json.loads(export_schema())
+    defs, subfile = schema["$defs"], schema["$defs"]["Subfile"]["properties"]
+    out = set()
+    for ns in SUBFILE_NAMESPACES:
+        ref = ((subfile.get(ns) or {}).get("additionalProperties") or {}).get("$ref", "")
+        d = defs.get(ref.rsplit("/", 1)[-1], {})
+        if d.get("additionalProperties") is False and \
+                "implemented_in" not in (d.get("properties") or {}):
+            out.add(ns)
+    return frozenset(out)
+
+
 def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None) -> list[Finding]:
     """Per-token rule: tokens at `status` ≥ prototyped (i.e. prototyped /
     implemented / balanced / shipped / experimental) with empty `implemented_in:`,
@@ -590,14 +656,15 @@ def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None
         `["docs/sketches/foo.md"]`) when the section is being actively
         prototyped without code yet. The lint then doesn't fire.
       - Accept the warning as a real workflow signal (the spec lacks
-        vocabulary for "actively prototyping without code yet" — that's a
-        v0.4+ vocabulary-extension question to surface, not a rule to
-        silence).
+        vocabulary for "actively prototyping without code yet" — an open
+        vocabulary question, not a rule to silence).
 
     Tokens at status `draft | cut | deferred` are exempt (code may
-    legitimately not exist at those states per STATUS_LEVELS).
+    legitimately not exist at those states per STATUS_LEVELS), and so are
+    namespaces whose schema forbids `implemented_in` (D-036).
     """
     config = config or LintConfig()
+    exempt = namespaces_forbidding_impl()
     now = config.now or datetime.now()
     findings: list[Finding] = []
 
@@ -615,6 +682,8 @@ def rule_prototyped_without_pointer(tree: Tree, config: LintConfig | None = None
         if days_old <= config.prototyped_stale_days:
             continue  # file recently verified; rule's premise (stale doc) doesn't hold
         for ns in SUBFILE_NAMESPACES:
+            if ns in exempt:
+                continue
             block = pf.frontmatter.get(ns)
             if not isinstance(block, dict):
                 continue
@@ -688,34 +757,6 @@ def rule_shipped_stale_doc(tree: Tree, config: LintConfig | None = None) -> list
     return findings
 
 
-def rule_balance_target_untyped(tree: Tree) -> list[Finding]:
-    """D-003: every `balance_targets.<id>` must declare `target_kind:`.
-
-    Legacy v0.1.1 targets without a `target_kind` field are accepted with a
-    warning. Ratchets to error in v0.3 once the deferral window closes.
-    """
-    findings: list[Finding] = []
-    for pf in tree.files:
-        if pf.file_type != "subfile":
-            continue
-        targets = pf.frontmatter.get("balance_targets")
-        if not isinstance(targets, dict):
-            continue
-        for name, target in targets.items():
-            if not isinstance(target, dict):
-                continue
-            if "target_kind" not in target:
-                findings.append(Finding(
-                    rule="balance-target-untyped", severity="warning",
-                    file=pf.rel_str,
-                    location=f"balance_targets.{name}",
-                    message=(f"balance target '{name}' is missing target_kind: "
-                             f"(one of scalar | range | distribution_over_categories). "
-                             f"Permissive shape deprecated; ratchets to error in v0.3."),
-                ))
-    return findings
-
-
 def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
     """D-011: a `do:` step that's a bare string inside a rule reachable from a
     deterministic loop is a *prose label*, not a computable procedure. Two
@@ -731,8 +772,8 @@ def rule_determinism_undetermined_rule(tree: Tree) -> list[Finding]:
          clock's `drives:` list.
       4. For each such rule, flag every `do[]` item that is a string (not a dict).
 
-    Severity is `info` (advisory) at v0.2.0-alpha — visibility, not gate.
-    Ratchets to `warning` in v0.3, `error` in v0.4 (per D-011).
+    Severity is `info` (advisory) — visibility, not gate. It is raised only
+    when a structured silence mechanism exists (Ratchet Register R6, D-044).
     """
     # (1) Verbs referenced from moment loops.
     moment_verbs: set[str] = set()
@@ -832,9 +873,9 @@ def rule_write_to_template_field(tree: Tree) -> list[Finding]:
           per_instance_state schema or it's not contracted.
 
     The check is opt-in (fires only when `field:` is declared on a do[] step).
-    Authors not declaring `field:` on mutation steps escape the check; that's
-    the v0.3 / v0.4 ratchet path — declared-field becomes required in v0.4 once
-    the discipline settles.
+    Authors not declaring `field:` on mutation steps escape the check. Making
+    `field:` required needs a closed do[].kind vocabulary first (Ratchet
+    Register R9, D-044).
     """
     # Collect all writable per_instance_state field names across all
     # instance_containers in the tree.
@@ -940,9 +981,11 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
          effect kind is `damage` or `gain_block`).
       2. For each `{entities.<kind>}` referenced in `applies_to:`, every content
          entity in that collection has integer values for every field that the
-         content-schema declares `type: integer`.
+         content-schema declares `type: integer`. `{entities}` (D-033) names
+         every collection.
       3. For each `{resources.<id>}` referenced in `applies_to:`, the resource's
-         `min:` and `max:` bounds are integers.
+         `min:` and `max:` bounds are integers. `{resources}` (D-033) names
+         every resource.
     """
     kind = inv.get("kind")
     if kind == "numeric_domain":
@@ -970,6 +1013,8 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
         for ref in applies_to:
             if not isinstance(ref, str):
                 continue
+            if ref == "{entities}":   # D-033: the whole namespace, every collection
+                entity_kinds.update(tree.content_schemas)
             m = re.match(r"^\{entities\.([a-z_][a-z0-9_]*)\}$", ref)
             if m:
                 entity_kinds.add(m.group(1))
@@ -997,6 +1042,8 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
         for ref in applies_to:
             if not isinstance(ref, str):
                 continue
+            if ref == "{resources}":  # D-033: the whole namespace, every resource
+                resource_refs.update(tree.tokens.get("resources", {}))
             m = re.match(r"^\{(resources\.[a-z_][a-z0-9_]*)\}$", ref)
             if m:
                 resource_refs.add(m.group(1))
@@ -1024,6 +1071,214 @@ def _check_lint_invariant(tree: Tree, name: str, inv: dict) -> Iterable[tuple[st
     # advisory and verify, respectively.
 
 
+# ---- schema-violation (D-034, spec §9.1 / §10) ---------------------------------
+
+# Each file validates against its own file_type's branch of the discriminated
+# union, so a finding names the field that is wrong rather than "valid under
+# none of the given schemas".
+SCHEMA_BRANCHES = {"core": "CoreFile", "subfile": "Subfile",
+                   "content-schema": "ContentSchemaFile", "content-entity": "ContentEntityFile"}
+_SCHEMA_MESSAGE_MAX = 200
+
+
+@functools.lru_cache(maxsize=1)
+def _schema_validators() -> tuple[Any, dict[str, Any]]:
+    """(whole-schema validator, {file_type: branch validator}), built once."""
+    from .export_cmd import export_schema
+    schema = json.loads(export_schema())
+    cls = jsonschema.Draft202012Validator
+    branches = {ft: cls({"$schema": schema["$schema"], "$defs": schema["$defs"],
+                         "$ref": f"#/$defs/{name}"})
+                for ft, name in SCHEMA_BRANCHES.items()}
+    return cls(schema), branches
+
+
+def _claims_spec(fm: dict) -> bool:
+    """A file is a game-design.md file if it says so: `spec: game-design.md` or a
+    `file_type`. Other YAML under the tree (a CI config, a manifest with its own
+    `spec:`) is not validated."""
+    return fm.get("spec") == "game-design.md" or "file_type" in fm
+
+
+def _schema_location(path) -> str:
+    out = ""
+    for seg in path:
+        out += f"[{seg}]" if isinstance(seg, int) else ("." if out else "") + str(seg)
+    return out or "frontmatter"
+
+
+def _schema_message(e) -> str:
+    if e.validator in ("anyOf", "oneOf") and e.context:
+        e = jsonschema.exceptions.best_match(e.context)
+    msg = e.message
+    return msg if len(msg) <= _SCHEMA_MESSAGE_MAX else msg[:_SCHEMA_MESSAGE_MAX - 1] + "…"
+
+
+def rule_schema_violation(tree: Tree) -> list[Finding]:
+    """Every game-design.md file's frontmatter validates against the normative
+    JSON Schema (§10): its file_type's branch, or the whole schema when the
+    file_type is missing or unknown."""
+    whole, branches = _schema_validators()
+    findings: list[Finding] = []
+    for pf in tree.files:
+        fm = pf.frontmatter
+        if not isinstance(fm, dict) or not _claims_spec(fm):
+            continue
+        validator = branches.get(pf.file_type, whole)
+        errors = sorted(validator.iter_errors(fm),
+                        key=lambda e: ([str(x) for x in e.absolute_path], e.message))
+        for e in errors:
+            findings.append(Finding(
+                rule="schema-violation", severity="error", file=pf.rel_str,
+                location=_schema_location(e.absolute_path),
+                message=_schema_message(e),
+            ))
+    return findings
+
+
+# ---- content-entity-invalid (D-035, OI-005, spec §6.2 / §11 item 4) -----------
+
+def _content_dir(pf: ParsedFile) -> Path | None:
+    """The directory a content-schema file's `data_dir:` names, resolved against
+    the file's own directory (§6.1)."""
+    d = pf.frontmatter.get("data_dir")
+    if not isinstance(d, str) or not d.strip():
+        return None
+    return (pf.abs_path.parent / d).resolve()
+
+
+def rule_content_entity_invalid(tree: Tree) -> list[Finding]:
+    """§6.2 (a) and (b) for every content-entity file:
+      (a) it validates against the `schema:` of each content-schema whose
+          `data_dir:` contains it; an entity no `data_dir:` covers is
+          validated against nothing, which §11 item 4 does not allow;
+      (b) its `id` equals its file name's stem.
+    §6.2 (c), `status` and `implemented_in` present, is the §10 schema's
+    ContentEntityFile branch, so `schema-violation` reports it (D-034).
+
+    And the two links between a collection and its content (D-037, OI-001):
+      - a content-schema's `data_dir:` names a directory called its `entity:`,
+        since `{entities.<kind>.<id>}` resolves by directory name (§3), so
+        validation and resolution reach the same files;
+      - an entity's deprecated `data_source:`, when present, repeats the
+        `data_dir:` of the content-schema whose `entity:` is its key."""
+    rule = "content-entity-invalid"
+    by_dir: dict[Path, list[ParsedFile]] = defaultdict(list)
+    by_entity: dict[str, list[ParsedFile]] = defaultdict(list)
+    findings: list[Finding] = []
+    for pf in tree.files:
+        if pf.file_type == "content-schema":
+            d = _content_dir(pf)
+            ent = pf.frontmatter.get("entity")
+            if isinstance(ent, str):
+                by_entity[ent].append(pf)
+            if d is None:
+                continue
+            by_dir[d].append(pf)
+            if isinstance(ent, str) and d.name != ent:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str, location="data_dir",
+                    message=(f"data_dir names a directory '{d.name}', not '{ent}' (its "
+                             f"entity:); {{entities.{ent}.<id>}} resolves by directory "
+                             f"name (§3), so it would not reach these entities")))
+    for pf in tree.files:
+        if pf.file_type != "subfile" or not isinstance(pf.frontmatter.get("entities"), dict):
+            continue
+        for key, ent in pf.frontmatter["entities"].items():
+            ds = ent.get("data_source") if isinstance(ent, dict) else None
+            dirs = [(d, s.rel_str) for s in by_entity.get(key, [])
+                    if isinstance(d := s.frontmatter.get("data_dir"), str)]
+            if isinstance(ds, str) and dirs and ds not in {d for d, _ in dirs}:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str,
+                    location=f"entities.{key}.data_source",
+                    message=(f"data_source '{ds}' differs from the data_dir '{dirs[0][0]}' of "
+                             f"{dirs[0][1]} (entity: {key}); data_source is deprecated and, "
+                             f"when present, repeats that data_dir (D-037)")))
+    validators: dict[str, Any] = {}
+    bad_schema: set[str] = set()
+    cls = jsonschema.Draft202012Validator
+    for pf in tree.files:
+        if pf.file_type != "content-entity":
+            continue
+        fm = pf.frontmatter
+        eid = fm.get("id")
+        if isinstance(eid, str) and eid != pf.abs_path.stem:
+            findings.append(Finding(
+                rule=rule, severity="error", file=pf.rel_str, location="id",
+                message=f"id '{eid}' does not match the file name '{pf.abs_path.stem}'"))
+        schemas = by_dir.get(pf.abs_path.parent.resolve(), [])
+        if not schemas:
+            findings.append(Finding(
+                rule=rule, severity="error", file=pf.rel_str, location="file",
+                message=(f"no content-schema's data_dir covers "
+                         f"{pf.rel_path.parent.as_posix()}/, so this entity is "
+                         f"validated against no schema (§6.2, §11 item 4)")))
+            continue
+        for spf in schemas:
+            block = spf.frontmatter.get("schema")
+            if not isinstance(block, dict) or spf.rel_str in bad_schema:
+                continue      # a missing or non-mapping schema: is schema-violation's
+            if spf.rel_str not in validators:
+                try:
+                    cls.check_schema(block)
+                except jsonschema.exceptions.SchemaError as e:
+                    bad_schema.add(spf.rel_str)
+                    findings.append(Finding(
+                        rule=rule, severity="error", file=spf.rel_str, location="schema",
+                        message=f"schema: is not a valid JSON Schema: {_schema_message(e)}"))
+                    continue
+                validators[spf.rel_str] = cls(block)
+            errors = sorted(validators[spf.rel_str].iter_errors(fm),
+                            key=lambda e: ([str(x) for x in e.absolute_path], e.message))
+            for e in errors:
+                findings.append(Finding(
+                    rule=rule, severity="error", file=pf.rel_str,
+                    location=_schema_location(e.absolute_path),
+                    message=f"{_schema_message(e)} (schema: {spf.rel_str})"))
+    return findings
+
+
+# ---- trajectory-sort-by-missing (D-048, spec §9.5.5) ----------------------------
+
+def _array_fields_without_sort_by(fields: Any, path: str) -> Iterable[str]:
+    """Field paths in a `trajectory.schema` field map whose `type` is array
+    and which declare no non-empty `sort_by:` list, including arrays nested
+    under an array's `items:` field map."""
+    if not isinstance(fields, dict):
+        return
+    for name, spec in fields.items():
+        if not isinstance(spec, dict):
+            continue
+        here = f"{path}.{name}"
+        t = spec.get("type")
+        if t == "array" or (isinstance(t, list) and "array" in t):
+            keys = spec.get("sort_by")
+            if not (isinstance(keys, list) and keys and all(isinstance(k, str) for k in keys)):
+                yield here
+            yield from _array_fields_without_sort_by(spec.get("items"), f"{here}.items")
+
+
+def rule_trajectory_sort_by_missing(tree: Tree) -> list[Finding]:
+    """§9.5.5: every array in a `trajectory.schema` MUST declare a `sort_by:`
+    key list, so two engines serialize its elements in the same order. The
+    static part of that MUST: the declaration is present and is a non-empty
+    list of keys. Whether the keys give a total order is not checked."""
+    findings: list[Finding] = []
+    for pf in tree.files:
+        traj = pf.frontmatter.get("trajectory") if pf.file_type == "subfile" else None
+        if not isinstance(traj, dict):
+            continue
+        for loc in _array_fields_without_sort_by(traj.get("schema"), "trajectory.schema"):
+            findings.append(Finding(
+                rule="trajectory-sort-by-missing", severity="error",
+                file=pf.rel_str, location=loc,
+                message=(f"array field {loc} declares no sort_by: key list; §9.5.5 "
+                         f"requires one that totally orders its elements"),
+            ))
+    return findings
+
+
 # ---- Dispatch -----------------------------------------------------------------
 
 ALL_RULES: list[Callable[..., list[Finding]]] = [
@@ -1039,12 +1294,15 @@ ALL_RULES: list[Callable[..., list[Finding]]] = [
     rule_unreferenced_verb,
     rule_broken_implementation_pointer,
     rule_stale_section,                  # v0.3 Task 6: now config-aware
-    rule_balance_target_untyped,
     rule_determinism_undetermined_rule,
     rule_write_to_template_field,
     rule_invariant_violation,
     rule_prototyped_without_pointer,     # v0.3 Task 6: NEW
     rule_shipped_stale_doc,              # v0.3 Task 6: NEW
+    rule_schema_violation,               # v0.4 D-034
+    rule_content_entity_invalid,         # v0.4 D-035 (OI-005)
+    rule_implementation_pointer_outside_repo,  # v0.4 D-038 (OI-002)
+    rule_trajectory_sort_by_missing,     # v0.4 D-048 (R11a)
 ]
 
 

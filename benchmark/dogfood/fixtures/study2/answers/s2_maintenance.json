@@ -1,0 +1,9 @@
+{
+  "_provenance": "Frozen answers for dogfood study 2 (D-026). Computed by generate.py from its planted edge list (edges.json), never by parsing the tree with gdmd code. tests/test_dogfood_study2.py cross-checks them once against gdmd graph / gdmd view and refs.walk_refs; a disagreement is fixed at its source, never by editing these files. Checkers compare against this file only.",
+  "patched": "examples/lanternfall/impl/lanternfall/loot/drop_tables.py",
+  "task": "s2_maintenance",
+  "touched": [
+    "examples/lanternfall/gdd/systems/distributions.md",
+    "examples/lanternfall/gdd/systems/loot.md"
+  ]
+}

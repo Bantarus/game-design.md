@@ -1,0 +1,108 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1571,
+  "cache_read_tokens": 496512,
+  "cache_creation_tokens": 76968,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 5716,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82512,
+  "per_turn_occupancy": [
+    79278,
+    80360,
+    81913,
+    82512,
+    82802,
+    83134,
+    83495
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Write": 1
+  },
+  "gdmd_view_calls": 3,
+  "gdmd_graph_calls": 0,
+  "view_mode_bytes": {
+    "grep": 82,
+    "ref": 4312
+  },
+  "view_mode_calls": {
+    "grep": 1,
+    "ref": 2
+  },
+  "bash_read_calls": 2,
+  "bash_read_bytes": 3729,
+  "bash_files_read": 2,
+  "all_files_read": 2,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/deckbuilder",
+    "examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "mmSMEk",
+      "result_bytes": 1458,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r1.txt:27-52"
+    },
+    {
+      "tool": "Bash",
+      "id": "c7Mugo",
+      "result_bytes": 82,
+      "is_error": true,
+      "vcc": "lookup_refs__views__r1.txt:64-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "bWMseL",
+      "result_bytes": 2854,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r1.txt:77-119"
+    },
+    {
+      "tool": "Bash",
+      "id": "jEyEck",
+      "result_bytes": 875,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r1.txt:131-162"
+    },
+    {
+      "tool": "Bash",
+      "id": "vo9P6F",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "lookup_refs__views__r1.txt:174-174"
+    },
+    {
+      "tool": "Bash",
+      "id": "mUUWw2",
+      "result_bytes": 79,
+      "is_error": true,
+      "vcc": "lookup_refs__views__r1.txt:186-186"
+    },
+    {
+      "tool": "Write",
+      "id": "jewZvc",
+      "result_bytes": 177,
+      "is_error": false,
+      "vcc": "lookup_refs__views__r1.txt:204-204"
+    }
+  ]
+}

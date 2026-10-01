@@ -1,0 +1,108 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1817,
+  "cache_read_tokens": 173760,
+  "cache_creation_tokens": 30100,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 7553,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 34777.0,
+  "per_turn_occupancy": [
+    30820,
+    32154,
+    34528,
+    35026,
+    35381,
+    35963
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Write": 1
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 1930
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 7018,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 1,
+  "all_files_read_paths": [
+    "examples/deckbuilder",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/systems/combat.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "swRXer",
+      "result_bytes": 1930,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r2.txt:27-57"
+    },
+    {
+      "tool": "Bash",
+      "id": "fVd4QG",
+      "result_bytes": 82,
+      "is_error": true,
+      "vcc": "lookup_refs__import-card__r2.txt:69-70"
+    },
+    {
+      "tool": "Bash",
+      "id": "5PrQ7u",
+      "result_bytes": 4986,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r2.txt:82-213"
+    },
+    {
+      "tool": "Bash",
+      "id": "uFSNQh",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "lookup_refs__import-card__r2.txt:225-225"
+    },
+    {
+      "tool": "Bash",
+      "id": "52r6CF",
+      "result_bytes": 79,
+      "is_error": true,
+      "vcc": "lookup_refs__import-card__r2.txt:237-237"
+    },
+    {
+      "tool": "Bash",
+      "id": "mRubNC",
+      "result_bytes": 102,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r2.txt:249-253"
+    },
+    {
+      "tool": "Write",
+      "id": "eyd3q6",
+      "result_bytes": 183,
+      "is_error": false,
+      "vcc": "lookup_refs__import-card__r2.txt:269-269"
+    }
+  ]
+}

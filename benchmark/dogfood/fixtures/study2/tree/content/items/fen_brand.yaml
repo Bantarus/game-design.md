@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_brand
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Brand
+rarity: worn
+slot: lantern
+weight: 6
+value: 18
+description: A worn lantern that hums near open flame.

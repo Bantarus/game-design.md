@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "game-design-md"
-version = "0.3.0a1"
+version = "0.4.0"
 description = "An LLM-first, engine-neutral, genre-agnostic specification for game design documents. Modeled on Google Labs' DESIGN.md."
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -36,6 +36,9 @@ dev = [
     # benchmark/harness/llama_server.py imports httpx; the harness tests
     # (tests/test_harness_wiring.py) fail collection without it.
     "httpx>=0.27",
+    # tests/test_packaging.py builds a wheel; it fails in CI without this
+    # (D-050) and skips elsewhere.
+    "build>=1.0",
 ]
 
 [project.scripts]
@@ -54,10 +57,12 @@ packages = ["src/game_design_md"]
 # D-006: ship spec.md and the JSON Schema as package data so a wheel install
 # can read them via importlib.resources. The canonical files live at
 # docs/spec.md and schema/game-design.schema.json; force-include copies them
-# into the wheel at game_design_md/_data/.
+# into the wheel at game_design_md/_data/. D-050: the six `gdmd init` starters
+# ship the same way, at game_design_md/_data/starters/.
 [tool.hatch.build.targets.wheel.force-include]
 "docs/spec.md" = "game_design_md/_data/spec.md"
 "schema/game-design.schema.json" = "game_design_md/_data/game-design.schema.json"
+"templates/starters" = "game_design_md/_data/starters"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

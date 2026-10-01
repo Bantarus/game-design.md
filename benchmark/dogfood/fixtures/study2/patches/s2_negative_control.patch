@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Sam Teammate <sam@example.invalid>
+Date: Wed, 30 Sep 2026 09:12:00 +0200
+Subject: [PATCH] tests: note that the drop-table seeds are arbitrary
+
+Docstring only; no test changes.
+---
+ examples/lanternfall/impl/lanternfall/tests/test_drop_tables.py | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/examples/lanternfall/impl/lanternfall/tests/test_drop_tables.py b/examples/lanternfall/impl/lanternfall/tests/test_drop_tables.py
+--- a/examples/lanternfall/impl/lanternfall/tests/test_drop_tables.py
++++ b/examples/lanternfall/impl/lanternfall/tests/test_drop_tables.py
+@@ -1,4 +1,7 @@
+-"""Smoke tests for loot/drop_tables.py."""
++"""Smoke tests for loot/drop_tables.py.
++
++Seeds are arbitrary; the assertions hold for any seed.
++"""
+ import random
+ 
+ from lanternfall.loot import drop_tables

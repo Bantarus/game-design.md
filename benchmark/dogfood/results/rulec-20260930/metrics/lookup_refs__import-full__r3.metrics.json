@@ -1,0 +1,69 @@
+{
+  "turns": 4,
+  "input_tokens": 8,
+  "output_tokens": 1469,
+  "cache_read_tokens": 249355,
+  "cache_creation_tokens": 78868,
+  "tool_calls": 3,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 9305,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82018.5,
+  "per_turn_occupancy": [
+    79463,
+    80056,
+    83981,
+    84731
+  ],
+  "tool_counts": {
+    "Bash": 3
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 9305,
+  "bash_files_read": 5,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/lookup.txt",
+    "examples/deckbuilder",
+    "examples/deckbuilder/gdd/loops.md",
+    "examples/deckbuilder/gdd/mechanics.md",
+    "examples/deckbuilder/gdd/systems/combat.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "nskJ9j",
+      "result_bytes": 687,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r3.txt:27-51"
+    },
+    {
+      "tool": "Bash",
+      "id": "JSvKeQ",
+      "result_bytes": 8462,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r3.txt:63-327"
+    },
+    {
+      "tool": "Bash",
+      "id": "YpARxq",
+      "result_bytes": 156,
+      "is_error": false,
+      "vcc": "lookup_refs__import-full__r3.txt:339-340"
+    }
+  ]
+}

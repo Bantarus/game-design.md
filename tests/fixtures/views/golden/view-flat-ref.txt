@@ -1,0 +1,17 @@
+[view ref --flat] tree tree_sha=97a522d1fb1298585f3bbb6051a85b9a5d965737101c1c8c1e0c9c7ac5b8a282
+token {verbs.study} gdd/mechanics.md:19-26 draft focus
+token {rules.study_rule} gdd/mechanics.md:49-58 draft hop=1 back
+rationale gdd/mechanics.md#Tokens gdd/mechanics.md:72-74 - hop=1 back
+token {loops.day} gdd/loops.md:8-18 draft hop=1 back
+rationale gdd/loops.md#Rationale gdd/loops.md:21-23 - hop=1 back
+meta game-design.md#core_loop_ref game-design.md:16-16 - hop=2 back
+rationale game-design.md#High Concept game-design.md:31-33 - hop=2 back
+token {events.studied} gdd/mechanics.md:68-68 draft hop=2 back
+token {balance_targets.focus_per_day} gdd/economy-balance.md:8-13 draft hop=2 back
+token {entities.player} gdd/mechanics.md:9-13 draft hop=1 forward
+token {entities.relics} gdd/mechanics.md:14-17 draft hop=1 forward
+token {resources.focus} gdd/mechanics.md:36-47 draft hop=1 forward
+token {rules.study_rule} gdd/mechanics.md:49-58 draft hop=1 forward
+token {events.studied} gdd/mechanics.md:68-68 draft hop=2 forward
+token {balance_targets.focus_per_day} gdd/economy-balance.md:8-13 draft hop=2 forward
+content-entity {entities.relics.lamp} content/relics/lamp.yaml:1-8 draft hop=2 forward

@@ -20,7 +20,7 @@ This repo contains: the spec (`docs/spec.md`), the frontmatter JSON Schema (`sch
 - **YAML frontmatter is normative.** Token values are the truth you compile against.
 - **Markdown prose is rationale.** It explains *why* and is your fallback when no token covers a case — extrapolate from intent, do not invent.
 - **Resolve `{namespace.id}` references by namespace.** Example: `{loops.combat_turn}` lives in `gdd/loops.md` frontmatter; `{resources.energy}` in `gdd/mechanics.md`; `{distributions.card_draw}` in `gdd/systems/distributions.md`.
-- **Content-heavy types are external.** A `data_source:` field points to a directory of `*.yaml` files (e.g. `content/cards/`). Read individual entity files on demand; never assume the `gdd/content/*.md` subfile contains the full set.
+- **Content-heavy types are external.** A content-schema file's `data_dir:` (in `gdd/content/<kind>.md`, relative to that file) points to a directory of `*.yaml` files (e.g. `content/cards/`). Read individual entity files on demand; never assume the `gdd/content/*.md` subfile contains the full set.
 
 ## Hard rules (never violate)
 
@@ -44,8 +44,10 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Adding a vocabulary item without observed-use evidence.** D-020 added `experimental` + `deferred` because prose markers existed across 4 trees; `blocked` is deferred until live adoption surfaces it.
 - **Imposing new shape engines must conform to.** Name observable shape engines already have. Verify-adapter PASS is then *expected*, not lucky. (Memory: `descriptive-not-prescriptive-vocabulary-extensions`.)
 - **Calibrating defaults against the population you'd use them to validate.** Circular trap. Task 6 grounded `--stale-days` defaults in cadence assumptions, NOT the in-repo `last_verified` distribution.
+- **Editing `docs/spec.md` or format semantics from the card alone.** `CLAUDE.md` imports only the agent card (`docs/spec-card.md`), which excerpts a few sections and indexes the rest. Before editing the spec, the schema, or what a namespace, enum value or lint rule means, read every affected section in full (`gdmd spec --section <id>`). After editing the spec, regenerate the card: `gdmd spec --card > docs/spec-card.md`.
 - **Quietly dropping or silently swapping a validation claim.** Reframes get recorded in DECISIONS.md + spec text (D-021 + §11.2 pattern). Premise-correction is honest only when audit-lineage-preserved. (Memory: `premise-correction-reframe-is-gate-correction`.)
 
+- **Writing future behavior into the spec.** `docs/spec.md` and the schema state current behavior only. A planned change is a row in the Ratchet Register (`DECISIONS.md` OI-010) written as trigger → action, with an optional target version that is not binding. Never write "ratchets to error in v0.N" into the spec: the dates lapse and the spec ends up describing behavior the code does not have (D-044). `docs_lint` rejects such phrases.
 **CLI:** `gdmd spec` (read the spec back); `gdmd export --format schema` (validate the schema parses).
 
 ### Operating — implementing the design (CLI, lint rules, example trees, cross-engine adapters)
@@ -60,7 +62,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Working around a bug instead of diagnosing the root cause.** When Task 4's hook check broke under pre-commit's CWD convention, the fix was path normalization in `check_staged`, not a workaround in the renderer.
 - **Fabricating values.** When uncertain, reference an existing token, ask the user, or mark the entity `draft` with empty `implemented_in:`. Never invent numbers, never invent token names.
 
-**CLI:** `gdmd lint <tree>` (verify the tree compiles after every edit); `gdmd verify <tree>` (for trees with adapters); `pytest` (for src/ + tests/ changes).
+**CLI:** `gdmd lint <tree>` (verify the tree compiles after every edit); `gdmd verify <tree>` (for trees with adapters); `gdmd view <tree>` (projected views of a tree: overview, `--full`, `--grep`, `--ref`; spec §9.9); `gdmd graph <tree>` (the tree's reference graph: `--impact`, `--from/--to`, `--cycles`); `pytest` (for src/ + tests/ changes).
 
 ### Maintenance — pre-commit, status hygiene, audit lineage
 
@@ -72,6 +74,7 @@ Every activity in this repo applies one of three disciplines. The modes are *act
 - **Using `experimental` as an escape hatch for uncertainty.** It means "code exists, design under active evaluation." NOT "I'm not sure what status this is." (Spec §8.1 + D-020.)
 - **Committing with a what-only message.** The *why* — which discipline applied, which calibration the choice rests on, which sister-disciplines apply — is the audit trail future agents need. Commit messages are first-class artifacts.
 - **Silently calibrating against the population you'd validate.** Name the calibration source explicitly in the commit message (Task 6 named "defaults grounded in reasonable cadence, NOT in-repo distribution").
+- **Citing study 2's views PASS without study 1's NULL** (D-032). The two results measure the same treatment on two tree regimes, so they are always cited together, and neither is a session-cost claim.
 - **Changing the workflow without updating AGENTS.md.** Every new CLI command, every new ritual step, every new mode prohibition lands here too. (CLAUDE.md only if the change is Claude-specific.)
 - **Deferring memory writes.** Save the discipline when it's concrete and worth saving for future sessions; deferred memory writes get forgotten. Save mid-flow, not at end-of-session.
 
@@ -97,10 +100,18 @@ Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are 
 
 - Language: **Python ≥3.10** (Hatchling build backend). Install with `pip install -e ".[dev]"` (or `uv pip install -e ".[dev]"`), test with `pytest`.
 - After install, both `game-design.md` and the short alias `gdmd` are on `$PATH`. Either works.
-- Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`.
+- Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`, `schema-violation` (the §10 JSON Schema, v0.4), `content-entity-invalid` (§6.2, v0.4), `implementation-pointer-outside-repo` (§2.3, v0.4), `trajectory-sort-by-missing` (§9.5.5, v0.4).
 - `lint` must emit structured JSON (`{ findings: [...], summary: {...} }`) so an agent can self-correct.
 - Before committing CLI changes, run `gdmd lint examples/deckbuilder` and confirm it passes clean.
+- `tests/test_packaging.py` builds a wheel, installs it in a fresh venv and runs the installed `gdmd` (`spec`, `export`, `init`) from outside the source tree, so only packaged data can answer (D-006, D-050). It needs `build`, which the `[dev]` extra installs; CI runs it as its own step. Anything a command reads at run time ships under `game_design_md/_data/` through `force-include` in `pyproject.toml`.
 - Before committing changes to README.md, AGENTS.md, docs/spec.md, or the CLI verb set, run `python scripts/docs_lint.py` — it drift-lints the docs themselves (version agreement, §9 verb list vs the click registry, the four-field stability guarantee, namespace validity of taught refs). CI runs it on every push.
+- After editing `docs/spec.md`, regenerate the agent card that `CLAUDE.md` imports: `gdmd spec --card > docs/spec-card.md`. A test fails while they differ.
+
+## Release procedure (before any version bump)
+
+1. **Review the Ratchet Register** (`DECISIONS.md` OI-010). Check every open row's trigger against the trees and the code, and read the unscheduled items. A trigger that has been observed gets its own D-entry and commit before the bump. Log the review in the register: the date, the version, and whether each row's trigger was observed.
+2. **Propose the bump; never decide it alone.**
+3. **Bump everything that carries the version together:** `pyproject.toml`, `src/game_design_md/__init__.py` (`__version__`, which `gdmd --version` prints, and `__spec_version__`), the spec's frontmatter `spec_version`, its status line and §11's conformance sentence, the schema's `$id` and `title`, the README, the CHANGELOG (`[Unreleased]` becomes the version and date) and the release notes. `python scripts/docs_lint.py` checks that the pyproject, `__init__.py`, README, spec (frontmatter, status line, §11) and schema (`$id`, `title`) agree.
 
 ## Universal practice (across all three modes)
 

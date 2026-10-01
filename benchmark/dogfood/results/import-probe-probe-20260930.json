@@ -1,0 +1,60 @@
+{
+  "cli_version": "2.1.285 (Claude Code)",
+  "effort": "high",
+  "model_requested": "claude-sonnet-5-5",
+  "source_sha": "79a1827bcfaba3324314358d52d51cb972260b2c",
+  "spec_import_tokens_difference": 4,
+  "spec_md_bytes_difference": 1409,
+  "worlds": {
+    "matrix": {
+      "overlay_sha": null,
+      "spec_import_tokens": -1,
+      "spec_md_bytes": 122948,
+      "with_spec_import": {
+        "cost_usd": 0.0062661999999999995,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "e25739ce-701c-4343-bbeb-2909e91995ef",
+        "stop_reason": "completed",
+        "turn1_occupancy": 6887
+      },
+      "without_spec_import": {
+        "cost_usd": 0.0062702,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "66542795-c673-43b7-b85e-4a7671d32924",
+        "stop_reason": "completed",
+        "turn1_occupancy": 6888
+      }
+    },
+    "v0.3": {
+      "overlay_sha": "61c95fe9ae89ecc58712127768d206c6e41e5f1e",
+      "spec_import_tokens": -5,
+      "spec_md_bytes": 121539,
+      "with_spec_import": {
+        "cost_usd": 0.0107828,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "488937a4-6ab5-45fc-8a16-3250adaaedbf",
+        "stop_reason": "completed",
+        "turn1_occupancy": 6904
+      },
+      "without_spec_import": {
+        "cost_usd": 0.0063592,
+        "model_reported": [
+          "claude-haiku-4-5-20251001",
+          "claude-sonnet-5-5"
+        ],
+        "session_id": "587af730-5c1e-4eee-abc9-89cb406d9ab3",
+        "stop_reason": "completed",
+        "turn1_occupancy": 6909
+      }
+    }
+  }
+}

@@ -1,0 +1,41 @@
+From 4924c5408d25d90c8dba6a59dbc23e0edb213e5c Mon Sep 17 00:00:00 2001
+From: Sam Teammate <sam@example.invalid>
+Date: Wed, 30 Sep 2026 01:27:16 +0200
+Subject: [PATCH] xtreme: name the gold-drop count in combat_resolution
+
+Behavior-preserving refactor: replace the literal 6 with a named constant.
+---
+ examples/tick-combat/impl/xtreme/src/rules.rs | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/examples/tick-combat/impl/xtreme/src/rules.rs b/examples/tick-combat/impl/xtreme/src/rules.rs
+index 917f230..29d30a3 100644
+--- a/examples/tick-combat/impl/xtreme/src/rules.rs
++++ b/examples/tick-combat/impl/xtreme/src/rules.rs
+@@ -42,6 +42,9 @@ use crate::distributions::{action_order, critical_hit, damage_roll, gold_drop, o
+ use crate::resources::{Gold, Rng, TickCounter};
+ use crate::state::{CombatPhase, Event, UnitLifecycle};
+ 
++/// Number of `gold_drop` samples drawn when a combat resolves.
++const GOLD_DROPS_PER_COMBAT: usize = 6;
++
+ /// `{rules.tick_resolution}` — advance one tick. Per the resolved spec:
+ ///   1. select_actor by rotation through action_order (one unit per tick)
+ ///   2. sample damage_roll with mean = actor.attack (D-012)
+@@ -121,11 +124,11 @@ pub fn combat_resolution(world: &mut World) {
+     if *world.resource::<CombatPhase>() == CombatPhase::Resolved {
+         return;
+     }
+-    // 6 drops accumulating value (D-014, resolves #6).
++    // GOLD_DROPS_PER_COMBAT drops accumulating value (D-014, resolves #6).
+     let mut total_gold: i32 = 0;
+     {
+         let mut rng_guard = world.resource_mut::<Rng>();
+-        for _ in 0..6 {
++        for _ in 0..GOLD_DROPS_PER_COMBAT {
+             let drop = gold_drop(&mut rng_guard.0);
+             total_gold += drop.value();
+         }
+-- 
+2.43.0
+

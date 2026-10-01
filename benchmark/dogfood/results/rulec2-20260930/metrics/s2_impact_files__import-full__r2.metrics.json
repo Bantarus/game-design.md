@@ -1,0 +1,100 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1955,
+  "cache_read_tokens": 497267,
+  "cache_creation_tokens": 78185,
+  "tool_calls": 7,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 5333,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 82510,
+  "per_turn_occupancy": [
+    79690,
+    81056,
+    81457,
+    82510,
+    83035,
+    83670,
+    84048
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Grep": 2,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 4523
+  },
+  "view_mode_calls": {
+    "graph": 3
+  },
+  "bash_read_calls": 0,
+  "bash_read_bytes": 0,
+  "bash_files_read": 0,
+  "all_files_read": 0,
+  "all_re_reads": 0,
+  "all_files_read_paths": [],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "9M12ur",
+      "result_bytes": 2579,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r2.txt:27-130"
+    },
+    {
+      "tool": "Bash",
+      "id": "MAg9yA",
+      "result_bytes": 219,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-full__r2.txt:147-151"
+    },
+    {
+      "tool": "Bash",
+      "id": "wCYZYM",
+      "result_bytes": 1725,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r2.txt:163-181"
+    },
+    {
+      "tool": "Bash",
+      "id": "siZgpi",
+      "result_bytes": 257,
+      "is_error": true,
+      "vcc": "s2_impact_files__import-full__r2.txt:193-193"
+    },
+    {
+      "tool": "Grep",
+      "id": "C86dWU",
+      "result_bytes": 197,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r2.txt:207-209"
+    },
+    {
+      "tool": "Write",
+      "id": "QanEap",
+      "result_bytes": 197,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r2.txt:228-228"
+    },
+    {
+      "tool": "Grep",
+      "id": "11Qa87",
+      "result_bytes": 159,
+      "is_error": false,
+      "vcc": "s2_impact_files__import-full__r2.txt:245-248"
+    }
+  ]
+}

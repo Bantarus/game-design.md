@@ -1,0 +1,107 @@
+{
+  "turns": 6,
+  "input_tokens": 12,
+  "output_tokens": 1983,
+  "cache_read_tokens": 417645,
+  "cache_creation_tokens": 78749,
+  "tool_calls": 7,
+  "files_read": 1,
+  "bytes_read": 3459,
+  "re_reads": 0,
+  "consultation_bytes": 7622,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83125.0,
+  "per_turn_occupancy": [
+    79303,
+    81920,
+    82696,
+    83554,
+    84321,
+    84612
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Edit": 1,
+    "Read": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 2,
+  "bash_read_bytes": 3009,
+  "bash_files_read": 4,
+  "all_files_read": 5,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/deckbuilder/content/cards/bellows.yaml",
+    "examples/deckbuilder/content/cards/firewall.yaml",
+    "examples/deckbuilder/game-design.md",
+    "examples/deckbuilder/gdd/content/cards.md",
+    "examples/deckbuilder/gdd/mechanics.md"
+  ],
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "/last_updated:"
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "UuJVcS",
+      "result_bytes": 3459,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:25-101"
+    },
+    {
+      "tool": "Bash",
+      "id": "2mV47j",
+      "result_bytes": 1845,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:113-129"
+    },
+    {
+      "tool": "Bash",
+      "id": "XjbM4H",
+      "result_bytes": 1164,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:141-195"
+    },
+    {
+      "tool": "Bash",
+      "id": "RfYpat",
+      "result_bytes": 601,
+      "is_error": true,
+      "vcc": "authoring_new_card__import-full__r1.txt:230-252"
+    },
+    {
+      "tool": "Write",
+      "id": "uu9FNo",
+      "result_bytes": 218,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:286-286"
+    },
+    {
+      "tool": "Edit",
+      "id": "sme9QE",
+      "result_bytes": 149,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:305-305"
+    },
+    {
+      "tool": "Bash",
+      "id": "VY9u3u",
+      "result_bytes": 186,
+      "is_error": false,
+      "vcc": "authoring_new_card__import-full__r1.txt:317-327"
+    }
+  ]
+}

@@ -25,9 +25,9 @@ pre-commit framework convention (a `local` hook entry invoking
 idempotent.
 
 Spec → code direction (spec edit implies impl may need updating) is a
-separate workflow shape (closer to design-doc-driven-development) and
-deferred to v0.4+ per the minimum-extension discipline — ship what's
-demanded by the observed problem (code→spec), don't preempt.
+separate workflow shape (closer to design-doc-driven-development) and is
+not provided, per the minimum-extension discipline — ship what's demanded
+by the observed problem (code→spec), don't preempt (Ratchet Register, D-044).
 
 Performance budget: pre-commit hooks that take >1s get disabled by
 developers. The inverted index is O(N) over spec files at build time;
@@ -36,6 +36,7 @@ this is 50-100ms easily.
 """
 from __future__ import annotations
 
+import os
 import re
 from collections import defaultdict
 from dataclasses import dataclass
@@ -44,7 +45,7 @@ from pathlib import Path
 
 import yaml
 
-from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree
+from .tree import SUBFILE_NAMESPACES, ParsedFile, Tree, find_repo_root
 
 
 @dataclass(frozen=True)
@@ -59,17 +60,40 @@ class Reference:
 HOOK_ENTRY_ID = "gdmd-anti-drift"
 
 
+def key_frame(tree: Tree) -> Path:
+    """The directory code paths are keyed against (D-038): the git
+    repository root, which is the frame pre-commit's staged names use, or
+    the tree root when the tree is in no git repository."""
+    root = tree.root.resolve()
+    return find_repo_root(root) or root
+
+
+def code_key(path: Path, frame: Path) -> str:
+    """`path`, resolved (so `impl/../x` and a `../` glob's hits normalize),
+    as a POSIX path relative to `frame`."""
+    try:
+        return Path(os.path.relpath(Path(path).resolve(), frame)).as_posix()
+    except ValueError:   # another drive (Windows): no relative form
+        return Path(path).resolve().as_posix()
+
+
 def build_inverted_index(tree: Tree) -> dict[str, list[Reference]]:
-    """Build the inverse map `{resolved_code_path: [Reference, ...]}` once
-    at lookup time.
+    """Build the inverse map `{code_path: [Reference, ...]}` once at lookup
+    time.
 
     Walks every ParsedFile in the tree, expanding each `implemented_in:`
     glob (subfile-level + per-token) and the core file's
     `implementation_pointers:` map into the set of files they currently
     resolve to. The resulting map lets `gdmd hook check` answer "which
     spec sections reference this code path?" in O(1) per staged file.
+
+    Globs are relative to the tree root and may climb out of it with `../`
+    (spec §2.1). Each hit is keyed by `code_key` against `key_frame`: the
+    git repository root, so a key is the name git stages the file under,
+    or the tree root outside a repository (D-038).
     """
     index: dict[str, list[Reference]] = defaultdict(list)
+    frame = key_frame(tree)
 
     def _add(pf: ParsedFile, patterns: list, location: str) -> None:
         for pat in patterns:
@@ -82,11 +106,8 @@ def build_inverted_index(tree: Tree) -> dict[str, list[Reference]]:
             for src in matches:
                 if not src.is_file():
                     continue
-                try:
-                    rel = str(src.relative_to(tree.root))
-                except ValueError:
-                    rel = str(src)
-                index[rel].append(Reference(file=pf.rel_str, location=location))
+                index[code_key(src, frame)].append(
+                    Reference(file=pf.rel_str, location=location))
 
     for pf in tree.files:
         impl = pf.frontmatter.get("implemented_in") if pf.frontmatter else None
@@ -118,40 +139,70 @@ def check_staged(tree: Tree, staged_files: list[str],
                  cwd: Path | None = None) -> dict[str, list[Reference]]:
     """Intersect `staged_files` against the inverted index.
 
-    Returns `{tree_relative_path: [Reference, ...]}` for each staged file
-    referenced by at least one spec section. Files not referenced by any
-    section are absent from the result (the hook stays silent on them).
+    Returns `{code_path: [Reference, ...]}` for each staged file referenced
+    by at least one spec section, keyed as the index is (`key_frame`).
+    Files not referenced by any section are absent from the result (the
+    hook stays silent on them).
 
     **Path normalization (pre-commit convention).** Pre-commit invokes
     hooks from the repo root and passes staged filenames as repo-relative
-    paths. The inverted index is keyed by tree-relative paths. We bridge
-    the two: each staged path is resolved against `cwd` (defaults to
-    `Path.cwd()` — i.e. the repo root when pre-commit invoked us), then
-    made relative to the tree root. Absolute staged paths and already-
-    tree-relative staged paths both pass through naturally.
+    paths. Each staged path is resolved against `cwd` (defaults to
+    `Path.cwd()` — i.e. the repo root when pre-commit invoked us) and keyed
+    against the same frame as the index, so a staged `src/x.py` meets the
+    hit of a tree's `../src/**` glob (D-038). Absolute staged paths and
+    paths relative to a tree-root CWD pass through the same way.
     """
     index = build_inverted_index(tree)
     if not index:
         return {}
     if cwd is None:
         cwd = Path.cwd()
-    tree_root_abs = tree.root.resolve()
+    frame = key_frame(tree)
     result: dict[str, list[Reference]] = {}
     for sf in staged_files:
         p = Path(sf)
         try:
-            abs_sf = (p if p.is_absolute() else (cwd / p)).resolve()
-            rel = str(abs_sf.relative_to(tree_root_abs))
-        except (ValueError, OSError):
-            # Fallback: literal lookup (CWD already IS the tree root case).
-            rel = sf
-        if rel in index:
-            result[rel] = index[rel]
+            key = code_key(p if p.is_absolute() else (cwd / p), frame)
+        except OSError:
+            key = sf
+        if key in index:
+            result[key] = index[key]
     return result
 
 
+def affected_blocks(model, refs: list[Reference]) -> list:
+    """The view-engine blocks for a spec file's matched references (WS3,
+    spec §9.7 `--show-tokens`), deduplicated, in source order:
+
+    - `<ns>.<token>` → that token's block;
+    - `(file-level)` → the content-entity block for an entity file, else the
+      file's top-level `implemented_in` block;
+    - `implementation_pointers.<key>` → the core's `implementation_pointers`
+      block.
+    """
+    out: dict[int, object] = {}
+    for r in refs:
+        idx = None
+        if r.location == "(file-level)":
+            want = [b for b in model.blocks if b.path == r.file and (
+                b.role == "content-entity"
+                or (b.parent is None and b.primary == f"{r.file}#implemented_in"))]
+            idx = want[0].index if want else None
+        elif r.location.startswith("implementation_pointers."):
+            want = [b for b in model.blocks
+                    if b.primary == f"{r.file}#implementation_pointers"]
+            idx = want[0].index if want else None
+        else:
+            idx = model.by_id.get(r.location)
+            if idx is not None and model.blocks[idx].path != r.file:
+                idx = None
+        if idx is not None:
+            out[idx] = model.blocks[idx]
+    return sorted(out.values(), key=lambda b: (b.start, b.index))
+
+
 def render_hook_output(matches: dict[str, list[Reference]],
-                        tree_path: str | Path = ".") -> str:
+                        tree_path: str | Path = ".", model=None) -> str:
     """Format the hook output for human reading.
 
     Empty matches → empty string (hook stays silent — most commits don't
@@ -164,6 +215,11 @@ def render_hook_output(matches: dict[str, list[Reference]],
     The rendered `gdmd touch` command prefixes spec file paths with this
     so the suggestion is invocable from the user's CWD (typically the
     repo root) without rewriting.
+
+    With `model` (the compiled view IR; `--show-tokens`, WS3), each spec
+    file's entry is followed by the matched blocks, verbatim, each under its
+    `[role] <primary> <path>:<start>-<end>` header (spec §9.9.2's lowering
+    rule: lines are never re-indented or re-serialized).
     """
     if not matches:
         return ""
@@ -190,6 +246,12 @@ def render_hook_output(matches: dict[str, list[Reference]],
         lines.append(f"  {_for_cmd(sf)}")
         lines.append(f"    locations:    {', '.join(locations)}")
         lines.append(f"    triggered by: {', '.join(codes)}")
+        if model is not None:
+            from .view_cmd import verbatim_block  # the view engine (D-027)
+            refs = [Reference(file=sf, location=loc) for loc in locations]
+            for blk in affected_blocks(model, refs):
+                lines.append(blk.header())
+                lines.extend(verbatim_block(model, blk))
     lines.append("")
     lines.append("If your code changes affect the design intent of these sections, re-verify")
     lines.append("and bump `last_verified:` via:")

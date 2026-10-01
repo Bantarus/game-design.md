@@ -1,0 +1,103 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 3284,
+  "cache_read_tokens": 536109,
+  "cache_creation_tokens": 98100,
+  "tool_calls": 7,
+  "files_read": 1,
+  "bytes_read": 6380,
+  "re_reads": 0,
+  "consultation_bytes": 41726,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83470,
+  "per_turn_occupancy": [
+    80358,
+    82498,
+    83157,
+    83470,
+    96299,
+    103814,
+    104627
+  ],
+  "tool_counts": {
+    "Bash": 4,
+    "Grep": 2,
+    "Read": 1
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "ref": 3899
+  },
+  "view_mode_calls": {
+    "ref": 1
+  },
+  "bash_read_calls": 1,
+  "bash_read_bytes": 247,
+  "bash_files_read": 1,
+  "all_files_read": 2,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "answers/s2_lookup_forward.txt",
+    "examples/lanternfall/gdd/systems/distributions.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "R7Hgux",
+      "result_bytes": 3899,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r2.txt:33-74"
+    },
+    {
+      "tool": "Bash",
+      "id": "cAjVgm",
+      "result_bytes": 15,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r2.txt:86-86"
+    },
+    {
+      "tool": "Bash",
+      "id": "AsvdYt",
+      "result_bytes": 25,
+      "is_error": true,
+      "vcc": "s2_lookup_forward__views__r2.txt:98-98"
+    },
+    {
+      "tool": "Grep",
+      "id": "SuiumM",
+      "result_bytes": 18253,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r2.txt:115-366"
+    },
+    {
+      "tool": "Read",
+      "id": "pudFzw",
+      "result_bytes": 6380,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r2.txt:380-594"
+    },
+    {
+      "tool": "Grep",
+      "id": "RQYk2b",
+      "result_bytes": 12907,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r2.txt:610-786"
+    },
+    {
+      "tool": "Bash",
+      "id": "wiweYZ",
+      "result_bytes": 247,
+      "is_error": false,
+      "vcc": "s2_lookup_forward__views__r2.txt:798-807"
+    }
+  ]
+}

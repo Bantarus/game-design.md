@@ -1,0 +1,128 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 3654,
+  "cache_read_tokens": 556943,
+  "cache_creation_tokens": 77336,
+  "tool_calls": 12,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 14616,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 80024.0,
+  "per_turn_occupancy": [
+    72418,
+    76524,
+    79184,
+    79938,
+    80110,
+    80696,
+    82226,
+    83199
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Edit": 5,
+    "Grep": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "out_of_copy_access": [
+    {
+      "tool": "Bash",
+      "path": "../.."
+    }
+  ],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Grep",
+      "id": "xZgyQ3",
+      "result_bytes": 7862,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:24-81"
+    },
+    {
+      "tool": "Bash",
+      "id": "GL4gLe",
+      "result_bytes": 286,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:93-109"
+    },
+    {
+      "tool": "Bash",
+      "id": "SMkvL3",
+      "result_bytes": 4661,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:121-209"
+    },
+    {
+      "tool": "Bash",
+      "id": "572J1n",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "operating_energy_budget__baseline__r1.txt:234-234"
+    },
+    {
+      "tool": "Bash",
+      "id": "KqaN9o",
+      "result_bytes": 31,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:246-246"
+    },
+    {
+      "tool": "Bash",
+      "id": "Jyjai5",
+      "result_bytes": 95,
+      "is_error": true,
+      "vcc": "operating_energy_budget__baseline__r1.txt:272-272"
+    },
+    {
+      "tool": "Edit",
+      "id": "TXkFc3",
+      "result_bytes": 159,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:293-293"
+    },
+    {
+      "tool": "Edit",
+      "id": "RXRz3e",
+      "result_bytes": 159,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:308-308"
+    },
+    {
+      "tool": "Edit",
+      "id": "RFQQzx",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:327-327"
+    },
+    {
+      "tool": "Edit",
+      "id": "DA4Wck",
+      "result_bytes": 153,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:342-342"
+    },
+    {
+      "tool": "Edit",
+      "id": "bnEYkt",
+      "result_bytes": 151,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:361-361"
+    },
+    {
+      "tool": "Bash",
+      "id": "hvp94E",
+      "result_bytes": 715,
+      "is_error": false,
+      "vcc": "operating_energy_budget__baseline__r1.txt:373-398"
+    }
+  ]
+}

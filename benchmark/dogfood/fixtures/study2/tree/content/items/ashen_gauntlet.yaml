@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: ashen_gauntlet
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Ashen Gauntlet
+rarity: gleaming
+slot: tonic
+weight: 6
+value: 65
+description: A gleaming tonic scorched black on the rim.

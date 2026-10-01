@@ -1,0 +1,116 @@
+{
+  "turns": 8,
+  "input_tokens": 16,
+  "output_tokens": 2760,
+  "cache_read_tokens": 269535,
+  "cache_creation_tokens": 36923,
+  "tool_calls": 8,
+  "files_read": 1,
+  "bytes_read": 3481,
+  "re_reads": 0,
+  "consultation_bytes": 18855,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 38618.0,
+  "per_turn_occupancy": [
+    31092,
+    35728,
+    37130,
+    37596,
+    39640,
+    40391,
+    42111,
+    42786
+  ],
+  "tool_counts": {
+    "Bash": 6,
+    "Read": 1,
+    "Write": 1
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 3,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "graph": 6170,
+    "other": 5971
+  },
+  "view_mode_calls": {
+    "graph": 2,
+    "other": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 5539,
+  "bash_files_read": 4,
+  "all_files_read": 5,
+  "all_re_reads": 2,
+  "all_files_read_paths": [
+    "examples/lanternfall",
+    "examples/lanternfall/content/skills/fen_wail.yaml",
+    "examples/lanternfall/game-design.md",
+    "examples/lanternfall/gdd/*.md",
+    "examples/lanternfall/gdd/systems/*.md"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Read",
+      "id": "DTdcNU",
+      "result_bytes": 3481,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:33-117"
+    },
+    {
+      "tool": "Bash",
+      "id": "4dtQv8",
+      "result_bytes": 5971,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:129-244"
+    },
+    {
+      "tool": "Bash",
+      "id": "bM1PJZ",
+      "result_bytes": 2539,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:256-355"
+    },
+    {
+      "tool": "Bash",
+      "id": "pXkCPc",
+      "result_bytes": 30,
+      "is_error": true,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:376-376"
+    },
+    {
+      "tool": "Bash",
+      "id": "towVhn",
+      "result_bytes": 3631,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:388-426"
+    },
+    {
+      "tool": "Bash",
+      "id": "kjoqpX",
+      "result_bytes": 560,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:438-445"
+    },
+    {
+      "tool": "Bash",
+      "id": "6QfMK6",
+      "result_bytes": 2440,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:459-490"
+    },
+    {
+      "tool": "Write",
+      "id": "ux34B6",
+      "result_bytes": 203,
+      "is_error": false,
+      "vcc": "s2_lookup_backward__import-card__r1.txt:518-518"
+    }
+  ]
+}

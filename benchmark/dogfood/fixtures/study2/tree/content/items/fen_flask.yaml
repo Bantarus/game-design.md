@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: fen_flask
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Fen Flask
+rarity: sound
+slot: tonic
+weight: 5
+value: 29
+grants: "{entities.skills.umber_veil}"
+description: A sound tonic cold even in the lamplight.

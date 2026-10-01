@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: moth_phial
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Moth Phial
+rarity: relic
+slot: weapon
+weight: 1
+value: 165
+grants: "{entities.skills.wick_chant}"
+description: A relic weapon scorched black on the rim.

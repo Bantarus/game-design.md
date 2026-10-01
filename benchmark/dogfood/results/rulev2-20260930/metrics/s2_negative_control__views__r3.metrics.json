@@ -1,0 +1,76 @@
+{
+  "turns": 4,
+  "input_tokens": 8,
+  "output_tokens": 893,
+  "cache_read_tokens": 258347,
+  "cache_creation_tokens": 80198,
+  "tool_calls": 4,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 11963,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 85831.0,
+  "per_turn_occupancy": [
+    80166,
+    85521,
+    86141,
+    86725
+  ],
+  "tool_counts": {
+    "Bash": 4
+  },
+  "gdmd_view_calls": 1,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {
+    "overview": 8411
+  },
+  "view_mode_calls": {
+    "overview": 1
+  },
+  "bash_read_calls": 3,
+  "bash_read_bytes": 3552,
+  "bash_files_read": 1,
+  "all_files_read": 1,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/lanternfall"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "Um5Ze4",
+      "result_bytes": 2076,
+      "is_error": false,
+      "vcc": "s2_negative_control__views__r3.txt:20-59"
+    },
+    {
+      "tool": "Bash",
+      "id": "VxzKzm",
+      "result_bytes": 8411,
+      "is_error": false,
+      "vcc": "s2_negative_control__views__r3.txt:71-204"
+    },
+    {
+      "tool": "Bash",
+      "id": "r8iLVZ",
+      "result_bytes": 765,
+      "is_error": false,
+      "vcc": "s2_negative_control__views__r3.txt:216-236"
+    },
+    {
+      "tool": "Bash",
+      "id": "uQeweN",
+      "result_bytes": 711,
+      "is_error": false,
+      "vcc": "s2_negative_control__views__r3.txt:248-259"
+    }
+  ]
+}

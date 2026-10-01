@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: tallow_phial
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Tallow Phial
+rarity: sound
+slot: weapon
+weight: 4
+value: 33
+grants: "{entities.skills.hollow_hex}"
+description: A sound weapon scorched black on the rim.

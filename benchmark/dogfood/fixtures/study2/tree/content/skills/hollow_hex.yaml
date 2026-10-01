@@ -1,0 +1,13 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: hollow_hex
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Hollow Hex
+school: iron
+focus_cost: 3
+roll: "{distributions.sablegleam_roll}"
+inflicts: "{states.affliction.hexed}"
+description: "An iron hex; it echoes down the stair."

@@ -1,0 +1,12 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: yew_pulse
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Yew Pulse
+school: umbral
+focus_cost: 3
+roll: "{distributions.rustmire_roll}"
+description: "An umbral pulse; it is learned from a knell-bell's crack."

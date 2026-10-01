@@ -1,0 +1,92 @@
+{
+  "turns": 7,
+  "input_tokens": 14,
+  "output_tokens": 1600,
+  "cache_read_tokens": 501208,
+  "cache_creation_tokens": 79654,
+  "tool_calls": 6,
+  "files_read": 0,
+  "bytes_read": 0,
+  "re_reads": 0,
+  "consultation_bytes": 10943,
+  "non_text_result_items": 0,
+  "median_turn_occupancy": 83584,
+  "per_turn_occupancy": [
+    79278,
+    80397,
+    83115,
+    83584,
+    83945,
+    85040,
+    85517
+  ],
+  "tool_counts": {
+    "Bash": 6
+  },
+  "gdmd_view_calls": 0,
+  "gdmd_graph_calls": 0,
+  "gdmd_spec_section_calls": 0,
+  "view_mode_bytes": {},
+  "view_mode_calls": {},
+  "bash_read_calls": 3,
+  "bash_read_bytes": 9876,
+  "bash_files_read": 4,
+  "all_files_read": 4,
+  "all_re_reads": 0,
+  "all_files_read_paths": [
+    "examples/tick-combat/game-design.md",
+    "examples/tick-combat/gdd",
+    "examples/tick-combat/gdd/mechanics.md",
+    "examples/tick-combat/impl/xtreme/src/rules.rs"
+  ],
+  "out_of_copy_access": [],
+  "claude_md_loaded": true,
+  "auto_memory_prompt": false,
+  "assistant_models": [
+    "claude-sonnet-5-5"
+  ],
+  "tool_detail": [
+    {
+      "tool": "Bash",
+      "id": "o3sehH",
+      "result_bytes": 1992,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r1.txt:20-65"
+    },
+    {
+      "tool": "Bash",
+      "id": "poBWMG",
+      "result_bytes": 5748,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r1.txt:77-159"
+    },
+    {
+      "tool": "Bash",
+      "id": "ddLRsa",
+      "result_bytes": 646,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r1.txt:171-194"
+    },
+    {
+      "tool": "Bash",
+      "id": "yBvQxN",
+      "result_bytes": 191,
+      "is_error": true,
+      "vcc": "maintenance_drift__import-full__r1.txt:206-206"
+    },
+    {
+      "tool": "Bash",
+      "id": "GggFd1",
+      "result_bytes": 2136,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r1.txt:218-269"
+    },
+    {
+      "tool": "Bash",
+      "id": "BP9PKC",
+      "result_bytes": 230,
+      "is_error": false,
+      "vcc": "maintenance_drift__import-full__r1.txt:287-297"
+    }
+  ]
+}

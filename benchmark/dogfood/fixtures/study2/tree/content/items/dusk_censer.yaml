@@ -1,0 +1,14 @@
+spec: game-design.md
+spec_version: 0.3.0
+file_type: content-entity
+id: dusk_censer
+status: draft
+last_verified: "2026-04-18"
+implemented_in: []
+name: Dusk Censer
+rarity: worn
+slot: weapon
+weight: 6
+value: 22
+grants: "{entities.skills.fen_wail}"
+description: A worn weapon that hums near open flame.
