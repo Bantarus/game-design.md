@@ -68,6 +68,8 @@ The copy sits outside the native installer's `versions/` directory, so auto-upda
 
 **Study 2 (D-026)** adds six tasks on a generated tree, `fixtures/study2/tree/`, which `fixture.prepare_copy` places at `examples/lanternfall/` inside each copy's baseline commit (read from the run's commit). `generate.py` writes the tree, the prompts, the two teammate patches and the frozen answers; `generate.py --check` confirms the frozen output reproduces, and `generate.py --leaks` runs the §7 leak check. Run a study-2 cell with `--study 2`, which also applies study 2's caps (80 turns, 1800 s, $5.00).
 
+**Lint state of the frozen tree.** With its mtimes pinned to `fixture.FIXTURE_MTIME` (2026-05-01), as every copy sets them (`fixture.normalize_mtimes`) and its tests do, `fixtures/study2/tree/` lints 0 errors and 0 warnings. A raw checkout shows 6 `stale-section` warnings by design: git stamps the files with the checkout time, so the code under `impl/` looks newer than `last_verified: 2026-04-24` on the five subfiles that point at it. Do not "fix" the frozen tree: its manifest is pinned (`fixture.FIXTURE_TREE_SHA256`), and any edit to it changes what study 2 measured.
+
 | Task | Class | Success (checker) |
 | --- | --- | --- |
 | `s2_lookup_forward` | lookup, forward | `answers/s2_lookup_forward.txt`: two questions, "exactly k references" (k = 2, 3), exact set equality |
