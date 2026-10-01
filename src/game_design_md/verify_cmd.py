@@ -294,13 +294,57 @@ def run_all(
     }
 
 
+BLOCKING_AXES = ("build_health", "behavioral_alignment")
+
+
 def evaluate(result: dict[str, Any]) -> int:
     """Spec §9.5.4: exit 1 iff any build_health or behavioral_alignment
     target failed. presentation_usability regressions are exit 0."""
     fails = [r for r in result.get("results", []) if not r.get("pass")]
-    blocking = [r for r in fails
-                if r.get("axis") in ("build_health", "behavioral_alignment")]
+    blocking = [r for r in fails if r.get("axis") in BLOCKING_AXES]
     return 1 if blocking else 0
+
+
+# ---- --baseline: verify-result-regression (D-045, OI-011, spec §9.5.4) -------
+
+def load_baseline(path: Path) -> dict[str, Any]:
+    """A prior `gdmd verify` report: an object whose `results` rows each carry
+    `axis` and `pass`."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as e:
+        raise VerifyError(f"baseline {path} is not readable JSON: {e}") from e
+    rows = data.get("results") if isinstance(data, dict) else None
+    if not isinstance(rows, list) or not all(
+            isinstance(r, dict) and "axis" in r and "pass" in r for r in rows):
+        raise VerifyError(f"baseline {path} is not a verify report: expected an "
+                          f"object whose 'results' rows carry 'axis' and 'pass'")
+    return data
+
+
+def regressions(baseline: dict[str, Any], current: dict[str, Any]) -> list[dict[str, Any]]:
+    """One `verify-result-regression` finding per current row that passed in
+    the baseline and fails now, matched by (axis, target). Severity follows
+    the axis: error for build_health / behavioral_alignment, warning for
+    presentation_usability. A target new since the baseline, or one no longer
+    run, is not a regression. A key the baseline lists twice passed only if
+    every row passed."""
+    passed: dict[tuple[Any, Any], bool] = {}
+    for r in baseline.get("results", []):
+        key = (r.get("axis"), r.get("target"))
+        passed[key] = passed.get(key, True) and r.get("pass") is True
+    found: list[dict[str, Any]] = []
+    for r in current.get("results", []):
+        axis, target = r.get("axis"), r.get("target")
+        if passed.get((axis, target)) and not r.get("pass"):
+            found.append({
+                "rule": "verify-result-regression",
+                "severity": "error" if axis in BLOCKING_AXES else "warning",
+                "axis": axis,
+                "target": target,
+                "message": f"{axis} {target or '(no target)'} passed in the baseline and fails now",
+            })
+    return found
 
 
 # Back-compat shim — older CLI imports `run_adapter` directly. New code uses

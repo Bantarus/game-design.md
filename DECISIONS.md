@@ -2313,6 +2313,45 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - No lint behavior changes, and the 12 trees stay 0/0.
 - The card is regenerated (its source hash).
 
+## D-045 — `gdmd verify --baseline`: `verify-result-regression` implemented (OI-011)
+
+- **Status:** decided (2026-10-01) by the user on OI-011: "implement it if it fits in one commit with tests (match by axis+target; pass→fail is a regression; per-axis severity per §9.5.4)". It fits, so it is implemented rather than marked "specified, not implemented".
+- **Related:** OI-011, spec §9.1 (the `verify-result-regression` row), §9.5 and §9.5.4.
+
+### Decisions
+
+1. **The baseline** is a prior `gdmd verify` report: an object whose `results` rows each carry `axis` and `pass` (`verify_cmd.load_baseline`).
+   - One that is not readable as such is a usage error (`click.BadParameter`, exit 2), raised before any adapter runs.
+2. **A regression** is a current row that passed in the baseline and fails now, matched by `(axis, target)` (`verify_cmd.regressions`).
+   - **Not regressions:** a target new since the baseline, a target no longer run, and a target that was already failing.
+   - A key the baseline lists twice counts as passed only if every row passed.
+   - The negative-control rows carry their seed in `target`, so they match their own baseline rows.
+3. **Severity per axis (§9.5.4):** error for `build_health` and `behavioral_alignment`, warning for `presentation_usability`.
+4. **Output:** the report gains a top-level `regressions` array, only with `--baseline`. Each finding carries `rule`, `severity`, `axis`, `target` and `message`.
+   - Without `--baseline`, the output is byte-for-byte v0.3's.
+   - The adapter contract, `$defs.VerifyResult` (§9.5.3), is unchanged: regressions are computed by `gdmd verify`, not emitted by adapters.
+5. **The exit code is unchanged (§9.5.4).** A blocking-axis regression is already a failed target (exit 1), and a `presentation_usability` regression stays at exit 0.
+
+### Tests and proof of fire
+
+- **`tests/test_verify.py`:**
+  - the pass → fail rule, with each axis's severity, against already-failing, new, gone and still-passing targets;
+  - matching by `(axis, target)`, not by target alone;
+  - four malformed baselines rejected;
+  - an end-to-end CLI run with the stub adapter. A passing report becomes the baseline; then the golden changes and one error regression is reported (exit 1). There is no `regressions` key without `--baseline`, and a bad baseline is exit 2.
+  - All seven new tests fail on the pre-D-045 code.
+- **Real content, tick-combat:**
+  - The clean run's report is the baseline.
+  - A copy of the tree (its `impl/` linked, so the real xtreme adapter runs) points `matches_golden` at a golden with one changed line.
+  - `gdmd verify <copy> --baseline <clean report>` gives exactly one regression, `behavioral_alignment {loops.tick}` at error, with exit 1. The negative control and `build_health` still pass.
+  - The clean tree against its own baseline gives `regressions: []`, with exit 0.
+
+### Spec
+
+- §9.5.4's baseline paragraph keeps its sentence and adds the concrete rules above.
+- The §9.5 synopsis and the §9.1 row already named the option and the finding.
+- The card is regenerated.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2651,3 +2690,4 @@ The audit as it was logged, before the user's decisions (D-044). Its proposals a
 - **Code does:** `gdmd verify` has only `--adapter`, and no code emits `verify-result-regression`.
 - **Impact today:** none. No workflow in the repository passes `--baseline`, and tick-combat's gate is byte-identity to the golden.
 - **Resolution (later, with its own D-entry):** implement it, or mark it reserved in §9.5 and §9.1 until a tree needs regression tracking. The observed-need discipline applies.
+- **Resolved (2026-10-01):** implemented in one commit with tests, as the user allowed: D-045. OI-011 is closed.

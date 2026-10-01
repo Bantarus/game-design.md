@@ -1248,7 +1248,12 @@ The adapter emits, on stdout, a JSON document conforming to `$defs.VerifyResult`
 - `1` if any `build_health` or `behavioral_alignment` target failed.
 - `0` (with warnings in `notes`) if only `presentation_usability` regressed.
 
-When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`).
+When invoked with `--baseline <prior-result.json>`, `verify` additionally fires `verify-result-regression` findings for any tracked axis that worsens versus the baseline (severity: error for `build_health`/`behavioral_alignment`; warning for `presentation_usability`). Concretely (D-045):
+
+- **The baseline** is a prior `gdmd verify` report: an object whose `results` rows each carry `axis` and `pass`. One that is not readable as such is a usage error (exit 2) before any adapter runs.
+- **A regression** is a result row that passed in the baseline and fails now, matched by `axis` and `target`. A target new since the baseline, or one no longer run, is not a regression.
+- **The report** gains a `regressions` array, present only with `--baseline`. Each finding carries `rule` (`verify-result-regression`), `severity`, `axis`, `target` and `message`. The adapter's own output (§9.5.3) is unchanged.
+- **The exit code is as above.** A regression on a blocking axis is already a failed target (exit 1), and a `presentation_usability` regression stays at exit 0.
 
 #### 9.5.5 Trajectory format (engine-neutral, canonical JSONL)
 

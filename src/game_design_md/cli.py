@@ -124,7 +124,16 @@ def spec_cmd_entry(card: bool, section: str | None) -> None:
                                         path_type=Path))
 @click.option("--adapter", "adapter_name", default="default",
               help="Adapter key under `adapters:` (defaults to 'default').")
-def verify_cmd_entry(path: Path, adapter_name: str) -> None:
+@click.option("--baseline", type=click.Path(dir_okay=False, path_type=Path),
+              help="A prior `gdmd verify` report. Adds `regressions`: each "
+                   "target that passed there and fails now (spec §9.5.4).")
+def verify_cmd_entry(path: Path, adapter_name: str, baseline: Path | None) -> None:
+    prior = None
+    if baseline is not None:
+        try:
+            prior = verify_cmd.load_baseline(baseline)
+        except verify_cmd.VerifyError as e:
+            raise click.BadParameter(str(e), param_hint="--baseline") from e
     tree = Tree.load(path)
     targets, adapters = verify_cmd.collect_config(tree)
     adapter_cmd = adapters.get(adapter_name)
@@ -143,6 +152,8 @@ def verify_cmd_entry(path: Path, adapter_name: str) -> None:
         result = verify_cmd.run_all(targets, adapter_path, tree.root)
     except verify_cmd.VerifyError as e:
         raise click.ClickException(str(e)) from e
+    if prior is not None:
+        result["regressions"] = verify_cmd.regressions(prior, result)
     click.echo(json.dumps(result, indent=2))
     sys.exit(verify_cmd.evaluate(result))
 
