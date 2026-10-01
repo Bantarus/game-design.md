@@ -38,7 +38,7 @@ gdmd lint my-game                            # validate (exit 0, structured JSON
 gdmd status my-game                          # project dashboard view
 gdmd spec                                    # the spec itself, frontmatter stripped — ready for agent prompt injection
 
-pytest                                       # the test suite (854 tests at v0.4.0)
+pytest                                       # the test suite (855 tests at v0.4.0)
 ```
 
 For an existing tree, the anti-drift ritual is the rhythm:

@@ -103,6 +103,7 @@ Only `pillars`, `non_goals`, `player_experience_goals`, and `core_loop_ref` are 
 - Linter rules to keep green: `broken-ref`, `orphaned-entity`, `unreferenced-verb`, `missing-pillars`, `missing-core-loop`, `missing-balance-targets`, `undefined-distribution`, `stale-section`, `section-order`, `schema-violation` (the §10 JSON Schema, v0.4), `content-entity-invalid` (§6.2, v0.4), `implementation-pointer-outside-repo` (§2.3, v0.4), `trajectory-sort-by-missing` (§9.5.5, v0.4).
 - `lint` must emit structured JSON (`{ findings: [...], summary: {...} }`) so an agent can self-correct.
 - Before committing CLI changes, run `gdmd lint examples/deckbuilder` and confirm it passes clean.
+- `tests/test_packaging.py` builds a wheel, installs it in a fresh venv and runs the installed `gdmd` (`spec`, `export`, `init`) from outside the source tree, so only packaged data can answer (D-006, D-050). It needs `build`, which the `[dev]` extra installs; CI runs it as its own step. Anything a command reads at run time ships under `game_design_md/_data/` through `force-include` in `pyproject.toml`.
 - Before committing changes to README.md, AGENTS.md, docs/spec.md, or the CLI verb set, run `python scripts/docs_lint.py` — it drift-lints the docs themselves (version agreement, §9 verb list vs the click registry, the four-field stability guarantee, namespace validity of taught refs). CI runs it on every push.
 - After editing `docs/spec.md`, regenerate the agent card that `CLAUDE.md` imports: `gdmd spec --card > docs/spec-card.md`. A test fails while they differ.
 

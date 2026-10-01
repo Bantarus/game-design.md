@@ -2459,6 +2459,34 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 
 - The four unchecked parts are stated, not scheduled. None is a rule change in this entry. The item-4 gap is the one a tree could hit unseen: an entity file that omits `file_type: content-entity` is not loaded, so neither its schema nor its `id` is checked. Whether any of the four becomes a Ratchet Register row is open.
 
+## D-050 — `gdmd init` works from a wheel: the starters ship as package data (OI-012)
+
+- **Status:** decided (2026-10-01) by the user at the PR #2 review: "OI-012: fix it in this PR, before merge. Bundle templates/starters into the wheel the D-006 way: force-include into `game_design_md/_data/starters`, `importlib.resources` first, dev-tree fallback second."
+- **Related:** D-006 (the spec and the schema as package data), OI-012, spec §9.8 ("one of six bundled per-genre starters").
+
+### Decisions
+
+1. **Packaging.** `pyproject.toml` force-includes `templates/starters` into the wheel at `game_design_md/_data/starters`, beside D-006's spec and schema. `templates/starters/` stays the one source in the repository.
+2. **Lookup** (`init_cmd._starters_root()`): the package data through `importlib.resources` first, then the repository's `templates/starters/`, for the editable install, which has no `_data/`. The package data is used only when it is a directory on the file system, because `init` copies real files. A zipped install falls through, and the error names both places.
+3. **Tests** (`tests/test_packaging.py`). A wheel is built once and installed in a fresh venv, and the installed `gdmd` runs from a directory outside the source tree:
+   - D-006's checks: `gdmd spec`, `gdmd export --format schema`;
+   - the six starters are in the installed `_data/starters/`;
+   - `gdmd init --list` lists all six;
+   - `gdmd init --genre party-rpg <dir>` exits 0 and copies the starter byte for byte;
+   - the scaffolded tree lints 0/0 under the installed `gdmd`.
+
+   Proof of fire: with the force-include line removed, the new test fails (no `_data/starters/`). With the pre-D-050 lookup, `gdmd init --list` exits 1.
+4. **CI runs them.** Until now they skipped in every CI run, because `build` was not installed. Now:
+   - `build` is in the `[dev]` extra;
+   - under CI (`$CI` set), the tests fail instead of skipping when `build` is missing;
+   - a separate, verbose CI step runs `tests/test_packaging.py`, so the log names each test and its result.
+
+### Effect
+
+- `gdmd init` works from `pip install git+…` and from a built wheel. The editable install behaves as before.
+- v0.3.0 had the same defect. The v0.4.0 CHANGELOG lists the fix under Fixed, and the release notes' known-issue entry is gone.
+- OI-012 is closed.
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2830,5 +2858,6 @@ The audit as it was logged, before the user's decisions (D-044). Its proposals a
   - The v0.3.0 dogfood venv, installed non-editable from the `v0.3.0` tag: `gdmd init --list` exits 1 with `could not locate templates/starters/`.
   - A non-editable install of this branch at `eef7609`: the same.
   - An editable install from a clone (`pip install -e .`), the only install README, AGENTS.md and CLAUDE.md document, works.
-- **Impact:** an install from a git URL or a wheel runs every command except `init`. No test caught it, because the tests and the dogfood harness run from the editable install or a source copy. The dry run ran v0.3.0's `init` from an archive of the tag (`git archive v0.3.0`), which is the tag's own code and starters.
+- **Impact:** an install from a git URL or a wheel runs every command except `init`. No test caught it: D-006's wheel test checked only `spec` and `export`, and it skipped in CI, which had no `build`. Every other test, and the dogfood harness, runs from the editable install or a source copy. The dry run ran v0.3.0's `init` from an archive of the tag (`git archive v0.3.0`), which is the tag's own code and starters.
 - **Resolution (with its own D-entry):** the user decides whether it is fixed before v0.4.0 or later. A likely fix: force-include `templates/starters` into the wheel under `game_design_md/_data/starters`, look there in `_starters_root()`, and add a test that builds a wheel and runs `gdmd init --list`. Until then the v0.4 release notes list it as a known issue.
+- **Resolved (2026-10-01):** fixed before the v0.4.0 merge, as the user decided at the PR #2 review: D-050. OI-012 is closed.

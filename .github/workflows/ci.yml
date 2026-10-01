@@ -19,7 +19,11 @@ jobs:
       - name: Install
         run: pip install -e ".[dev]"
       - name: Test suite
-        run: pytest
+        run: pytest --ignore=tests/test_packaging.py
+      # D-050: a separate, verbose step so the log names each packaging test and
+      # its result. `build` comes from the [dev] extra; without it they fail here.
+      - name: Packaging (wheel build, install, run outside the source tree)
+        run: pytest -v tests/test_packaging.py
       - name: Lint every in-repo tree
         run: |
           for tree in examples/deckbuilder examples/tick-combat examples/party-rpg examples/tcg \
