@@ -183,12 +183,12 @@ Tokens are referenced inline as `{namespace.id}` with literal curly braces. Exam
 
 **Unresolved references.** A reference whose namespace, id, or sub-path does not resolve fires rule `broken-ref` at severity error.
 
-**Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time:
+**Context-local prefixes (D-012, v0.2.0-alpha).** Two reference prefixes are *not* globally-resolvable namespaces but reserved placeholders bound at rule-evaluation time. The set is closed: these two, and no others (D-047).
 
 - `{actor.<field>}` — the acting unit / entity in the current rule firing.
 - `{target.<field>}` — the rule's target (resolved per `target_selection:`).
 
-The linter's `broken-ref` rule skips refs starting with these prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Adding a context-local prefix is a spec-level event. Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
+The linter's `broken-ref` rule skips refs starting with these two prefixes; they are interpreted at rule-evaluation time against the live ECS world, not at lint time. Any other prefix that is not a namespace, such as `{world.tick}`, fires `broken-ref`. Adding a context-local prefix is a spec-level event. Engines MUST treat these prefixes identically — divergence here defeats cross-engine determinism.
 
 **Binding to `instance_container` per-instance state (D-019, F-008 v0.3 addressing DSL).** When the actor or target is an instance from an `instance_container` (§4.1), `{actor.<field>}` / `{target.<field>}` resolve `<field>` through a documented lookup order:
 
@@ -699,7 +699,7 @@ damage_roll:
   status: implemented
 ```
 
-Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local, through the context-local prefixes of §3. A distribution with `params_from:` overrides its inline parameter values for any key present.
+Keys in `params_from:` match the distribution's parameter names (`mean`, `stddev`, `threshold`, …); values are `{namespace.id}`-shaped strings that use the closed context-local prefixes of §3, `{actor.<field>}` and `{target.<field>}`, which the *consuming rule* binds (e.g. `{actor.<field>}` resolves to the acting unit's `<field>` value). The static schema accepts `params_from:` as an object of string-valued entries; the *semantics* of which contexts are bound is rule-local, through the context-local prefixes of §3. A distribution with `params_from:` overrides its inline parameter values for any key present.
 
 **Binding moment for `params_from:` reads.** Each parameter sourced via `params_from:` is read at **apply-time** — at the `do:` step that calls `sample:` on this distribution, the context refs are resolved live against the world. This is the same rule as for context-local refs anywhere else (see §3). Two engines that read `{actor.attack}` at different moments (e.g. one at action-start, one at the sample step) produce different integer trajectories the moment any mid-firing mutation is added — the canonical timing must live in the spec, not in each engine. Tick-combat's xtreme reads `actor.attack` from a tick-start snapshot, which is provably equivalent under tick-combat's no-mid-tick-mutation invariant; this is permitted as an optimization, not a different semantics.
 

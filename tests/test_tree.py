@@ -78,3 +78,16 @@ def test_docs_lint_teaches_only_referenceable_namespaces():
     spec.loader.exec_module(mod)
     assert set(SUBFILE_NAMESPACES) <= mod.VALID_NAMESPACES
     assert not mod.VALID_NAMESPACES & {*RESERVED_OWNED_KEYS, "content_schema"}
+
+
+def test_spec_s3_context_local_prefixes_are_the_closed_code_set():
+    """D-047 (R7): §3 states the context-local set is closed, and lists
+    exactly linter.CONTEXT_LOCAL_PREFIXES."""
+    import re
+    from game_design_md import spec_cmd
+    from game_design_md.linter import CONTEXT_LOCAL_PREFIXES
+    text = spec_cmd.spec_text()
+    para = text[text.index("**Context-local prefixes"):]
+    para = para[:para.index("\n\n", para.index("\n- ")) ]
+    assert "The set is closed" in para
+    assert set(re.findall(r"^- `\{([a-z_]+)\.<field>\}`", para, re.M)) == set(CONTEXT_LOCAL_PREFIXES)

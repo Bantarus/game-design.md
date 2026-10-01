@@ -214,7 +214,7 @@ The rounding happens **at the point of application**, not at sample time — sam
 - **Spec footprint:** §3 (context-local prefixes + binding-moment paragraph), §4.7 (templated parameters subsection + apply-time clause).
 - **Schema footprint:** `Distribution.params_from: { type: object, additionalProperties: { type: string } }`.
 
-`params_from:` lets a distribution declare which parameters are sourced from context (the acting unit, the target, the world tick number) rather than fixed in the YAML. Keys are parameter names of the distribution; values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the consuming rule binds. At v0.2.0-alpha the vocabulary is project-defined; v0.3 closes a normative set. (D-044: the code closed the prefix set at `{actor, target}`; the spec says so as R7.)
+`params_from:` lets a distribution declare which parameters are sourced from context (the acting unit, the target, the world tick number) rather than fixed in the YAML. Keys are parameter names of the distribution; values are `{namespace.id}`-shaped strings drawn from a context-local vocabulary the consuming rule binds. At v0.2.0-alpha the vocabulary is project-defined; v0.3 closes a normative set. (D-044 / D-047: the code closed the prefix set at `{actor, target}`; the spec says so since D-047.)
 
 **Cross-engine implication.** Without templated parameters, every implementation would need to invent the actor-stat-to-damage mapping locally. The cross-engine bar requires this mapping in the spec.
 
@@ -2379,6 +2379,34 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 - **The 12 trees stay 0/0,** and the study-2 tree is unchanged. All 89 transitions in the 12 trees, and the study-2 tree's 11, already use tokens. That is the audit's prototype, confirmed on the commit.
 - **The register:** R3 moves to "Closed".
 
+## D-047 — The context-local prefix set is closed at `{actor, target}` (R7, D-012)
+
+- **Status:** decided (2026-10-01) by the user on the ratchet audit: "R7: apply now (spec text only)."
+- **Related:** D-012 ("v0.3 closes a normative set"), D-019, the Ratchet Register (OI-010, R7), spec §3 and §4.8.
+
+### Decision
+
+- **The spec now says what the code has always done:**
+  - the context-local prefixes are exactly `{actor.<field>}` and `{target.<field>}`;
+  - any other non-namespace prefix fires `broken-ref`;
+  - adding one is a spec-level event.
+- **Where:**
+  - §3's "Context-local prefixes" paragraph, which the agent card excerpts, so `CLAUDE.md`'s import carries it;
+  - the paragraph after its list (the `{world.tick}` example);
+  - §4.8's `params_from` sentence.
+- **Unchanged:** the fields after the prefix stay open (D-019's lookup order binds them), and clocks' `delta_source` dotted paths are a separate syntax.
+- **Evidence (the audit):** `actor` appears 25 times and `target` 18 times across the 13 trees, and no other prefix appears. The code's `linter.CONTEXT_LOCAL_PREFIXES` is `{actor, target}`.
+
+### Tests
+
+- **`tests/test_tree.py`:** §3 says the set is closed, and its list equals `CONTEXT_LOCAL_PREFIXES`. It fails on the pre-D-047 text.
+- **`tests/test_lint.py`, real content:** in a tick-combat copy, `params_from.mean: "{actor.attack}"` draws no `broken-ref`, and `"{world.attack}"` draws one, at `distributions.damage_roll.params_from.mean`. The behavior predates D-047; the test pins what the text now states.
+
+### Effect
+
+- No code or lint change, and the 12 trees stay 0/0.
+- **The register:** R7 moves to "Closed".
+
 ## OI-001 — Content-entity refs resolve by parent directory, not by `data_source` / `data_dir`
 
 - **Logged:** 2026-09-30 (v0.4 WS0).
@@ -2568,7 +2596,6 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | --- | --- | --- | --- |
 | R4 | An engine needs event-production checking (an engine-backed tree hits a gap that "every event a machine reacts to is emitted by some verb or rule" would catch) → optional `emits:` on verbs and rules, plus a lint cross-check | D-005 | — |
 | R6 | A working silence mechanism exists: a structured key that marks a bare-string step as deliberate (not a YAML comment, which the loader drops) → raise `determinism-undetermined-rule` from info to warning. Error is a later, separate decision. | D-011 | — |
-| R7 | **Decided, apply now** → the spec states that the context-local prefix set is closed at `{actor, target}` (the code already enforces it) | D-012 | 0.4.0 (its own commit) |
 | R8 | A tree requests `pcg32` or `pcg64` → pin the variant (constants, output function, seeding) by a D-entry, with reference vectors | D-015 | — |
 | R9 | R10 is done, so a closed `do[]` `kind:` vocabulary tells mutation steps apart → `field:` is required on mutation steps | D-019 | — |
 | R10 | A second engine-backed tree: one other than tick-combat with a working verify adapter → close the `do[]` `kind:` vocabulary to the kinds the engine-backed trees share | D-011, §4.5 | — |
@@ -2605,6 +2632,7 @@ The register also takes the items the audit listed as not versioned (R12–R21) 
 | R2 | `target_kind` required by the loader (D-003) | Dropped, D-044 |
 | R5 | `output_domain` / `round_mode` required, plus `distribution-output-undeclared` (D-010) | Dropped, D-044: void, superseded by D-016 |
 | R3 | `undefined-event` → error, and the schema requires `{events.<id>}` (D-005) | Applied, D-046: the schema pattern; `undefined-event` retired |
+| R7 | The context-local prefix set closes (D-012) | Applied, D-047: the spec states the closed set `{actor, target}` |
 
 ### Review log
 

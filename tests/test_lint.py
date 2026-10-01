@@ -604,6 +604,26 @@ def test_bare_string_event_proof_of_fire_on_the_deckbuilder(tmp_path):
     assert not [f for f in res.findings if f.rule == "state-machine-coverage"]
 
 
+def test_context_local_prefix_set_is_closed_on_real_content(tmp_path):
+    """D-047 (R7): in tick-combat's damage_roll, `{actor.attack}` binds at
+    rule-evaluation time; the same field under any other prefix fires
+    broken-ref, because the set is closed at {actor, target}."""
+    import shutil
+    from tests.conftest import REPO_ROOT
+    root = tmp_path / "tick-combat"
+    shutil.copytree(REPO_ROOT / "examples/tick-combat", root,
+                    ignore=shutil.ignore_patterns("impl"))
+    dist = root / "gdd/systems/distributions.md"
+
+    def broken(text):
+        dist.write_text(text)
+        return [f.location for f in _lint(root).findings if f.rule == "broken-ref"]
+    text = dist.read_text()
+    assert '"{actor.attack}"' in text and broken(text) == []
+    assert broken(text.replace('"{actor.attack}"', '"{world.attack}"', 1)) == [
+        "frontmatter:distributions.damage_roll.params_from.mean"]
+
+
 def test_broken_event_ref_is_error(make_tree):
     """{events.missing} where events.missing isn't declared → broken-ref error."""
     bad = (make_tree() / "gdd/mechanics.md").read_text().replace(
